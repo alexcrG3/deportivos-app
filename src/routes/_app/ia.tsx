@@ -278,14 +278,13 @@ function IADashboard() {
       { id: `a_ia_7_${Date.now()}`, dia: 6, tipo: "descanso" as const, hora: "", duracion: 0, titulo: "Día de descanso activo", equipo: targetTeam },
     ];
 
-    // 2. Guardar/Actualizar en el storage de TacticalStore para todos los equipos
+    // 2. Guardar/Actualizar ÚNICAMENTE el equipo objetivo (targetTeam) sin alterar Asoderive U13 u otros equipos
     const existingWeekly = TacticalStore.getWeeklyPlans();
-    const updatedWeekly = existingWeekly.map(wp => ({
-      ...wp,
-      objetivo: `[IA] ${wgObjetivo}`,
-      responsable: activeCoach,
-      actividades: actividadesIA
-    }));
+    const otherTeamsWeekly = existingWeekly.filter(wp => 
+      !wp.equipo.toLowerCase().includes(targetTeam.toLowerCase()) &&
+      !wp.categoria.toLowerCase().includes(targetTeam.toLowerCase()) &&
+      !targetTeam.toLowerCase().includes(wp.equipo.toLowerCase())
+    );
 
     const newWeeklyPlan = {
       id: `wp_ia_${Date.now()}`,
@@ -299,8 +298,9 @@ function IADashboard() {
     };
 
     if (typeof window !== "undefined") {
-      const mergedWeekly = [newWeeklyPlan, ...updatedWeekly];
+      const mergedWeekly = [newWeeklyPlan, ...otherTeamsWeekly];
       localStorage.setItem("tact_weekly_plans", JSON.stringify(mergedWeekly));
+      localStorage.setItem("deportivos_active_plan_team", targetTeam);
     }
 
     // 3. Guardar Microciclo en RendimientoStore

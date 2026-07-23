@@ -702,6 +702,14 @@ function PlanificacionTactica() {
   // New Tab & Selection States
   const [activeTab, setActiveTab] = useState<"semanal" | "microciclos" | "mesociclos" | "temporada">("semanal");
   const [selectedTeam, setSelectedTeam] = useState(() => {
+    if (typeof window !== "undefined") {
+      const activeSaved = localStorage.getItem("deportivos_active_plan_team");
+      if (activeSaved) {
+        const found = availableTeams.find(t => t.nombre.toLowerCase().includes(activeSaved.toLowerCase()) || activeSaved.toLowerCase().includes(t.nombre.toLowerCase()));
+        if (found) return found.nombre;
+        return activeSaved;
+      }
+    }
     const sub13 = availableTeams.find(t => t.nombre.toLowerCase() === "u13" || t.nombre.toLowerCase().includes("13"));
     return sub13 ? sub13.nombre : (availableTeams[0]?.nombre || "U13");
   });
