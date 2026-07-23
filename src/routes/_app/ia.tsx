@@ -261,7 +261,9 @@ function IADashboard() {
     const f2Dur = Math.round(durMin * 0.55);
     const f3Dur = Math.round(durMin * 0.20);
     const targetTeam = wgEdad || "U15";
-    const activeCoach = (role === "coach" && coachName) ? coachName : "Edgar Calderón";
+    const activeCoach = (role === "coach" && coachName) 
+      ? coachName 
+      : (selectedCoachName || (targetTeam.toLowerCase().includes("15") ? "Carlos Araya" : "Edgar Calderón"));
 
     // Extraer consignas principales del texto generado
     const lines = wgOutput.split("\n").map(l => l.trim()).filter(Boolean);
