@@ -577,3 +577,21 @@ Una academia deportiva maneja inventario físico constante: uniformes, balones, 
   * Reubicación del módulo principal **`Área Médica & Fisioterapia`** al bloque final antes de **`Configuración & IA`**, eliminando la redundancia dentro de Operación Deportiva.
   * Adaptación del `TabsList` con desplazamiento horizontal suave para navegación en dispositivos móviles y tablets.
 
+## [23/07/2026]
+* **Integración del Generador de Sesiones IA con Planificación en Tiempo Real:**
+  - Implementación del botón **`🚀 Asignar a Planificación del Coach`** en el módulo de IA (`/ia`).
+  - Al guardar, la sesión táctica generada se registra simultáneamente como un plan de microciclo de rendimiento, se inyecta como sesión viva en el planificador de entrenamientos y se actualiza en el store táctico de la categoría correspondiente.
+* **Aislamiento Estricto de Planificaciones por Entrenador:**
+  - Corrección de la regla de respaldo que mezclaba datos y mostraba por defecto el plan base de Edgar Calderón (U13) a Carlos Araya (U11).
+  - Sembrado de planes semanales iniciales independientes para **Carlos Araya** (categoría U11) y **Edgar Calderón** (categoría U13).
+  - Refactorización de la lógica de filtrado de planes semanales y mesociclos para aislar estrictamente las vistas según el responsable (`entrenador` / `responsable`), garantizando privacidad y consistencia de datos por coach.
+* **Infraestructura de PWA Instalable Móvil & Tablet:**
+  - Creación del manifiesto de aplicación web **`manifest.json`** y del Service Worker **`sw.js`** en el directorio público.
+  - Registro dinámico del Service Worker en `index.html` y adición de meta-etiquetas PWA optimizadas (`theme-color: #2563eb`, `apple-mobile-web-app-capable`, `apple-touch-icon`) para soportar la instalación nativa como aplicación móvil en iOS (iPad/iPhone) y Android.
+* **Ajuste de Identidad Visual (Morado ➔ Azul Real Deportivo `#2563eb`):**
+  - Reemplazo general de los estilos morados y violetas (`#8545e8`, `#7839d4`) por **Azul Real Deportivo (`#2563eb`, `#1d4ed8`)** en la barra lateral, botones activos del sidebar, badges, barras de progreso e indicadores de interfaz.
+* **Estructura del Sidebar por Rol (Unificación & Restauración):**
+  - Se eliminó la duplicidad de la opción *"Planificación"* del menú *Inicio Coach OS*, centralizándolo únicamente dentro del desplegable de **`Centro Táctico`** para entrenadores.
+  - Se restauró el menú original de **`Área Técnica`** en el perfil de Administrador, manteniendo sus accesos a *Coach OS* (simulación de entrenadores), *Centro Táctico*, *Competiciones* y *Alto Rendimiento*.
+* **Ocultado de la Vercel Toolbar:**
+  - Inyección de reglas CSS específicas en `styles.css` para ocultar por completo el widget flotante de feedback y speed insights de Vercel en la versión de producción desplegada.
