@@ -1294,7 +1294,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
   const [plans, setPlans] = useState<any[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const raw = localStorage.getItem("athletix_training_plans");
+      const raw = localStorage.getItem("deportivos_training_plans");
       if (!raw) return [];
       return JSON.parse(raw);
     } catch {
@@ -1471,9 +1471,9 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
       { nombre: "Fin de Temporada", inicio: "2026-12-01", fin: "2026-12-31", notas: "Cierre del ciclo académico anual.", estado: "Próximamente" },
     ];
     if (typeof window === "undefined") return INITIAL_PHASES;
-    const raw = localStorage.getItem("athletix_annual_phases");
+    const raw = localStorage.getItem("deportivos_annual_phases");
     if (!raw) {
-      localStorage.setItem("athletix_annual_phases", JSON.stringify(INITIAL_PHASES));
+      localStorage.setItem("deportivos_annual_phases", JSON.stringify(INITIAL_PHASES));
       return INITIAL_PHASES;
     }
     return JSON.parse(raw);
@@ -1481,7 +1481,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
 
   const saveAnnualPhases = (newPhases: any[]) => {
     setAnnualPhases(newPhases);
-    localStorage.setItem("athletix_annual_phases", JSON.stringify(newPhases));
+    localStorage.setItem("deportivos_annual_phases", JSON.stringify(newPhases));
   };
 
   const [openEditPhase, setOpenEditPhase] = useState(false);
@@ -1557,7 +1557,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
         <body>
           <div class="header">
             <h1>Planificación Anual de Temporada 2026</h1>
-            <h2>Equipo: ${team.nombre} | Academia Athletix</h2>
+            <h2>Equipo: ${team.nombre} | Academia DeportivOS</h2>
           </div>
           <div>
             ${phasesHtml}
@@ -3877,7 +3877,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 >
                   {(() => {
                     const DEFAULT_CATALOG = ["Sprint 30m", "Yo-Yo Test", "Course Navette", "Cooper Test", "Salto Vertical CMJ", "Agilidad T-Test"];
-                    const saved = typeof window !== "undefined" ? localStorage.getItem("athletix_catalogo_pruebas") : null;
+                    const saved = typeof window !== "undefined" ? localStorage.getItem("deportivos_catalogo_pruebas") : null;
                     const list: string[] = saved ? JSON.parse(saved) : DEFAULT_CATALOG;
                     return list.map((testName) => (
                       <option key={testName} value={testName}>🏃 {testName}</option>

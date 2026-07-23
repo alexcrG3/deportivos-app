@@ -155,7 +155,7 @@ function JugadoresPage() {
   // Notificación de Bienvenida
   const [metodoNotificacion, setMetodoNotificacion] = useState<"correo" | "whatsapp">("whatsapp");
   const [mensajeBienvenida, setMensajeBienvenida] = useState(
-`🏆 *Athletix OS — Confirmación de Registro*
+`🏆 *DeportivOS — Confirmación de Registro*
 
 ¡Bienvenido(a) a la Academia! Se ha registrado satisfactoriamente el deportista:
 • N° Registro: [N_REGISTRO]
@@ -1215,7 +1215,7 @@ function JugadoresPage() {
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>REGISTRO DE DEPORTISTA</span>
             </div>
-            <span className="text-xs font-normal opacity-80">Athletix OS — Ficha de Ingreso</span>
+            <span className="text-xs font-normal opacity-80">DeportivOS — Ficha de Ingreso</span>
           </div>
 
           <form onSubmit={handleCreatePlayer} className="p-6 space-y-6">
@@ -1959,7 +1959,7 @@ function JugadoresPage() {
           )}
 
           <div className="flex justify-between items-center pt-2 border-t">
-            <span className="text-[11px] text-muted-foreground font-semibold">ATHLETIX OS — CONTROL DE SANCIONES Y SALUD</span>
+            <span className="text-[11px] text-muted-foreground font-semibold">DEPORTIVOS — CONTROL DE SANCIONES Y SALUD</span>
             <Button variant="outline" onClick={() => setOpenSuspendedListModal(false)} size="sm" className="h-8 text-xs font-bold rounded-xl">
               Cerrar
             </Button>

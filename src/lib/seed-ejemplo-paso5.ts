@@ -5,7 +5,7 @@
  * con jugadores reales del plantel U13 de Edgar Calderón.
  *
  * Usa RendimientoStore.addPartido() para escribir directamente en memoryCache
- * y athletix_cache_convocatorias para el módulo de convocatorias.
+ * y deportivos_cache_convocatorias para el módulo de convocatorias.
  */
 
 import RendimientoStore from "@/lib/rendimiento-store";
@@ -14,10 +14,10 @@ export function seedEjemploPaso5() {
   if (typeof window === "undefined") return;
 
   // ── Limpiar flag viejo (el seed anterior estaba roto) ──
-  localStorage.removeItem("athletix_seed_paso5");
+  localStorage.removeItem("deportivos_seed_paso5");
 
   // Solo ejecutar una vez
-  if (localStorage.getItem("athletix_seed_paso5_v2")) return;
+  if (localStorage.getItem("deportivos_seed_paso5_v2")) return;
 
   // ── Fecha del próximo sábado ───────────────────────────────────────────────
   const fechaSabado = (() => {
@@ -121,8 +121,8 @@ export function seedEjemploPaso5() {
   // ── 3. Crear la convocatoria oficial ──────────────────────────────────────
   const convId = `conv_heredia_u13_demo`;
 
-  // La clave usada en convocatorias.tsx es "athletix_convocatorias" directamente
-  const convKey = "athletix_convocatorias";
+  // La clave usada en convocatorias.tsx es "deportivos_convocatorias" directamente
+  const convKey = "deportivos_convocatorias";
   let existingConv: any[] = [];
   try {
     existingConv = JSON.parse(localStorage.getItem(convKey) || "[]");
@@ -158,5 +158,5 @@ export function seedEjemploPaso5() {
   }
 
   // ── Marcar como ejecutado ─────────────────────────────────────────────────
-  localStorage.setItem("athletix_seed_paso5_v2", "1");
+  localStorage.setItem("deportivos_seed_paso5_v2", "1");
 }

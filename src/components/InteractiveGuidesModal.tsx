@@ -55,7 +55,7 @@ const GUIDES_DATABASE: GuideItem[] = [
     durationMinutes: 10,
     steps: [
       {
-        title: "¡Bienvenido a Athletix OS!",
+        title: "¡Bienvenido a DeportivOS!",
         subtitle: "Aprende los conceptos fundamentales para gestionar tu academia.",
         summaryBox: {
           title: "¿Qué aprenderás en esta guía?",
@@ -101,7 +101,7 @@ const GUIDES_DATABASE: GuideItem[] = [
           },
           {
             icon: "💳",
-            title: "Suscripción & Plan Athletix OS",
+            title: "Suscripción & Plan DeportivOS",
             description: "Control de vigencia de licencia, selector de plan mensual o anual con 50% de ahorro."
           }
         ]
@@ -222,7 +222,7 @@ const GUIDES_DATABASE: GuideItem[] = [
     id: "g-admin-ia",
     roleTarget: "admin",
     category: "IA & TÁCTICA",
-    title: "IA & Automatizaciones Athletix AI",
+    title: "IA & Automatizaciones DeportivOS AI",
     description: "Monitoreo predictivo de deserción, generación de crónicas y automatizaciones.",
     icon: Sparkles,
     durationMinutes: 5,
@@ -231,12 +231,12 @@ const GUIDES_DATABASE: GuideItem[] = [
         title: "Inteligencia Artificial para tu Club",
         subtitle: "Optimiza la toma de decisiones con análisis automático",
         summaryBox: {
-          title: "Capacidades de Athletix AI",
+          title: "Capacidades de DeportivOS AI",
           items: [
             "Detección predictiva de riesgo de abandono de deportistas",
             "Generador automático de sesiones de entrenamiento en 3 fases",
             "Redactor por voz de crónicas de partidos para familias",
-            "Consultas en lenguaje natural al Asistente Athletix AI"
+            "Consultas en lenguaje natural al Asistente DeportivOS AI"
           ]
         }
       }
@@ -340,7 +340,7 @@ const GUIDES_DATABASE: GuideItem[] = [
     durationMinutes: 5,
     steps: [
       {
-        title: "Potencia tus Entrenamientos con Athletix AI",
+        title: "Potencia tus Entrenamientos con DeportivOS AI",
         subtitle: "Ahorra tiempo de planificación diaria con inteligencia artificial",
         summaryBox: {
           title: "Cómo usar los Generadores IA",
@@ -369,7 +369,7 @@ const GUIDES_DATABASE: GuideItem[] = [
     durationMinutes: 5,
     steps: [
       {
-        title: "¡Bienvenido a la App de Padres Athletix!",
+        title: "¡Bienvenido a la App de Padres DeportivOS!",
         subtitle: "Mantente al tanto de la evolución deportiva de tu hijo.",
         summaryBox: {
           title: "¿Qué puedes hacer desde tu perfil de Padre?",
@@ -623,7 +623,7 @@ export function InteractiveGuidesModal({
             {/* Footer summary */}
             <div className="p-3 border-t border-border/60 bg-muted/20 flex items-center justify-between text-[11px] text-muted-foreground px-5">
               <span className="flex items-center gap-1.5 font-medium">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Athletix Academy Knowledge Center
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> DeportivOS Academy Knowledge Center
               </span>
               <span className="font-bold text-foreground">{GUIDES_DATABASE.length} Guías Disponibles</span>
             </div>

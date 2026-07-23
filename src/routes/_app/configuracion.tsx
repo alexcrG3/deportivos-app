@@ -679,7 +679,7 @@ function ConfigPage() {
                 <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/40 text-[10px] font-extrabold uppercase">
                   ❇️ Suscripción Activa
                 </Badge>
-                <span className="text-xs text-slate-300">Plan Athletix OS Élite</span>
+                <span className="text-xs text-slate-300">Plan DeportivOS Élite</span>
               </div>
               <h2 className="text-xl font-extrabold text-white mt-1">Gestión de Suscripción & Facturación de la Academia</h2>
               <p className="text-xs text-slate-300">
@@ -687,7 +687,7 @@ function ConfigPage() {
               </p>
             </div>
             <Button 
-              onClick={() => toast.success("Solicitud de actualización de tarjeta enviada a Athletix Billing.")}
+              onClick={() => toast.success("Solicitud de actualización de tarjeta enviada a DeportivOS Billing.")}
               className="bg-purple-600 hover:bg-purple-500 text-white shadow-lg text-xs font-bold gap-2 shrink-0"
             >
               <CreditCard className="h-4 w-4" /> Actualizar Tarjeta
@@ -750,7 +750,7 @@ function ConfigPage() {
             </div>
           </div>
 
-          {/* Plans Grid (Original Athletix OS Style) */}
+          {/* Plans Grid (Original DeportivOS Style) */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Plan 1: Pago Mensual */}
             <Card 
@@ -860,7 +860,7 @@ function ConfigPage() {
                   </span>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                  Para gestionar tu facturación corporativa o cambiar moneda a tu moneda local, contacta al equipo central de Athletix OS.
+                  Para gestionar tu facturación corporativa o cambiar moneda a tu moneda local, contacta al equipo central de DeportivOS.
                 </p>
               </div>
 
@@ -2545,7 +2545,7 @@ function IntegracionesTab() {
     };
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("athletix_integraciones_config");
+        const saved = localStorage.getItem("deportivos_integraciones_config");
         if (saved) return { ...DEFAULT, ...JSON.parse(saved) };
       } catch (e) {
         console.error(e);
@@ -2555,7 +2555,7 @@ function IntegracionesTab() {
   });
 
   const handleSave = () => {
-    localStorage.setItem("athletix_integraciones_config", JSON.stringify(config));
+    localStorage.setItem("deportivos_integraciones_config", JSON.stringify(config));
     toast.success("Configuraciones de integración guardadas con éxito.");
   };
 
@@ -2564,10 +2564,10 @@ function IntegracionesTab() {
   const [openEmailTest, setOpenEmailTest] = useState(false);
   
   const [wsDest, setWSDest] = useState("");
-  const [wsMsg, setWSMsg] = useState("¡Hola! Este es un mensaje de prueba de Athletix OS.");
+  const [wsMsg, setWSMsg] = useState("¡Hola! Este es un mensaje de prueba de DeportivOS.");
   const [emailDest, setEmailDest] = useState("");
-  const [emailSubject, setEmailSubject] = useState("Prueba de integración - Athletix OS");
-  const [emailBody, setEmailBody] = useState("<p>Este es un correo de prueba enviado desde <strong>Athletix OS</strong>.</p>");
+  const [emailSubject, setEmailSubject] = useState("Prueba de integración - DeportivOS");
+  const [emailBody, setEmailBody] = useState("<p>Este es un correo de prueba enviado desde <strong>DeportivOS</strong>.</p>");
   const [testing, setTesting] = useState(false);
 
   const handleTestWS = async (e: React.FormEvent) => {

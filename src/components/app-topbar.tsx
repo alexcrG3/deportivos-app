@@ -101,12 +101,12 @@ export function AppTopbar() {
         variant="ghost" 
         size="sm" 
         onClick={() => navigate({ to: "/ruta-aprendizaje" })} 
-        aria-label="Ruta Athletix OS" 
+        aria-label="Ruta DeportivOS" 
         title="Ruta de Maestría y Aprendizaje Interactivo"
         className="gap-1.5 font-extrabold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl shadow-sm"
       >
         <Rocket className="h-4 w-4 text-amber-500 animate-pulse" />
-        <span className="hidden md:inline">Ruta Athletix OS</span>
+        <span className="hidden md:inline">Ruta DeportivOS</span>
       </Button>
 
       <Button 

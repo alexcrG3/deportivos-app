@@ -933,7 +933,7 @@ class RendimientoStore {
         firmaBase64: j.firma_base64,
       }));
       try {
-        localStorage.setItem("athletix_hp_jugadores_dynamics", JSON.stringify(this.memoryCache["jugadores_dynamics"]));
+        localStorage.setItem("deportivos_hp_jugadores_dynamics", JSON.stringify(this.memoryCache["jugadores_dynamics"]));
       } catch (e) {}
 
       // 2. PAGOS
@@ -1000,7 +1000,7 @@ class RendimientoStore {
       // Preserve locally-added partidos (e.g. demo seeds) not yet in Supabase
       let localCachedPartidos: any[] = [];
       try {
-        const lc = localStorage.getItem("athletix_cache_partidos");
+        const lc = localStorage.getItem("deportivos_cache_partidos");
         if (lc) localCachedPartidos = JSON.parse(lc);
       } catch { /* ignore */ }
       const dbIds = new Set(dbMappedPartidos.map((p: any) => p.id));
@@ -1218,7 +1218,7 @@ class RendimientoStore {
       for (const k of cacheKeys) {
         if (this.memoryCache[k] !== undefined) {
           try {
-            localStorage.setItem(`athletix_cache_${k}`, JSON.stringify(this.memoryCache[k]));
+            localStorage.setItem(`deportivos_cache_${k}`, JSON.stringify(this.memoryCache[k]));
           } catch (err) {}
         }
       }
@@ -1258,7 +1258,7 @@ class RendimientoStore {
 
     if (key === "competiciones_dynamics" || key === "temporadas" || key === "resultados_pruebas" || key === "wellness" || key === "asistencias_dynamics") {
       try {
-        const cached = localStorage.getItem(`athletix_cache_${key}`);
+        const cached = localStorage.getItem(`deportivos_cache_${key}`);
         if (cached) {
           const parsed = JSON.parse(cached);
           this.memoryCache[key] = parsed;
@@ -1283,20 +1283,20 @@ class RendimientoStore {
 
     if (key === "usuarios") {
       try {
-        localStorage.setItem("athletix_hp_usuarios", JSON.stringify(value));
+        localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(value));
       } catch (e) {}
       return;
     }
 
     if (key === "competiciones_dynamics" || key === "temporadas" || key === "resultados_pruebas" || key === "wellness" || key === "asistencias_dynamics") {
       try {
-        localStorage.setItem(`athletix_cache_${key}`, JSON.stringify(value));
+        localStorage.setItem(`deportivos_cache_${key}`, JSON.stringify(value));
       } catch (e) {}
     }
 
     if (key === "jugadores_dynamics") {
       try {
-        localStorage.setItem("athletix_hp_jugadores_dynamics", JSON.stringify(value));
+        localStorage.setItem("deportivos_hp_jugadores_dynamics", JSON.stringify(value));
       } catch (e) {}
     }
 
@@ -2588,16 +2588,16 @@ class RendimientoStore {
 
     if (!this.isBrowser()) return [superAdmin];
 
-    const migrationDone = localStorage.getItem("athletix_usuarios_migration");
+    const migrationDone = localStorage.getItem("deportivos_usuarios_migration");
     if (migrationDone !== USERS_MIGRATION_VERSION) {
-      localStorage.removeItem("athletix_hp_usuarios");
-      localStorage.setItem("athletix_usuarios_migration", USERS_MIGRATION_VERSION);
-      localStorage.setItem("athletix_hp_usuarios", JSON.stringify([superAdmin]));
+      localStorage.removeItem("deportivos_hp_usuarios");
+      localStorage.setItem("deportivos_usuarios_migration", USERS_MIGRATION_VERSION);
+      localStorage.setItem("deportivos_hp_usuarios", JSON.stringify([superAdmin]));
     }
 
     let list: SistemaUsuario[] = [];
     try {
-      const stored = localStorage.getItem("athletix_hp_usuarios");
+      const stored = localStorage.getItem("deportivos_hp_usuarios");
       list = stored ? JSON.parse(stored) : [superAdmin];
     } catch (e) {
       list = [superAdmin];
@@ -2606,7 +2606,7 @@ class RendimientoStore {
     // Always ensure alex is in the list
     if (!list.some(u => u.email === "alex@mail.com")) {
       list.unshift(superAdmin);
-      localStorage.setItem("athletix_hp_usuarios", JSON.stringify(list));
+      localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(list));
     }
 
     const activeOrgId = this.getActiveOrganizacionId();
@@ -2616,7 +2616,7 @@ class RendimientoStore {
   public static addUsuario(u: Omit<SistemaUsuario, "id" | "estado" | "codigoAcceso" | "fechaCreacion">): SistemaUsuario {
     let list: SistemaUsuario[] = [];
     try {
-      const stored = localStorage.getItem("athletix_hp_usuarios");
+      const stored = localStorage.getItem("deportivos_hp_usuarios");
       list = stored ? JSON.parse(stored) : [];
     } catch (e) {}
 
@@ -2629,7 +2629,7 @@ class RendimientoStore {
       organizacion_id: activeOrgId
     };
     list.push(newUser);
-    localStorage.setItem("athletix_hp_usuarios", JSON.stringify(list));
+    localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(list));
     return newUser;
   }  // --- JUGADORES DYNAMICS ---
   public static getJugadores(): StoreJugador[] {
@@ -3033,7 +3033,7 @@ class RendimientoStore {
     if (!this.memoryCache["partidos"]) this.memoryCache["partidos"] = [];
     this.memoryCache["partidos"] = [newPartido, ...this.memoryCache["partidos"]];
     try {
-      localStorage.setItem("athletix_cache_partidos", JSON.stringify(this.memoryCache["partidos"]));
+      localStorage.setItem("deportivos_cache_partidos", JSON.stringify(this.memoryCache["partidos"]));
     } catch (e) { /* ignore */ }
     return newPartido;
   }
@@ -3496,7 +3496,7 @@ class RendimientoStore {
       ...ticket,
       id: generateUniqueId("tick"),
       organizacion_id: activeOrgId,
-      organizacion_nombre: currentOrg ? currentOrg.nombre : "Academia Athletix",
+      organizacion_nombre: currentOrg ? currentOrg.nombre : "Academia DeportivOS",
       creadoEn: new Date().toISOString(),
       respuestas: []
     };
@@ -3651,11 +3651,11 @@ export interface StoreSupportTicket {
 
 export const INITIAL_SUPPORT_TICKETS: StoreSupportTicket[] = [
   {
-    id: "tick-athletix-01",
+    id: "tick-deportivos-01",
     organizacion_id: "00000000-0000-0000-0000-000000000000",
     organizacion_nombre: "Academia Asoderive",
     titulo: "Confirmación automática de comprobantes SINPE Móvil y descarga masiva de carnets QR",
-    descripcion: "Hola equipo de Athletix OS, quisiéramos solicitar si es posible habilitar la verificación automática de comprobantes SINPE Móvil en el módulo de Cobros y si podemos exportar los carnets QR de los jugadores de la categoría U13 en un solo archivo PDF impreso.",
+    descripcion: "Hola equipo de DeportivOS, quisiéramos solicitar si es posible habilitar la verificación automática de comprobantes SINPE Móvil en el módulo de Cobros y si podemos exportar los carnets QR de los jugadores de la categoría U13 en un solo archivo PDF impreso.",
     tipo: "necesidad",
     prioridad: "alta",
     estado: "resuelto",
@@ -3665,16 +3665,16 @@ export const INITIAL_SUPPORT_TICKETS: StoreSupportTicket[] = [
     respuestas: [
       {
         id: "resp-ath-01",
-        autorNombre: "Soporte Central Athletix OS",
-        autorEmail: "soporte@athletixos.com",
+        autorNombre: "Soporte Central DeportivOS",
+        autorEmail: "soporte@deportivos.com",
         esAdminSaaS: true,
         mensaje: "¡Hola Bill! Para la descarga masiva de QRs de la U13, puedes ir al módulo de Jugadores > Opciones > Exportar Carnets PDF. Respecto a la conciliación automática SINPE Móvil, nuestro equipo de ingeniería está desplegando la actualización esta semana en el área de Finanzas.",
         fecha: "2026-07-22T16:15:00Z"
       },
       {
         id: "resp-ath-02-asoderive",
-        autorNombre: "Soporte Central Athletix OS",
-        autorEmail: "soporte@athletixos.com",
+        autorNombre: "Soporte Central DeportivOS",
+        autorEmail: "soporte@deportivos.com",
         esAdminSaaS: true,
         mensaje: "✅ Solicitud Resuelta: Se ha habilitado la validación automática de comprobantes SINPE Móvil en Finanzas > Pagos. ¡Quedamos atentos a cualquier otra duda!",
         fecha: "2026-07-22T18:40:00Z"
@@ -3682,7 +3682,7 @@ export const INITIAL_SUPPORT_TICKETS: StoreSupportTicket[] = [
     ]
   },
   {
-    id: "tick-athletix-02",
+    id: "tick-deportivos-02",
     organizacion_id: "panthers-elite-id",
     organizacion_nombre: "Panthers Elite academy",
     titulo: "Ajuste de umbrales RPE en el Monitor de Cargas y Sports Science",
@@ -3696,8 +3696,8 @@ export const INITIAL_SUPPORT_TICKETS: StoreSupportTicket[] = [
     respuestas: [
       {
         id: "resp-ath-02",
-        autorNombre: "Ingeniería Deportiva Athletix OS",
-        autorEmail: "soporte@athletixos.com",
+        autorNombre: "Ingeniería Deportiva DeportivOS",
+        autorEmail: "soporte@deportivos.com",
         esAdminSaaS: true,
         mensaje: "Quedó habilitada la alerta de Semáforo de Riesgo en el Centro Táctico y Sports Science con cálculo dinámico de ACWR.",
         fecha: "2026-07-21T09:00:00Z"

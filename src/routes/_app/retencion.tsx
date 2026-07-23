@@ -140,7 +140,7 @@ export function DashboardRetencion() {
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Retención por Cohorte");
-    XLSX.writeFile(workbook, `Athletix_Retencion_Cohortes_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.writeFile(workbook, `DeportivOS_Retencion_Cohortes_${new Date().toISOString().slice(0, 10)}.xlsx`);
     toast.success("Excel con matriz de retención descargado correctamente");
   };
 
@@ -372,7 +372,7 @@ export function DashboardRetencion() {
         </Card>
       </div>
 
-      {/* Row 4: Mapa de Retención por Cohorte (Diseño Exclusivo Athletix OS) */}
+      {/* Row 4: Mapa de Retención por Cohorte (Diseño Exclusivo DeportivOS) */}
       <Card className="shadow-elegant border/80 bg-card overflow-hidden">
         <div className="p-5 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/20">
           <div>

@@ -1,4 +1,4 @@
-# Propuesta de Cobros y Mensualidades - Athletix OS
+# Propuesta de Cobros y Mensualidades - DeportivOS
 
 Actualmente, las métricas y reportes financieros del Dashboard de Finanzas (`/finanzas`) y la lista de pagos (`/pagos`) se alimentan de datos estáticos precargados (Mock Data). No hay una opción que defina cuánto vale la mensualidad por categoría o sede, ni un flujo para cobrar de manera real.
 

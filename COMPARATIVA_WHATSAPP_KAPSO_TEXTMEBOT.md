@@ -1,6 +1,6 @@
 # 📱 Comparativa Técnica, Costos y Estrategia de Monetización: Kapso vs. TextMeBot
 
-Este documento contiene el análisis técnico, financiero y la estrategia de negocio para la integración del servicio de mensajería automatizada por **WhatsApp** en **Athletix OS**.
+Este documento contiene el análisis técnico, financiero y la estrategia de negocio para la integración del servicio de mensajería automatizada por **WhatsApp** en **DeportivOS**.
 
 ---
 
@@ -43,7 +43,7 @@ Este documento contiene el análisis técnico, financiero y la estrategia de neg
 
 ---
 
-## 💡 4. Estrategia de Monetización y Reventa para Athletix OS
+## 💡 4. Estrategia de Monetización y Reventa para DeportivOS
 
 A través del panel de **Configuración (`/configuracion`)** bajo la pestaña **`💬 Servicio WhatsApp`**, los administradores de la academia ven su **ApiKey** y el botón de recarga oficial:
 
@@ -55,12 +55,12 @@ A través del panel de **Configuración (`/configuracion`)** bajo la pestaña **
 2. **Pack 500 Mensajes WhatsApp**:
    - **Precio de Venta a la Academia**: **$15.00 USD**
    - Costo Real del Proveedor: ~$5.00 USD
-   - 📈 **Ganancia Neta para Athletix OS**: **+$10.00 USD**
+   - 📈 **Ganancia Neta para DeportivOS**: **+$10.00 USD**
 
 3. **Pack 1,500 Mensajes WhatsApp**:
    - **Precio de Venta a la Academia**: **$35.00 USD**
    - Costo Real del Proveedor: ~$12.00 USD
-   - 📈 **Ganancia Neta para Athletix OS**: **+$23.00 USD**
+   - 📈 **Ganancia Neta para DeportivOS**: **+$23.00 USD**
 
 4. **Pack Ilimitado por Sede**:
    - **Precio de Venta a la Academia**: **$49.00 USD / mes**

@@ -409,7 +409,7 @@ Soporte: soporte@asoderive.com`;
           estado: existingStatus as const,
           encargadoLegal: j.encargadoLegal || j.madreNombre || j.padreNombre || "Patricia Fonseca",
           telefonoEncargado: (j as any).whatsappEncargado || (j as any).madreWhatsapp || (j as any).padreWhatsapp || j.telefonoEncargado || j.madreTelefono || j.padreTelefono || j.telefonoEmergencia || "+506 8888-9900",
-          emailEncargado: j.emailEncargado || j.madreEmail || j.padreEmail || j.email || "encargado@athletix.cr",
+          emailEncargado: j.emailEncargado || j.madreEmail || j.padreEmail || j.email || "encargado@deportivos.cr",
         };
       });
 
@@ -720,7 +720,7 @@ Soporte: soporte@asoderive.com`;
                             </p>
                             <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 flex items-center gap-1.5 truncate">
                               <span>📱 {j.telefonoEncargado || "+506 8888-9900"}</span>
-                              <span>✉️ {j.emailEncargado || "encargado@athletix.cr"}</span>
+                              <span>✉️ {j.emailEncargado || "encargado@deportivos.cr"}</span>
                             </p>
                           </div>
                         </div>
@@ -1182,7 +1182,7 @@ Soporte: soporte@asoderive.com`;
                     📌 Asunto: 📝 Convocatoria de Partido Oficial - {samplePlayer.nombre} - Categoría {dynamicEquipos[0]?.categoria || "Sub-13"}
                   </p>
                   <p className="text-slate-400">De: <strong>Coordinación Deportiva Asoderive</strong> &lt;soporte@asoderive.com&gt;</p>
-                  <p className="text-slate-400">Para: <strong>{samplePlayer.encargadoLegal || "Patricia Fonseca"}</strong> &lt;{samplePlayer.emailEncargado || "encargado@athletix.cr"}&gt;</p>
+                  <p className="text-slate-400">Para: <strong>{samplePlayer.encargadoLegal || "Patricia Fonseca"}</strong> &lt;{samplePlayer.emailEncargado || "encargado@deportivos.cr"}&gt;</p>
                 </div>
 
                 {/* Body Mail Template HTML Box */}
@@ -1249,7 +1249,7 @@ Soporte: soporte@asoderive.com`;
 
             {/* Phone Footer */}
             <div className="bg-slate-950 p-3 text-center border-t border-slate-800 flex items-center justify-between gap-2">
-              <span className="text-[10px] text-slate-400 font-mono">Simulador Athletix OS 2026</span>
+              <span className="text-[10px] text-slate-400 font-mono">Simulador DeportivOS 2026</span>
               <Button
                 onClick={() => setIsOpenPreviewModal(false)}
                 className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-1.5 px-4 rounded-xl"

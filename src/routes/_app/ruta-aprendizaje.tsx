@@ -68,7 +68,7 @@ function RutaAprendizajePage() {
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <Badge className="bg-gradient-primary text-white border-none font-black text-[10px] uppercase tracking-wider px-3 py-1 shadow-elegant">
-                  🚀 Ruta de Maestría Athletix OS
+                  🚀 Ruta de Maestría DeportivOS
                 </Badge>
                 <span className="text-xs text-slate-300">Aprende haciendo tareas reales</span>
               </div>
@@ -299,7 +299,7 @@ function RutaAprendizajePage() {
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3">
                 <Lightbulb className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
-                  <span className="font-bold text-amber-600 dark:text-amber-400 text-xs block">Consejo Pro Athletix:</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400 text-xs block">Consejo Pro DeportivOS:</span>
                   <p className="leading-relaxed text-[11px]">{selectedLesson.lesson.tip}</p>
                 </div>
               </div>

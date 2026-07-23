@@ -1,4 +1,4 @@
-# Guía de Próximos Pasos - Athletix OS
+# Guía de Próximos Pasos - DeportivOS
 
 ¡Felicidades! La academia ya está configurada con su estructura básica: sedes, categorías, equipos, jugadores, entrenadores asignados y branding (logo).
 

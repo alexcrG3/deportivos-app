@@ -1,4 +1,4 @@
-# Bitácora de Cambios - Athletix OS
+# Bitácora de Cambios - DeportivOS
 
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
@@ -6,7 +6,7 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 ## [22/07/2026 - Planificación de Landing Page SaaS Elite & Inicialización de Servidor Local]
 
 - **Planificación de Landing Page de Alto Rendimiento (SaaS Elite):**
-  - **Plan de Implementación:** Creación de la propuesta integral de diseño para la Landing Page de Athletix OS ([implementation_plan.md](file:///C:/Users/AlexG3/.gemini/antigravity/brain/c238d055-e8da-49bd-9e57-f0cac0a4e876/implementation_plan.md)).
+  - **Plan de Implementación:** Creación de la propuesta integral de diseño para la Landing Page de DeportivOS ([implementation_plan.md](file:///C:/Users/AlexG3/.gemini/antigravity/brain/c238d055-e8da-49bd-9e57-f0cac0a4e876/implementation_plan.md)).
   - **Concepto y Estética Visual:** Definición de línea de diseño *High-Performance Dark* con *Glassmorphism*, acentos en Neón Ámbar (`#F59E0B`), Esmeralda (`#10B981`) y tipografía `Outfit`.
   - **Estructura de Secciones Propuesta:**
     - Header & Navigation con accesos a demo y portal.
@@ -88,38 +88,38 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 ## [21/07/2026 - Módulo de Tienda de Uniformes, Persistencia Supabase e Inventario por Tallas]
 
 - **Módulo de Tienda en Línea y Confección de Uniformes (`/tienda`):**
-  - Desarrollo del módulo e interfaz premium [tienda.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/tienda.tsx) con soporte para venta de indumentaria de competencia, camisetas de entreno, abrigos, mochilas y equipamiento.
+  - Desarrollo del módulo e interfaz premium [tienda.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/tienda.tsx) con soporte para venta de indumentaria de competencia, camisetas de entreno, abrigos, mochilas y equipamiento.
   - **Inventario Dinámico por Talla:** Control independiente de existencias por cada talla (infantiles `6, 8, 10, 12, 14, 16` y adultos `S, M, L, XL`). Deshabilitación automática de tallas agotadas y alertas de stock en tiempo real.
   - **Doble Rol (Padres & Administración):**
     - *Padres:* Catálogo interactivo con tarjetas glassmorphic, filtros por categoría, selector de talla/color, carrito de compras deslizable, simulación de pago (cargo a próxima mensualidad, tarjeta o transferencia) y pestaña de seguimiento del estado del pedido (*En preparación*, *Listo para retirar*, *Entregado*).
     - *Administración:* Dashboard de ventas recaudadas, control de despacho de pedidos recibidos y CRUD de catálogo para crear o modificar indumentaria y ajustar existencias por talla.
 - **Sincronización Híbrida con Supabase & LocalStorage:**
   - Vinculación del módulo con la base de datos mediante las tablas `tienda_productos` y `tienda_pedidos` en Supabase con mecanismo de respaldo en `RendimientoStore`.
-  - Script SQL de estructura de base de datos generado en [schema_tienda_supabase.sql](file:///d:/AntigravitDev/Athletix%20OS/scripts/schema_tienda_supabase.sql).
+  - Script SQL de estructura de base de datos generado en [schema_tienda_supabase.sql](file:///d:/AntigravitDev/DeportivOS%20OS/scripts/schema_tienda_supabase.sql).
 
 ---
 
 ## [21/07/2026 - Módulo de Inventario Deportivo, Gestión de WhatsApp y Mejoras del Dashboard]
 
 - **Módulo Completo de Inventario Deportivo (`/inventario`):**
-  - Se desarrolló e integró el módulo de gestión de inventario para materiales y equipamiento deportivo ([inventario.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/inventario.tsx)).
+  - Se desarrolló e integró el módulo de gestión de inventario para materiales y equipamiento deportivo ([inventario.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/inventario.tsx)).
   - **5 Secciones de Gestión:** Dashboard con métricas y gráficas Recharts de stock por categoría, Control de Artículos con búsqueda y filtros por estado semafórico (🟢 Disponible / 🟡 Stock Bajo / 🔴 Crítico / ⚫ Vencido / 🔵 Prestado), Sistema de Préstamos a Staff con fecha límite y control de vencimientos, Categorización editable y Kardex Inmutable exportable.
   - **CRUD Completo de Artículos:** Botones de acción siempre visibles para ver detalle, registrar préstamos, editar campos y eliminar ítems (con protección automática ante préstamos activos).
   - **Vincular Entrenadores Reales:** El modal de préstamos obtiene automáticamente la lista de coaches activos en la academia desde `RendimientoStore`, auto-completando su especialidad/cargo.
   - **Nuevos Materiales Precargados:** Inclusión de balones, mallas, conos, cronómetros, botiquines y la nueva categoría de **Chalecos** (tácticos, de entrenamiento y tallas infantiles).
 - **Alertas de Inventario en el Dashboard (`/dashboard`):**
   - Se agregó la tarjeta de atención prioritaria **"Préstamos vencidos"** en la sección *Hoy* del Centro de Operaciones con enlace directo al inventario.
-  - Se corrigió el contraste tipográfico de los badges de la tarjeta **Athletix AI Copilot** adaptándolos dinámicamente a temas claro y oscuro (`slate-900` / `slate-100`).
+  - Se corrigió el contraste tipográfico de los badges de la tarjeta **DeportivOS AI Copilot** adaptándolos dinámicamente a temas claro y oscuro (`slate-900` / `slate-100`).
 - **Integración de Gestión y Pago de Servicio de WhatsApp (`/configuracion`):**
   - Creación de la pestaña **`💬 Servicio WhatsApp`** en el módulo de configuración con la pasarela de recarga de ApiKey del club.
-  - Generación del documento comparativo técnico y de rentabilidad ([COMPARATIVA_WHATSAPP_KAPSO_TEXTMEBOT.md](file:///d:/AntigravitDev/Athletix%20OS/COMPARATIVA_WHATSAPP_KAPSO_TEXTMEBOT.md)) evaluando Kapso vs TextMeBot y esquemas de reventa de paquetes para la academia.
+  - Generación del documento comparativo técnico y de rentabilidad ([COMPARATIVA_WHATSAPP_KAPSO_TEXTMEBOT.md](file:///d:/AntigravitDev/DeportivOS%20OS/COMPARATIVA_WHATSAPP_KAPSO_TEXTMEBOT.md)) evaluando Kapso vs TextMeBot y esquemas de reventa de paquetes para la academia.
 
 ---
 
 ## [20/07/2026 - Sesión de Tarde - Filtro por Equipos en Alto Rendimiento, Conexión a Base de Datos y Correcciones de Compilación]
 
 - **Filtro de Equipos Completo en Alto Rendimiento:**
-  - Se implementó el menú desplegable (dropdown) selector de equipo en todos los módulos de Alto Rendimiento: **Control de Cargas** ([rendimiento.cargas.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/rendimiento.cargas.tsx)), **Sports Science** ([rendimiento.sports-science.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/rendimiento.sports-science.tsx)), **Tests Físicos** ([rendimiento.tests.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/rendimiento.tests.tsx)) y **Lesiones** ([rendimiento.lesiones.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/rendimiento.lesiones.tsx)).
+  - Se implementó el menú desplegable (dropdown) selector de equipo en todos los módulos de Alto Rendimiento: **Control de Cargas** ([rendimiento.cargas.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/rendimiento.cargas.tsx)), **Sports Science** ([rendimiento.sports-science.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/rendimiento.sports-science.tsx)), **Tests Físicos** ([rendimiento.tests.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/rendimiento.tests.tsx)) y **Lesiones** ([rendimiento.lesiones.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/rendimiento.lesiones.tsx)).
   - Cada selector cuenta con lógica fuzzy-matching para alinear las categorías de los jugadores con el nombre del equipo y tarjetas informativas de estado vacío personalizadas.
 - **Conexión de Tests Físicos y Lesiones a Supabase:**
   - Se vinculó el listado de **Tests Físicos** para leer e inyectar dinámicamente los datos reales de la tabla de Supabase `resultados_pruebas_fisicas` de forma robusta.
@@ -131,7 +131,7 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 - **Orden Alfabético por Primer Nombre:**
   - Se actualizó el método de obtención de jugadores en el store para ordenar las listas alfabéticamente por su primer nombre (`nombre`) con salvaguardas contra campos vacíos.
 - **Persistencia de Banner de Migración:**
-  - Implementación de la clave `athletix_cloud_migrated` para evitar que el banner de migración se muestre en bucles infinitos en el Dashboard tras una sincronización exitosa.
+  - Implementación de la clave `deportivos_cloud_migrated` para evitar que el banner de migración se muestre en bucles infinitos en el Dashboard tras una sincronización exitosa.
 
 ---
 
@@ -139,17 +139,17 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 ## [20/07/2026 - Sesión de Noche - Unificación de Roles en Competiciones, Sincronización CRM con Supabase y Soporte de Simulador de Coach]
 
 - **Competiciones Globales y Restricciones a Padres:**
-  - Se modificaron las consultas en [temporadas.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/temporadas.tsx) y [partidos.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/partidos.tsx) para que tanto directores, entrenadores y padres puedan consultar todas las temporadas y partidos de la academia de forma global.
+  - Se modificaron las consultas en [temporadas.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/temporadas.tsx) y [partidos.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/partidos.tsx) para que tanto directores, entrenadores y padres puedan consultar todas las temporadas y partidos de la academia de forma global.
   - Se añadieron verificaciones basadas en el hook de roles para ocultar e impedir las acciones de creación (`+ Nuevo partido`, `+ Nueva temporada`), duplicado, edición y eliminación de datos a los usuarios que accedan bajo el rol de `padres`, asegurando un visor de solo lectura para ellos.
 - **CRM Deportivo Conectado a Supabase:**
-  - Migración del módulo [crm.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/crm.tsx) y la gestión de [prospectos.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/prospectos.tsx) para recuperar y gestionar los prospectos directamente desde la tabla `crm_leads` en Supabase en lugar de datos estáticos en memoria.
+  - Migración del módulo [crm.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/crm.tsx) y la gestión de [prospectos.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/prospectos.tsx) para recuperar y gestionar los prospectos directamente desde la tabla `crm_leads` en Supabase en lugar de datos estáticos en memoria.
   - Sembrado de 10 atletas y leads de prueba reales en Supabase vinculando de forma consistente sus actividades de captación, campañas y pruebas.
 - **Visualización Cruzada de Entrenamientos (Edgar Calderón y Coaches):**
   - Vinculación en la base de datos de las 8 sesiones de entrenamiento del equipo **U13** en Supabase, registrando de forma persistente a **Edgar Calderón** (`t1`) como su entrenador asignado para solucionar listados vacíos.
   - Vinculación del resto de entrenamientos en la base de datos a sus respectivos entrenadores asignados (**Tiffany Eduarte**, **Carlos Araya** y **Eduardo Villa**).
-  - Actualización del buscador y visor de [entrenamientos.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/entrenamientos.tsx) para realizar búsquedas mediante un operador híbrido `or` (`entrenador_id` o `entrenador` por texto libre).
+  - Actualización del buscador y visor de [entrenamientos.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/entrenamientos.tsx) para realizar búsquedas mediante un operador híbrido `or` (`entrenador_id` o `entrenador` por texto libre).
 - **Persistencia de Roles del Simulador Administrativo:**
-  - Corrección de la lógica de recuperación de rol en [use-role.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/hooks/use-role.tsx) para dar prioridad absoluta al rol guardado en `localStorage` (simulación), permitiendo alternar y probar vistas administrativas de entrenadores o padres de forma persistente en refrescos de página.
+  - Corrección de la lógica de recuperación de rol en [use-role.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/hooks/use-role.tsx) para dar prioridad absoluta al rol guardado en `localStorage` (simulación), permitiendo alternar y probar vistas administrativas de entrenadores o padres de forma persistente en refrescos de página.
 
 ---
 
@@ -286,7 +286,7 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 - **Consistencia de Contadores:** Los contadores de asignaciones de equipos y categorías en la lista de entrenadores ahora se recalculan de forma limpia y automática con datos de Supabase en tiempo real, corrigiendo discrepancias de caché local desactualizada.
 
 ### 🐛 Corrección de Crash al Cargar Entrenadores (TypeError de Disciplinas)
-- **Adaptador de Datos:** Se identificó que la base de datos guarda `disciplina` (singular string) y el frontend renderizaba mapeando `disciplinas` (plural array). Se implementó un mapeador dinámico en `syncFromSupabase()` para inyectar `disciplinas: [disciplina]` y una lógica tolerante defensiva en [entrenadores.index.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/entrenadores.index.tsx).
+- **Adaptador de Datos:** Se identificó que la base de datos guarda `disciplina` (singular string) y el frontend renderizaba mapeando `disciplinas` (plural array). Se implementó un mapeador dinámico en `syncFromSupabase()` para inyectar `disciplinas: [disciplina]` y una lógica tolerante defensiva en [entrenadores.index.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/entrenadores.index.tsx).
 
 ### 📊 Corrección de Pérdida de Datos en Categorías y Ocupación `44/0`
 - **Mapeo de Campos Faltantes:** Se corrigió el método `set()` en `rendimiento-store.ts` para que al guardar categorías en Supabase incluya campos previamente omitidos como `capacidad`, `edad_min`, `edad_max`, `genero` y `sede_id`. Esto solucionó la lectura de capacidad en `0` que mostraba ocupaciones erróneas.
@@ -353,7 +353,7 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 - **Corrección de Contraste en Lista:** Se reemplazó el color de texto fijo `text-white` por colores adaptativos `text-slate-900 dark:text-white` en los listados del Plantel y de Rivales, solucionando la invisibilidad de los nombres de los jugadores en el tema claro de la aplicación.
 
 ### 🔄 Curvatura de Flechas Ajustable (Izquierda / Derecha)
-- **Extensión del Modelo (`curvedOffset`):** Se añadió el campo opcional `curvedOffset?: number` a la interfaz `Arrow` en [tactical-store.ts](file:///d:/AntigravitDev/Athletix OS/src/lib/tactical-store.ts).
+- **Extensión del Modelo (`curvedOffset`):** Se añadió el campo opcional `curvedOffset?: number` a la interfaz `Arrow` en [tactical-store.ts](file:///d:/AntigravitDev/DeportivOS/src/lib/tactical-store.ts).
 - **Arrastre Interactivo de Curvas:** Se habilitó el arrastre interactivo en el modo de selección. Al hacer clic y mover el cuerpo de cualquier flecha curva, se calcula dinámicamente el desplazamiento perpendicular, permitiendo curvar los pases, disparos o movimientos hacia la izquierda o derecha de forma fluida.
 - **Acciones Contextuales de Flecha:** Se implementó una barra de herramientas contextual al seleccionar una flecha en el tablero que permite:
   - **Invertir Curva (🔄):** Cambia el sentido de la curva (izquierda ⟷ derecha) multiplicando el offset por `-1`.
@@ -363,16 +363,16 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 ## [15/07/2026 - Sesión Nocturna - Simulación de Coaches y Planificación Táctica Premium U-11]
 
 ### 👥 Simulación Dinámica de Coaches y Filtro Reactivo de Equipos
-- **Simulador de Coach en Topbar:** Se integró la opción **"Simular Coach"** en el menú desplegable del avatar en [app-topbar.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/components/app-topbar.tsx). Despliega dinámicamente un submenú con todos los entrenadores del sistema para facilitar simulaciones de roles.
-- **Sidebar Reactivo al Entrenador:** Se reconfiguró [app-sidebar.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/components/app-sidebar.tsx) para remontarse automáticamente usando una clave compuesta con `coachName`. Al cambiar de coach, el menú lateral **"Mis Equipos"** filtra y muestra instantáneamente solo los equipos asignados a ese entrenador específico (ej. Carlos Méndez solo ve *Élite Sub-12 A*).
+- **Simulador de Coach en Topbar:** Se integró la opción **"Simular Coach"** en el menú desplegable del avatar en [app-topbar.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/components/app-topbar.tsx). Despliega dinámicamente un submenú con todos los entrenadores del sistema para facilitar simulaciones de roles.
+- **Sidebar Reactivo al Entrenador:** Se reconfiguró [app-sidebar.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/components/app-sidebar.tsx) para remontarse automáticamente usando una clave compuesta con `coachName`. Al cambiar de coach, el menú lateral **"Mis Equipos"** filtra y muestra instantáneamente solo los equipos asignados a ese entrenador específico (ej. Carlos Méndez solo ve *Élite Sub-12 A*).
 - **Seguridad en SSR / Pre-render:** Se eliminaron las llamadas directas a `RendimientoStore` (que utiliza `localStorage`) durante el renderizado inicial en el Sidebar y Topbar. Se implementó una hidratación segura usando los datos estáticos de `mock-data.ts` como fallback, erradicando los crashes de servidor de TanStack Start.
 
 ### 🧹 Versionado y Purga Automática de Caché (Data Buster)
-- **Versionado Global:** Se añadió la constante `DATA_VERSION = "5"` en [rendimiento-store.ts](file:///d:/AntigravitDev/Athletix%20OS/src/lib/rendimiento-store.ts).
-- **Auto-Purga Dinámica:** Al cargar la app en el cliente, el store detecta si el navegador tiene una versión de datos desactualizada. De ser así, vacía todas las claves `athletix_hp_` de `localStorage` y vuelve a sembrar los registros frescos. Esto garantiza que las correcciones de jugadores (22 por equipo de fútbol) e instructores se apliquen al instante a todos los usuarios sin necesidad de limpiar la caché del navegador manualmente.
+- **Versionado Global:** Se añadió la constante `DATA_VERSION = "5"` en [rendimiento-store.ts](file:///d:/AntigravitDev/DeportivOS%20OS/src/lib/rendimiento-store.ts).
+- **Auto-Purga Dinámica:** Al cargar la app en el cliente, el store detecta si el navegador tiene una versión de datos desactualizada. De ser así, vacía todas las claves `deportivos_hp_` de `localStorage` y vuelve a sembrar los registros frescos. Esto garantiza que las correcciones de jugadores (22 por equipo de fútbol) e instructores se apliquen al instante a todos los usuarios sin necesidad de limpiar la caché del navegador manualmente.
 
 ### 📋 Planificación Táctica e Inyección de Currículum U-11
-- **Currículum de la Categoría U-11:** Se reemplazó el plan ficticio semanal por el plan de entrenamiento real de Carlos Méndez para el equipo *Élite Sub-12 A* en [tactica.planificacion.tsx](file:///d:/AntigravitDev/Athletix%20OS/src/routes/_app/tactica.planificacion.tsx):
+- **Currículum de la Categoría U-11:** Se reemplazó el plan ficticio semanal por el plan de entrenamiento real de Carlos Méndez para el equipo *Élite Sub-12 A* en [tactica.planificacion.tsx](file:///d:/AntigravitDev/DeportivOS%20OS/src/routes/_app/tactica.planificacion.tsx):
   - **Trabajo Técnico:** Pase corto/largo, Control orientado, Conducción, Finalización y Juego aéreo.
   - **Táctica Individual/Colectiva:** Desmarques, Apoyos/coberturas, Amplitud/profundidad, Transiciones y Posición.
   - **Conceptos Físicos:** Velocidad de reacción, Agilidad, Cambios de dirección, Técnica de carrera y Coordinación.

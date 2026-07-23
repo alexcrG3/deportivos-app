@@ -162,7 +162,7 @@ const INITIAL_PLANS: TrainingPlan[] = [
 ];
 
 // ─── LocalStorage helpers ─────────────────────────────────────────────────────
-const STORAGE_KEY = "athletix_training_plans";
+const STORAGE_KEY = "deportivos_training_plans";
 
 function loadPlans(): TrainingPlan[] {
   if (typeof window === "undefined") return INITIAL_PLANS;
@@ -720,9 +720,9 @@ function PlanificacionTactica() {
       { nombre: "Fin de Temporada", inicio: "2026-12-01", fin: "2026-12-31", notas: "Cierre del ciclo académico anual.", estado: "Próximamente" },
     ];
     if (typeof window === "undefined") return INITIAL_PHASES;
-    const raw = localStorage.getItem("athletix_annual_phases");
+    const raw = localStorage.getItem("deportivos_annual_phases");
     if (!raw) {
-      localStorage.setItem("athletix_annual_phases", JSON.stringify(INITIAL_PHASES));
+      localStorage.setItem("deportivos_annual_phases", JSON.stringify(INITIAL_PHASES));
       return INITIAL_PHASES;
     }
     return JSON.parse(raw);
@@ -730,7 +730,7 @@ function PlanificacionTactica() {
 
   const saveAnnualPhases = (newPhases: any[]) => {
     setAnnualPhases(newPhases);
-    localStorage.setItem("athletix_annual_phases", JSON.stringify(newPhases));
+    localStorage.setItem("deportivos_annual_phases", JSON.stringify(newPhases));
   };
 
   // Phase editing states
@@ -800,7 +800,7 @@ function PlanificacionTactica() {
     printWindow.document.write(`
       <html>
         <head>
-          <title>Reporte de Temporada 2026 - Athletix OS</title>
+          <title>Reporte de Temporada 2026 - DeportivOS</title>
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; margin: 50px; color: #334155; line-height: 1.5; }
             .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #6366f1; padding-bottom: 15px; margin-bottom: 30px; }
@@ -814,7 +814,7 @@ function PlanificacionTactica() {
         <body>
           <div class="header">
             <div>
-              <h1>ATHLETIX OS - PLANIFICACIÓN ANUAL</h1>
+              <h1>DEPORTIVOS - PLANIFICACIÓN ANUAL</h1>
               <div class="subtitle">Reporte Oficial de Fases y Periodos Clave (Temporada 2026)</div>
             </div>
             <div style="font-size: 12px; color: #64748b; text-align: right;">
@@ -836,7 +836,7 @@ function PlanificacionTactica() {
             </tbody>
           </table>
           <div class="footer">
-            Academia Deportiva Élite © 2026 · Athletix OS - Inteligencia Deportiva Aplicada
+            Academia Deportiva Élite © 2026 · DeportivOS - Inteligencia Deportiva Aplicada
           </div>
           <script>
             window.onload = function() {

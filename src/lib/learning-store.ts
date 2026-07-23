@@ -100,7 +100,7 @@ export const ROADMAP_DATA: Record<"admin" | "coach" | "padres", RoleRoadmap> = {
           },
           {
             id: "admin-1-4",
-            title: "Suscripción & Licencia Athletix",
+            title: "Suscripción & Licencia DeportivOS",
             subtitle: "Elección de plan mensual o anual con 50% de ahorro",
             xp: 100,
             actionUrl: "/configuracion?tab=suscripcion",
@@ -219,11 +219,11 @@ export const ROADMAP_DATA: Record<"admin" | "coach" | "padres", RoleRoadmap> = {
           },
           {
             id: "admin-4-2",
-            title: "Asistente Athletix AI",
+            title: "Asistente DeportivOS AI",
             subtitle: "Consultas analíticas en lenguaje natural",
             xp: 100,
             actionUrl: "/ia",
-            actionLabel: "Ir a Athletix AI",
+            actionLabel: "Ir a DeportivOS AI",
             icon: "✨",
             details: [
               "Solicitar reportes ejecutivos de rendimiento",
@@ -375,7 +375,7 @@ export const ROADMAP_DATA: Record<"admin" | "coach" | "padres", RoleRoadmap> = {
   // 👨‍👩‍👧‍👦 PADRES DE FAMILIA ROADMAP
   padres: {
     role: "padres",
-    title: "Ruta de la Familia Athletix OS",
+    title: "Ruta de la Familia DeportivOS",
     description: "Aprende a consultar la evolución deportiva de tu hijo, carnet digital y mensualidades.",
     levelTitle: "Padre de Familia Élite",
     phases: [
@@ -476,8 +476,8 @@ export const ROADMAP_DATA: Record<"admin" | "coach" | "padres", RoleRoadmap> = {
 };
 
 export class LearningStore {
-  private static KEY = "athletix_learning_progress";
-  private static ACTIVE_KEY = "athletix_active_learning_step";
+  private static KEY = "deportivos_learning_progress";
+  private static ACTIVE_KEY = "deportivos_active_learning_step";
 
   public static getCompletedLessons(): string[] {
     if (typeof window === "undefined") return [];
@@ -511,7 +511,7 @@ export class LearningStore {
     if (typeof window !== "undefined") {
       localStorage.getItem(this.KEY);
       localStorage.setItem(this.KEY, JSON.stringify(updated));
-      window.dispatchEvent(new Event("athletix_learning_updated"));
+      window.dispatchEvent(new Event("deportivos_learning_updated"));
     }
     return isCompletedNow;
   }
@@ -530,13 +530,13 @@ export class LearningStore {
   public static setActiveStep(step: ActiveStepState): void {
     if (typeof window === "undefined") return;
     localStorage.setItem(this.ACTIVE_KEY, JSON.stringify(step));
-    window.dispatchEvent(new Event("athletix_learning_updated"));
+    window.dispatchEvent(new Event("deportivos_learning_updated"));
   }
 
   public static clearActiveStep(): void {
     if (typeof window === "undefined") return;
     localStorage.removeItem(this.ACTIVE_KEY);
-    window.dispatchEvent(new Event("athletix_learning_updated"));
+    window.dispatchEvent(new Event("deportivos_learning_updated"));
   }
 
   public static calculateXP(role: "admin" | "coach" | "padres"): { currentXP: number; totalXP: number; completedCount: number; totalCount: number } {

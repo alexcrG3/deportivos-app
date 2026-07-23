@@ -161,7 +161,7 @@ function TestsPage() {
   // Dynamic Physical Test Catalog State
   const DEFAULT_CATALOG = ["Sprint 30m", "Yo-Yo Test", "Course Navette", "Cooper Test", "Salto Vertical CMJ", "Agilidad T-Test"];
   const [catalogoPruebas, setCatalogoPruebas] = useState<string[]>(() => {
-    const saved = localStorage.getItem("athletix_catalogo_pruebas");
+    const saved = localStorage.getItem("deportivos_catalogo_pruebas");
     return saved ? JSON.parse(saved) : DEFAULT_CATALOG;
   });
   const [modalCatalogo, setModalCatalogo] = useState(false);
@@ -169,7 +169,7 @@ function TestsPage() {
 
   const guardarCatalogo = (newList: string[]) => {
     setCatalogoPruebas(newList);
-    localStorage.setItem("athletix_catalogo_pruebas", JSON.stringify(newList));
+    localStorage.setItem("deportivos_catalogo_pruebas", JSON.stringify(newList));
     toast.success("Catálogo de pruebas físicas actualizado.");
   };
 

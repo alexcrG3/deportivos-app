@@ -118,7 +118,7 @@ function MuroPage() {
       "eq3": { nombre: "Élite Femenino", coach: true, padres: false }
     },
     individualPerms: [
-      { email: "admin@athletixos.com", nombre: "Admin Demo", role: "Administrador", allowed: true },
+      { email: "admin@deportivos.com", nombre: "Admin Demo", role: "Administrador", allowed: true },
       { email: "carlos.g@elite.com", nombre: "Carlos Gómez", role: "Coach Deportivo", allowed: true },
       { email: "manuel.r@correo.com", nombre: "Manuel Rodríguez", role: "Padre de Familia", allowed: true },
       { email: "esteban.soto@elite.com", nombre: "Esteban Soto", role: "Coach Deportivo", allowed: false },
@@ -150,7 +150,7 @@ function MuroPage() {
 
 
   const canPublish = (() => {
-    const userEmail = role === "admin" ? "admin@athletixos.com" : role === "coach" ? "carlos.g@elite.com" : "manuel.r@correo.com";
+    const userEmail = role === "admin" ? "admin@deportivos.com" : role === "coach" ? "carlos.g@elite.com" : "manuel.r@correo.com";
     
     // Si existe permiso individual explícito, tiene prioridad máxima
     const individual = perms.individualPerms?.find((u: any) => u.email === userEmail);
@@ -183,7 +183,7 @@ function MuroPage() {
 
     // Auto-migrate legacy posts from localStorage to Supabase
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("athletix_muro_posts");
+      const saved = localStorage.getItem("deportivos_muro_posts");
       if (saved) {
         try {
           const legacyPosts = JSON.parse(saved);
@@ -213,7 +213,7 @@ function MuroPage() {
         } catch (e) {
           console.error("Error migrating legacy posts:", e);
         } finally {
-          localStorage.removeItem("athletix_muro_posts");
+          localStorage.removeItem("deportivos_muro_posts");
         }
       }
     }
@@ -979,7 +979,7 @@ function MuroPage() {
                               <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-popover p-1.5 shadow-md z-40 animate-in fade-in slide-in-from-top-1 duration-200">
                                 <button
                                   onClick={() => {
-                                    const shareText = `*${post.autor} en Athletix OS:* \n\n${post.contenido}`;
+                                    const shareText = `*${post.autor} en DeportivOS:* \n\n${post.contenido}`;
                                     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
                                     setActiveShareMenu(null);
                                   }}

@@ -264,7 +264,7 @@ function SoporteAcademiaPage() {
                 <LifeBuoy className="h-5 w-5 text-primary" /> Crear nuevo ticket de soporte
               </DialogTitle>
               <DialogDescription className="text-xs">
-                Envía tus dudas, solicitudes de desarrollo o reporte de incidentes al equipo de Athletix OS.
+                Envía tus dudas, solicitudes de desarrollo o reporte de incidentes al equipo de DeportivOS.
               </DialogDescription>
             </DialogHeader>
 

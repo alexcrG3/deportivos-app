@@ -18,8 +18,8 @@ export function ActiveStepFloatingWidget() {
   useEffect(() => {
     refreshState();
     const handleUpdate = () => refreshState();
-    window.addEventListener("athletix_learning_updated", handleUpdate);
-    return () => window.removeEventListener("athletix_learning_updated", handleUpdate);
+    window.addEventListener("deportivos_learning_updated", handleUpdate);
+    return () => window.removeEventListener("deportivos_learning_updated", handleUpdate);
   }, []);
 
   // Hide if no active step or if user is currently on the roadmap page itself

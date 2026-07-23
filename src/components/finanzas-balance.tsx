@@ -232,7 +232,7 @@ export function FinanzasBalance() {
       let csvContent = "\uFEFF"; // UTF-8 BOM for Excel compatibility
 
       // Header Meta
-      csvContent += `BALANCE FINANCIERO Y ESTADO DE RESULTADOS - ATHLETIX OS\n`;
+      csvContent += `BALANCE FINANCIERO Y ESTADO DE RESULTADOS - DEPORTIVOS\n`;
       csvContent += `Periodo:;${fechaDesde} a ${fechaHasta}\n`;
       csvContent += `Sede:;${sedeFilter}\n`;
       csvContent += `Fecha Generacion:;${new Date().toLocaleString("es-CR")}\n\n`;

@@ -810,7 +810,7 @@ function EntrenamientosPage() {
                       <SelectContent>
                         {(() => {
                           const DEFAULT_CATALOG = ["Sprint 30m", "Yo-Yo Test", "Course Navette", "Cooper Test", "Salto Vertical CMJ", "Agilidad T-Test"];
-                          const saved = typeof window !== "undefined" ? localStorage.getItem("athletix_catalogo_pruebas") : null;
+                          const saved = typeof window !== "undefined" ? localStorage.getItem("deportivos_catalogo_pruebas") : null;
                           const list: string[] = saved ? JSON.parse(saved) : DEFAULT_CATALOG;
                           return list.map((testName) => (
                             <SelectItem key={testName} value={testName}>🏃 {testName}</SelectItem>

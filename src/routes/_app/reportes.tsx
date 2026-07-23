@@ -39,7 +39,7 @@ function ReportesPage() {
     
     setTimeout(() => {
       setExportingExcel(false);
-      toast.success("¡Base de datos exportada! Descargando 'Consolidado_Deportivo_Athletix.xlsx'...", { id: "export-excel" });
+      toast.success("¡Base de datos exportada! Descargando 'Consolidado_Deportivo_DeportivOS.xlsx'...", { id: "export-excel" });
     }, 1500);
   };
 
@@ -49,7 +49,7 @@ function ReportesPage() {
     
     setTimeout(() => {
       setExportingPdf(false);
-      toast.success("¡Documento PDF listo! Descargando 'Reporte_Global_Athletix.pdf'...", { id: "export-pdf" });
+      toast.success("¡Documento PDF listo! Descargando 'Reporte_Global_DeportivOS.pdf'...", { id: "export-pdf" });
     }, 1500);
   };
 
@@ -60,7 +60,7 @@ function ReportesPage() {
     setTimeout(() => {
       setActiveReportDownload(null);
       const sanitizedFilename = reportLabel.toLowerCase().replace(/ /g, "_");
-      toast.success(`¡Reporte generado! Descargando '${sanitizedFilename}_athletix.xlsx'...`, { id: "single-report" });
+      toast.success(`¡Reporte generado! Descargando '${sanitizedFilename}_deportivos.xlsx'...`, { id: "single-report" });
     }, 1200);
   };
 

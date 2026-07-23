@@ -275,7 +275,7 @@ const DEFAULT_CONFIG: AIConfig = {
   automationWellness: true,
   automationMorosidad: false,
   automationRTP: true,
-  webhookUrl: "https://n8n.athletix.os/webhooks/ai"
+  webhookUrl: "https://n8n.deportivos.os/webhooks/ai"
 };
 
 // ─── CLASS AI STORE ──────────────────────────────────────────────────────────
@@ -620,7 +620,7 @@ export class AIStore {
             return `• Registro: ${r.tipo || r.nombre}`;
           }).join("\n");
       } else {
-        answerText = "No se encontraron registros que cumplan con ese criterio de búsqueda inteligente en Athletix OS.";
+        answerText = "No se encontraron registros que cumplan con ese criterio de búsqueda inteligente en DeportivOS.";
       }
     }
     // 5. AGENDAR EVALUACIÓN
@@ -728,7 +728,7 @@ export class AIStore {
     }
     // DEFAULT GENERIC RESPONDER
     else {
-      answerText = "Hola Carlos. Entiendo tu consulta. Como copiloto inteligente de Athletix OS puedo ayudarte con el estado deportivo del plantel, riesgos de lesión (ACWR), finanzas pendientes, morosos, control de asistencia y agendar evaluaciones físicas de tus atletas. ¿Deseas analizar algún jugador o equipo en específico?";
+      answerText = "Hola Carlos. Entiendo tu consulta. Como copiloto inteligente de DeportivOS puedo ayudarte con el estado deportivo del plantel, riesgos de lesión (ACWR), finanzas pendientes, morosos, control de asistencia y agendar evaluaciones físicas de tus atletas. ¿Deseas analizar algún jugador o equipo en específico?";
     }
 
     // Context tracking update

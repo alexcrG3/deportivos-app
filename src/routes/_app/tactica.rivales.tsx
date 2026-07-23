@@ -420,7 +420,7 @@ function RivalesTacticos() {
               <Card className="bg-gradient-to-r from-card to-orange-500/5 border-orange-500/20">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-xs text-foreground flex items-center gap-1.5">
-                    <BrainCircuit className="h-4 w-4 text-orange-500" /> Athletix IA Scouting Insights
+                    <BrainCircuit className="h-4 w-4 text-orange-500" /> DeportivOS IA Scouting Insights
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 text-xs space-y-3">

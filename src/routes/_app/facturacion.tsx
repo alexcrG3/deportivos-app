@@ -75,7 +75,7 @@ function FacturacionPage() {
   const handlePrintTicket = (f: ReturnType<typeof pagoToFactura>) => {
     const activeOrgId = RendimientoStore.getActiveOrganizacionId();
     const activeOrg = RendimientoStore.getOrganizaciones().find(o => o.id === activeOrgId);
-    const clubName = activeOrg?.nombre || "ATHLETIX ACADEMY";
+    const clubName = activeOrg?.nombre || "DEPORTIVOS ACADEMY";
 
     const ticketWindow = window.open("", "_blank", "width=380,height=600");
     if (!ticketWindow) {
@@ -167,7 +167,7 @@ function FacturacionPage() {
 
           <div class="footer text-center">
             <div class="bold">¡Gracias por su puntualidad!</div>
-            <div>Athletix OS - Gestión Deportiva</div>
+            <div>DeportivOS - Gestión Deportiva</div>
           </div>
 
           <script>
@@ -191,7 +191,7 @@ function FacturacionPage() {
       
       const activeOrgId = RendimientoStore.getActiveOrganizacionId();
       const activeOrg = RendimientoStore.getOrganizaciones().find(o => o.id === activeOrgId);
-      const clubName = activeOrg?.nombre || "ATHLETIX ACADEMY";
+      const clubName = activeOrg?.nombre || "DEPORTIVOS ACADEMY";
 
       // 1. Crear el bloque de encabezado elegante
       const headerRows = [

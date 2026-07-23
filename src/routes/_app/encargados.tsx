@@ -202,7 +202,7 @@ function EncargadosPage() {
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 text-xs space-y-1">
                 <div className="flex items-center justify-between text-amber-500 font-bold">
                   <span className="flex items-center gap-1.5">
-                    <Shield className="h-4 w-4" /> Licencia Athletix Verified
+                    <Shield className="h-4 w-4" /> Licencia DeportivOS Verified
                   </span>
                   <span className="font-mono text-[10px]">2026-OK</span>
                 </div>

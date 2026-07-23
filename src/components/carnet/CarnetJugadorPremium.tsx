@@ -163,7 +163,7 @@ export function CarnetJugadorPremium({
                 </div>
                 <div>
                   <p className="text-[10px] font-black tracking-widest text-amber-400 uppercase flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> ATHLETIX PRO LICENCIA
+                    <Sparkles className="h-3 w-3" /> DEPORTIVOS PRO LICENCIA
                   </p>
                   <h3 className="text-base sm:text-lg font-black tracking-tight text-white leading-tight uppercase drop-shadow-sm">
                     {equipo}
@@ -255,7 +255,7 @@ export function CarnetJugadorPremium({
                 <div className="flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-xl w-fit">
                   <Shield className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                   <span className="text-[9px] font-black text-amber-300 uppercase tracking-widest truncate">
-                    ATHLETIX VERIFIED PASS
+                    DEPORTIVOS VERIFIED PASS
                   </span>
                 </div>
 
@@ -379,7 +379,7 @@ export function CarnetJugadorPremium({
 
             <div className="border-t border-white/15 pt-2 flex items-center justify-between gap-2 text-[9px] text-slate-400">
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Validez Nacional Athletix OS
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Validez Nacional DeportivOS
               </span>
               
               <div
@@ -400,7 +400,7 @@ export function CarnetJugadorPremium({
       <div className="carnet-print-area hidden print:flex flex-col items-center justify-center space-y-3 w-full p-0 text-slate-950">
         <div className="text-center mb-1">
           <h2 className="text-xs font-black uppercase text-slate-900 tracking-wider">ACREDITACIÓN OFICIAL PVC · {equipo}</h2>
-          <p className="text-[10px] font-bold text-slate-600">ATHLETIX OS PRO PASS · TEMPORADA 2026</p>
+          <p className="text-[10px] font-bold text-slate-600">DEPORTIVOS PRO PASS · TEMPORADA 2026</p>
         </div>
 
         {/* FRENTE Y REVERSO IMPRESOS CON MAQUETACIÓN COMPACTA ANTI-CORTE DE PÁGINA */}
@@ -423,7 +423,7 @@ export function CarnetJugadorPremium({
                 </div>
                 <div>
                   <p className="text-[10px] font-black tracking-widest text-amber-400 uppercase flex items-center gap-1">
-                    <Sparkles className="h-3 w-3" /> ATHLETIX PRO LICENCIA
+                    <Sparkles className="h-3 w-3" /> DEPORTIVOS PRO LICENCIA
                   </p>
                   <h3 className="text-base font-black tracking-tight text-white leading-tight uppercase">
                     {equipo}
@@ -503,7 +503,7 @@ export function CarnetJugadorPremium({
                 <div className="flex items-center gap-1.5 bg-amber-400/10 border border-amber-400/30 px-2.5 py-1 rounded-xl w-fit">
                   <Shield className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                   <span className="text-[9px] font-black text-amber-300 uppercase tracking-widest truncate">
-                    ATHLETIX VERIFIED PASS
+                    DEPORTIVOS VERIFIED PASS
                   </span>
                 </div>
                 <div className="flex flex-col space-y-1">
@@ -599,7 +599,7 @@ export function CarnetJugadorPremium({
 
             <div className="border-t border-white/15 pt-2 flex items-center justify-between gap-2 text-[9px] text-slate-400">
               <span className="flex items-center gap-1">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Validez Nacional Athletix OS
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Validez Nacional DeportivOS
               </span>
               
               <div className="bg-white p-1 rounded-lg shadow ring-1 ring-emerald-400/40 flex items-center gap-1">

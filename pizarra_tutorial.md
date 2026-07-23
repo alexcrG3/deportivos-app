@@ -1,4 +1,4 @@
-# Manual de Usuario: Pizarra Táctica de Athletix OS 🧠📋
+# Manual de Usuario: Pizarra Táctica de DeportivOS 🧠📋
 *¡Guía rápida paso a paso diseñada para entrenadores y cuerpo técnico!*
 
 ---

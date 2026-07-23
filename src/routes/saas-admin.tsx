@@ -128,8 +128,8 @@ function SaasAdminDashboard() {
   const handleAdminSendReply = () => {
     if (!selectedTicketAdmin || !adminReplyText.trim()) return;
     RendimientoStore.addTicketResponse(selectedTicketAdmin.id, {
-      autorNombre: "Soporte Central Athletix SaaS",
-      autorEmail: "soporte@athletixos.com",
+      autorNombre: "Soporte Central DeportivOS SaaS",
+      autorEmail: "soporte@deportivos.com",
       mensaje: adminReplyText.trim(),
       esAdminSaaS: true
     });
@@ -238,7 +238,7 @@ function SaasAdminDashboard() {
       {/* Top Header Navigation */}
       <header className="border-b bg-background/90 backdrop-blur px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-sm tracking-tight text-foreground">Athletix OS</span>
+          <span className="font-bold text-sm tracking-tight text-foreground">DeportivOS</span>
           <span className="text-muted-foreground/60 text-xs font-medium">— Centro de Mando</span>
         </div>
         <Button 
@@ -261,7 +261,7 @@ function SaasAdminDashboard() {
             </div>
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">CENTRO DE MANDO</h1>
-              <p className="text-xs text-muted-foreground font-medium">Gestión global de academias • Athletix SaaS</p>
+              <p className="text-xs text-muted-foreground font-medium">Gestión global de academias • DeportivOS SaaS</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ function SaasAdminDashboard() {
                   ✨ Edición de Red Global — Julio 2026
                 </Badge>
                 <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-none bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
-                  REVISTA DEPORTIVA ATHLETIX
+                  REVISTA DEPORTIVA DEPORTIVOS
                 </h1>
                 <p className="text-sm md:text-base text-slate-300 leading-relaxed font-medium">
                   El escaparate definitivo de todas las academias de nuestra red. Explora crónicas, entrevistas de IA, tácticas ganadoras y el rendimiento estelar de las futuras estrellas del deporte global.
@@ -764,7 +764,7 @@ function SaasAdminDashboard() {
 
         {/* Footer */}
         <footer className="text-center text-[10px] text-muted-foreground/60 uppercase tracking-widest pt-8">
-          ⚡ ATHLETIX OS — PLATAFORMA SAAS DE GESTIÓN DEPORTIVA
+          ⚡ DEPORTIVOS — PLATAFORMA SAAS DE GESTIÓN DEPORTIVA
         </footer>
       </main>
 

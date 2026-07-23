@@ -58,7 +58,7 @@ function Dashboard() {
   // ─── MIGRACIÓN LOCALSTORAGE → SUPABASE ───
   const [migrableKeys, setMigrableKeys] = useState<string[]>([]);
   useEffect(() => {
-    localStorage.setItem("athletix_cloud_migrated", "true");
+    localStorage.setItem("deportivos_cloud_migrated", "true");
     setMigrableKeys([]);
   }, []);
 
@@ -67,7 +67,7 @@ function Dashboard() {
       toast.loading("Migrando datos a Supabase...");
       const keys = ["jugadores_dynamics", "entrenadores_dynamics", "equipos_dynamics", "categorias_dynamics", "pagos_dynamics", "sedes_dynamics"];
       for (const key of keys) {
-        const val = localStorage.getItem(`athletix_hp_${key}`);
+        const val = localStorage.getItem(`deportivos_hp_${key}`);
         if (val) {
           const parsed = JSON.parse(val);
           if (Array.isArray(parsed) && parsed.length > 0) {
@@ -75,8 +75,8 @@ function Dashboard() {
           }
         }
       }
-      keys.forEach(k => localStorage.removeItem(`athletix_hp_${k}`));
-      localStorage.setItem("athletix_cloud_migrated", "true");
+      keys.forEach(k => localStorage.removeItem(`deportivos_hp_${k}`));
+      localStorage.setItem("deportivos_cloud_migrated", "true");
       setMigrableKeys([]);
       toast.dismiss();
       toast.success("¡Migración exitosa! Todos tus datos están ahora en la nube.");
@@ -278,7 +278,7 @@ function Dashboard() {
                   <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold text-[10px] uppercase tracking-wider">
                     Asistente de Configuración
                   </Badge>
-                  <span className="text-[10px] text-muted-foreground font-semibold">Tus primeros pasos en Athletix OS</span>
+                  <span className="text-[10px] text-muted-foreground font-semibold">Tus primeros pasos en DeportivOS</span>
                 </div>
                 <h3 className="text-lg font-bold tracking-tight">
                   ¡Te damos la bienvenida a {activeOrg?.nombre || "tu nueva academia"}!
@@ -420,22 +420,22 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Athletix AI Section */}
+      {/* DeportivOS AI Section */}
       <section className="space-y-3 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5"><Brain className="h-4 w-4 text-violet-400" /> Inteligencia Athletix AI</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5"><Brain className="h-4 w-4 text-violet-400" /> Inteligencia DeportivOS AI</h2>
           <Link to="/ia/asistente" className="text-xs text-primary hover:underline font-medium">Abrir Asistente Completo →</Link>
         </div>
         
         <div className="grid gap-3 md:grid-cols-3">
-          {/* Athletix AI Card */}
+          {/* DeportivOS AI Card */}
           <Card className="p-4 shadow-card hover:shadow-elegant transition border bg-card relative overflow-hidden flex flex-col justify-between col-span-1">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Badge className="bg-gradient-to-r from-violet-600 to-amber-500 text-white font-bold text-[9px] uppercase">Copilot</Badge>
                 <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
               </div>
-              <p className="text-xs font-bold text-muted-foreground">Athletix AI Detectó Hoy</p>
+              <p className="text-xs font-bold text-muted-foreground">DeportivOS AI Detectó Hoy</p>
               <div className="grid grid-cols-2 gap-2 my-3 text-xs">
                 <div className="bg-slate-100 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/60">⚠️ <span className="font-extrabold text-slate-900 dark:text-slate-100">4</span> Alertas</div>
                 <div className="bg-slate-100 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700/60">💡 <span className="font-extrabold text-slate-900 dark:text-slate-100">7</span> Recom.</div>
@@ -445,14 +445,14 @@ function Dashboard() {
             </div>
             <Link to="/ia/asistente" className="w-full">
               <Button size="sm" className="w-full bg-gradient-to-r from-violet-600 to-amber-500 text-white text-xs font-bold gap-1 mt-1">
-                Abrir Athletix AI <ArrowRight className="h-3 w-3" />
+                Abrir DeportivOS AI <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </Card>
 
-          {/* Dashboard Admin Widget ("Athletix AI detectó") */}
+          {/* Dashboard Admin Widget ("DeportivOS AI detectó") */}
           <Card className="p-4 shadow-card hover:shadow-elegant transition border bg-card col-span-1 md:col-span-2">
-            <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1"><Brain className="h-3.5 w-3.5 text-violet-400" /> Athletix AI Detectó</p>
+            <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1"><Brain className="h-3.5 w-3.5 text-violet-400" /> DeportivOS AI Detectó</p>
             {hasPlayers ? (
               <div className="grid gap-2 text-xs">
                 <div className="flex items-center justify-between border-b pb-1.5 border-slate-200 dark:border-slate-800">
@@ -1024,7 +1024,7 @@ function CoachDashboard() {
 
         {/* Sidebar Alerts + Wellness */}
         <div className="space-y-4">
-          {/* Athletix AI Recomienda Card (Coach) */}
+          {/* DeportivOS AI Recomienda Card (Coach) */}
           <Card className="shadow-card border border-violet-500/20 bg-gradient-to-br from-violet-950/15 via-card to-card relative overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-20">
               <Sparkles className="h-10 w-10 text-violet-400" />
@@ -1032,7 +1032,7 @@ function CoachDashboard() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-violet-400" /> Athletix AI recomienda
+                  <Brain className="h-4 w-4 text-violet-400" /> DeportivOS AI recomienda
                 </CardTitle>
                 <Badge className="bg-violet-500/20 text-violet-300 text-[8px] border-violet-500/30 uppercase font-bold">Activo</Badge>
               </div>

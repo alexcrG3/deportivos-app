@@ -155,27 +155,27 @@ function FinanzasPage() {
 
   const [becados, setBecados] = useState<Becado[]>(() => {
     if (typeof window === "undefined") return [];
-    const cached = localStorage.getItem("athletix_becados_v2");
+    const cached = localStorage.getItem("deportivos_becados_v2");
     if (cached) return JSON.parse(cached);
     const initial = [
       { id: "b1", nombre: "Ian Gutiérrez Valverde", sede: "Sede Central", categoria: "U13", beca: "100%", tipo: "Deportiva", vigencia: "Ene 2026 - Dic 2026" },
       { id: "b2", nombre: "Mateo Rojas Calvo", sede: "Sede Central", categoria: "U15", beca: "50%", tipo: "Socioeconómica", vigencia: "Ene 2026 - Dic 2026" },
       { id: "b3", nombre: "Paula Fernández Calderón", sede: "Sede Central", categoria: "U15", beca: "75%", tipo: "Talento", vigencia: "Feb 2026 - Jul 2026" },
     ];
-    localStorage.setItem("athletix_becados_v2", JSON.stringify(initial));
+    localStorage.setItem("deportivos_becados_v2", JSON.stringify(initial));
     return initial;
   });
 
   const [arreglos, setArreglos] = useState<ArregloPago[]>(() => {
     if (typeof window === "undefined") return [];
-    const cached = localStorage.getItem("athletix_arreglos_v2");
+    const cached = localStorage.getItem("deportivos_arreglos_v2");
     if (cached) return JSON.parse(cached);
     const initial = [
       { id: "a1", nombre: "Adrián Solís Navarro", sede: "Sede Central", categoria: "U13", deudaOriginal: 120000, cuotaMensual: 20000, cuotasPagas: 3, cuotasTotales: 6, estado: "Al día" },
       { id: "a2", nombre: "Gabriel Quesada Blanco", sede: "Sede Central", categoria: "U15", deudaOriginal: 90000, cuotaMensual: 15000, cuotasPagas: 2, cuotasTotales: 6, estado: "Pendiente" },
       { id: "a3", nombre: "Brayan Zamora Calderón", sede: "Sede Central", categoria: "U15", deudaOriginal: 60000, cuotaMensual: 10000, cuotasPagas: 4, cuotasTotales: 6, estado: "Al día" },
     ];
-    localStorage.setItem("athletix_arreglos_v2", JSON.stringify(initial));
+    localStorage.setItem("deportivos_arreglos_v2", JSON.stringify(initial));
     return initial;
   });
 
@@ -236,7 +236,7 @@ function FinanzasPage() {
       },
     ];
     setBecados(updated);
-    localStorage.setItem("athletix_becados_v2", JSON.stringify(updated));
+    localStorage.setItem("deportivos_becados_v2", JSON.stringify(updated));
     
     const firstCat = uniqueCategories[0] || "U13";
     const playersInCat = activePlayers.filter(j => j.categoria === firstCat);
@@ -313,7 +313,7 @@ function FinanzasPage() {
       },
     ];
     setArreglos(updated);
-    localStorage.setItem("athletix_arreglos_v2", JSON.stringify(updated));
+    localStorage.setItem("deportivos_arreglos_v2", JSON.stringify(updated));
     
     const firstCat = uniqueCategories[0] || "U13";
     const playersInCat = activePlayers.filter(j => j.categoria === firstCat);

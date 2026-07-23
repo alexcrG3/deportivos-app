@@ -49,7 +49,7 @@ function RiesgosIA() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Panel de Riesgos & Búsqueda Inteligente</h1>
-          <p className="text-sm text-muted-foreground">Rankings predictivos por tipo de riesgo de Athletix AI.</p>
+          <p className="text-sm text-muted-foreground">Rankings predictivos por tipo de riesgo de DeportivOS AI.</p>
         </div>
       </div>
 

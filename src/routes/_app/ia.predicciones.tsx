@@ -102,7 +102,7 @@ function PrediccionesIA() {
         <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />
         <div>
           <p className="font-bold text-white mb-0.5">Nota Importante de Confianza Predictiva</p>
-          Athletix AI nunca presenta una recomendación o predicción como una verdad absoluta. Cada cálculo se basa en tendencias matemáticas, wellness diario e históricos de entrenamiento. Por favor, complemente este análisis con evaluaciones clínicas y la experiencia de su cuerpo técnico.
+          DeportivOS AI nunca presenta una recomendación o predicción como una verdad absoluta. Cada cálculo se basa en tendencias matemáticas, wellness diario e históricos de entrenamiento. Por favor, complemente este análisis con evaluaciones clínicas y la experiencia de su cuerpo técnico.
         </div>
       </div>
     </div>

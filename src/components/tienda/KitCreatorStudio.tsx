@@ -28,7 +28,7 @@ interface KitCreatorProps {
 export function KitCreatorStudio({
   onAddToCart,
   logoEquipo,
-  nombreEquipo = "ACADEMIA ATHLETIX",
+  nombreEquipo = "ACADEMIA DEPORTIVOS",
 }: KitCreatorProps) {
   // Preset kits
   const [viewAngle, setViewAngle] = useState<"frente" | "espalda">("frente");
@@ -116,7 +116,7 @@ export function KitCreatorStudio({
         <div>
           <div className="flex items-center gap-2">
             <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[10px] uppercase tracking-widest">
-              <Sparkles className="h-3 w-3 mr-1" /> Athletix 3D Kit Studio Pro
+              <Sparkles className="h-3 w-3 mr-1" /> DeportivOS 3D Kit Studio Pro
             </Badge>
             <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] uppercase">
               FIFA Kit Creator Tech
@@ -378,7 +378,7 @@ export function KitCreatorStudio({
                   <path d="M 125,45 C 135,52 165,52 175,45" fill="none" stroke="#334155" strokeWidth="1" />
                   {/* Etiqueta interna de la marca */}
                   <rect x="136" y="38" width="28" height="10" rx="2" fill="#0f172a" stroke={accentColor} strokeWidth="0.5" />
-                  <text x="150" y="45" fontSize="5" fontWeight="900" fill="#ffffff" textAnchor="middle" letterSpacing="0.5">ATHLETIX M</text>
+                  <text x="150" y="45" fontSize="5" fontWeight="900" fill="#ffffff" textAnchor="middle" letterSpacing="0.5">DEPORTIVOS M</text>
 
                   {/* 2. MANGA IZQUIERDA 3D (Organic Curve) */}
                   <g>
@@ -505,7 +505,7 @@ export function KitCreatorStudio({
                         <rect x="-55" y="-16" width="110" height="32" rx="6" fill="#090d16" opacity="0.85" stroke={accentColor} strokeWidth="1.5" />
                         <rect x="-52" y="-13" width="104" height="26" rx="4" fill="none" stroke="#ffffff" strokeWidth="0.5" opacity="0.3" />
                         <text x="0" y="5" fontSize="15" fontWeight="900" fill="#ffffff" textAnchor="middle" letterSpacing="2.5" className="font-mono">
-                          ATHLETIX
+                          DEPORTIVOS
                         </text>
                         <text x="0" y="13" fontSize="5" fontWeight="800" fill={accentColor} textAnchor="middle" letterSpacing="3">
                           SPORTS SCIENCE ACADEMY

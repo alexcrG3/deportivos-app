@@ -1680,7 +1680,7 @@ function PlayerOS() {
               <FileText className="h-5 w-5 text-primary" /> Ficha de Inscripción y Matrícula Legal
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Documento oficial de registro del deportista en la plataforma Athletix OS.
+              Documento oficial de registro del deportista en la plataforma DeportivOS.
             </DialogDescription>
           </DialogHeader>
 
@@ -1688,7 +1688,7 @@ function PlayerOS() {
             {/* Encabezado Club */}
             <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-900 p-4 rounded-xl border">
               <div>
-                <p className="font-extrabold text-sm text-primary uppercase">{legalConfig.razonSocial || "CLUB DEPORTIVO ATHLETIX OS"}</p>
+                <p className="font-extrabold text-sm text-primary uppercase">{legalConfig.razonSocial || "CLUB DEPORTIVO DEPORTIVOS"}</p>
                 <p className="text-[11px] text-muted-foreground">Cédula Jurídica: {legalConfig.cedulaJuridica || "3-101-998877"}</p>
                 <p className="text-[11px] text-muted-foreground">Sede: {j.sede}</p>
               </div>
@@ -2459,7 +2459,7 @@ function PlayerOS() {
             <div className="w-full border border-zinc-400 grid grid-cols-4 text-center divide-x divide-zinc-400 text-[10px]">
               <div className="p-2 flex flex-col items-center justify-center font-bold">
                 <Trophy className="h-10 w-10 text-zinc-700" />
-                <span className="mt-1 font-semibold text-[8px]">ATHLETIX OS</span>
+                <span className="mt-1 font-semibold text-[8px]">DEPORTIVOS</span>
               </div>
               <div className="p-2 flex flex-col items-center justify-center font-bold col-span-2">
                 <p className="text-xs uppercase tracking-wider font-extrabold">Academia Deportiva Élite Sports</p>
@@ -2893,7 +2893,7 @@ function QrDialog({ qrUrl, carnetUrl, token, jugador, estadoOp, numero, equipo }
             <Sparkles className="h-5 w-5 text-amber-400" /> Acreditación Pro Atleta
           </DialogTitle>
           <DialogDescription className="text-slate-400 text-xs">
-            Pase Oficial 3D Holográfico Athletix OS · Imprimible y escaneable en cancha.
+            Pase Oficial 3D Holográfico DeportivOS · Imprimible y escaneable en cancha.
           </DialogDescription>
         </DialogHeader>
 
@@ -3891,7 +3891,7 @@ function AltoRendimientoTab({ jugador, equipo }: { jugador: any; equipo: string 
                       >
                         {(() => {
                           const DEFAULT_CATALOG = ["Sprint 30m", "Yo-Yo Test", "Course Navette", "Cooper Test", "Salto Vertical CMJ", "Agilidad T-Test"];
-                          const saved = typeof window !== "undefined" ? localStorage.getItem("athletix_catalogo_pruebas") : null;
+                          const saved = typeof window !== "undefined" ? localStorage.getItem("deportivos_catalogo_pruebas") : null;
                           const list: string[] = saved ? JSON.parse(saved) : DEFAULT_CATALOG;
                           return list.map((testName) => (
                             <option key={testName} value={testName}>🏃 {testName}</option>

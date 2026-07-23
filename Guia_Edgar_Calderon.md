@@ -1,6 +1,6 @@
 # Guía de Inicio Rápido para Edgar Calderon (Coach Deportivo)
 
-¡Hola Edgar! Esta es tu guía paso a paso para comenzar a utilizar **Athletix OS** en el día a día con tus equipos y jugadores asignados.
+¡Hola Edgar! Esta es tu guía paso a paso para comenzar a utilizar **DeportivOS** en el día a día con tus equipos y jugadores asignados.
 
 A continuación encontrarás qué debes hacer en cada una de las herramientas de tu **Sidebar (Menú Lateral)**, ordenadas por prioridad de uso:
 

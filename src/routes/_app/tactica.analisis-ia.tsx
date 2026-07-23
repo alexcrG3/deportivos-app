@@ -241,7 +241,7 @@ function AnalisisIATactica() {
                 </div>
 
                 <div className="border-t border-border pt-2 flex justify-between items-center text-[10px] text-muted-foreground">
-                  <span>Generado por: Athletix AI Core</span>
+                  <span>Generado por: DeportivOS AI Core</span>
                   <span>Confianza del Modelo: <strong className="text-emerald-600 dark:text-emerald-400">{report.confianza}</strong></span>
                 </div>
               </CardContent>

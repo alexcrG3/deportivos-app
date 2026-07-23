@@ -1,4 +1,4 @@
-# 📋 Especificación Oficial: Flujo de Wellness, Pruebas Físicas e Incidencias en Athletix OS
+# 📋 Especificación Oficial: Flujo de Wellness, Pruebas Físicas e Incidencias en DeportivOS
 
 > **Garantía de Persistencia**: Todo este flujo funciona **100% conectado a la Base de Datos de Supabase (PostgreSQL)**. No se utiliza `localStorage` para el registro de asistencias, encuestas wellness, evaluaciones físicas ni incidencias médicas.
 

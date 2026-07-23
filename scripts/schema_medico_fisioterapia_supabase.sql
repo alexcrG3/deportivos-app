@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- SCHEMA SUPABASE: ÁREA MÉDICA, FISIOTERAPIA & HISTORIAL CLÍNICO
--- Athletix OS - Sistema de Gestión Médica Deportiva
+-- DeportivOS - Sistema de Gestión Médica Deportiva
 -- ==============================================================================
 
 -- 1. TABLA: HISTORIALES MÉDICOS (Expediente Clínico del Atleta)

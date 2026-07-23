@@ -34,7 +34,7 @@ function InsightsIA() {
             <Lightbulb className="h-6 w-6 text-primary animate-pulse" /> Centro de Insights
           </h1>
           <p className="text-sm text-muted-foreground">
-            Patrones y anomalías detectados automáticamente por el motor analítico de Athletix AI.
+            Patrones y anomalías detectados automáticamente por el motor analítico de DeportivOS AI.
           </p>
         </div>
         <Badge variant="outline" className="gap-1 border-primary/20 text-primary">

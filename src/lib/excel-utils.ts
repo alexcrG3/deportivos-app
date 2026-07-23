@@ -46,7 +46,7 @@ export function downloadCoachTemplate() {
   wsData["!cols"] = COACH_TEMPLATE_HEADERS.map(() => ({ wch: 22 }));
   XLSX.utils.book_append_sheet(wb, wsData, "Datos");
 
-  XLSX.writeFile(wb, "Plantilla_Entrenadores_Athletix.xlsx");
+  XLSX.writeFile(wb, "Plantilla_Entrenadores_DeportivOS.xlsx");
 }
 
 export interface ParsedCoach {
@@ -171,7 +171,7 @@ export function downloadAthleteTemplate() {
   wsData["!cols"] = ATHLETE_TEMPLATE_HEADERS.map(() => ({ wch: 20 }));
   XLSX.utils.book_append_sheet(wb, wsData, "Datos");
 
-  XLSX.writeFile(wb, "Plantilla_Atletas_Athletix.xlsx");
+  XLSX.writeFile(wb, "Plantilla_Atletas_DeportivOS.xlsx");
 }
 
 export interface ParsedAthlete {

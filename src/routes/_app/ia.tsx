@@ -209,7 +209,7 @@ function IADashboard() {
 
   const handleSaveConfig = () => {
     AIStore.setConfig(config);
-    toast.success("Configuración de Athletix AI guardada correctamente");
+    toast.success("Configuración de DeportivOS AI guardada correctamente");
   };
 
   const handleGenerateTraining = () => {
@@ -243,7 +243,7 @@ function IADashboard() {
       
       setWgOutput(result);
       setWgLoading(false);
-      toast.success("¡Sesión de entrenamiento generada por Athletix AI!");
+      toast.success("¡Sesión de entrenamiento generada por DeportivOS AI!");
     }, 1500);
   };
 
@@ -289,7 +289,7 @@ ${learning}
 
       setCgOutput(result);
       setCgLoading(false);
-      toast.success("¡Crónica de partido redactada por Athletix AI!");
+      toast.success("¡Crónica de partido redactada por DeportivOS AI!");
     }, 1500);
   };
 
@@ -303,13 +303,13 @@ ${learning}
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">IA & Automatización</h1>
-            <p className="text-sm text-muted-foreground">Monitoreo predictivo y análisis analítico de Athletix AI.</p>
+            <p className="text-sm text-muted-foreground">Monitoreo predictivo y análisis analítico de DeportivOS AI.</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link to="/ia/asistente">
             <Button size="sm" className="bg-gradient-to-r from-violet-600 to-amber-500 text-white font-bold gap-1 text-xs">
-              <Sparkles className="h-4.5 w-4.5 animate-pulse" /> Abrir Chat Athletix AI
+              <Sparkles className="h-4.5 w-4.5 animate-pulse" /> Abrir Chat DeportivOS AI
             </Button>
           </Link>
         </div>
@@ -1190,7 +1190,7 @@ ${learning}
             <CardHeader className="pb-3 flex flex-row items-center justify-between border-b border-white/5">
               <div>
                 <CardTitle className="text-base flex items-center gap-1.5"><Sliders className="h-4.5 w-4.5 text-primary" /> Parámetros del Motor IA</CardTitle>
-                <CardDescription>Ajusta el comportamiento, tono y automatizaciones de Athletix AI.</CardDescription>
+                <CardDescription>Ajusta el comportamiento, tono y automatizaciones de DeportivOS AI.</CardDescription>
               </div>
               <Button size="sm" onClick={handleSaveConfig} className="bg-gradient-primary text-white font-bold text-xs">Guardar Cambios</Button>
             </CardHeader>
@@ -1269,9 +1269,9 @@ ${learning}
                   value={config.webhookUrl}
                   onChange={(e) => setLocalConfig({ ...config, webhookUrl: e.target.value })}
                   className="bg-white/5 border-white/10 text-white placeholder-white/30 text-xs rounded-xl"
-                  placeholder="https://n8n.athletix.os/webhooks/ai"
+                  placeholder="https://n8n.deportivos.os/webhooks/ai"
                 />
-                <p className="text-[9px] text-muted-foreground mt-1">Athletix AI disparará flujos a este endpoint para enviar emails, sincronizar Google Calendar y actualizar Google Drive.</p>
+                <p className="text-[9px] text-muted-foreground mt-1">DeportivOS AI disparará flujos a este endpoint para enviar emails, sincronizar Google Calendar y actualizar Google Drive.</p>
               </div>
 
               {/* Safety auditing disclaimer */}
@@ -1279,7 +1279,7 @@ ${learning}
                 <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
                 <div>
                   <p className="font-bold text-white">Cumplimiento RGPD & LOPD</p>
-                  El almacenamiento de configuración no procesa información médica o financiera fuera del entorno encriptado de la sede. Athletix OS respeta los roles asignados por el administrador de la academia.
+                  El almacenamiento de configuración no procesa información médica o financiera fuera del entorno encriptado de la sede. DeportivOS respeta los roles asignados por el administrador de la academia.
                 </div>
               </div>
             </CardContent>

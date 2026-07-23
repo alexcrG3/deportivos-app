@@ -256,7 +256,7 @@ function PagosPage() {
       // Obtener datos del club / organización activa
       const activeOrgId = RendimientoStore.getActiveOrganizacionId();
       const activeOrg = RendimientoStore.getOrganizaciones().find(o => o.id === activeOrgId);
-      const clubName = activeOrg?.nombre || "ATHLETIX ACADEMY";
+      const clubName = activeOrg?.nombre || "DEPORTIVOS ACADEMY";
 
       // 1. Crear el bloque de encabezado elegante
       const headerRows = [

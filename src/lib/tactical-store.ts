@@ -1,4 +1,4 @@
-// ─── TACTICAL STORE — ATHLETIX OS ─────────────────────────────────────────────
+// ─── TACTICAL STORE — DEPORTIVOS ─────────────────────────────────────────────
 // Centro de datos del Smart Tactical Board. Gestiona formaciones, alineaciones,
 // jugadas, estrategias, rivales y sesiones de pizarra. Persistido en localStorage.
 

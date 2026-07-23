@@ -168,7 +168,7 @@ export function ReciboHonorariosModal({ open, onOpenChange, data }: ReciboHonora
           <div className="pt-2 border-t border-border flex items-center justify-between text-[10px] text-muted-foreground">
             <div className="flex items-center gap-1">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verificado por Athletix OS Software Nómina 2026</span>
+              <span>Verificado por DeportivOS Software Nómina 2026</span>
             </div>
             <span>Fecha de emisión: {new Date().toISOString().slice(0, 10)}</span>
           </div>

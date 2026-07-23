@@ -44,7 +44,7 @@ const DEFAULT_CONFIG_FILTROS: ConfigFiltros = {
   categorias: ["CAMISETA", "ACCESORIOS", "BALONES", "CALZADO", "MALETINES", "MEDIAS", "PROTECTORES", "SHORT"],
   colores: ["Blanco", "Negro", "Azul", "Rojo", "Verde", "Amarillo", "Rosa", "Gris"],
   tallas: ["6", "8", "10", "12", "14", "16", "XS", "S", "M", "L", "XL", "2XL"],
-  marcas: ["Athletix", "Adidas", "Nike", "Puma", "Under Armour", "Kappa"],
+  marcas: ["DeportivOS", "Adidas", "Nike", "Puma", "Under Armour", "Kappa"],
 };
 
 interface Producto {
@@ -221,7 +221,7 @@ function TiendaPage() {
             popular: p.popular,
             destacado: p.destacado,
             genero: p.genero || "Unisex",
-            marca: p.marca || "Athletix",
+            marca: p.marca || "DeportivOS",
             tallas: p.tallas || [],
             stockPorTalla: p.stock_por_talla || {},
             colores: p.colores || [],
@@ -366,7 +366,7 @@ function TiendaPage() {
       total: totalCarrito,
       metodoPago: metodoPagoSel,
       estado: "pendiente",
-      notas: "Pedido realizado desde la Tienda Oficial Athletix",
+      notas: "Pedido realizado desde la Tienda Oficial DeportivOS",
     };
 
     const productosActualizados = productos.map((p) => {
@@ -429,7 +429,7 @@ function TiendaPage() {
       precio: Number(productoEditar.precio),
       imagen: imagenFinal,
       genero: productoEditar.genero || "Unisex",
-      marca: productoEditar.marca || "Athletix",
+      marca: productoEditar.marca || "DeportivOS",
       tallas: productoEditar.tallas || ["S", "M", "L"],
       stockPorTalla: productoEditar.stockPorTalla || { S: 10, M: 10, L: 10 },
       colores: productoEditar.colores || ["Oficial"],
@@ -502,7 +502,7 @@ function TiendaPage() {
 
   return (
     <div className="space-y-5">
-      {/* ── STORE HEADER TOP NAVIGATION BAR (ATHLETIX OS INTEGRATED DESIGN) ── */}
+      {/* ── STORE HEADER TOP NAVIGATION BAR (DEPORTIVOS INTEGRATED DESIGN) ── */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden space-y-4">
         {/* Top Header Information */}
         <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
@@ -585,11 +585,11 @@ function TiendaPage() {
           </TabsList>
         </div>
 
-        {/* TAB 1: TIENDA COMPLETA CON SIDEBAR DE FILTROS ATHLETIX OS */}
+        {/* TAB 1: TIENDA COMPLETA CON SIDEBAR DE FILTROS DEPORTIVOS */}
         <TabsContent value="tienda" className="pt-2">
           <div className="flex flex-col lg:flex-row gap-6">
             
-            {/* ── LEFT SIDEBAR FILTERS (ATHLETIX STYLED) ── */}
+            {/* ── LEFT SIDEBAR FILTERS (DEPORTIVOS STYLED) ── */}
             <aside className="w-full lg:w-64 shrink-0 space-y-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-card">
               
               {/* Categories Navigation */}

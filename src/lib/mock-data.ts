@@ -296,7 +296,7 @@ export function getPlayerOS(id: string) {
   let j: any = null;
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("athletix_hp_jugadores_dynamics");
+      const stored = localStorage.getItem("deportivos_hp_jugadores_dynamics");
       if (stored) {
         const dynamicPlayers = JSON.parse(stored);
         j = dynamicPlayers.find((x: any) => x.id === id);
@@ -380,7 +380,7 @@ export function getPlayerOS(id: string) {
   let lesiones: any[] = [];
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("athletix_hp_lesiones");
+      const stored = localStorage.getItem("deportivos_hp_lesiones");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {

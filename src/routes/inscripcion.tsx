@@ -193,7 +193,7 @@ function PublicInscripcionPage() {
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Admisiones e Inscripción</p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Athletix OS</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">DeportivOS</span>
       </header>
 
       {/* Main Container */}
@@ -392,7 +392,7 @@ function PublicInscripcionPage() {
 
       {/* Footer */}
       <footer className="text-center py-6 border-t border-slate-900 text-[10px] text-slate-500 uppercase tracking-widest">
-        ⚡ Impulsado por Athletix OS — Gestión Deportiva Inteligente
+        ⚡ Impulsado por DeportivOS — Gestión Deportiva Inteligente
       </footer>
     </div>
   );
