@@ -94,13 +94,13 @@ const ADMIN_MODULES: Module[] = [
   },
   {
     id: "area_tecnica_auditoria",
-    title: "Área Técnica",
+    title: "Centro Táctico",
     icon: ShieldHalf,
-    url: "/coach",
+    url: "/tactica",
     items: [
-      { title: "Coach OS", url: "/coach" },
       { title: "Planificación Táctica", url: "/tactica/planificacion" },
-      { title: "Centro Táctico", url: "/tactica" },
+      { title: "Pizarra & Formaciones", url: "/tactica/pizarra" },
+      { title: "Coach OS", url: "/coach" },
       { title: "Competiciones", url: "/competiciones" },
       { title: "Alto Rendimiento", url: "/rendimiento" },
       { title: "  ├─ Tests Físicos", url: "/rendimiento/tests" },
