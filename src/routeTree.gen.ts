@@ -61,6 +61,7 @@ import { Route as AppCoachRouteImport } from './routes/_app/coach'
 import { Route as AppCheckinRouteImport } from './routes/_app/checkin'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as AppCargaRouteImport } from './routes/_app/carga'
+import { Route as AppCaptacionRouteImport } from './routes/_app/captacion'
 import { Route as AppCampanasRouteImport } from './routes/_app/campanas'
 import { Route as AppCalendarioRouteImport } from './routes/_app/calendario'
 import { Route as AppCajaRouteImport } from './routes/_app/caja'
@@ -362,6 +363,11 @@ const AppCargaRoute = AppCargaRouteImport.update({
   path: '/carga',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCaptacionRoute = AppCaptacionRouteImport.update({
+  id: '/captacion',
+  path: '/captacion',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCampanasRoute = AppCampanasRouteImport.update({
   id: '/campanas',
   path: '/campanas',
@@ -585,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/caja': typeof AppCajaRoute
   '/calendario': typeof AppCalendarioRoute
   '/campanas': typeof AppCampanasRoute
+  '/captacion': typeof AppCaptacionRoute
   '/carga': typeof AppCargaRoute
   '/categorias': typeof AppCategoriasRoute
   '/checkin': typeof AppCheckinRoute
@@ -679,6 +686,7 @@ export interface FileRoutesByTo {
   '/caja': typeof AppCajaRoute
   '/calendario': typeof AppCalendarioRoute
   '/campanas': typeof AppCampanasRoute
+  '/captacion': typeof AppCaptacionRoute
   '/carga': typeof AppCargaRoute
   '/categorias': typeof AppCategoriasRoute
   '/checkin': typeof AppCheckinRoute
@@ -773,6 +781,7 @@ export interface FileRoutesById {
   '/_app/caja': typeof AppCajaRoute
   '/_app/calendario': typeof AppCalendarioRoute
   '/_app/campanas': typeof AppCampanasRoute
+  '/_app/captacion': typeof AppCaptacionRoute
   '/_app/carga': typeof AppCargaRoute
   '/_app/categorias': typeof AppCategoriasRoute
   '/_app/checkin': typeof AppCheckinRoute
@@ -869,6 +878,7 @@ export interface FileRouteTypes {
     | '/caja'
     | '/calendario'
     | '/campanas'
+    | '/captacion'
     | '/carga'
     | '/categorias'
     | '/checkin'
@@ -963,6 +973,7 @@ export interface FileRouteTypes {
     | '/caja'
     | '/calendario'
     | '/campanas'
+    | '/captacion'
     | '/carga'
     | '/categorias'
     | '/checkin'
@@ -1056,6 +1067,7 @@ export interface FileRouteTypes {
     | '/_app/caja'
     | '/_app/calendario'
     | '/_app/campanas'
+    | '/_app/captacion'
     | '/_app/carga'
     | '/_app/categorias'
     | '/_app/checkin'
@@ -1513,6 +1525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCargaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/captacion': {
+      id: '/_app/captacion'
+      path: '/captacion'
+      fullPath: '/captacion'
+      preLoaderRoute: typeof AppCaptacionRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/campanas': {
       id: '/_app/campanas'
       path: '/campanas'
@@ -1892,6 +1911,7 @@ interface AppRouteChildren {
   AppCajaRoute: typeof AppCajaRoute
   AppCalendarioRoute: typeof AppCalendarioRoute
   AppCampanasRoute: typeof AppCampanasRoute
+  AppCaptacionRoute: typeof AppCaptacionRoute
   AppCargaRoute: typeof AppCargaRoute
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppCheckinRoute: typeof AppCheckinRoute
@@ -1954,6 +1974,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCajaRoute: AppCajaRoute,
   AppCalendarioRoute: AppCalendarioRoute,
   AppCampanasRoute: AppCampanasRoute,
+  AppCaptacionRoute: AppCaptacionRoute,
   AppCargaRoute: AppCargaRoute,
   AppCategoriasRoute: AppCategoriasRoute,
   AppCheckinRoute: AppCheckinRoute,
