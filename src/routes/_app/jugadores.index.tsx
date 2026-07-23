@@ -433,8 +433,6 @@ function JugadoresPage() {
       lesionesInput: "",
       institucionEducativa: clubAnterior || "N/A",
       gradoActual: modalidad || "N/A",
-      peso: parseFloat(peso) || 40,
-      altura: parseFloat(altura) * 100 || 140,
 
       // Mapear datos completos de los padres
       madreNombre: (madreNombreInput || madreApellidoInput) ? `${madreNombreInput} ${madreApellidoInput}`.trim() : (parentesco === "Madre" ? fullEncargadoNombre : "—"),
