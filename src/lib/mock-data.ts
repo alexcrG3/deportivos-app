@@ -120,6 +120,9 @@ export const entrenadores = [
 ];
 
 export const equipos = [
+  { id: "eq_u13_edgar", nombre: "Asoderive U13", categoria: "Sub-13 Fútbol", disciplina: "Fútbol", entrenador: "Edgar Calderón", jugadores: 18, uniforme: "Verde / Blanco", estado: "activo" as Estado },
+  { id: "eq_u11_carlos", nombre: "U11", categoria: "Sub-11 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Araya", jugadores: 16, uniforme: "Azul / Blanco", estado: "activo" as Estado },
+  { id: "eq_asoderive_u11", nombre: "Asoderive U11", categoria: "Sub-11 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Araya", jugadores: 16, uniforme: "Azul / Blanco", estado: "activo" as Estado },
   { id: "eq1", nombre: "Élite Sub-12 A", categoria: "Sub-12 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Méndez", jugadores: 0, uniforme: "Azul / Blanco", estado: "activo" as Estado },
   { id: "eq7", nombre: "Élite Sub-14", categoria: "Sub-14 Fútbol", disciplina: "Fútbol", entrenador: "Roberto Ruiz", jugadores: 0, uniforme: "Azul / Blanco", estado: "activo" as Estado },
   { id: "eq2", nombre: "Élite Sub-15", categoria: "Sub-15 Fútbol", disciplina: "Fútbol", entrenador: "Roberto Ruiz", jugadores: 0, uniforme: "Azul / Negro", estado: "activo" as Estado },
