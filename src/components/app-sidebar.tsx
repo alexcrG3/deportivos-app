@@ -69,13 +69,17 @@ const ADMIN_MODULES: Module[] = [
   },
   {
     id: "control_staff",
-    title: "Control de Staff",
+    title: "Staff & Personal",
     icon: UserRound,
     url: "/entrenadores",
     items: [
       { title: "Entrenadores", url: "/entrenadores" },
-      { title: "Asistencia Staff", url: "/asistencia-staff" },
-      { title: "Reportes Rendimiento", url: "/reportes" },
+      { title: "Preparadores Físicos", url: "/entrenadores" },
+      { title: "Fisioterapeutas & Médicos", url: "/medico" },
+      { title: "Administrativos & Apoyo", url: "/personal" },
+      { title: "Asistencia & Horarios Staff", url: "/asistencia-staff" },
+      { title: "Evaluaciones & Certificaciones", url: "/evaluaciones" },
+      { title: "Reportes de Rendimiento Staff", url: "/reportes" },
     ],
   },
   {
@@ -133,6 +137,12 @@ const ADMIN_MODULES: Module[] = [
     title: "IA & Automatización",
     icon: Sparkles,
     url: "/ia",
+  },
+  {
+    id: "business_intelligence",
+    title: "Business Intelligence",
+    icon: TrendingUp,
+    url: "/reportes",
   },
   {
     id: "muro_club",
