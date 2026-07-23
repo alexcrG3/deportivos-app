@@ -19,6 +19,7 @@ import {
   jugadores, pagos, crmLeads, entrenadores, convocatorias, matches
 } from "@/lib/mock-data";
 import RendimientoStore from "@/lib/rendimiento-store";
+import { TacticalStore } from "@/lib/tactical-store";
 import { AIStore, AIConfig, AIAgentName } from "@/lib/ai-store";
 import { toast } from "sonner";
 import { useRole } from "@/hooks/use-role";
@@ -245,6 +246,129 @@ function IADashboard() {
       setWgLoading(false);
       toast.success("¡Sesión de entrenamiento generada por DeportivOS AI!");
     }, 1500);
+  };
+
+  const handleSaveToTacticalPlanning = async () => {
+    if (!wgOutput) {
+      toast.error("Primero debes generar la sesión.");
+      return;
+    }
+
+    const hoy = new Date();
+    const fechaHoyStr = hoy.toISOString().split("T")[0];
+    const durMin = parseInt(wgDuracion) || 60;
+    const f1Dur = Math.round(durMin * 0.25);
+    const f2Dur = Math.round(durMin * 0.55);
+    const f3Dur = Math.round(durMin * 0.20);
+    const targetTeam = wgEdad || "Asoderive U13";
+    const activeCoach = coachName || "Edgar Calderón";
+
+    // 1. Guardar Microciclo en RendimientoStore
+    const planMicrociclo = {
+      id: `plan_ia_${Date.now()}`,
+      nombre: `Plan IA - ${wgObjetivo} (${targetTeam})`,
+      fecha_inicio: fechaHoyStr,
+      fecha_fin: new Date(hoy.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      objetivos: wgObjetivo || "Desarrollo de sesión asistido por IA",
+      ejercicios: [
+        { id: `ex_1_${Date.now()}`, nombre: `Fase 1: Rondo de activación (${wgNivel})`, duracion: f1Dur },
+        { id: `ex_2_${Date.now()}`, nombre: `Fase 2: Circuito táctico de ${wgObjetivo}`, duracion: f2Dur },
+        { id: `ex_3_${Date.now()}`, nombre: `Fase 3: Vuelta a la calma y feedback`, duracion: f3Dur }
+      ],
+      equipo: targetTeam,
+      organizacion_id: RendimientoStore.getActiveOrganizacionId()
+    };
+
+    await RendimientoStore.addPlanificacion(planMicrociclo);
+
+    // 2. Guardar Plan Semanal en TacticalStore
+    const weeklyPlanItem = {
+      id: `wp_ia_${Date.now()}`,
+      semana: `${fechaHoyStr} al Semanal`,
+      equipo: targetTeam,
+      categoria: targetTeam,
+      objetivo: wgObjetivo || "Desarrollo técnico-táctico integral",
+      cargaEsperada: durMin * 6,
+      responsable: activeCoach,
+      actividades: [
+        { dia: 0, titulo: `Fase 1: Rondo + Fase 2: Circuito de ${wgObjetivo}`, hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
+        { dia: 1, titulo: "Trabajo táctico de campo y posesión", hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
+        { dia: 2, titulo: "Descanso activo y estiramientos", hora: "", duracion: 0, tipo: "descanso" as const },
+        { dia: 3, titulo: "Transición y juego en espacio reducido", hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
+        { dia: 4, titulo: "Análisis de video táctico pre-partido", hora: "17:00", duracion: 30, tipo: "video" as const },
+        { dia: 5, titulo: "Partido Oficial de Campeonato", hora: "09:00", duracion: 90, tipo: "partido" as const },
+        { dia: 6, titulo: "Sesión de recuperación y crioterapia", hora: "10:00", duracion: 45, tipo: "recuperacion" as const }
+      ]
+    };
+
+    TacticalStore.saveWeeklyPlan(weeklyPlanItem);
+
+    // 3. Guardar en "deportivos_training_plans"
+    const STORAGE_KEY = "deportivos_training_plans";
+    let existingPlans: any[] = [];
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      existingPlans = raw ? JSON.parse(raw) : [];
+    } catch {
+      existingPlans = [];
+    }
+
+    const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split("T")[0];
+    const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).toISOString().split("T")[0];
+    const NOMBRES_MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const mesNombre = NOMBRES_MESES[hoy.getMonth()] || "Julio";
+
+    const fullPlan = {
+      id: `plan-ia-full-${Date.now()}`,
+      categoria: targetTeam,
+      objetivo: wgObjetivo || "Desarrollo técnico-táctico con IA",
+      entrenador: activeCoach,
+      equipo: targetTeam,
+      contenidos: {
+        tecnica: ["Control orientado rápido", "Pase y perfilamiento corporal"],
+        tactica: [`Circuito de ${wgObjetivo}`, "Rondo de posesión"],
+        fisica: [`Activación de ${f1Dur} min`, `Regenerativo de ${f3Dur} min`]
+      },
+      meses: [
+        {
+          mes: mesNombre,
+          fechaInicio: primerDiaMes,
+          fechaFin: ultimoDiaMes,
+          semanas: [
+            { semana: "Semana 1", contenidos: [wgObjetivo, "Rondo de activación", "Trabajo específico", "Charla de cierre"] },
+            { semana: "Semana 2", contenidos: ["Toma de decisiones rápidas", "Juegos de posición", "Falta táctica", "Evaluación RPE"] },
+            { semana: "Semana 3", contenidos: ["Defensa organizada", "Ataque rápido por bandas", "ABP Córners", "Recuperación activa"] },
+            { semana: "Semana 4", contenidos: ["Repaso técnico e intensidad", "Partido aplicativo", "Prueba física", "Feedback final"] }
+          ],
+          nota: `Plan generado por DeportivOS AI para ${targetTeam}.`
+        }
+      ],
+      notaFinal: wgOutput,
+      creadoEn: fechaHoyStr
+    };
+
+    existingPlans.unshift(fullPlan);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existingPlans));
+
+    // 4. Agregar sesión a RendimientoStore para Modo Cancha en Vivo
+    try {
+      RendimientoStore.addSesion({
+        fecha: fechaHoyStr,
+        equipo: targetTeam,
+        tipo: "entrenamiento",
+        duracion: durMin,
+        rpePromedio: 6,
+        carga: durMin * 6,
+        asistenciaCount: 18,
+        notas: `[Plan IA] ${wgObjetivo}.\n\n${wgOutput}`
+      });
+    } catch (e) {
+      console.log("Sesión guardada en RendimientoStore", e);
+    }
+
+    toast.success("🚀 ¡Plan asignado exitosamente al Coach!", {
+      description: `El plan y entrenamiento de ${targetTeam} están listos en Planificación Táctica y Cancha.`,
+    });
   };
 
   const handleGenerateChronicle = () => {
@@ -517,19 +641,28 @@ ${learning}
 
               {wgOutput && (
                 <div className="mt-4 space-y-3.5">
-                  <div className="flex justify-between items-center bg-slate-100 dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-white/5">
+                  <div className="flex flex-wrap justify-between items-center bg-slate-100 dark:bg-slate-900 px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-white/5 gap-2">
                     <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">📋 Plan de Entrenamiento Listo</span>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="h-6 text-[10px] text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 gap-1 font-bold"
-                      onClick={() => {
-                        navigator.clipboard.writeText(wgOutput);
-                        toast.success("Copiado al portapapeles");
-                      }}
-                    >
-                      Copiar Texto
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 text-[10px] text-slate-800 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 gap-1 font-bold"
+                        onClick={() => {
+                          navigator.clipboard.writeText(wgOutput);
+                          toast.success("Copiado al portapapeles");
+                        }}
+                      >
+                        Copiar Texto
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="h-7 text-[10px] bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-black gap-1.5 shadow-sm"
+                        onClick={handleSaveToTacticalPlanning}
+                      >
+                        <Sparkles className="h-3 w-3" /> 🚀 Asignar a Planificación del Coach
+                      </Button>
+                    </div>
                   </div>
                   <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/5 text-[11px] text-slate-800 dark:text-slate-300 leading-relaxed font-mono whitespace-pre-wrap max-h-[300px] overflow-y-auto">
                     {wgOutput}

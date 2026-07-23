@@ -951,7 +951,6 @@ function PlanificacionTactica() {
     if (targetCoachName) {
       const filtered = matches.filter(wp => wp.responsable && wp.responsable.toLowerCase() === targetCoachName.toLowerCase());
       if (filtered.length > 0) return filtered[0];
-      return null;
     }
     return matches[0] || weeklyPlans[0];
   }, [weeklyPlans, selectedTeam, role, coachName, selectedCoachName]);
@@ -969,17 +968,20 @@ function PlanificacionTactica() {
     let list = plans.filter(p => isSameTeam(p.equipo, selectedTeam));
     if (list.length === 0) {
       if (selectedTeam.toLowerCase().includes("13") || selectedTeam.toLowerCase() === "u13") {
-        list = plans.filter(p => p.id.includes("sub13"));
+        list = plans.filter(p => p.id.includes("sub13") || p.equipo.toLowerCase().includes("13"));
       } else if (selectedTeam.toLowerCase().includes("15")) {
-        list = plans.filter(p => p.id.includes("sub15"));
+        list = plans.filter(p => p.id.includes("sub15") || p.equipo.toLowerCase().includes("15"));
       }
     }
-    // Coach or Admin simulating a coach only sees their own plans
+    // Coach or Admin simulating a coach: try filter by coach name, but keep list if no specific match
     const targetCoachName = (role === "admin" && selectedCoachName) ? selectedCoachName : (role === "coach" ? coachName : null);
     if (targetCoachName) {
-      list = list.filter(p => p.entrenador && p.entrenador.toLowerCase() === targetCoachName.toLowerCase());
+      const coachMatch = list.filter(p => p.entrenador && p.entrenador.toLowerCase() === targetCoachName.toLowerCase());
+      if (coachMatch.length > 0) {
+        list = coachMatch;
+      }
     }
-    return list;
+    return list.length > 0 ? list : plans;
   }, [plans, selectedTeam, role, coachName, selectedCoachName]);
 
   const openNew = () => setModal({ open: true, plan: blankPlan(coachName, selectedTeam) });
