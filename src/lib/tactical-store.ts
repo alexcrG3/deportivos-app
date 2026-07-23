@@ -816,20 +816,6 @@ export const sportLabels: Record<SportType, string> = {
 
 const INITIAL_WEEKLY_PLANS: WeeklyPlan[] = [
   {
-    id: "wp1", semana: "2026-W28", equipo: "Sub-15", categoria: "Sub-15",
-    objetivo: "Preparación táctica para el clásico del fin de semana",
-    cargaEsperada: 480, responsable: "Carlos Araya",
-    actividades: [
-      { id: "a1", dia: 0, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Técnica individual + pressing", equipo: "Sub-15" },
-      { id: "a2", dia: 1, tipo: "video",   hora: "15:00", duracion: 60, titulo: "Análisis del rival", equipo: "Sub-15" },
-      { id: "a3", dia: 2, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Sistemática defensiva", equipo: "Sub-15" },
-      { id: "a4", dia: 3, tipo: "recuperacion", hora: "09:00", duracion: 45, titulo: "Sesión regenerativa", equipo: "Sub-15" },
-      { id: "a5", dia: 4, tipo: "entreno", hora: "16:00", duracion: 75, titulo: "Ensayo táctico precompetitivo", equipo: "Sub-15" },
-      { id: "a6", dia: 5, tipo: "partido", hora: "10:00", duracion: 90, titulo: "Partido vs Deportivo Saprissa Sub-15", equipo: "Sub-15" },
-      { id: "a7", dia: 6, tipo: "descanso", hora: "", duracion: 0, titulo: "Día de descanso", equipo: "Sub-15" },
-    ],
-  },
-  {
     id: "wp_u13", semana: "2026-W28", equipo: "U13", categoria: "Sub-13",
     objetivo: "Desarrollo del juego asociativo y transiciones rápidas",
     cargaEsperada: 450, responsable: "Edgar Calderón",
@@ -1407,7 +1393,8 @@ export class TacticalStore {
 
   // Weekly Plans
   static getWeeklyPlans(): WeeklyPlan[] {
-    return this.get<WeeklyPlan[]>("tact_weekly_plans", INITIAL_WEEKLY_PLANS);
+    const list = this.get<WeeklyPlan[]>("tact_weekly_plans", INITIAL_WEEKLY_PLANS);
+    return list.filter(p => !p.responsable || !p.responsable.toLowerCase().includes("carlos araya"));
   }
   static saveWeeklyPlan(p: WeeklyPlan): void {
     const all = this.getWeeklyPlans().filter(x => x.id !== p.id);
