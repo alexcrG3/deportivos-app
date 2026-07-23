@@ -3,11 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DeportivOS" />
+    <meta name="application-name" content="DeportivOS" />
     <title>DeportivOS - Academia Deportiva Élite Sports</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/entry-spa.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('DeportivOS PWA SW registrado con éxito:', reg.scope);
+          }).catch((err) => {
+            console.log('Error registrando PWA SW:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

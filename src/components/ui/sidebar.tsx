@@ -501,7 +501,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<"li
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm outline-none ring-sidebar-ring cursor-pointer transition-all hover:bg-[#222659] hover:text-white focus-visible:ring-2 active:bg-[#8545e8] active:text-white disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-[#8545e8] data-[active=true]:font-bold data-[active=true]:text-white data-[active=true]:shadow-md data-[state=open]:hover:bg-[#222659] data-[state=open]:hover:text-white group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm outline-none ring-sidebar-ring cursor-pointer transition-all hover:bg-[#1e3a8a]/40 hover:text-white focus-visible:ring-2 active:bg-[#2563eb] active:text-white disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-[#2563eb] data-[active=true]:font-bold data-[active=true]:text-white data-[active=true]:shadow-md data-[state=open]:hover:bg-[#1e3a8a]/40 data-[state=open]:hover:text-white group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -704,7 +704,7 @@ const SidebarMenuSubButton = React.forwardRef<
       data-active={isActive}
       className={cn(
         "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
-        "data-[active=true]:bg-white/10 data-[active=true]:border-l-4 data-[active=true]:border-l-[#8545e8] data-[active=true]:text-white data-[active=true]:font-bold data-[active=true]:rounded-r-md data-[active=true]:pl-2.5",
+        "data-[active=true]:bg-white/10 data-[active=true]:border-l-4 data-[active=true]:border-l-[#2563eb] data-[active=true]:text-white data-[active=true]:font-bold data-[active=true]:rounded-r-md data-[active=true]:pl-2.5",
         size === "sm" && "text-xs",
         size === "md" && "text-sm",
         "group-data-[collapsible=icon]:hidden",

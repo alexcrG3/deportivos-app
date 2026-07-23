@@ -164,7 +164,6 @@ const COACH_MODULES: Module[] = [
       { title: "Objetivos", url: "/objetivos" },
       { title: "Diario del entrenador", url: "/diario" },
       { title: "Biblioteca", url: "/biblioteca" },
-      { title: "Planificación", url: "/tactica/planificacion" },
     ]
   },
   { id: "calendario", title: "Calendario", icon: CalendarDays, url: "/calendario" },

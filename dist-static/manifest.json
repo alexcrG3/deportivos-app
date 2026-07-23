@@ -1,0 +1,19 @@
+{
+  "short_name": "DeportivOS",
+  "name": "DeportivOS - Academia Deportiva Élite Sports OS",
+  "description": "Sistema Operativo Élite de Gestión Deportiva, Alto Rendimiento y Modo Cancha en Vivo.",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/dashboard",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "display": "standalone",
+  "orientation": "any",
+  "categories": ["sports", "productivity", "utilities"]
+}

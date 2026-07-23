@@ -208,3 +208,14 @@ body {
     width: 100% !important;
   }
 }
+
+/* Ocultar Widget flotante de Vercel Toolbar / Feedback */
+#vercel-live-feedback-embed,
+[data-vercel-toolbar],
+vercel-live-feedback,
+iframe[src*="vercel.live"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
