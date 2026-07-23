@@ -816,17 +816,31 @@ export const sportLabels: Record<SportType, string> = {
 
 const INITIAL_WEEKLY_PLANS: WeeklyPlan[] = [
   {
-    id: "wp_u13", semana: "2026-W28", equipo: "U13", categoria: "Sub-13",
-    objetivo: "Desarrollo del juego asociativo y transiciones rápidas",
+    id: "wp_asoderive_u13", semana: "2026-W28", equipo: "Asoderive U13", categoria: "Sub-13",
+    objetivo: "Desarrollo de la técnica, comprensión táctica del juego y desarrollar tomas de decisiones.",
     cargaEsperada: 450, responsable: "Edgar Calderón",
     actividades: [
-      { id: "au1", dia: 0, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Técnica individual y pases cortos", equipo: "U13" },
-      { id: "au2", dia: 1, tipo: "video",   hora: "15:00", duracion: 45, titulo: "Visualización de táctica grupal", equipo: "U13" },
-      { id: "au3", dia: 2, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Posicionamiento de líneas y vasculación", equipo: "U13" },
-      { id: "au4", dia: 3, tipo: "recuperacion", hora: "09:00", duracion: 45, titulo: "Sesión regenerativa y estiramientos", equipo: "U13" },
-      { id: "au5", dia: 4, tipo: "entreno", hora: "16:00", duracion: 75, titulo: "Fútbol tenis y táctica fija", equipo: "U13" },
-      { id: "au6", dia: 5, tipo: "partido", hora: "10:00", duracion: 90, titulo: "Partido amistoso vs Academias Filiales U13", equipo: "U13" },
-      { id: "au7", dia: 6, tipo: "descanso", hora: "", duracion: 0, titulo: "Día de descanso", equipo: "U13" },
+      { id: "au1", dia: 0, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Coordinación · Pase y control orientado · Rondo 4vs1, 2vs2", equipo: "Asoderive U13" },
+      { id: "au2", dia: 1, tipo: "video",   hora: "15:00", duracion: 45, titulo: "Posición de balón · Desmarques de apoyo · Posesión", equipo: "Asoderive U13" },
+      { id: "au3", dia: 2, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Conducción del balón · 1vs1 y 2vs2 · Remates y definición", equipo: "Asoderive U13" },
+      { id: "au4", dia: 3, tipo: "recuperacion", hora: "09:00", duracion: 45, titulo: "Sesión regenerativa y estiramientos", equipo: "Asoderive U13" },
+      { id: "au5", dia: 4, tipo: "entreno", hora: "16:00", duracion: 75, titulo: "Combinaciones de pases · Vascular · Líneas y colectivo", equipo: "Asoderive U13" },
+      { id: "au6", dia: 5, tipo: "partido", hora: "10:00", duracion: 90, titulo: "Partido de aplicación táctica y torneo de 5", equipo: "Asoderive U13" },
+      { id: "au7", dia: 6, tipo: "descanso", hora: "", duracion: 0, titulo: "Día de descanso", equipo: "Asoderive U13" },
+    ],
+  },
+  {
+    id: "wp_u13", semana: "2026-W28", equipo: "U13", categoria: "Sub-13",
+    objetivo: "Desarrollo de la técnica, comprensión táctica del juego y desarrollar tomas de decisiones.",
+    cargaEsperada: 450, responsable: "Edgar Calderón",
+    actividades: [
+      { id: "au1_u13", dia: 0, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Coordinación · Pase y control orientado · Rondo 4vs1, 2vs2", equipo: "U13" },
+      { id: "au2_u13", dia: 1, tipo: "video",   hora: "15:00", duracion: 45, titulo: "Posición de balón · Desmarques de apoyo · Posesión", equipo: "U13" },
+      { id: "au3_u13", dia: 2, tipo: "entreno", hora: "16:00", duracion: 90, titulo: "Conducción del balón · 1vs1 y 2vs2 · Remates y definición", equipo: "U13" },
+      { id: "au4_u13", dia: 3, tipo: "recuperacion", hora: "09:00", duracion: 45, titulo: "Sesión regenerativa y estiramientos", equipo: "U13" },
+      { id: "au5_u13", dia: 4, tipo: "entreno", hora: "16:00", duracion: 75, titulo: "Combinaciones de pases · Vascular · Líneas y colectivo", equipo: "U13" },
+      { id: "au6_u13", dia: 5, tipo: "partido", hora: "10:00", duracion: 90, titulo: "Partido de aplicación táctica y torneo de 5", equipo: "U13" },
+      { id: "au7_u13", dia: 6, tipo: "descanso", hora: "", duracion: 0, titulo: "Día de descanso", equipo: "U13" },
     ],
   },
 ];
@@ -1394,7 +1408,14 @@ export class TacticalStore {
   // Weekly Plans
   static getWeeklyPlans(): WeeklyPlan[] {
     const list = this.get<WeeklyPlan[]>("tact_weekly_plans", INITIAL_WEEKLY_PLANS);
-    return list.filter(p => !p.responsable || !p.responsable.toLowerCase().includes("carlos araya"));
+    const filtered = list.filter(p => !p.responsable || !p.responsable.toLowerCase().includes("carlos araya"));
+    // Ensure Asoderive U13 and U13 initial plans are present
+    INITIAL_WEEKLY_PLANS.forEach(ip => {
+      if (!filtered.some(p => p.equipo.toLowerCase() === ip.equipo.toLowerCase())) {
+        filtered.push(ip);
+      }
+    });
+    return filtered;
   }
   static saveWeeklyPlan(p: WeeklyPlan): void {
     const all = this.getWeeklyPlans().filter(x => x.id !== p.id);
