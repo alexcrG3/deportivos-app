@@ -816,6 +816,20 @@ export const sportLabels: Record<SportType, string> = {
 
 const INITIAL_WEEKLY_PLANS: WeeklyPlan[] = [
   {
+    id: "wp_carlos_u11", semana: "2026-W28", equipo: "U11", categoria: "Sub-11",
+    objetivo: "Desarrollar las capacidades técnicas, tácticas, físicas y coordinativas de los jugadores mediante actividades lúdicas y progresivas.",
+    cargaEsperada: 360, responsable: "Carlos Araya",
+    actividades: [
+      { id: "ca1", dia: 0, tipo: "entreno", hora: "16:00", duracion: 60, titulo: "Coordinación lúdica y conducción con amagues", equipo: "U11" },
+      { id: "ca2", dia: 1, tipo: "video",   hora: "15:00", duracion: 30, titulo: "Análisis de decisiones y perfilamiento corporal", equipo: "U11" },
+      { id: "ca3", dia: 2, tipo: "entreno", hora: "16:00", duracion: 60, titulo: "Pase corto y desmarque de apoyo en 3 vs 3", equipo: "U11" },
+      { id: "ca4", dia: 3, tipo: "recuperacion", hora: "09:00", duracion: 40, titulo: "Sesión de movilidad y estiramientos", equipo: "U11" },
+      { id: "ca5", dia: 4, tipo: "entreno", hora: "16:00", duracion: 60, titulo: "Transición rápida y tiros en mini-canchas", equipo: "U11" },
+      { id: "ca6", dia: 5, tipo: "partido", hora: "09:00", duracion: 60, titulo: "Partido de aplicación táctica U11", equipo: "U11" },
+      { id: "ca7", dia: 6, tipo: "descanso", hora: "", duracion: 0, titulo: "Día de descanso", equipo: "U11" },
+    ],
+  },
+  {
     id: "wp_asoderive_u13", semana: "2026-W28", equipo: "Asoderive U13", categoria: "Sub-13",
     objetivo: "Desarrollo de la técnica, comprensión táctica del juego y desarrollar tomas de decisiones.",
     cargaEsperada: 450, responsable: "Edgar Calderón",

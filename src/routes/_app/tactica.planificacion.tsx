@@ -956,12 +956,27 @@ function PlanificacionTactica() {
       return ca === cb || ca.includes(cb) || cb.includes(ca);
     };
     const targetCoachName = (role === "admin" && selectedCoachName) ? selectedCoachName : (role === "coach" ? coachName : null);
-    const matches = weeklyPlans.filter(wp => isSameTeam(wp.equipo, selectedTeam));
+
     if (targetCoachName) {
-      const filtered = matches.filter(wp => wp.responsable && wp.responsable.toLowerCase() === targetCoachName.toLowerCase());
-      if (filtered.length > 0) return filtered[0];
+      // 1. Coincidencia por Entrenador + Equipo
+      const coachTeamMatch = weeklyPlans.find(wp => 
+        wp.responsable && wp.responsable.toLowerCase().includes(targetCoachName.toLowerCase()) && 
+        isSameTeam(wp.equipo, selectedTeam)
+      );
+      if (coachTeamMatch) return coachTeamMatch;
+
+      // 2. Coincidencia solo por Entrenador
+      const coachMatchOnly = weeklyPlans.find(wp => 
+        wp.responsable && wp.responsable.toLowerCase().includes(targetCoachName.toLowerCase())
+      );
+      if (coachMatchOnly) return coachMatchOnly;
     }
-    return matches[0] || weeklyPlans[0];
+
+    // Coincidencia por Equipo en Admin general
+    const teamMatch = weeklyPlans.find(wp => isSameTeam(wp.equipo, selectedTeam));
+    if (teamMatch) return teamMatch;
+
+    return weeklyPlans[0] || null;
   }, [weeklyPlans, selectedTeam, role, coachName, selectedCoachName]);
 
   // Filter mesociclo plans by team and by coach when role=coach
@@ -974,23 +989,16 @@ function PlanificacionTactica() {
       const cb = clean(b);
       return ca === cb || ca.includes(cb) || cb.includes(ca);
     };
-    let list = plans.filter(p => isSameTeam(p.equipo, selectedTeam));
-    if (list.length === 0) {
-      if (selectedTeam.toLowerCase().includes("13") || selectedTeam.toLowerCase() === "u13") {
-        list = plans.filter(p => p.id.includes("sub13") || p.equipo.toLowerCase().includes("13"));
-      } else if (selectedTeam.toLowerCase().includes("15")) {
-        list = plans.filter(p => p.id.includes("sub15") || p.equipo.toLowerCase().includes("15"));
-      }
-    }
-    // Coach or Admin simulating a coach: try filter by coach name, but keep list if no specific match
+
     const targetCoachName = (role === "admin" && selectedCoachName) ? selectedCoachName : (role === "coach" ? coachName : null);
+
     if (targetCoachName) {
-      const coachMatch = list.filter(p => p.entrenador && p.entrenador.toLowerCase() === targetCoachName.toLowerCase());
-      if (coachMatch.length > 0) {
-        list = coachMatch;
-      }
+      const coachMatch = plans.filter(p => p.entrenador && p.entrenador.toLowerCase().includes(targetCoachName.toLowerCase()));
+      if (coachMatch.length > 0) return coachMatch;
     }
-    return list.length > 0 ? list : plans;
+
+    let list = plans.filter(p => isSameTeam(p.equipo, selectedTeam));
+    return list;
   }, [plans, selectedTeam, role, coachName, selectedCoachName]);
 
   const openNew = () => setModal({ open: true, plan: blankPlan(coachName, selectedTeam) });
