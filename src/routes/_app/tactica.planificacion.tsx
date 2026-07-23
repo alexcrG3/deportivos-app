@@ -104,31 +104,31 @@ function calcularSemanasYMes(inicioStr: string, finStr: string): { mes: string; 
 const INITIAL_PLANS: TrainingPlan[] = [
   {
     id: "plan-u13-edgar-2026",
-    categoria: "",
-    objetivo: "Desarrollo de la técnica individual, comprensión de la táctica de juego colectiva y tomas de decisiones rápidas.",
+    categoria: "Sub-13 Fútbol",
+    objetivo: "Desarrollo de la técnica, comprensión táctica del juego y desarrollar tomas de decisiones.",
     entrenador: "Edgar Calderón",
     equipo: "U13",
     contenidos: {
       tecnica: [
-        "Pase corto y largo preciso",
-        "Control orientado bajo presión",
-        "Conducción veloz y amagues",
-        "Finalización de jugadas de ataque",
-        "Juego de cabeza básico",
+        "Pase corto y largo",
+        "Control orientado",
+        "Conducción y cambio de ritmo",
+        "Finalización de contra-ataque",
+        "Juego aéreo básico",
       ],
       tactica: [
-        "Desmarques de apoyo y ruptura",
-        "Coberturas defensivas recíprocas",
-        "Amplitud de juego por bandas",
-        "Transiciones defensa-ataque rápidas",
-        "Presión alta y recuperación de balón",
+        "Desmarques",
+        "Apoyos y coberturas",
+        "Amplitud y profundidad",
+        "Transiciones ataque-defensa",
+        "Posición y recuperación de balón",
       ],
       fisica: [
-        "Velocidad de reacción y aceleración",
-        "Coordinación motriz específica",
-        "Agilidad en giros y frenos",
-        "Fuerza funcional general",
-        "Resistencia aeróbica básica",
+        "Velocidad de reacción",
+        "Agilidad",
+        "Cambios de dirección",
+        "Técnica de correr con y sin balón",
+        "Coordinación específica",
       ],
     },
     meses: [
@@ -138,22 +138,22 @@ const INITIAL_PLANS: TrainingPlan[] = [
         fechaFin: "2026-07-31",
         nota: "SEMANA DEL 15 AL 21 NO SE TRABAJA",
         semanas: [
-          { semana: "01/07 al 07/07", contenidos: ["Coordinación", "Pase y control orientado", "Rondo 4 vs 1, 2 vs 2", "Colectivo dirigido"] },
-          { semana: "08/07 al 14/07", contenidos: ["Posición de balón", "Desmarques de apoyo", "Juego de posesión", "Mini-campeonato de 5"] },
-          { semana: "15/07 al 22/07", contenidos: ["Conducción del balón", "1 vs 1 y 2vs 2", "Remates – definición", "Línea de fondo y definición"] },
-          { semana: "23/07 al 31/07", contenidos: ["Combinaciones de pases", "Vascular", "Posicionamiento de líneas", "Colectivo dirigido"] },
+          { semana: "Semana # 1 ( 1-7-26 )", contenidos: ["Coordinación", "Pase y control orientado", "Rondo 4 vs 1 , 2 vs 2", "Colectivo dirigido"] },
+          { semana: "Semana # 2 ( 8-7-26 )", contenidos: ["Posición de balón", "Desmarques de apoyo", "Juego de posesión", "Mini-campeonato de 5"] },
+          { semana: "Semana # 3 ( 23-7-26 )", contenidos: ["Conducción del balón", "1 vs 1 y 2vs 2", "Remates – definición", "Línea de fondo y definición"] },
+          { semana: "Semana # 4 ( 30-7-26 )", contenidos: ["Combinaciones de pases", "Vascular", "Posicionamiento de líneas", "Colectivo dirigido"] },
         ],
       },
       {
         mes: "Agosto",
         fechaInicio: "2026-08-01",
         fechaFin: "2026-08-31",
-        nota: "Se estará valorando iniciar campeonato última semana de agosto.",
+        nota: "Plan mensual de Agosto - Fase de consolidación táctica y colectiva.",
         semanas: [
-          { semana: "01/08 al 07/08", contenidos: ["Marcaje individual", "Temporización defensiva", "Recuperación tras perdida", "Posicionamiento táctico"] },
-          { semana: "08/08 al 14/08", contenidos: ["Coberturas", "Superioridad numérica", "Posicionamiento táctico", "Colectivo dirigido"] },
-          { semana: "15/08 al 22/08", contenidos: ["Transiciones", "Salidas de juego (portería)", "Posesión y progresión de juego", "Juego por sector de la cancha"] },
-          { semana: "23/08 al 31/08", contenidos: ["Vascular", "Cambio de ritmo", "Evaluación técnica y táctica", "Evaluación – colectivo."] },
+          { semana: "Semana # 5 ( 5-8-26 )", contenidos: ["Marcaje individual", "Temporización defensiva", "Recuperación tras perdida", "Posicionamiento táctico"] },
+          { semana: "Semana # 6 ( 12-8-26 )", contenidos: ["Coberturas", "Superioridad numérica", "Posicionamiento táctico", "Colectivo dirigido"] },
+          { semana: "Semana # 7 ( 19-8-26 )", contenidos: ["Transiciones", "Salidas de juego (portería)", "Posesión y progresión de juego", "Juego por sector de la cancha"] },
+          { semana: "Semana # 8 ( 26-8-26 )", contenidos: ["Vascular", "Cambio de ritmo", "Evaluación técnica y táctica", "Evaluación – colectivo."] },
         ],
       },
     ],
@@ -168,19 +168,20 @@ function loadPlans(): TrainingPlan[] {
   if (typeof window === "undefined") return INITIAL_PLANS;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    // Auto-migration: remove old dummy plan IDs from previous versions
     const OLD_IDS = ["plan-sub13-2026", "plan-sub15-2026"];
     let saved: TrainingPlan[] = raw ? JSON.parse(raw) : [];
-    // Strip any stale dummy plans
     saved = saved.filter(p => !OLD_IDS.includes(p.id));
-    // Merge in initial plans if not already present
-    const merged = [...saved];
-    INITIAL_PLANS.forEach(ip => {
-      if (!merged.some(p => p.id === ip.id)) merged.push(ip);
-    });
-    // Persist the cleaned/merged result
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-    return merged;
+    
+    // Forzar actualización del plan oficial de Edgar Calderón con la imagen exacta
+    const idx = saved.findIndex(p => p.id === "plan-u13-edgar-2026");
+    if (idx > -1) {
+      saved[idx] = INITIAL_PLANS[0];
+    } else {
+      saved.unshift(INITIAL_PLANS[0]);
+    }
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    return saved;
   } catch { return INITIAL_PLANS; }
 }
 
