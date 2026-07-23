@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SaasAdminRouteImport } from './routes/saas-admin'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as InscripcionRouteImport } from './routes/inscripcion'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -115,6 +116,11 @@ const SaasAdminRoute = SaasAdminRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InscripcionRoute = InscripcionRouteImport.update({
@@ -567,6 +573,7 @@ const AppMedicoJugadorIdRoute = AppMedicoJugadorIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inscripcion': typeof InscripcionRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
@@ -660,6 +667,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/inscripcion': typeof InscripcionRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
@@ -753,6 +761,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/inscripcion': typeof InscripcionRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
@@ -848,6 +857,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/inscripcion'
+    | '/landing'
     | '/login'
     | '/saas-admin'
     | '/signup'
@@ -941,6 +951,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/inscripcion'
+    | '/landing'
     | '/login'
     | '/saas-admin'
     | '/signup'
@@ -1033,6 +1044,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/inscripcion'
+    | '/landing'
     | '/login'
     | '/saas-admin'
     | '/signup'
@@ -1128,6 +1140,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   InscripcionRoute: typeof InscripcionRoute
+  LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   SaasAdminRoute: typeof SaasAdminRoute
   SignupRoute: typeof SignupRoute
@@ -1155,6 +1168,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inscripcion': {
@@ -1993,6 +2013,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   InscripcionRoute: InscripcionRoute,
+  LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   SaasAdminRoute: SaasAdminRoute,
   SignupRoute: SignupRoute,
