@@ -99,6 +99,7 @@ const ADMIN_MODULES: Module[] = [
     url: "/coach",
     items: [
       { title: "Coach OS", url: "/coach" },
+      { title: "Planificación Táctica", url: "/tactica/planificacion" },
       { title: "Centro Táctico", url: "/tactica" },
       { title: "Competiciones", url: "/competiciones" },
       { title: "Alto Rendimiento", url: "/rendimiento" },
