@@ -185,6 +185,11 @@ function LoginPage() {
                   Pre-inscríbete aquí
                 </Link>
               </p>
+              <div className="pt-2 border-t border-slate-800">
+                <Link to="/landing" className="text-[11px] text-slate-500 hover:text-amber-400 hover:underline transition-colors flex items-center justify-center gap-1">
+                  🌐 Ver presentación comercial (Landing Page)
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
