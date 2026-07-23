@@ -260,10 +260,50 @@ function IADashboard() {
     const f1Dur = Math.round(durMin * 0.25);
     const f2Dur = Math.round(durMin * 0.55);
     const f3Dur = Math.round(durMin * 0.20);
-    const targetTeam = wgEdad || "Asoderive U13";
-    const activeCoach = coachName || "Edgar Calderón";
+    const targetTeam = wgEdad || "U15";
+    const activeCoach = (role === "coach" && coachName) ? coachName : "Edgar Calderón";
 
-    // 1. Guardar Microciclo en RendimientoStore
+    // Extraer consignas principales del texto generado
+    const lines = wgOutput.split("\n").map(l => l.trim()).filter(Boolean);
+    const mainEx = lines.find(l => l.includes("1.") || l.includes("Fase 2")) || `Circuito táctico: ${wgObjetivo}`;
+
+    // 1. Crear las actividades semanales de IA para el mapa de días
+    const actividadesIA = [
+      { id: `a_ia_1_${Date.now()}`, dia: 0, tipo: "entreno" as const, hora: "16:00", duracion: durMin, titulo: `IA Fase 1 & 2: ${wgObjetivo}`, equipo: targetTeam },
+      { id: `a_ia_2_${Date.now()}`, dia: 1, tipo: "video" as const, hora: "15:00", duracion: 45, titulo: `IA Visualización Táctica: ${wgObjetivo}`, equipo: targetTeam },
+      { id: `a_ia_3_${Date.now()}`, dia: 2, tipo: "entreno" as const, hora: "16:00", duracion: durMin, titulo: `IA ${mainEx}`, equipo: targetTeam },
+      { id: `a_ia_4_${Date.now()}`, dia: 3, tipo: "recuperacion" as const, hora: "09:00", duracion: f3Dur, titulo: `IA Fase 3: Vuelta a la Calma (${f3Dur}m)`, equipo: targetTeam },
+      { id: `a_ia_5_${Date.now()}`, dia: 4, tipo: "entreno" as const, hora: "16:00", duracion: 75, titulo: `IA Ensayo Táctico: ${wgObjetivo}`, equipo: targetTeam },
+      { id: `a_ia_6_${Date.now()}`, dia: 5, tipo: "partido" as const, hora: "10:00", duracion: 90, titulo: `Partido de Aplicación Táctica (${targetTeam})`, equipo: targetTeam },
+      { id: `a_ia_7_${Date.now()}`, dia: 6, tipo: "descanso" as const, hora: "", duracion: 0, titulo: "Día de descanso activo", equipo: targetTeam },
+    ];
+
+    // 2. Guardar/Actualizar en el storage de TacticalStore para todos los equipos
+    const existingWeekly = TacticalStore.getWeeklyPlans();
+    const updatedWeekly = existingWeekly.map(wp => ({
+      ...wp,
+      objetivo: `[IA] ${wgObjetivo}`,
+      responsable: activeCoach,
+      actividades: actividadesIA
+    }));
+
+    const newWeeklyPlan = {
+      id: `wp_ia_${Date.now()}`,
+      semana: "2026-W28",
+      equipo: targetTeam,
+      categoria: targetTeam,
+      objetivo: `[IA] ${wgObjetivo}`,
+      cargaEsperada: durMin * 6,
+      responsable: activeCoach,
+      actividades: actividadesIA
+    };
+
+    if (typeof window !== "undefined") {
+      const mergedWeekly = [newWeeklyPlan, ...updatedWeekly];
+      localStorage.setItem("tact_weekly_plans", JSON.stringify(mergedWeekly));
+    }
+
+    // 3. Guardar Microciclo en RendimientoStore
     const planMicrociclo = {
       id: `plan_ia_${Date.now()}`,
       nombre: `Plan IA - ${wgObjetivo} (${targetTeam})`,
@@ -271,9 +311,9 @@ function IADashboard() {
       fecha_fin: new Date(hoy.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       objetivos: wgObjetivo || "Desarrollo de sesión asistido por IA",
       ejercicios: [
-        { id: `ex_1_${Date.now()}`, nombre: `Fase 1: Rondo de activación (${wgNivel})`, duracion: f1Dur },
-        { id: `ex_2_${Date.now()}`, nombre: `Fase 2: Circuito táctico de ${wgObjetivo}`, duracion: f2Dur },
-        { id: `ex_3_${Date.now()}`, nombre: `Fase 3: Vuelta a la calma y feedback`, duracion: f3Dur }
+        { id: `ex_1_${Date.now()}`, nombre: `Fase 1: Calentamiento (${f1Dur}m)`, duracion: f1Dur },
+        { id: `ex_2_${Date.now()}`, nombre: `Fase 2: ${wgObjetivo} (${f2Dur}m)`, duracion: f2Dur },
+        { id: `ex_3_${Date.now()}`, nombre: `Fase 3: Vuelta a la calma (${f3Dur}m)`, duracion: f3Dur }
       ],
       equipo: targetTeam,
       organizacion_id: RendimientoStore.getActiveOrganizacionId()
@@ -281,29 +321,7 @@ function IADashboard() {
 
     await RendimientoStore.addPlanificacion(planMicrociclo);
 
-    // 2. Guardar Plan Semanal en TacticalStore
-    const weeklyPlanItem = {
-      id: `wp_ia_${Date.now()}`,
-      semana: `${fechaHoyStr} al Semanal`,
-      equipo: targetTeam,
-      categoria: targetTeam,
-      objetivo: wgObjetivo || "Desarrollo técnico-táctico integral",
-      cargaEsperada: durMin * 6,
-      responsable: activeCoach,
-      actividades: [
-        { dia: 0, titulo: `Fase 1: Rondo + Fase 2: Circuito de ${wgObjetivo}`, hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
-        { dia: 1, titulo: "Trabajo táctico de campo y posesión", hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
-        { dia: 2, titulo: "Descanso activo y estiramientos", hora: "", duracion: 0, tipo: "descanso" as const },
-        { dia: 3, titulo: "Transición y juego en espacio reducido", hora: "16:00", duracion: durMin, tipo: "entrenamiento" as const },
-        { dia: 4, titulo: "Análisis de video táctico pre-partido", hora: "17:00", duracion: 30, tipo: "video" as const },
-        { dia: 5, titulo: "Partido Oficial de Campeonato", hora: "09:00", duracion: 90, tipo: "partido" as const },
-        { dia: 6, titulo: "Sesión de recuperación y crioterapia", hora: "10:00", duracion: 45, tipo: "recuperacion" as const }
-      ]
-    };
-
-    TacticalStore.saveWeeklyPlan(weeklyPlanItem);
-
-    // 3. Guardar en "deportivos_training_plans"
+    // 4. Guardar en "deportivos_training_plans" (Mesociclos y Planes)
     const STORAGE_KEY = "deportivos_training_plans";
     let existingPlans: any[] = [];
     try {
@@ -335,7 +353,7 @@ function IADashboard() {
           fechaInicio: primerDiaMes,
           fechaFin: ultimoDiaMes,
           semanas: [
-            { semana: "Semana 1", contenidos: [wgObjetivo, "Rondo de activación", "Trabajo específico", "Charla de cierre"] },
+            { semana: "Semana 1", contenidos: [wgObjetivo, "Calentamiento IA", mainEx, "Vuelta a la calma"] },
             { semana: "Semana 2", contenidos: ["Toma de decisiones rápidas", "Juegos de posición", "Falta táctica", "Evaluación RPE"] },
             { semana: "Semana 3", contenidos: ["Defensa organizada", "Ataque rápido por bandas", "ABP Córners", "Recuperación activa"] },
             { semana: "Semana 4", contenidos: ["Repaso técnico e intensidad", "Partido aplicativo", "Prueba física", "Feedback final"] }
@@ -350,7 +368,7 @@ function IADashboard() {
     existingPlans.unshift(fullPlan);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(existingPlans));
 
-    // 4. Agregar sesión a RendimientoStore para Modo Cancha en Vivo
+    // 5. Agregar sesión a RendimientoStore para Modo Cancha en Vivo
     try {
       RendimientoStore.addSesion({
         fecha: fechaHoyStr,
@@ -366,8 +384,8 @@ function IADashboard() {
       console.log("Sesión guardada en RendimientoStore", e);
     }
 
-    toast.success("🚀 ¡Plan asignado exitosamente al Coach!", {
-      description: `El plan y entrenamiento de ${targetTeam} están listos en Planificación Táctica y Cancha.`,
+    toast.success("🚀 ¡Plan IA asignado a Planificación Táctica!", {
+      description: `Objetivo: "${wgObjetivo}" aplicado a la planificación del Coach.`,
     });
   };
 
