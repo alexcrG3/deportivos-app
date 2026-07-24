@@ -104,38 +104,9 @@ export const ingresosMensuales: any[] = [];
 export const crecimientoJugadores: any[] = [];
 export const categorias: any[] = [];
 
-export const entrenadores = [
-  { id: "t1", nombre: "Carlos Araya", identificacion: "112345678", telefono: "+50688881111", whatsapp: "+50688881111", correo: "carlos@elite.com", especialidad: "Fútbol técnico", disciplinas: ["Fútbol"], categorias: 0, sedeId: "s1", horario: "L–V 14:00–20:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=11" },
-  { id: "t3", nombre: "Laura Vargas", identificacion: "133445566", telefono: "+50688883333", whatsapp: "+50688883333", correo: "laura@elite.com", especialidad: "Baloncesto base / Voleibol", disciplinas: ["Baloncesto", "Voleibol"], categorias: 0, sedeId: "s4", horario: "M–S 13:00–19:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=20" },
-  { id: "t4", nombre: "Marco Núñez", identificacion: "144556677", telefono: "+50688884444", whatsapp: "+50688884444", correo: "marco@elite.com", especialidad: "Baloncesto avanzado", disciplinas: ["Baloncesto"], categorias: 0, sedeId: "s2", horario: "L–V 16:00–20:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=13" },
-  { id: "t5", nombre: "Diego Soto", identificacion: "155667788", telefono: "+50688885555", whatsapp: "+50688885555", correo: "diego@elite.com", especialidad: "Natación", disciplinas: ["Natación"], categorias: 0, sedeId: "s3", horario: "L–S 06:00–12:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=14" },
-  { id: "t6", nombre: "Sofía Hidalgo", identificacion: "166778899", telefono: "+50688886666", whatsapp: "+50688886666", correo: "sofia@elite.com", especialidad: "Natación competitiva", disciplinas: ["Natación"], categorias: 0, sedeId: "s3", horario: "M–V 14:00–20:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=21" },
-  { id: "t7", nombre: "Ana Rojas", identificacion: "177889900", telefono: "+50688887777", whatsapp: "+50688887777", correo: "ana@elite.com", especialidad: "Baloncesto femenino", disciplinas: ["Baloncesto"], categorias: 0, sedeId: "s2", horario: "L–V 14:00–18:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=22" },
-  { id: "t8", nombre: "Roberto Ruiz", identificacion: "188990011", telefono: "+50688888888", whatsapp: "+50688888888", correo: "roberto@elite.com", especialidad: "Fútbol juvenil", disciplinas: ["Fútbol"], categorias: 0, sedeId: "s1", horario: "L–V 16:00–20:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=15" },
-  { id: "t9", nombre: "Laura Castro", identificacion: "199001122", telefono: "+50688889999", whatsapp: "+50688889999", correo: "lcastro@elite.com", especialidad: "Fútbol femenino", disciplinas: ["Fútbol"], categorias: 0, sedeId: "s1", horario: "M–V 17:00–21:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=23" },
-  { id: "t10", nombre: "Juan Pérez", identificacion: "200112233", telefono: "+50688880001", whatsapp: "+50688880001", correo: "juan@elite.com", especialidad: "Tenis individual", disciplinas: ["Tenis"], categorias: 0, sedeId: "s1", horario: "L–V 14:00–18:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=34" },
-  { id: "t11", nombre: "Pedro Ortiz", identificacion: "211223344", telefono: "+50688880002", whatsapp: "+50688880002", correo: "pedro@elite.com", especialidad: "Karate Do", disciplinas: ["Artes Marciales"], categorias: 0, sedeId: "s4", horario: "L–V 15:00–19:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=35" },
-  { id: "t12", nombre: "Sofía Rojas", identificacion: "222334455", telefono: "+50688880003", whatsapp: "+50688880003", correo: "srojas@elite.com", especialidad: "Velocidad y resistencia", disciplinas: ["Atletismo"], categorias: 0, sedeId: "s2", horario: "L–V 16:00–20:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=36" },
-  { id: "t13", nombre: "José Delgado", identificacion: "233445566", telefono: "+50688880004", whatsapp: "+50688880004", correo: "jdelgado@elite.com", especialidad: "Lanzamiento y bateo", disciplinas: ["Béisbol"], categorias: 0, sedeId: "s3", horario: "M–S 14:00–19:00", estado: "activo" as Estado, avatar: "https://i.pravatar.cc/100?img=37" },
-];
+export const entrenadores: any[] = [];
 
-export const equipos = [
-  { id: "eq_u13_edgar", nombre: "Asoderive U13", categoria: "Sub-13 Fútbol", disciplina: "Fútbol", entrenador: "Edgar Calderón", jugadores: 18, uniforme: "Verde / Blanco", estado: "activo" as Estado },
-  { id: "eq_u11_carlos", nombre: "U11", categoria: "Sub-11 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Araya", jugadores: 16, uniforme: "Azul / Blanco", estado: "activo" as Estado },
-  { id: "eq_asoderive_u11", nombre: "Asoderive U11", categoria: "Sub-11 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Araya", jugadores: 16, uniforme: "Azul / Blanco", estado: "activo" as Estado },
-  { id: "eq1", nombre: "Élite Sub-12 A", categoria: "Sub-12 Fútbol", disciplina: "Fútbol", entrenador: "Carlos Méndez", jugadores: 0, uniforme: "Azul / Blanco", estado: "activo" as Estado },
-  { id: "eq7", nombre: "Élite Sub-14", categoria: "Sub-14 Fútbol", disciplina: "Fútbol", entrenador: "Roberto Ruiz", jugadores: 0, uniforme: "Azul / Blanco", estado: "activo" as Estado },
-  { id: "eq2", nombre: "Élite Sub-15", categoria: "Sub-15 Fútbol", disciplina: "Fútbol", entrenador: "Roberto Ruiz", jugadores: 0, uniforme: "Azul / Negro", estado: "activo" as Estado },
-  { id: "eq3", nombre: "Élite Femenino", categoria: "Mayor Femenino", disciplina: "Fútbol", entrenador: "Laura Castro", jugadores: 0, uniforme: "Rojo / Blanco", estado: "activo" as Estado },
-  { id: "eq4", nombre: "Halcones Sub-14", categoria: "Sub-14 Baloncesto", disciplina: "Baloncesto", entrenador: "Marco Núñez", jugadores: 0, uniforme: "Naranja / Negro", estado: "activo" as Estado },
-  { id: "eq5", nombre: "Halcones Femenino", categoria: "Juvenil Baloncesto", disciplina: "Baloncesto", entrenador: "Ana Rojas", jugadores: 0, uniforme: "Negro / Rosa", estado: "activo" as Estado },
-  { id: "eq6", nombre: "Delfines Élite", categoria: "Competitivo Natación", disciplina: "Natación", entrenador: "Sofía Hidalgo", jugadores: 0, uniforme: "Azul marino", estado: "activo" as Estado },
-  { id: "eq8", nombre: "Élite Voleibol", categoria: "Sub-12 Voleibol", disciplina: "Voleibol", entrenador: "Laura Vargas", jugadores: 0, uniforme: "Azul / Amarillo", estado: "activo" as Estado },
-  { id: "eq9", nombre: "Academia Tenis", categoria: "Sub-15 Tenis", disciplina: "Tenis", entrenador: "Juan Pérez", jugadores: 0, uniforme: "Blanco / Verde", estado: "activo" as Estado },
-  { id: "eq10", nombre: "Garra Marcial", categoria: "Iniciación Artes Marciales", disciplina: "Artes Marciales", entrenador: "Pedro Ortiz", jugadores: 0, uniforme: "Karategui Blanco", estado: "activo" as Estado },
-  { id: "eq11", nombre: "Gacelas del Viento", categoria: "Juvenil Atletismo", disciplina: "Atletismo", entrenador: "Sofía Rojas", jugadores: 0, uniforme: "Negro / Amarillo", estado: "activo" as Estado },
-  { id: "eq12", nombre: "Cachorros Béisbol", categoria: "Sub-14 Béisbol", disciplina: "Béisbol", entrenador: "José Delgado", jugadores: 0, uniforme: "Gris / Rojo", estado: "activo" as Estado },
-];
+export const equipos: any[] = [];
 
 export const instalaciones: any[] = [];
 export const horarios: any[] = [];

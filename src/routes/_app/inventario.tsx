@@ -28,7 +28,7 @@ import {
   BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell,
 } from "recharts";
 
-export const Route = createFileRoute("/_app/inventario")({ component: InventarioPage });
+export const Route = createFileRoute("/_app/inventario")({ component: InventarioPage, ssr: false });
 
 // ─────────────────────────────────────────────
 //  TYPES

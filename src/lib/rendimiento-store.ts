@@ -34,6 +34,21 @@ export interface SistemaUsuario {
   avatar?: string;
 }
 
+export interface CitaFisioterapia {
+  id: string;
+  jugadorId: string;
+  jugadorNombre: string;
+  fisioterapeutaNombre: string;
+  fecha: string;
+  hora: string;
+  motivo: string;
+  tratamientoAplicado?: string;
+  nivelDolorEva?: number;
+  estado: "programada" | "completada" | "cancelada" | string;
+  notas?: string;
+  [key: string]: any;
+}
+
 export interface StoreJugador {
   id: string;
   nombre: string;
@@ -778,6 +793,35 @@ class RendimientoStore {
   private static isSynced = false;
   private static syncPromise: Promise<void> | null = null;
 
+  // ⚡ Cache buster: Se ejecuta INMEDIATAMENTE al cargar el módulo.
+  // Limpia memoryCache Y localStorage si detecta datos mock de sesiones anteriores.
+  private static _bustStaleMockData = (() => {
+    if (typeof window === "undefined") return;
+    const CACHE_VERSION = "v2026.07.23.c";
+    const MOCK_KEYS = ["equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics", "partidos", "partidos_dynamics"];
+    const storedVersion = localStorage.getItem("deportivos_cache_version");
+    if (storedVersion !== CACHE_VERSION) {
+      // Limpiar caches viejos de localStorage
+      MOCK_KEYS.forEach(k => {
+        localStorage.removeItem(`deportivos_cache_${k}`);
+        localStorage.removeItem(`deportivos_hp_${k}`);
+      });
+      // Resetear el flag de purga para que corra en la próxima sincronización
+      localStorage.removeItem("deportivos_mock_purge_v1");
+      localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
+    }
+    // Si la purga de datos mock de Supabase no se ha corrido aún, forzar re-sync
+    if (!localStorage.getItem("deportivos_mock_purge_v1")) {
+      setTimeout(() => {
+        try {
+          (RendimientoStore as any).isSynced = false;
+          (RendimientoStore as any).syncPromise = null;
+          RendimientoStore.syncFromSupabase();
+        } catch(_) {}
+      }, 100);
+    }
+  })();
+
   public static isStoreSynced(): boolean {
     return this.isSynced;
   }
@@ -789,6 +833,20 @@ class RendimientoStore {
 
     this.syncPromise = (async () => {
       try {
+      // Limpiar caché de datos mock guardados en localStorage de sesiones anteriores
+      const CACHE_VERSION = "v2025.07.23";
+      const storedVersion = localStorage.getItem("deportivos_cache_version");
+      if (storedVersion !== CACHE_VERSION) {
+        const mockKeys = ["equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics", "partidos"];
+        mockKeys.forEach(k => {
+          localStorage.removeItem(`deportivos_cache_${k}`);
+          localStorage.removeItem(`deportivos_hp_${k}`);
+        });
+        localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
+        // Limpiar memoryCache de datos viejos
+        mockKeys.forEach(k => { delete this.memoryCache[k]; });
+      }
+
       const org = this.getActiveOrganizacionId();
 
       const fetchTablePromise = async (table: string) => {
@@ -1220,6 +1278,54 @@ class RendimientoStore {
           try {
             localStorage.setItem(`deportivos_cache_${k}`, JSON.stringify(this.memoryCache[k]));
           } catch (err) {}
+        }
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // ASEGURAR EQUIPOS Y ENTRENADORES REALES PARA LA ORGANIZACIÓN
+      // ──────────────────────────────────────────────────────────────────────
+      const currentEquipos = this.memoryCache["equipos_dynamics"] || [];
+      const orgEquipos = currentEquipos.filter((e: any) => e.organizacion_id === org || !e.organizacion_id);
+
+      if (orgEquipos.length === 0) {
+        const defaultOrgEquipos = [
+          {
+            id: `eq_u13_${org.slice(0, 8)}`,
+            nombre: "Academia U13",
+            disciplina: "Fútbol",
+            categoria: "Sub-13",
+            entrenador: "D.T. Principal",
+            sede: "Sede Central",
+            estado: "activo",
+            organizacion_id: org,
+          },
+          {
+            id: `eq_u11_${org.slice(0, 8)}`,
+            nombre: "Academia U11",
+            disciplina: "Fútbol",
+            categoria: "Sub-11",
+            entrenador: "D.T. Carlos Fonseca",
+            sede: "Sede Central",
+            estado: "activo",
+            organizacion_id: org,
+          },
+          {
+            id: `eq_u15_${org.slice(0, 8)}`,
+            nombre: "Academia Sub-15 Élite",
+            disciplina: "Fútbol",
+            categoria: "Sub-15",
+            entrenador: "D.T. Principal",
+            sede: "Sede Central",
+            estado: "activo",
+            organizacion_id: org,
+          },
+        ];
+
+        this.memoryCache["equipos_dynamics"] = defaultOrgEquipos;
+        try {
+          await supabase.from("equipos").upsert(defaultOrgEquipos);
+        } catch (err) {
+          console.warn("[Supabase] Error autoguardando equipos de organización:", err);
         }
       }
 
@@ -2660,7 +2766,12 @@ class RendimientoStore {
     }
 
     const activeOrg = this.getActiveOrganizacionId();
-    const filtered = stored.filter(j => j.organizacion_id === activeOrg || (!j.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+    const isRealOrg = activeOrg && activeOrg !== "00000000-0000-0000-0000-000000000000";
+    let filtered = stored.filter(j => j.organizacion_id === activeOrg || (!j.organizacion_id && isRealOrg));
+    if (filtered.length === 0 && stored.length > 0) {
+      filtered = stored.map(j => ({ ...j, organizacion_id: activeOrg }));
+      this.set("jugadores_dynamics", filtered);
+    }
     return filtered.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
   }
 
@@ -2779,9 +2890,12 @@ class RendimientoStore {
   // --- ENTRENADORES DYNAMICS ---
   public static getEntrenadores(): StoreEntrenador[] {
     if (!this.isBrowser()) return [];
-    const stored = this.get<StoreEntrenador[]>("entrenadores_dynamics", entrenadores);
     const activeOrg = this.getActiveOrganizacionId();
-    return stored.filter(e => e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+    const stored = this.get<StoreEntrenador[]>("entrenadores_dynamics", []);
+    return stored.filter(e => 
+      (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
+      !e.id?.startsWith("t_main_") && !e.id?.startsWith("t_carlos_")
+    );
   }
 
   public static addEntrenador(e: Omit<StoreEntrenador, "id" | "categorias" | "avatar"> & { avatar?: string }): StoreEntrenador {
@@ -2803,9 +2917,7 @@ class RendimientoStore {
         identificacion: newEntrenador.identificacion,
         correo: newEntrenador.correo,
         telefono: newEntrenador.telefono,
-        whatsapp: newEntrenador.whatsapp,
         especialidad: newEntrenador.especialidad,
-        disciplinas: newEntrenador.disciplinas,
         sede_id: newEntrenador.sedeId,
         horario: newEntrenador.horario,
         estado: newEntrenador.estado,
@@ -2837,9 +2949,7 @@ class RendimientoStore {
         if (e.identificacion !== undefined) updateData.identificacion = e.identificacion;
         if (e.correo !== undefined) updateData.correo = e.correo;
         if (e.telefono !== undefined) updateData.telefono = e.telefono;
-        if (e.whatsapp !== undefined) updateData.whatsapp = e.whatsapp;
         if (e.especialidad !== undefined) updateData.especialidad = e.especialidad;
-        if (e.disciplinas !== undefined) updateData.disciplinas = e.disciplinas;
         if (e.sedeId !== undefined) updateData.sede_id = e.sedeId;
         if (e.horario !== undefined) updateData.horario = e.horario;
         if (e.estado !== undefined) updateData.estado = e.estado;
@@ -2873,18 +2983,33 @@ class RendimientoStore {
     }
   }
 
+  /** Helper para extraer edad numérica de categoría (ej: Sub-5 -> 5, U9 -> 9, Sub-13 -> 13) */
+  public static parseCategoryAge(catName: string): number {
+    if (!catName) return 999;
+    const match = catName.match(/\d+/);
+    if (match) return parseInt(match[0], 10);
+    const lower = catName.toLowerCase();
+    if (lower.includes("inici") || lower.includes("teter")) return 3;
+    if (lower.includes("infant")) return 8;
+    if (lower.includes("juven")) return 16;
+    if (lower.includes("mayo") || lower.includes("adul") || lower.includes("libre")) return 99;
+    return 100;
+  }
+
   // --- CATEGORIAS DYNAMICS ---
   public static getCategorias(): any[] {
     if (!this.isBrowser()) return [];
     const stored = this.get<any[]>("categorias_dynamics", categorias);
     const activeOrg = this.getActiveOrganizacionId();
-    return stored.map(cat => {
+    const filtered = stored.map(cat => {
       const val = cat.costo_mensual !== undefined && cat.costo_mensual !== null ? cat.costo_mensual : cat.costoMensual;
       return {
         ...cat,
         costoMensual: val !== undefined && val !== null ? Number(val) : 30000
       };
     }).filter(c => c.organizacion_id === activeOrg || (!c.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+
+    return filtered.sort((a, b) => this.parseCategoryAge(a.nombre || a.categoria) - this.parseCategoryAge(b.nombre || b.categoria));
   }
 
   public static addCategoria(c: any): any {
@@ -3009,12 +3134,28 @@ class RendimientoStore {
   public static getEquipos(): any[] {
     if (!this.isBrowser()) return [];
     const activeOrg = this.getActiveOrganizacionId();
-    const stored = this.get<any[] | null>("equipos_dynamics", equipos);
-    if (stored === null || stored.length === 0) {
-      this.set("equipos_dynamics", equipos);
-      return (equipos as any[]).filter(e => e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+    const stored = this.get<any[]>("equipos_dynamics", []);
+
+    const realAsoderiveTeams = [
+      { id: `eq_u9_${activeOrg.slice(0, 8)}`, nombre: "U9 Asoderive", disciplina: "Fútbol", categoria: "Sub-9", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
+      { id: `eq_u11_${activeOrg.slice(0, 8)}`, nombre: "U11 Asoderive", disciplina: "Fútbol", categoria: "Sub-11", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
+      { id: `eq_u13_${activeOrg.slice(0, 8)}`, nombre: "U13 Asoderive", disciplina: "Fútbol", categoria: "Sub-13", entrenador: "Eduardo Mora", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
+    ];
+
+    if (!stored || stored.length === 0 || !stored.some(e => e.nombre?.includes("Asoderive"))) {
+      this.memoryCache["equipos_dynamics"] = realAsoderiveTeams;
+      this.set("equipos_dynamics", realAsoderiveTeams);
+      supabase.from("equipos").upsert(realAsoderiveTeams).then(() => {});
+      return realAsoderiveTeams;
     }
-    return stored.filter(e => e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+
+    const filtered = stored.filter(e => 
+      (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
+      !e.nombre?.includes("U5") && e.categoria !== "Sub-5"
+    );
+    this.memoryCache["equipos_dynamics"] = filtered;
+    this.set("equipos_dynamics", filtered);
+    return filtered.sort((a, b) => this.parseCategoryAge(a.categoria || a.nombre) - this.parseCategoryAge(b.categoria || b.nombre));
   }
 
   public static getPartidos(): any[] {
@@ -3124,12 +3265,44 @@ class RendimientoStore {
   public static getSedes(): any[] {
     if (!this.isBrowser()) return [];
     const activeOrg = this.getActiveOrganizacionId();
-    const stored = this.get<any[] | null>("sedes_dynamics", null);
-    if (stored === null) {
-      this.set("sedes_dynamics", []);
-      return [];
+    const stored = this.get<any[] | null>("sedes_dynamics", []);
+
+    const defaultSedes = [
+      {
+        id: `sede_central_${activeOrg.slice(0, 8)}`,
+        nombre: "Sede Central — Campus Deportivo",
+        direccion: "Campus Deportivo Principal de la Academia",
+        ciudad: "San José",
+        telefono: "+506 2222-0000",
+        contacto: "Administración General",
+        canchasCount: 4,
+        canchas: [
+          "Cancha Principal (Grama Natural 11v11)",
+          "Cancha Sintética 1 (Fútbol 9)",
+          "Cancha 2 (Fútbol 7)",
+          "Gimnasio de Alto Rendimiento"
+        ],
+        estado: "activo",
+        organizacion_id: activeOrg,
+      },
+    ];
+
+    if (!stored || stored.length === 0) {
+      this.memoryCache["sedes_dynamics"] = defaultSedes;
+      this.set("sedes_dynamics", defaultSedes);
+      supabase.from("sedes").upsert(defaultSedes).then(() => {});
+      return defaultSedes;
     }
-    return stored.filter(s => s.organizacion_id === activeOrg);
+
+    const filtered = stored.filter(s => s.organizacion_id === activeOrg || !s.organizacion_id);
+    if (filtered.length === 0) {
+      this.memoryCache["sedes_dynamics"] = defaultSedes;
+      this.set("sedes_dynamics", defaultSedes);
+      supabase.from("sedes").upsert(defaultSedes).then(() => {});
+      return defaultSedes;
+    }
+
+    return filtered.map(s => ({ ...s, organizacion_id: activeOrg }));
   }
 
   public static addSede(sede: any): any {

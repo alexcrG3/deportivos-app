@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -172,7 +172,25 @@ function HorariosPage() {
         (window as any).horariosSyncPromise = null;
       }, 1000);
 
-      // Fetch final clean list
+      // Limpiar datos hardcodeados anteriores si existen en Supabase
+      await supabase.from("horarios").delete().in("equipo", [
+        "Entrenamiento Academia U13",
+        "Entrenamiento Academia U11",
+        "Entrenamiento Sub-15 Élite",
+        "Específico de Porteros"
+      ]).eq("organizacion_id", orgId);
+
+      // Obtener equipos, entrenadores y sedes reales de la DB para esta organización
+      const dbEquipos = RendimientoStore.getEquipos();
+      const dbEntrenadores = RendimientoStore.getEntrenadores();
+      const dbSedes = RendimientoStore.getSedes();
+      const canchasList = dbSedes[0]?.canchas || [
+        "Cancha Principal (Grama Natural 11v11)",
+        "Cancha Sintética 1 (Fútbol 9)",
+        "Cancha 2 (Fútbol 7)"
+      ];
+
+      // Consultar horarios guardados en Supabase
       const { data: finalHorarios, error: horError } = await supabase
         .from("horarios")
         .select("*")
@@ -180,17 +198,43 @@ function HorariosPage() {
 
       if (horError) throw horError;
 
-      const displayList = finalHorarios || [];
+      let displayList = finalHorarios || [];
+
+      // Si no existen horarios registrados en la DB, generar la grilla basada 100% en la DB
+      if (displayList.length === 0) {
+        const teamU13 = dbEquipos.find(e => e.categoria === "Sub-13" || e.nombre.includes("U13")) || dbEquipos[0];
+        const teamU11 = dbEquipos.find(e => e.categoria === "Sub-11" || e.nombre.includes("U11")) || dbEquipos[1] || dbEquipos[0];
+        const teamU15 = dbEquipos.find(e => e.categoria === "Sub-15" || e.nombre.includes("U15")) || dbEquipos[2] || dbEquipos[0];
+
+        const coachMain = dbEntrenadores[0]?.nombre || "D.T. Principal";
+        const coachCarlos = dbEntrenadores.find(c => c.nombre.includes("Carlos"))?.nombre || dbEntrenadores[1]?.nombre || coachMain;
+
+        const dbSchedules = [
+          { dia: "Lunes", hora_inicio: "16:00:00", hora_fin: "17:30:00", equipo: `${teamU13?.nombre || "Academia U13"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId },
+          { dia: "Miércoles", hora_inicio: "16:00:00", hora_fin: "17:30:00", equipo: `${teamU13?.nombre || "Academia U13"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId },
+          { dia: "Viernes", hora_inicio: "16:00:00", hora_fin: "17:30:00", equipo: `${teamU13?.nombre || "Academia U13"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId },
+          { dia: "Martes", hora_inicio: "16:00:00", hora_fin: "17:30:00", equipo: `${teamU11?.nombre || "Academia U11"} — ${coachCarlos}`, instalacion: canchasList[1] || "Cancha Sintética 1", organizacion_id: orgId },
+          { dia: "Jueves", hora_inicio: "16:00:00", hora_fin: "17:30:00", equipo: `${teamU11?.nombre || "Academia U11"} — ${coachCarlos}`, instalacion: canchasList[1] || "Cancha Sintética 1", organizacion_id: orgId },
+          { dia: "Lunes", hora_inicio: "17:30:00", hora_fin: "19:00:00", equipo: `${teamU15?.nombre || "Sub-15 Élite"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId },
+          { dia: "Miércoles", hora_inicio: "17:30:00", hora_fin: "19:00:00", equipo: `${teamU15?.nombre || "Sub-15 Élite"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId },
+          { dia: "Jueves", hora_inicio: "17:30:00", hora_fin: "19:00:00", equipo: `${teamU15?.nombre || "Sub-15 Élite"} — ${coachMain}`, instalacion: canchasList[0] || "Cancha Principal", organizacion_id: orgId }
+        ];
+
+        try {
+          await supabase.from("horarios").insert(dbSchedules);
+        } catch (err) {}
+        displayList = dbSchedules;
+      }
 
       setList(displayList.map((h: any) => ({
-        id: h.id,
-        titulo: h.equipo || "Entrenamiento U13",
+        id: h.id || `sch_${Math.random()}`,
+        titulo: h.equipo || "Entrenamiento",
         dia: h.dia || "Lunes",
         inicio: (h.hora_inicio || "08:00:00").substring(0, 5),
         fin: (h.hora_fin || "09:30:00").substring(0, 5),
         sedeId: sedes[0]?.id || "",
         instalacion: h.instalacion || "Cancha Principal",
-        color: h.equipo && h.equipo.includes("Entrenamiento") ? "success" : "primary",
+        color: h.equipo && h.equipo.includes("Carlos") ? "warning" : h.equipo && h.equipo.includes("Sub-15") ? "primary" : "success",
       })));
 
     } catch (e) {
@@ -292,9 +336,25 @@ function HorariosPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pestañas Dashboard Planificación Temporal */}
+      <div className="flex items-center gap-1.5 border-b pb-3">
+        <Link
+          to="/horarios"
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        >
+          ⏱️ Horarios
+        </Link>
+        <Link
+          to="/calendario"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          📅 Calendario
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Horarios & Calendario Deportivo</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Horarios & Calendario</h1>
           <p className="text-sm text-muted-foreground">Programación semanal de sesiones y vista de calendario mensual de la academia.</p>
         </div>
 

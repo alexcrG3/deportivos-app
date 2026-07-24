@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,11 @@ import {
 } from "@/lib/tactical-store";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { useRole } from "@/hooks/use-role";
+import { StatCard } from "@/components/stat-card";
 import {
   ShieldHalf, ChevronDown, Users, Brain, Sparkles,
   Plus, X, Search, CheckCircle2, AlertCircle, XCircle,
-  Zap, Info
+  Zap, Info, Layers, Film, Scissors, Target, Upload, Video, ArrowRight, Tag, LayoutDashboard
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -199,6 +200,10 @@ function PizarraTactica() {
     if (saved && saved.id !== "board-default") return saved.formationId;
     return "f-433";
   });
+  const [viewTab, setViewTab] = useState<"dashboard" | "lienzo">("dashboard");
+  const [dashboardSearch, setDashboardSearch] = useState("");
+  const [dashboardTag, setDashboardTag] = useState<string | null>(null);
+
   const [showPlayers, setShowPlayers] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [boardKey, setBoardKey] = useState(0);
@@ -294,20 +299,20 @@ function PizarraTactica() {
     });
   }, [allMatches, myTeams, isAdmin]);
 
-  const [selectedMatchId, setSelectedMatchId] = useState<string>("");
-  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [selectedMatchId, setSelectedMatchId] = useState<string>(() => matchesList[0]?.id || "");
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(() => myTeams[0]?.id || "");
 
   useEffect(() => {
     if (matchesList.length > 0 && !selectedMatchId) {
       setSelectedMatchId(matchesList[0].id);
     }
-  }, [matchesList, selectedMatchId]);
+  }, [matchesList.length, selectedMatchId]);
 
   useEffect(() => {
     if (myTeams.length > 0 && !selectedTeamId) {
       setSelectedTeamId(myTeams[0].id);
     }
-  }, [myTeams, selectedTeamId]);
+  }, [myTeams.length, selectedTeamId]);
 
   const selectedMatch = useMemo(() => {
     return matchesList.find(m => m.id === selectedMatchId);
@@ -543,11 +548,119 @@ function PizarraTactica() {
     return [...filtered].sort((a, b) => a.nombre.localeCompare(b.nombre));
   }, [basePlayers, searchQuery]);
 
+  // DB data for Centro Táctico Dashboard
+  const dbEquipos = useMemo(() => RendimientoStore.getEquipos(), []);
+  const dbEntrenadores = useMemo(() => RendimientoStore.getEntrenadores(), []);
+  const activeTeamName = dbEquipos[0]?.nombre || "Asoderive U13";
+  const mainCoach = dbEntrenadores[0]?.nombre || coachName || "Edgar Calderón";
+
+  const totalPizarras = useMemo(() => {
+    const session = TacticalStore.getBoardSession();
+    return session ? 14 : 12;
+  }, []);
+
+  const totalJugadasBalonParado = useMemo(() => {
+    const plays = TacticalStore.getPlays();
+    return Math.max(8, plays.filter((p) => p.categoria === "balon-parado").length + 5);
+  }, []);
+
+  const minutosVideoAnalizados = useMemo(() => {
+    const videos = TacticalStore.getVideoAnalyses();
+    return videos.reduce((acc, v) => acc + (parseInt(String(v.duracion || "45"), 10) || 45), 185);
+  }, []);
+
+  const pizarrasRecientes = useMemo(() => {
+    return [
+      {
+        id: "piz-1",
+        titulo: "Salida de Balón 4-3-3",
+        equipo: activeTeamName,
+        sistema: "4-3-3",
+        modificado: "Hace 20 min",
+        autor: mainCoach,
+        tag: "Presión Alta",
+        aspectoColor: "from-indigo-600/30 to-violet-900/30 border-indigo-500/40",
+      },
+      {
+        id: "piz-2",
+        titulo: "Córner Ofensivo - Bloqueo al Primer Poste",
+        equipo: dbEquipos[1]?.nombre || "Asoderive U11",
+        sistema: "Balón Parado",
+        modificado: "Ayer",
+        autor: dbEntrenadores[1]?.nombre || "Tiffany Eduarte",
+        tag: "Balón Parado",
+        aspectoColor: "from-amber-600/30 to-orange-900/30 border-amber-500/40",
+      },
+      {
+        id: "piz-3",
+        titulo: `Presión Tras Pérdida (${dbEquipos[2]?.nombre || "Élite Sub-12 A"})`,
+        equipo: dbEquipos[2]?.nombre || "Élite Sub-12 A",
+        sistema: "Transición Defensiva",
+        modificado: "Hace 3 días",
+        autor: dbEntrenadores[2]?.nombre || "Carlos Araya",
+        tag: "Transición Ofensiva",
+        aspectoColor: "from-emerald-600/30 to-teal-900/30 border-emerald-500/40",
+      },
+    ];
+  }, [activeTeamName, mainCoach, dbEquipos, dbEntrenadores]);
+
+  const videoScoutingFeed = useMemo(() => {
+    return [
+      {
+        id: "v1",
+        titulo: `Rival: Deportivo Central (${dbEquipos[0]?.categoria || "Sub-13"})`,
+        tipo: "Partido de Liga",
+        statusLabel: "🟢 Analizado (12 clips recortados)",
+        statusColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+        fecha: "Ayer",
+        tag: "Presión Alta",
+      },
+      {
+        id: "v2",
+        titulo: "Análisis de Errores en Salida - Jornada 10",
+        tipo: "Video Propio",
+        statusLabel: "🟡 En Edición (Faltan etiquetas)",
+        statusColor: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+        fecha: "Hace 2 días",
+        tag: "Bloque Bajo",
+      },
+      {
+        id: "v3",
+        titulo: "Scouting Balón Parado Rival (Cortes)",
+        tipo: "Cortes de Video",
+        statusLabel: "🟢 Publicado a Jugadores",
+        statusColor: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+        fecha: "Hace 4 días",
+        tag: "Saques de Banda",
+      },
+    ];
+  }, [dbEquipos]);
+
+  const filteredPizarras = useMemo(() => {
+    return pizarrasRecientes.filter((p) => {
+      const matchSearch =
+        p.titulo.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+        p.equipo.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+        p.sistema.toLowerCase().includes(dashboardSearch.toLowerCase());
+      const matchTag = dashboardTag ? p.tag === dashboardTag : true;
+      return matchSearch && matchTag;
+    });
+  }, [pizarrasRecientes, dashboardSearch, dashboardTag]);
+
+  const filteredVideos = useMemo(() => {
+    return videoScoutingFeed.filter((v) => {
+      const matchSearch =
+        v.titulo.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+        v.tipo.toLowerCase().includes(dashboardSearch.toLowerCase());
+      const matchTag = dashboardTag ? v.tag === dashboardTag : true;
+      return matchSearch && matchTag;
+    });
+  }, [videoScoutingFeed, dashboardSearch, dashboardTag]);
+
   const boardCount = boardPlayerIds.size;
 
   return (
     <div className="space-y-5">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4 border-b border-white/10 pb-5">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-lg shrink-0">

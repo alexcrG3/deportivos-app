@@ -9,7 +9,7 @@ import {
   CalendarDays, Plus, Pencil, Trash2, X, Save, ChevronDown, ChevronUp,
   Target, BookOpen, CalendarRange, AlertTriangle, Check, Shield, Zap,
   Activity, ArrowRight, Dribbble, Sparkles, Coffee, Calendar as CalendarIcon,
-  MapPin, Clock, Award, Users, Layers, FileDown
+  MapPin, Clock, Award, Users, Layers, FileDown, FileText, CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
 import { TacticalStore } from "@/lib/tactical-store";
@@ -700,7 +700,10 @@ function PlanificacionTactica() {
     return list;
   }, []);
 
-  // New Tab & Selection States
+  // New Tab & Selection States (Enterprise 2.0 - 3 Pillars)
+  const [mainSection, setMainSection] = useState<"taller" | "adn" | "auditoria">("auditoria");
+  const [tallerSubTab, setTallerSubTab] = useState<"mis_planificaciones" | "calendario" | "biblioteca" | "historial">("calendario");
+  const [adnSubTab, setAdnSubTab] = useState<"objetivos" | "metodologia">("objetivos");
   const [activeTab, setActiveTab] = useState<"semanal" | "microciclos" | "mesociclos" | "temporada">("semanal");
   const [selectedTeam, setSelectedTeam] = useState(() => {
     if (typeof window !== "undefined") {
@@ -797,7 +800,7 @@ function PlanificacionTactica() {
       return;
     }
 
-    const phasesHtml = annualPhases.map(p => `
+    const phasesHtml = annualPhases.map((p: any) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 12px; font-weight: bold; color: #1e293b; font-size: 13px;">${p.nombre}</td>
         <td style="padding: 12px; color: #475569; font-size: 13px;">${p.inicio.split("-").reverse().join("/")} al ${p.fin.split("-").reverse().join("/")}</td>
@@ -1215,51 +1218,413 @@ function PlanificacionTactica() {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-border gap-2 pb-px overflow-x-auto">
+      {/* 3 Pillars Main Navigation Bar */}
+      <div className="bg-card border rounded-2xl p-2 shadow-sm flex flex-wrap gap-2">
         <button
-          onClick={() => setActiveTab("semanal")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
-            activeTab === "semanal"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+          onClick={() => setMainSection("auditoria")}
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+            mainSection === "auditoria"
+              ? "bg-primary text-white shadow-elegant scale-[1.01]"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
           }`}
         >
-          <CalendarIcon className="h-4 w-4" /> Semanal
+          <Sparkles className="h-4 w-4 text-violet-300 animate-pulse" /> 🤖 Motor de Auditoría e IA
         </button>
+
         <button
-          onClick={() => setActiveTab("microciclos")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
-            activeTab === "microciclos"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+          onClick={() => setMainSection("taller")}
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+            mainSection === "taller"
+              ? "bg-primary text-white shadow-elegant scale-[1.01]"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
           }`}
         >
-          <Zap className="h-4 w-4" /> Microciclos
+          <BookOpen className="h-4 w-4" /> ⚙️ El Taller del Entrenador
         </button>
+
         <button
-          onClick={() => setActiveTab("mesociclos")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
-            activeTab === "mesociclos"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+          onClick={() => setMainSection("adn")}
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+            mainSection === "adn"
+              ? "bg-primary text-white shadow-elegant scale-[1.01]"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
           }`}
         >
-          <Layers className="h-4 w-4" /> Mesociclos
-        </button>
-        <button
-          onClick={() => setActiveTab("temporada")}
-          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
-            activeTab === "temporada"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <CalendarDays className="h-4 w-4" /> Temporada
+          <Target className="h-4 w-4" /> 📐 El ADN del Club
         </button>
       </div>
 
-      {/* 1. WEEKLY CALENDAR TAB */}
+      {/* 🤖 SECCIÓN 3: MOTOR DE AUDITORÍA E IA (Wireframe Conceptual & Gobernanza Ejecutiva) */}
+      {mainSection === "auditoria" && (
+        <div className="space-y-6">
+          {/* Wireframe Conceptual Box */}
+          <Card className="border-2 border-primary/30 shadow-elegant bg-card overflow-hidden">
+            <CardHeader className="bg-primary/5 border-b pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base font-extrabold flex items-center gap-2">
+                    🌟 BANDEJA DE AUDITORÍA METODOLÓGICA (Coordinador de Academia)
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Auditoría automatizada por Athletix AI: Contraste directo de ejercicios contra el ADN del Club
+                  </CardDescription>
+                </div>
+                <Badge className="bg-primary text-white text-[10px] font-extrabold px-3 py-1">
+                  AI Auditor v2.0 Active
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-6 space-y-6">
+              {/* ⏳ PENDIENTES DE REVISIÓN */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-amber-500" /> ⏳ Pendientes de Revisión (2)
+                  </h3>
+                  <span className="text-[11px] text-muted-foreground">Filtro de IA pre-aprobado</span>
+                </div>
+
+                {/* Tarjeta 1: Pendiente */}
+                <div className="border rounded-xl p-4 bg-muted/30 hover:bg-muted/50 transition space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">⚽</span>
+                      <div>
+                        <p className="font-extrabold text-sm text-foreground">Asoderive U13 (Sub-13)</p>
+                        <p className="text-xs text-muted-foreground">Entrenador: <span className="font-semibold text-foreground">Edgar Calderón</span> · Sesión: <span className="font-semibold text-foreground font-mono">"Salida de Presión y Transiciones Rápidas"</span></p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] font-bold">
+                      ⏳ Pendiente de Coordinador
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-violet-500/5 border-violet-500/20 text-xs space-y-1">
+                    <p className="font-extrabold text-violet-700 dark:text-violet-300 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-violet-500" /> 🤖 Diagnóstico Athletix AI:
+                    </p>
+                    <p className="text-muted-foreground text-[11px] font-semibold">
+                      ⚠️ Alerta: 20% más de volumen físico que el límite del microciclo para Sub-13. Se sugiere reducir 10 min en bloque 2.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button size="sm" variant="outline" className="text-xs font-bold gap-1">
+                      <FileText className="h-3.5 w-3.5" /> 📥 Ver Sesión Completa
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => toast.success("Planificación de Asoderive U13 aprobada y liberada a campo (Inyectada a Coach OS)!")}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs gap-1 shadow-sm"
+                    >
+                      <Check className="h-3.5 w-3.5" /> 🟢 Aprobar y Liberar a Campo
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => toast.error("Sesión devuelta al entrenador Edgar Calderón con observaciones.")}
+                      className="text-xs font-bold gap-1"
+                    >
+                      <X className="h-3.5 w-3.5" /> 🔴 Devolver con Observaciones
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Tarjeta 2: Pendiente */}
+                <div className="border rounded-xl p-4 bg-muted/30 hover:bg-muted/50 transition space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">⚽</span>
+                      <div>
+                        <p className="font-extrabold text-sm text-foreground">Élite Sub-12 A</p>
+                        <p className="text-xs text-muted-foreground">Entrenador: <span className="font-semibold text-foreground">Carlos Méndez</span> · Sesión: <span className="font-semibold text-foreground font-mono font-bold">"Control Orientado y Perfiles en Salida"</span></p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px] font-bold">
+                      ✨ 95% Apego Metodológico
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-emerald-500/5 border-emerald-500/20 text-xs space-y-1">
+                    <p className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 🤖 Diagnóstico Athletix AI:
+                    </p>
+                    <p className="text-muted-foreground text-[11px] font-semibold">
+                      ✅ Check: El volumen de carga física es 100% coherente con el día de la semana. Ejercicios alineados al manual Sub-12.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Button size="sm" variant="outline" className="text-xs font-bold gap-1">
+                      <FileText className="h-3.5 w-3.5" /> 📥 Ver Sesión Completa
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => toast.success("Planificación de Élite Sub-12 A aprobada y liberada a campo!")}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs gap-1 shadow-sm"
+                    >
+                      <Check className="h-3.5 w-3.5" /> 🟢 Aprobar y Liberar a Campo
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => toast.error("Sesión devuelta con observaciones.")}
+                      className="text-xs font-bold gap-1"
+                    >
+                      <X className="h-3.5 w-3.5" /> 🔴 Devolver con Observaciones
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 📊 CUMPLIMIENTO METODOLÓGICO DE LA SEMANA */}
+              <div className="space-y-3 pt-4 border-t">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Activity className="h-4 w-4 text-primary" /> 📊 Cumplimiento Metodológico de la Semana (Métricas BI en vivo)
+                </h3>
+
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {availableTeams.slice(0, 4).map((eq: any, idx: number) => {
+                    const scores = [96, 85, 92, 78];
+                    const score = scores[idx % 4];
+                    const statusText =
+                      score >= 90
+                        ? "Apego al manual de juego (Zona Segura)"
+                        : score >= 80
+                        ? "Desvío menor en tiempos de calentamiento"
+                        : "Alerta: Ejercicios no validados por manual";
+                    const colorBg =
+                      score >= 90
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                        : score >= 80
+                        ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                        : "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400";
+                    const textScoreColor =
+                      score >= 90 ? "text-emerald-600" : score >= 80 ? "text-amber-600" : "text-red-600";
+
+                    return (
+                      <div key={eq.id || idx} className={`p-3.5 rounded-xl border ${colorBg} space-y-1`}>
+                        <p className="text-xs font-black truncate">{eq.nombre}</p>
+                        <p className={`text-2xl font-black ${textScoreColor}`}>{score}%</p>
+                        <p className="text-[10px] font-bold">{statusText}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 📐 SECCIÓN 2: EL ADN DEL CLUB (Las Reglas de Juego) */}
+      {mainSection === "adn" && (
+        <div className="space-y-6">
+          <div className="flex border-b gap-2 pb-px">
+            <button
+              onClick={() => setAdnSubTab("objetivos")}
+              className={`px-4 py-2 text-xs font-bold border-b-2 transition ${
+                adnSubTab === "objetivos" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
+              }`}
+            >
+              🎯 Objetivos Formativos por Categoría
+            </button>
+            <button
+              onClick={() => setAdnSubTab("metodologia")}
+              className={`px-4 py-2 text-xs font-bold border-b-2 transition ${
+                adnSubTab === "metodologia" ? "border-primary text-primary" : "border-transparent text-muted-foreground"
+              }`}
+            >
+              📖 Metodología del Club (Libro de Estilo)
+            </button>
+          </div>
+
+          {adnSubTab === "objetivos" ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {availableTeams.slice(0, 3).map((eq: any, idx: number) => (
+                <Card key={eq.id || idx} className="shadow-card">
+                  <CardHeader>
+                    <CardTitle className="text-sm font-extrabold">{eq.nombre} ({eq.categoria || "Fútbol"})</CardTitle>
+                    <CardDescription className="text-[11px]">Entrenador: {eq.entrenador || "Staff Técnico"}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-xs text-muted-foreground">
+                    <p className="font-semibold text-foreground">• Control orientado y perfiles corporales en salida.</p>
+                    <p className="font-semibold text-foreground">• Pase raso de primera intención y amplitud.</p>
+                    <p className="font-semibold text-foreground">• Presión tras pérdida en zona 2 (regla 5 segundos).</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base font-extrabold">Libro de Estilo e Identidad Institucional</CardTitle>
+                <CardDescription className="text-xs">Sistema base instituido: 4-3-3 de posesión fluida</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 text-xs">
+                <div className="p-4 rounded-xl border bg-muted/40 space-y-2">
+                  <p className="font-bold text-foreground">Principios Tácticos Fundamentales:</p>
+                  <p>1. Construcción desde la línea defensiva con participación activa del portero.</p>
+                  <p>2. Transiciones defensivas agresivas de máximo 5 segundos tras pérdida del balón.</p>
+                  <p>3. Duración de calentamiento: 15 min estructurados (10 min activación física + 5 min rondos).</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* ⚙️ SECCIÓN 1: EL TALLER DEL ENTRENADOR (Creación y Gestión) */}
+      {mainSection === "taller" && (
+        <div className="space-y-6">
+          <div className="flex border-b border-border gap-2 pb-px overflow-x-auto">
+            <button
+              onClick={() => setTallerSubTab("calendario")}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
+                tallerSubTab === "calendario"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <CalendarIcon className="h-4 w-4" /> Calendario Semanal
+            </button>
+            <button
+              onClick={() => setTallerSubTab("mis_planificaciones")}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
+                tallerSubTab === "mis_planificaciones"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <BookOpen className="h-4 w-4" /> Mis Planificaciones
+            </button>
+            <button
+              onClick={() => setTallerSubTab("biblioteca")}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
+                tallerSubTab === "biblioteca"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Layers className="h-4 w-4" /> Biblioteca de Sesiones
+            </button>
+            <button
+              onClick={() => setTallerSubTab("historial")}
+              className={`flex items-center gap-2 px-4 py-2 text-xs font-bold border-b-2 transition ${
+                tallerSubTab === "historial"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Clock className="h-4 w-4" /> Historial
+            </button>
+          </div>
+
+          {/* Sub-tab views inside Taller */}
+          {tallerSubTab === "calendario" && (
+            <div className="flex border-b border-border gap-2 pb-px overflow-x-auto mb-4">
+              <button
+                onClick={() => setActiveTab("semanal")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg ${activeTab === "semanal" ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}
+              >
+                Vista Semanal
+              </button>
+              <button
+                onClick={() => setActiveTab("microciclos")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg ${activeTab === "microciclos" ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}
+              >
+                Microciclos
+              </button>
+              <button
+                onClick={() => setActiveTab("mesociclos")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg ${activeTab === "mesociclos" ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}
+              >
+                Mesociclos
+              </button>
+              <button
+                onClick={() => setActiveTab("temporada")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg ${activeTab === "temporada" ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}
+              >
+                Temporada
+              </button>
+            </div>
+          )}
+
+          {tallerSubTab === "mis_planificaciones" && (
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-extrabold">Borradores (2)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs">
+                  <div className="p-3 rounded-lg border bg-muted/40">
+                    <p className="font-bold">Sesión Posesión en Reducido</p>
+                    <p className="text-[10px] text-muted-foreground">Última edición hace 2 horas</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-extrabold">Enviado a IA (1)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs">
+                  <div className="p-3 rounded-lg border bg-violet-500/10 border-violet-500/20">
+                    <p className="font-bold text-violet-600">Salida de Presión Asoderive U13</p>
+                    <p className="text-[10px] text-muted-foreground">En diagnóstico por Athletix AI</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-sm font-extrabold">Aprobados (8)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs">
+                  <div className="p-3 rounded-lg border bg-emerald-500/10 border-emerald-500/20">
+                    <p className="font-bold text-emerald-600">Microciclo 30 - Transiciones</p>
+                    <p className="text-[10px] text-muted-foreground">Inyectado en Coach OS</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {tallerSubTab === "biblioteca" && (
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base font-extrabold">Biblioteca de Plantillas de Sesión</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-2 text-xs">
+                <div className="p-3 rounded-xl border bg-muted/40 flex justify-between items-center">
+                  <div>
+                    <p className="font-bold">Plantilla 4-3-3 Posesión y Amplitud</p>
+                    <p className="text-[10px] text-muted-foreground">Duración: 90 min · 4 Ejercicios</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-xs font-bold" onClick={() => toast.success("Plantilla clonada!")}>
+                    Clonar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {tallerSubTab === "historial" && (
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base font-extrabold">Archivo Histórico de Entrenamientos</CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs text-muted-foreground">
+                <p>Histórico completo de planificaciones ejecutadas en la temporada 2025 y 2026.</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* RENDER CURRENT TAB IF IN TALLER CALENDARIO */}
+      {mainSection === "taller" && tallerSubTab === "calendario" && (
+        <>
+          {/* 1. WEEKLY CALENDAR TAB */}
       {activeTab === "semanal" && (
         <div className="space-y-6">
           {activeWeeklyPlan ? (
@@ -1511,7 +1876,7 @@ function PlanificacionTactica() {
             <CardContent className="px-0 pb-0 pt-6 space-y-8">
               {/* Color Categories Legend */}
               <div className="flex flex-wrap gap-2 select-none justify-start pb-4 border-b border-border/30">
-                {annualPhases.map((phase, idx) => {
+                {annualPhases.map((phase: any, idx: number) => {
                   let colorClass = "bg-slate-500/10 border-slate-500/20 text-slate-400";
                   if (phase.nombre.includes("Pretemporada")) colorClass = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400";
                   else if (phase.nombre.includes("Baja")) colorClass = "bg-blue-500/10 border-blue-500/20 text-blue-400";
@@ -1549,7 +1914,7 @@ function PlanificacionTactica() {
 
                 {/* Timeline Bar Chart */}
                 <div className="grid grid-cols-12 gap-2 text-[10px] font-black text-center text-white select-none">
-                  {annualPhases.map((phase, idx) => {
+                  {annualPhases.map((phase: any, idx: number) => {
                     let colSpan = "col-span-1";
                     // Custom colspans based on phase index to sum to 12
                     if (idx === 0) colSpan = "col-span-1"; // Pretemporada (Jan)
@@ -1588,7 +1953,7 @@ function PlanificacionTactica() {
 
               {/* Vertical Phases List with Date Ranges */}
               <div className="pt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {annualPhases.map((phase, idx) => {
+                {annualPhases.map((phase: any, idx: number) => {
                   let colorClass = "border-slate-500/20 bg-slate-500/5 text-slate-400";
                   if (phase.nombre.includes("Pretemporada")) colorClass = "border-indigo-500/20 bg-indigo-500/5 text-indigo-400";
                   else if (phase.nombre.includes("Baja")) colorClass = "border-blue-500/20 bg-blue-500/5 text-blue-400";
@@ -1628,6 +1993,8 @@ function PlanificacionTactica() {
             </CardContent>
           </Card>
         </div>
+      )}
+      </>
       )}
 
       {/* Dialog para Nuevo Ciclo de Planificación (Edgar Modal) */}

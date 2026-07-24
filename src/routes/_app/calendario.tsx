@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -390,10 +390,26 @@ function CalendarioPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pestañas Dashboard Planificación Temporal */}
+      <div className="flex items-center gap-1.5 border-b pb-3">
+        <Link
+          to="/horarios"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          ⏱️ Horarios
+        </Link>
+        <Link
+          to="/calendario"
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        >
+          📅 Calendario
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Calendario</h1>
-          <p className="text-sm text-muted-foreground">Vista mensual de eventos, partidos y actividades.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Horarios & Calendario</h1>
+          <p className="text-sm text-muted-foreground">Vista global mensual de eventos, entrenamientos y agenda del club.</p>
         </div>
         <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
           <Plus className="h-4 w-4 mr-1" /> Nuevo evento

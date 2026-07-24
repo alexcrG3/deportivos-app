@@ -355,28 +355,77 @@ function RivalesTacticos() {
               </div>
             )}
 
-            {/* TAB CONTENT: FASES DE JUEGO */}
+            {/* TAB CONTENT: FASES DE JUEGO & VIDEO SCOUTING */}
             {activeTab === "analisis" && (
               <div className="space-y-4">
                 <Card className="bg-card border-border">
+                  <CardHeader className="p-3 pb-2 border-b">
+                    <CardTitle className="text-xs font-extrabold text-foreground flex items-center gap-2">
+                      <BrainCircuit className="h-4 w-4 text-primary" /> 🧠 Análisis Táctico Base & Estructura de Juego
+                    </CardTitle>
+                  </CardHeader>
+
                   <CardContent className="p-4 space-y-4 text-xs">
-                    <div>
-                      <h4 className="font-bold text-foreground mb-1">Ataque y Transiciones Ofensivas</h4>
-                      <p className="text-muted-foreground leading-relaxed">
-                        Tienden a iniciar salida rápida por bandas explotando el sistema base. {selectedOpp.fortalezas[0] || "Buen desborde"}.
-                      </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="p-3 rounded-xl border bg-muted/30 space-y-1">
+                        <p className="text-[10px] font-extrabold uppercase text-muted-foreground">Estructura & Bloque Defensivo</p>
+                        <p className="font-extrabold text-foreground">Sistema: {selectedOpp.sistemaBase} · <span className="text-amber-600 dark:text-amber-400 font-bold">Bloque Medio-Bajo</span></p>
+                        <p className="text-[11px] text-muted-foreground">Suelen replegar a 2 líneas de 4 al perder el balón en 3/4 de cancha.</p>
+                      </div>
+
+                      <div className="p-3 rounded-xl border bg-muted/30 space-y-1">
+                        <p className="text-[10px] font-extrabold uppercase text-muted-foreground">Presión & Salida de Balón</p>
+                        <p className="font-extrabold text-foreground"><span className="text-emerald-600 dark:text-emerald-400 font-bold">Presión Tras Pérdida</span></p>
+                        <p className="text-[11px] text-muted-foreground">Presionan los primeros 3 segundos con pivote y extremos para forzar el error.</p>
+                      </div>
                     </div>
-                    <div className="border-t border-border pt-3">
-                      <h4 className="font-bold text-foreground mb-1">Defensa y Repliegues</h4>
-                      <p className="text-muted-foreground leading-relaxed">
-                        Transición defensiva lenta. Suelen dejar amplios espacios a la espalda de los mediocampistas creativos.
+
+                    {/* Jugadores Peligrosos */}
+                    <div className="pt-2 space-y-2 border-t border-border">
+                      <p className="text-xs font-extrabold text-foreground flex items-center gap-1.5">
+                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" /> 🎯 Jugadores Peligrosos (Marca Especial)
                       </p>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="p-3 rounded-xl border bg-amber-500/5 border-amber-500/20 space-y-1">
+                          <p className="font-extrabold text-xs text-foreground">#7 - Extremo Izquierdo (Rápido)</p>
+                          <p className="text-[11px] text-muted-foreground font-medium">Engancha hacia adentro para buscar remate de diestra. <span className="text-primary font-bold">Marca: Cobertura de lateral + ayuda de contención.</span></p>
+                        </div>
+
+                        <div className="p-3 rounded-xl border bg-amber-500/5 border-amber-500/20 space-y-1">
+                          <p className="font-extrabold text-xs text-foreground">#10 - Volante Organizador</p>
+                          <p className="text-[11px] text-muted-foreground font-medium">Excelente visión de pase filtrado a la espalda de centrales. <span className="text-primary font-bold">Marca: Presión apretada antes de recepción.</span></p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="border-t border-border pt-3">
-                      <h4 className="font-bold text-foreground mb-1">Pelota Parada</h4>
-                      <p className="text-muted-foreground leading-relaxed">
-                        Fuerte defensa en zona para saques de esquina, pero vulnerables a combinaciones rápidas de esquina corta.
+
+                    {/* Video Clips de Táctica Fija */}
+                    <div className="pt-2 space-y-2 border-t border-border">
+                      <p className="text-xs font-extrabold text-foreground flex items-center gap-1.5">
+                        <Video className="h-4 w-4 text-teal-500" /> 🎥 Video Clips de Táctica Fija (Balón Parado)
                       </p>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="p-3 rounded-xl border bg-muted/40 flex items-center justify-between">
+                          <div>
+                            <p className="font-extrabold text-xs text-foreground">Córner Defensivo - Marca en Zona</p>
+                            <p className="text-[10px] text-muted-foreground">Clip de 25s · Salida de esquina corta</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="text-[10px] font-bold gap-1 border-teal-500/30 text-teal-600">
+                            <Video className="h-3 w-3" /> Ver Clip
+                          </Button>
+                        </div>
+
+                        <div className="p-3 rounded-xl border bg-muted/40 flex items-center justify-between">
+                          <div>
+                            <p className="font-extrabold text-xs text-foreground">Tiro Libre Directo - Jugada Ensayada</p>
+                            <p className="text-[10px] text-muted-foreground">Clip de 18s · Pase raso al borde del área</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="text-[10px] font-bold gap-1 border-teal-500/30 text-teal-600">
+                            <Video className="h-3 w-3" /> Ver Clip
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

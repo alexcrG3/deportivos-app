@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/sedes")({
   component: SedesPage,
+  ssr: false,
 });
 
 function SedesPage() {
@@ -26,6 +27,7 @@ function SedesPage() {
   const [encargado, setEncargado] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");
   const [wazeUrl, setWazeUrl] = useState("");
+  const [activeTab, setActiveTab] = useState<"sedes" | "instalaciones">("sedes");
 
   useEffect(() => {
     setMounted(true);
@@ -64,17 +66,39 @@ function SedesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Sedes</h1>
-          <p className="text-sm text-muted-foreground">Gestiona las ubicaciones de tu academia.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Sedes & Instalaciones</h1>
+          <p className="text-sm text-muted-foreground">Gestiona las sedes principales y las canchas o instalaciones asociadas a tu academia.</p>
         </div>
         <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
-          <Plus className="h-4 w-4" /> Nueva sede
+          <Plus className="h-4 w-4" /> {activeTab === "sedes" ? "Nueva sede" : "Nueva instalación"}
         </Button>
       </div>
 
-      {sedesList.length > 0 ? (
+      {/* Pestañas de Navegación Interna */}
+      <div className="flex items-center gap-2 border-b pb-2">
+        <Button
+          variant={activeTab === "sedes" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("sedes")}
+          className="font-bold text-xs gap-1.5"
+        >
+          <Building2 className="h-4 w-4" /> Sedes ({sedesList.length})
+        </Button>
+        <Button
+          variant={activeTab === "instalaciones" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setActiveTab("instalaciones")}
+          className="font-bold text-xs gap-1.5"
+        >
+          <MapPin className="h-4 w-4" /> Instalaciones & Canchas (3)
+        </Button>
+      </div>
+
+      {activeTab === "sedes" ? (
+        sedesList.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sedesList.map((s) => (
             <Card key={s.id} className="shadow-card transition-all hover:shadow-elegant hover:-translate-y-0.5">
@@ -125,6 +149,55 @@ function SedesPage() {
             <Plus className="h-3.5 w-3.5" /> Registrar primera sede
           </Button>
         </Card>
+      )
+      ) : (
+        /* Vista de Instalaciones y Canchas */
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="shadow-card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <Badge className="bg-primary/15 text-primary border-primary/30">Cancha Sintética 1</Badge>
+              <Badge variant="outline" className="bg-success/15 text-success">Disponible</Badge>
+            </div>
+            <p className="text-sm font-semibold text-foreground">Cancha Principal Fútbol 11 (Medidas Oficiales)</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" /> Sede Central — Campus Deportivo
+            </p>
+            <div className="pt-2 border-t text-xs text-muted-foreground flex justify-between">
+              <span>Superficie: Sintética Élite</span>
+              <span>Iluminación: LED 500 Lux</span>
+            </div>
+          </Card>
+
+          <Card className="shadow-card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <Badge className="bg-primary/15 text-primary border-primary/30">Cancha Sintética 2</Badge>
+              <Badge variant="outline" className="bg-success/15 text-success">Disponible</Badge>
+            </div>
+            <p className="text-sm font-semibold text-foreground">Cancha Auxiliar Fútbol 9 (Formación)</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" /> Sede Central — Campus Deportivo
+            </p>
+            <div className="pt-2 border-t text-xs text-muted-foreground flex justify-between">
+              <span>Superficie: Sintética</span>
+              <span>Iluminación: Sí</span>
+            </div>
+          </Card>
+
+          <Card className="shadow-card p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <Badge className="bg-primary/15 text-primary border-primary/30">Gimnasio & Readaptación</Badge>
+              <Badge variant="outline" className="bg-amber-500/15 text-amber-600">Mantenimiento</Badge>
+            </div>
+            <p className="text-sm font-semibold text-foreground">Centro de Valoración y Fisioterapia</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" /> Sede Heredia, Belén
+            </p>
+            <div className="pt-2 border-t text-xs text-muted-foreground flex justify-between">
+              <span>Equipamiento: Fuerza & Funcional</span>
+              <span>Área: 120 m²</span>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Creation Modal */}

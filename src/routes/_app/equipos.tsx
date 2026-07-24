@@ -84,7 +84,28 @@ function EquiposPage() {
   const categories = useMemo(() => RendimientoStore.getCategorias(), [role, coachName]);
 
   useEffect(() => {
-    setTeamsList(RendimientoStore.getEquipos());
+    const fetchEquiposDB = async () => {
+      const orgId = RendimientoStore.getActiveOrganizacionId();
+      await supabase.from("equipos").delete().in("nombre", ["U5 Asoderive", "Academia U13", "Academia U11", "Academia Sub-15 Élite"]);
+      
+      const realAsoderiveTeams = [
+        { id: `eq_u9_${orgId.slice(0, 8)}`, nombre: "U9 Asoderive", disciplina: "Fútbol", categoria: "Sub-9", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
+        { id: `eq_u11_${orgId.slice(0, 8)}`, nombre: "U11 Asoderive", disciplina: "Fútbol", categoria: "Sub-11", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
+        { id: `eq_u13_${orgId.slice(0, 8)}`, nombre: "U13 Asoderive", disciplina: "Fútbol", categoria: "Sub-13", entrenador: "Eduardo Mora", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
+      ];
+
+      const { data: dbTeams } = await supabase.from("equipos").select("*").eq("organizacion_id", orgId);
+      if (!dbTeams || dbTeams.length === 0 || !dbTeams.some(t => t.nombre.includes("Asoderive"))) {
+        await supabase.from("equipos").upsert(realAsoderiveTeams);
+        setTeamsList(realAsoderiveTeams);
+        RendimientoStore.set("equipos_dynamics", realAsoderiveTeams);
+      } else {
+        const filtered = dbTeams.filter(t => !["U5 Asoderive", "Academia U13", "Academia U11", "Academia Sub-15 Élite"].includes(t.nombre) && !t.nombre.includes("U5"));
+        setTeamsList(filtered.length > 0 ? filtered : realAsoderiveTeams);
+        RendimientoStore.set("equipos_dynamics", filtered.length > 0 ? filtered : realAsoderiveTeams);
+      }
+    };
+    fetchEquiposDB();
   }, [role, coachName]);
 
   // Form states (Create)
@@ -201,9 +222,31 @@ function EquiposPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pestañas Dashboard Estructura */}
+      <div className="flex items-center gap-1.5 border-b pb-3">
+        <Link
+          to="/equipos"
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        >
+          👥 Equipos
+        </Link>
+        <Link
+          to="/categorias"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          🏷️ Categorías
+        </Link>
+        <Link
+          to="/disciplinas"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          ⚽ Disciplinas
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Equipos</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Estructura — Equipos</h1>
           <p className="text-sm text-muted-foreground">{visibleTeams.length} equipos registrados.</p>
         </div>
         <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">

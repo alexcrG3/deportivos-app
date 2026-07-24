@@ -44,6 +44,7 @@ import { Route as AppIaRouteImport } from './routes/_app/ia'
 import { Route as AppHorariosRouteImport } from './routes/_app/horarios'
 import { Route as AppFinanzasRouteImport } from './routes/_app/finanzas'
 import { Route as AppFacturacionRouteImport } from './routes/_app/facturacion'
+import { Route as AppEvaluacionesStaffRouteImport } from './routes/_app/evaluaciones-staff'
 import { Route as AppEvaluacionesRouteImport } from './routes/_app/evaluaciones'
 import { Route as AppEquiposRouteImport } from './routes/_app/equipos'
 import { Route as AppEntrenamientosRouteImport } from './routes/_app/entrenamientos'
@@ -85,6 +86,7 @@ import { Route as AppTacticaMatrizRouteImport } from './routes/_app/tactica.matr
 import { Route as AppTacticaJugadasRouteImport } from './routes/_app/tactica.jugadas'
 import { Route as AppTacticaFormacionesRouteImport } from './routes/_app/tactica.formaciones'
 import { Route as AppTacticaEstrategiasRouteImport } from './routes/_app/tactica.estrategias'
+import { Route as AppTacticaDashboardRouteImport } from './routes/_app/tactica.dashboard'
 import { Route as AppTacticaBibliotecaRouteImport } from './routes/_app/tactica.biblioteca'
 import { Route as AppTacticaAnalisisIaRouteImport } from './routes/_app/tactica.analisis-ia'
 import { Route as AppRendimientoWellnessRouteImport } from './routes/_app/rendimiento.wellness'
@@ -93,6 +95,7 @@ import { Route as AppRendimientoSportsScienceRouteImport } from './routes/_app/r
 import { Route as AppRendimientoPlanificacionRouteImport } from './routes/_app/rendimiento.planificacion'
 import { Route as AppRendimientoLesionesRouteImport } from './routes/_app/rendimiento.lesiones'
 import { Route as AppRendimientoGpsRouteImport } from './routes/_app/rendimiento.gps'
+import { Route as AppRendimientoEvolucionRouteImport } from './routes/_app/rendimiento.evolucion'
 import { Route as AppRendimientoCargasRouteImport } from './routes/_app/rendimiento.cargas'
 import { Route as AppMedicoCitasRouteImport } from './routes/_app/medico.citas'
 import { Route as AppJugadoresIdRouteImport } from './routes/_app/jugadores.$id'
@@ -276,6 +279,11 @@ const AppFinanzasRoute = AppFinanzasRouteImport.update({
 const AppFacturacionRoute = AppFacturacionRouteImport.update({
   id: '/facturacion',
   path: '/facturacion',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEvaluacionesStaffRoute = AppEvaluacionesStaffRouteImport.update({
+  id: '/evaluaciones-staff',
+  path: '/evaluaciones-staff',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEvaluacionesRoute = AppEvaluacionesRouteImport.update({
@@ -483,6 +491,11 @@ const AppTacticaEstrategiasRoute = AppTacticaEstrategiasRouteImport.update({
   path: '/estrategias',
   getParentRoute: () => AppTacticaRoute,
 } as any)
+const AppTacticaDashboardRoute = AppTacticaDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppTacticaRoute,
+} as any)
 const AppTacticaBibliotecaRoute = AppTacticaBibliotecaRouteImport.update({
   id: '/biblioteca',
   path: '/biblioteca',
@@ -523,6 +536,11 @@ const AppRendimientoLesionesRoute = AppRendimientoLesionesRouteImport.update({
 const AppRendimientoGpsRoute = AppRendimientoGpsRouteImport.update({
   id: '/gps',
   path: '/gps',
+  getParentRoute: () => AppRendimientoRoute,
+} as any)
+const AppRendimientoEvolucionRoute = AppRendimientoEvolucionRouteImport.update({
+  id: '/evolucion',
+  path: '/evolucion',
   getParentRoute: () => AppRendimientoRoute,
 } as any)
 const AppRendimientoCargasRoute = AppRendimientoCargasRouteImport.update({
@@ -609,6 +627,7 @@ export interface FileRoutesByFullPath {
   '/entrenamientos': typeof AppEntrenamientosRoute
   '/equipos': typeof AppEquiposRoute
   '/evaluaciones': typeof AppEvaluacionesRoute
+  '/evaluaciones-staff': typeof AppEvaluacionesStaffRoute
   '/facturacion': typeof AppFacturacionRoute
   '/finanzas': typeof AppFinanzasRoute
   '/horarios': typeof AppHorariosRoute
@@ -646,6 +665,7 @@ export interface FileRoutesByFullPath {
   '/jugadores/$id': typeof AppJugadoresIdRoute
   '/medico/citas': typeof AppMedicoCitasRoute
   '/rendimiento/cargas': typeof AppRendimientoCargasRoute
+  '/rendimiento/evolucion': typeof AppRendimientoEvolucionRoute
   '/rendimiento/gps': typeof AppRendimientoGpsRoute
   '/rendimiento/lesiones': typeof AppRendimientoLesionesRoute
   '/rendimiento/planificacion': typeof AppRendimientoPlanificacionRoute
@@ -654,6 +674,7 @@ export interface FileRoutesByFullPath {
   '/rendimiento/wellness': typeof AppRendimientoWellnessRoute
   '/tactica/analisis-ia': typeof AppTacticaAnalisisIaRoute
   '/tactica/biblioteca': typeof AppTacticaBibliotecaRoute
+  '/tactica/dashboard': typeof AppTacticaDashboardRoute
   '/tactica/estrategias': typeof AppTacticaEstrategiasRoute
   '/tactica/formaciones': typeof AppTacticaFormacionesRoute
   '/tactica/jugadas': typeof AppTacticaJugadasRoute
@@ -704,6 +725,7 @@ export interface FileRoutesByTo {
   '/entrenamientos': typeof AppEntrenamientosRoute
   '/equipos': typeof AppEquiposRoute
   '/evaluaciones': typeof AppEvaluacionesRoute
+  '/evaluaciones-staff': typeof AppEvaluacionesStaffRoute
   '/facturacion': typeof AppFacturacionRoute
   '/finanzas': typeof AppFinanzasRoute
   '/horarios': typeof AppHorariosRoute
@@ -739,6 +761,7 @@ export interface FileRoutesByTo {
   '/jugadores/$id': typeof AppJugadoresIdRoute
   '/medico/citas': typeof AppMedicoCitasRoute
   '/rendimiento/cargas': typeof AppRendimientoCargasRoute
+  '/rendimiento/evolucion': typeof AppRendimientoEvolucionRoute
   '/rendimiento/gps': typeof AppRendimientoGpsRoute
   '/rendimiento/lesiones': typeof AppRendimientoLesionesRoute
   '/rendimiento/planificacion': typeof AppRendimientoPlanificacionRoute
@@ -747,6 +770,7 @@ export interface FileRoutesByTo {
   '/rendimiento/wellness': typeof AppRendimientoWellnessRoute
   '/tactica/analisis-ia': typeof AppTacticaAnalisisIaRoute
   '/tactica/biblioteca': typeof AppTacticaBibliotecaRoute
+  '/tactica/dashboard': typeof AppTacticaDashboardRoute
   '/tactica/estrategias': typeof AppTacticaEstrategiasRoute
   '/tactica/formaciones': typeof AppTacticaFormacionesRoute
   '/tactica/jugadas': typeof AppTacticaJugadasRoute
@@ -799,6 +823,7 @@ export interface FileRoutesById {
   '/_app/entrenamientos': typeof AppEntrenamientosRoute
   '/_app/equipos': typeof AppEquiposRoute
   '/_app/evaluaciones': typeof AppEvaluacionesRoute
+  '/_app/evaluaciones-staff': typeof AppEvaluacionesStaffRoute
   '/_app/facturacion': typeof AppFacturacionRoute
   '/_app/finanzas': typeof AppFinanzasRoute
   '/_app/horarios': typeof AppHorariosRoute
@@ -836,6 +861,7 @@ export interface FileRoutesById {
   '/_app/jugadores/$id': typeof AppJugadoresIdRoute
   '/_app/medico/citas': typeof AppMedicoCitasRoute
   '/_app/rendimiento/cargas': typeof AppRendimientoCargasRoute
+  '/_app/rendimiento/evolucion': typeof AppRendimientoEvolucionRoute
   '/_app/rendimiento/gps': typeof AppRendimientoGpsRoute
   '/_app/rendimiento/lesiones': typeof AppRendimientoLesionesRoute
   '/_app/rendimiento/planificacion': typeof AppRendimientoPlanificacionRoute
@@ -844,6 +870,7 @@ export interface FileRoutesById {
   '/_app/rendimiento/wellness': typeof AppRendimientoWellnessRoute
   '/_app/tactica/analisis-ia': typeof AppTacticaAnalisisIaRoute
   '/_app/tactica/biblioteca': typeof AppTacticaBibliotecaRoute
+  '/_app/tactica/dashboard': typeof AppTacticaDashboardRoute
   '/_app/tactica/estrategias': typeof AppTacticaEstrategiasRoute
   '/_app/tactica/formaciones': typeof AppTacticaFormacionesRoute
   '/_app/tactica/jugadas': typeof AppTacticaJugadasRoute
@@ -896,6 +923,7 @@ export interface FileRouteTypes {
     | '/entrenamientos'
     | '/equipos'
     | '/evaluaciones'
+    | '/evaluaciones-staff'
     | '/facturacion'
     | '/finanzas'
     | '/horarios'
@@ -933,6 +961,7 @@ export interface FileRouteTypes {
     | '/jugadores/$id'
     | '/medico/citas'
     | '/rendimiento/cargas'
+    | '/rendimiento/evolucion'
     | '/rendimiento/gps'
     | '/rendimiento/lesiones'
     | '/rendimiento/planificacion'
@@ -941,6 +970,7 @@ export interface FileRouteTypes {
     | '/rendimiento/wellness'
     | '/tactica/analisis-ia'
     | '/tactica/biblioteca'
+    | '/tactica/dashboard'
     | '/tactica/estrategias'
     | '/tactica/formaciones'
     | '/tactica/jugadas'
@@ -991,6 +1021,7 @@ export interface FileRouteTypes {
     | '/entrenamientos'
     | '/equipos'
     | '/evaluaciones'
+    | '/evaluaciones-staff'
     | '/facturacion'
     | '/finanzas'
     | '/horarios'
@@ -1026,6 +1057,7 @@ export interface FileRouteTypes {
     | '/jugadores/$id'
     | '/medico/citas'
     | '/rendimiento/cargas'
+    | '/rendimiento/evolucion'
     | '/rendimiento/gps'
     | '/rendimiento/lesiones'
     | '/rendimiento/planificacion'
@@ -1034,6 +1066,7 @@ export interface FileRouteTypes {
     | '/rendimiento/wellness'
     | '/tactica/analisis-ia'
     | '/tactica/biblioteca'
+    | '/tactica/dashboard'
     | '/tactica/estrategias'
     | '/tactica/formaciones'
     | '/tactica/jugadas'
@@ -1085,6 +1118,7 @@ export interface FileRouteTypes {
     | '/_app/entrenamientos'
     | '/_app/equipos'
     | '/_app/evaluaciones'
+    | '/_app/evaluaciones-staff'
     | '/_app/facturacion'
     | '/_app/finanzas'
     | '/_app/horarios'
@@ -1122,6 +1156,7 @@ export interface FileRouteTypes {
     | '/_app/jugadores/$id'
     | '/_app/medico/citas'
     | '/_app/rendimiento/cargas'
+    | '/_app/rendimiento/evolucion'
     | '/_app/rendimiento/gps'
     | '/_app/rendimiento/lesiones'
     | '/_app/rendimiento/planificacion'
@@ -1130,6 +1165,7 @@ export interface FileRouteTypes {
     | '/_app/rendimiento/wellness'
     | '/_app/tactica/analisis-ia'
     | '/_app/tactica/biblioteca'
+    | '/_app/tactica/dashboard'
     | '/_app/tactica/estrategias'
     | '/_app/tactica/formaciones'
     | '/_app/tactica/jugadas'
@@ -1404,6 +1440,13 @@ declare module '@tanstack/react-router' {
       path: '/facturacion'
       fullPath: '/facturacion'
       preLoaderRoute: typeof AppFacturacionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/evaluaciones-staff': {
+      id: '/_app/evaluaciones-staff'
+      path: '/evaluaciones-staff'
+      fullPath: '/evaluaciones-staff'
+      preLoaderRoute: typeof AppEvaluacionesStaffRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/evaluaciones': {
@@ -1693,6 +1736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTacticaEstrategiasRouteImport
       parentRoute: typeof AppTacticaRoute
     }
+    '/_app/tactica/dashboard': {
+      id: '/_app/tactica/dashboard'
+      path: '/dashboard'
+      fullPath: '/tactica/dashboard'
+      preLoaderRoute: typeof AppTacticaDashboardRouteImport
+      parentRoute: typeof AppTacticaRoute
+    }
     '/_app/tactica/biblioteca': {
       id: '/_app/tactica/biblioteca'
       path: '/biblioteca'
@@ -1747,6 +1797,13 @@ declare module '@tanstack/react-router' {
       path: '/gps'
       fullPath: '/rendimiento/gps'
       preLoaderRoute: typeof AppRendimientoGpsRouteImport
+      parentRoute: typeof AppRendimientoRoute
+    }
+    '/_app/rendimiento/evolucion': {
+      id: '/_app/rendimiento/evolucion'
+      path: '/evolucion'
+      fullPath: '/rendimiento/evolucion'
+      preLoaderRoute: typeof AppRendimientoEvolucionRouteImport
       parentRoute: typeof AppRendimientoRoute
     }
     '/_app/rendimiento/cargas': {
@@ -1842,6 +1899,7 @@ const AppIaRouteWithChildren = AppIaRoute._addFileChildren(AppIaRouteChildren)
 
 interface AppRendimientoRouteChildren {
   AppRendimientoCargasRoute: typeof AppRendimientoCargasRoute
+  AppRendimientoEvolucionRoute: typeof AppRendimientoEvolucionRoute
   AppRendimientoGpsRoute: typeof AppRendimientoGpsRoute
   AppRendimientoLesionesRoute: typeof AppRendimientoLesionesRoute
   AppRendimientoPlanificacionRoute: typeof AppRendimientoPlanificacionRoute
@@ -1853,6 +1911,7 @@ interface AppRendimientoRouteChildren {
 
 const AppRendimientoRouteChildren: AppRendimientoRouteChildren = {
   AppRendimientoCargasRoute: AppRendimientoCargasRoute,
+  AppRendimientoEvolucionRoute: AppRendimientoEvolucionRoute,
   AppRendimientoGpsRoute: AppRendimientoGpsRoute,
   AppRendimientoLesionesRoute: AppRendimientoLesionesRoute,
   AppRendimientoPlanificacionRoute: AppRendimientoPlanificacionRoute,
@@ -1869,6 +1928,7 @@ const AppRendimientoRouteWithChildren = AppRendimientoRoute._addFileChildren(
 interface AppTacticaRouteChildren {
   AppTacticaAnalisisIaRoute: typeof AppTacticaAnalisisIaRoute
   AppTacticaBibliotecaRoute: typeof AppTacticaBibliotecaRoute
+  AppTacticaDashboardRoute: typeof AppTacticaDashboardRoute
   AppTacticaEstrategiasRoute: typeof AppTacticaEstrategiasRoute
   AppTacticaFormacionesRoute: typeof AppTacticaFormacionesRoute
   AppTacticaJugadasRoute: typeof AppTacticaJugadasRoute
@@ -1885,6 +1945,7 @@ interface AppTacticaRouteChildren {
 const AppTacticaRouteChildren: AppTacticaRouteChildren = {
   AppTacticaAnalisisIaRoute: AppTacticaAnalisisIaRoute,
   AppTacticaBibliotecaRoute: AppTacticaBibliotecaRoute,
+  AppTacticaDashboardRoute: AppTacticaDashboardRoute,
   AppTacticaEstrategiasRoute: AppTacticaEstrategiasRoute,
   AppTacticaFormacionesRoute: AppTacticaFormacionesRoute,
   AppTacticaJugadasRoute: AppTacticaJugadasRoute,
@@ -1929,6 +1990,7 @@ interface AppRouteChildren {
   AppEntrenamientosRoute: typeof AppEntrenamientosRoute
   AppEquiposRoute: typeof AppEquiposRoute
   AppEvaluacionesRoute: typeof AppEvaluacionesRoute
+  AppEvaluacionesStaffRoute: typeof AppEvaluacionesStaffRoute
   AppFacturacionRoute: typeof AppFacturacionRoute
   AppFinanzasRoute: typeof AppFinanzasRoute
   AppHorariosRoute: typeof AppHorariosRoute
@@ -1992,6 +2054,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppEntrenamientosRoute: AppEntrenamientosRoute,
   AppEquiposRoute: AppEquiposRoute,
   AppEvaluacionesRoute: AppEvaluacionesRoute,
+  AppEvaluacionesStaffRoute: AppEvaluacionesStaffRoute,
   AppFacturacionRoute: AppFacturacionRoute,
   AppFinanzasRoute: AppFinanzasRoute,
   AppHorariosRoute: AppHorariosRoute,

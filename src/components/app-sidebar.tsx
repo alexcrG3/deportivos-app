@@ -6,18 +6,16 @@ import { equipos as staticEquipos } from "@/lib/mock-data";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { supabase } from "@/lib/supabase";
 import {
-  LayoutDashboard, Users, Building2, Wallet, Receipt, UserRound, Settings, Trophy,
-  Dribbble, Layers, ShieldHalf, Megaphone, CalendarDays, ClipboardCheck, CalendarRange,
-  MapPinned, BarChart3, Activity, FileText, Banknote, Workflow, MessageSquare, Bell, ScrollText,
-  ScanLine, Target, UserPlus, ClipboardList, Sparkles, Brain, AlertTriangle, Lightbulb, TrendingUp, Bot,
-  Dumbbell, BookOpen, LayoutTemplate, Swords, HeartPulse, Flag, NotebookPen, Star, Command,
-  Medal, ListOrdered, Gauge, Stethoscope, Timer, Flame, ChevronRight, Filter, GitBranch,
-  MessageCircle, Mail, HandCoins, AlertOctagon, GraduationCap, ShieldCheck, KeyRound, Sliders, Plug, Package, ShoppingBag, LifeBuoy,
+  LayoutDashboard, Users, Building2, Wallet, Settings, Trophy,
+  Megaphone, Activity, Workflow, Sparkles, Gauge, Stethoscope,
+  Package, ShoppingBag, HelpCircle, GitFork, Laptop, Presentation,
+  Filter, UserCheck, LineChart, HeartPulse, ChevronRight, ChevronDown, ChevronUp, Command,
+  CalendarDays, ScanLine, MessageSquare, ShieldHalf, UserRound, User, Calendar, CheckSquare,
+  CalendarCheck, Folder, GraduationCap, Star, TrendingUp, Palmtree, Banknote, Pill, ClipboardCheck, Ambulance, Hospital
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
-  SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -26,303 +24,207 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-type SubItem = { title: string; url: string; search?: Record<string, any> };
-type Module = {
+export type SubLink = { title: string; url: string; icon?: React.ComponentType<{ className?: string; strokeWidth?: number; size?: number; color?: string }>; search?: Record<string, any> };
+export type SidebarItem = {
   id: string;
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number; size?: number; color?: string }>;
   url: string;
-  items?: SubItem[];
+  subLinks?: SubLink[];
+  childrenItems?: SidebarItem[];
+};
+export type SidebarSection = {
+  header?: string;
+  items: SidebarItem[];
 };
 
-const ADMIN_MODULES: Module[] = [
-  { id: "saas-admin", title: "Centro de Mando", icon: Building2, url: "/saas-admin" },
+const ADMIN_NAV_SECTIONS: SidebarSection[] = [
   {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    url: "/dashboard",
+    header: "GESTIÓN DE ACADEMIA",
     items: [
-      { title: "Resumen Ejecutivo", url: "/dashboard" },
-      { title: "Centro de Atención", url: "/dashboard" },
-      { title: "Agenda del Día", url: "/calendario" },
-      { title: "Alertas IA", url: "/ia" },
-      { title: "Actividad Reciente", url: "/dashboard" },
+      { id: "dashboard", title: "Dashboard", icon: LayoutDashboard, url: "/dashboard" },
+      {
+        id: "operacion",
+        title: "Operación Deportiva",
+        icon: Activity,
+        url: "/operacion",
+        childrenItems: [
+          { id: "op_jugadores", title: "Jugadores", icon: User, url: "/jugadores" },
+          {
+            id: "op_estructura",
+            title: "Estructura",
+            icon: Users,
+            url: "/categorias",
+          },
+          {
+            id: "op_planificacion",
+            title: "Horarios & Calendario",
+            icon: Calendar,
+            url: "/horarios",
+          },
+          {
+            id: "op_control_campo",
+            title: "Control de Campo",
+            icon: CheckSquare,
+            url: "/asistencia",
+            subLinks: [
+              { title: "Asistencia", url: "/asistencia" },
+              { title: "Check QR", url: "/checkin" },
+              { title: "Convocatorias", url: "/convocatorias" },
+            ],
+          },
+          {
+            id: "op_sedes",
+            title: "Sedes & Instalaciones",
+            icon: Building2,
+            url: "/sedes",
+          },
+        ],
+      },
     ],
   },
   {
-    id: "operacion_deportiva",
-    title: "Operación Deportiva",
-    icon: Building2,
-    url: "/jugadores",
+    header: "ÁREA TÉCNICA",
     items: [
-      { title: "Jugadores", url: "/jugadores" },
-      { title: "Equipos", url: "/equipos" },
-      { title: "Categorías", url: "/categorias" },
-      { title: "Disciplinas", url: "/disciplinas" },
-      { title: "Horarios", url: "/horarios" },
-      { title: "Calendario Deportivo", url: "/calendario" },
-      { title: "Asistencia", url: "/asistencia" },
-      { title: "Check-in QR", url: "/checkin" },
-      { title: "Convocatorias", url: "/convocatorias" },
-      { title: "Sedes e Instalaciones", url: "/sedes" },
+      {
+        id: "coordinacion_general",
+        title: "Coordinación General",
+        icon: GitFork,
+        url: "/tactica",
+        subLinks: [
+          { title: "Planificación Metodológica", url: "/tactica/planificacion" },
+        ],
+        childrenItems: [
+          {
+            id: "coach_os",
+            title: "Coach OS",
+            icon: Laptop,
+            url: "/coach",
+            subLinks: [
+              { title: "Sesiones", url: "/entrenamientos" },
+              { title: "Entrenamientos", url: "/plantillas" },
+              { title: "Convocatorias", url: "/convocatorias" },
+              { title: "Objetivos", url: "/objetivos" },
+              { title: "Evaluación de Jugadores", url: "/evaluaciones" },
+              { title: "Planeamiento", url: "/tactica/planificacion" },
+              { title: "Bitácora", url: "/diario" },
+            ],
+          },
+          {
+            id: "centro_tactico",
+            title: "Centro Táctico",
+            icon: Presentation,
+            url: "/tactica/dashboard",
+            subLinks: [
+              { title: "Pizarra", url: "/tactica/pizarra" },
+              { title: "Sistemas y Jugadas", url: "/tactica/jugadas" },
+              { title: "Videoanálisis", url: "/tactica/video" },
+              { title: "Biblioteca", url: "/biblioteca" },
+            ],
+          },
+          {
+            id: "competiciones",
+            title: "Competiciones",
+            icon: Trophy,
+            url: "/partidos",
+            subLinks: [
+              { title: "Torneos", url: "/competiciones" },
+              { title: "Rivales", url: "/tactica/rivales" },
+            ],
+          },
+          {
+            id: "alto_rendimiento",
+            title: "Alto Rendimiento",
+            icon: Gauge,
+            url: "",
+            subLinks: [
+              { title: "Wellness", url: "/rendimiento/wellness" },
+              { title: "Control de Cargas", url: "/rendimiento/cargas" },
+              { title: "Test Físicos", url: "/rendimiento/tests" },
+              { title: "Sport Science", url: "/rendimiento/sports-science" },
+              { title: "GPS y Wearables", url: "/rendimiento/gps" },
+              { title: "Evolución Física", url: "/rendimiento/evolucion" },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
-    id: "area_tecnica_auditoria",
-    title: "Área Técnica",
-    icon: ShieldHalf,
-    url: "/coach",
+    header: "CAPTACIÓN",
     items: [
-      { title: "Coach OS", url: "/coach" },
-      { title: "  ├─ Mis Equipos", url: "/equipos" },
-      { title: "  ├─ Planificaciones", url: "/tactica/planificacion" },
-      { title: "  ├─ Biblioteca Ejercicios", url: "/biblioteca" },
-      { title: "  ├─ Entrenamientos", url: "/entrenamientos" },
-      { title: "  └─ Evaluaciones Técnicas", url: "/evaluaciones" },
-      { title: "Centro Táctico", url: "/tactica" },
-      { title: "  ├─ Pizarra Táctica", url: "/tactica/pizarra" },
-      { title: "  ├─ Formaciones y Sistemas", url: "/tactica/formaciones" },
-      { title: "  ├─ Jugadas", url: "/tactica/jugadas" },
-      { title: "  └─ Videos", url: "/tactica/video" },
-      { title: "Competiciones", url: "/competiciones" },
-      { title: "  ├─ Partidos y Torneos", url: "/partidos" },
-      { title: "  ├─ Estadísticas y Resultados", url: "/reportes" },
-      { title: "  └─ Rivales", url: "/tactica/rivales" },
-      { title: "Alto Rendimiento", url: "/rendimiento" },
-      { title: "  ├─ Wellness", url: "/rendimiento/wellness" },
-      { title: "  ├─ Control de Cargas", url: "/rendimiento/cargas" },
-      { title: "  ├─ Test Físicos", url: "/rendimiento/tests" },
-      { title: "  ├─ Sport Science", url: "/rendimiento/sports-science" },
-      { title: "  └─ GPS & Wearables", url: "/rendimiento/gps" },
+      {
+        id: "crm",
+        title: "CRM Deportivo",
+        icon: Filter,
+        url: "/crm",
+      },
     ],
   },
   {
-    id: "crm_deportivo",
-    title: "CRM Deportivo",
-    icon: UserPlus,
-    url: "/crm",
+    header: "ADMINISTRACIÓN Y CONTROL",
     items: [
-      { title: "Leads", url: "/leads" },
-      { title: "Prospectos", url: "/prospectos" },
-      { title: "Pruebas Deportivas", url: "/pruebas" },
-      { title: "Embudo de Captación", url: "/captacion" },
-      { title: "Campañas", url: "/campanas" },
-      { title: "Alertas de Retención", url: "/retencion" },
-      { title: "Riesgo de Abandono", url: "/ia.riesgos" },
-      { title: "Seguimiento Comercial", url: "/crm" },
+      {
+        id: "personal",
+        title: "Personal",
+        icon: UserCheck,
+        url: "/entrenadores",
+        subLinks: [
+          { title: "Asistencia", url: "/asistencia-staff", icon: CalendarCheck },
+          { title: "Evaluaciones", url: "/evaluaciones-staff", icon: Star },
+          { title: "Rendimiento", url: "/reportes", icon: TrendingUp },
+          { title: "Nómina", url: "/finanzas", search: { tab: "nomina" }, icon: Banknote },
+        ],
+      },
+      {
+        id: "finanzas",
+        title: "Finanzas y Caja",
+        icon: Wallet,
+        url: "/finanzas",
+        subLinks: [
+          { title: "Mensualidades", url: "/pagos" },
+          { title: "Estados de Cuenta", url: "/balance" },
+        ],
+      },
+      {
+        id: "area_medica",
+        title: "Área Médica",
+        icon: HeartPulse,
+        url: "/medico",
+        subLinks: [
+          { title: "Historial Clínico", url: "/medico", search: { tab: "historial" }, icon: User },
+          { title: "Lesiones", url: "/rendimiento/lesiones", icon: Ambulance },
+          { title: "Fisioterapia", url: "/medico/citas", icon: Stethoscope },
+          { title: "Tratamientos", url: "/medico", search: { tab: "tratamientos" }, icon: Pill },
+          { title: "Citas", url: "/medico/citas", icon: CalendarDays },
+          { title: "Aptitud Deportiva", url: "/medico", search: { tab: "aptitud" }, icon: ClipboardCheck },
+          { title: "Reportes", url: "/reportes", search: { tab: "medico" }, icon: LineChart },
+        ],
+      },
+      {
+        id: "logistica",
+        title: "Logística e Inventario",
+        icon: Package,
+        url: "/inventario",
+        subLinks: [
+          { title: "Tienda", url: "/tienda" },
+          { title: "Inventario", url: "/inventario" },
+        ],
+      },
     ],
   },
   {
-    id: "control_staff",
-    title: "Staff",
-    icon: UserRound,
-    url: "/entrenadores",
+    header: "SISTEMA",
     items: [
-      { title: "Entrenadores", url: "/entrenadores" },
-      { title: "Preparadores Físicos", url: "/entrenadores" },
-      { title: "Fisioterapeutas", url: "/medico" },
-      { title: "Administrativos", url: "/personal" },
-      { title: "Asistencia Staff", url: "/asistencia-staff" },
-      { title: "Horarios Staff", url: "/horarios" },
-      { title: "Vacaciones & Permisos", url: "/personal" },
-      { title: "Evaluaciones", url: "/evaluaciones" },
-      { title: "Certificaciones", url: "/personal" },
-      { title: "Reporte de Rendimiento", url: "/reportes" },
-    ],
-  },
-  {
-    id: "finanzas_facturacion",
-    title: "Finanzas",
-    icon: Wallet,
-    url: "/finanzas",
-    items: [
-      { title: "Dashboard Financiero", url: "/finanzas" },
-      { title: "Mensualidades", url: "/pagos" },
-      { title: "Estados de Cuenta", url: "/balance" },
-      { title: "Morosidad", url: "/morosidad" },
-      { title: "Becas y Descuentos", url: "/becas" },
-      { title: "Facturación Electrónica CR", url: "/facturacion" },
-      { title: "Caja", url: "/caja" },
-      { title: "Movimientos", url: "/caja" },
-      { title: "Egresos", url: "/egresos" },
-      { title: "Nómina", url: "/finanzas", search: { tab: "nomina" } },
-      { title: "Reportes Financieros", url: "/reportes" },
-    ],
-  },
-  {
-    id: "area_medica_fisioterapia",
-    title: "Área Médica",
-    icon: Stethoscope,
-    url: "/medico",
-    items: [
-      { title: "Historial Médico", url: "/medico" },
-      { title: "Lesiones & Recuperación", url: "/rendimiento/lesiones" },
-      { title: "Wellness Clínico", url: "/rendimiento/wellness" },
-      { title: "Fisioterapia & Citas", url: "/medico/citas" },
-      { title: "Directorio Médico", url: "/medico" },
-      { title: "Medicamentos & Restricciones", url: "/medico" },
-      { title: "Alta Médica", url: "/medico" },
-    ],
-  },
-  {
-    id: "logistica_indumentaria",
-    title: "Logística",
-    icon: Package,
-    url: "/inventario",
-    items: [
-      { title: "Inventario", url: "/inventario" },
-      { title: "Uniformes", url: "/tienda" },
-      { title: "Equipamiento Deportivo", url: "/inventario" },
-      { title: "Material de Entrenamiento", url: "/inventario" },
-      { title: "Compras & Proveedores", url: "/inventario" },
-      { title: "Préstamos & Activos", url: "/inventario" },
-    ],
-  },
-  {
-    id: "comunicacion",
-    title: "Comunicación",
-    icon: Megaphone,
-    url: "/muro",
-    items: [
-      { title: "Muro del Club", url: "/muro" },
-      { title: "Noticias & Anuncios", url: "/muro" },
-      { title: "Eventos", url: "/calendario" },
-      { title: "Notificaciones Push", url: "/notificaciones" },
-      { title: "WhatsApp & Correos", url: "/comunicaciones" },
-      { title: "Encuestas & Documentos", url: "/plantillas" },
-    ],
-  },
-  {
-    id: "ia_automatizacion",
-    title: "IA & Automatización",
-    icon: Sparkles,
-    url: "/ia",
-    items: [
-      { title: "Athletix AI (Asistente)", url: "/ia.asistente" },
-      { title: "Automatizaciones & Flujos", url: "/workflows" },
-      { title: "Predicciones de Riesgo", url: "/ia.predicciones" },
-      { title: "Análisis IA & Scores", url: "/ia.insights" },
-    ],
-  },
-  {
-    id: "business_intelligence",
-    title: "Business Intelligence",
-    icon: TrendingUp,
-    url: "/reportes",
-    items: [
-      { title: "Dashboard Ejecutivo", url: "/reportes" },
-      { title: "KPIs & Comparativas", url: "/reportes" },
-      { title: "Rendimiento Entrenadores", url: "/reportes" },
-      { title: "Rendimiento Jugadores", url: "/reportes" },
-      { title: "Crecimiento & Retención", url: "/retencion" },
-      { title: "Rentabilidad & Ocupación", url: "/balance" },
-    ],
-  },
-  {
-    id: "configuracion_general",
-    title: "Configuración",
-    icon: Settings,
-    url: "/configuracion",
-    items: [
-      { title: "Academia & Parámetros", url: "/configuracion" },
-      { title: "Usuarios & Permisos", url: "/configuracion" },
-      { title: "Integraciones", url: "/configuracion" },
-      { title: "Plantillas", url: "/plantillas" },
-      { title: "Auditoría & Seguridad", url: "/auditoria" },
-    ],
-  },
-  {
-    id: "soporte_tickets",
-    title: "Soporte",
-    icon: LifeBuoy,
-    url: "/soporte",
-    items: [
-      { title: "Centro de Ayuda", url: "/soporte" },
-      { title: "Reportar Problema", url: "/soporte" },
-      { title: "Sugerencias & Contacto", url: "/soporte" },
+      { id: "bi", title: "Business Intelligence", icon: LineChart, url: "/reportes" },
+      { id: "ia", title: "IA & Automatización", icon: Sparkles, url: "/ia" },
+      { id: "configuracion", title: "Configuración General", icon: Settings, url: "/configuracion" },
+      { id: "soporte", title: "Soporte & Sugerencias", icon: HelpCircle, url: "/soporte" },
     ],
   },
 ];
 
-const COACH_MODULES: Module[] = [
-  {
-    id: "coach", title: "Inicio Coach OS", icon: Command, url: "/coach",
-    items: [
-      { title: "Mis Equipos", url: "/equipos", items: [] } as any,
-      { title: "Entrenamientos", url: "/entrenamientos" },
-      { title: "Convocatorias", url: "/convocatorias" },
-      { title: "Objetivos", url: "/objetivos" },
-      { title: "Diario del entrenador", url: "/diario" },
-      { title: "Biblioteca", url: "/biblioteca" },
-    ]
-  },
-  { id: "calendario", title: "Calendario", icon: CalendarDays, url: "/calendario" },
-  {
-    id: "tactica", title: "Centro Táctico", icon: ShieldHalf, url: "/tactica",
-    items: [
-      { title: "Pizarra", url: "/tactica/pizarra" },
-      { title: "Formaciones", url: "/tactica/formaciones" },
-      { title: "Jugadas", url: "/tactica/jugadas" },
-      { title: "Estrategias", url: "/tactica/estrategias" },
-      { title: "Rivales", url: "/tactica/rivales" },
-      { title: "Análisis IA", url: "/tactica/analisis-ia" },
-      { title: "Simulaciones", url: "/tactica/simulaciones" },
-      { title: "Disponibilidad", url: "/tactica/matriz" },
-      { title: "Biblioteca", url: "/tactica/biblioteca" },
-      { title: "Planificación", url: "/tactica/planificacion" },
-      { title: "Videoanálisis", url: "/tactica/video" },
-      { title: "Postpartido", url: "/tactica/postpartido" },
-    ]
-  },
-  {
-    id: "competiciones", title: "Competiciones", icon: Trophy, url: "/competiciones",
-    items: [
-      { title: "Temporadas", url: "/temporadas" },
-      { title: "Partidos", url: "/partidos" },
-    ]
-  },
-  {
-    id: "rendimiento_coach", title: "Alto Rendimiento", icon: Activity, url: "/rendimiento",
-    items: [
-      { title: "Dashboard", url: "/rendimiento" },
-      { title: "Planificación", url: "/rendimiento/planificacion" },
-      { title: "Control de Cargas", url: "/rendimiento/cargas" },
-      { title: "Wellness", url: "/rendimiento/wellness" },
-      { title: "GPS & Wearables", url: "/rendimiento/gps" },
-      { title: "Tests Físicos", url: "/rendimiento/tests" },
-      { title: "Lesiones & Rehab", url: "/rendimiento/lesiones" },
-      { title: "Expedientes Médicos", url: "/medico" },
-      { title: "Citas Fisioterapia", url: "/medico/citas" },
-      { title: "Sports Science", url: "/rendimiento/sports-science" },
-    ],
-  },
-  {
-    id: "area_medica_coach",
-    title: "Área Médica & Fisioterapia",
-    icon: Stethoscope,
-    url: "/medico",
-    items: [
-      { title: "Directorio Médico", url: "/medico" },
-      { title: "Citas Fisioterapia", url: "/medico/citas" },
-    ],
-  },
-  { id: "muro", title: "Muro del Club", icon: Megaphone, url: "/muro" },
-  { id: "coach_tienda", title: "Tienda de Uniformes", icon: ShoppingBag, url: "/tienda" },
-  { id: "ia_coach", title: "IA & Automatización", icon: Sparkles, url: "/ia" },
-  { id: "mensajes", title: "Mensajes", icon: MessageSquare, url: "/notificaciones" },
-  { id: "config_coach", title: "Configuración", icon: Settings, url: "/configuracion" }
-];
-const PADRES_MODULES: Module[] = [
-  { id: "padres_inicio", title: "Inicio", icon: LayoutDashboard, url: "/dashboard" },
-  { id: "padres_muro", title: "Muro del Club", icon: Megaphone, url: "/muro" },
-  { id: "padres_hijo", title: "Mi Hijo (Player OS)", icon: UserRound, url: "/jugadores/j1" },
-  { id: "padres_carnet", title: "Carnet Digital Hijos", icon: ScanLine, url: "/encargados" },
-  { id: "padres_pagos", title: "Pagos y Mensualidad", icon: Wallet, url: "/pagos" },
-  { id: "padres_tienda", title: "Tienda de Uniformes", icon: ShoppingBag, url: "/tienda" },
-  { id: "padres_mensajes", title: "Mensajes", icon: MessageSquare, url: "/notificaciones" },
-  { id: "padres_config", title: "Configuración", icon: Settings, url: "/configuracion" }
-];
+
 
 export function AppSidebar() {
   const { role, coachName, selectedCoachId, selectedCoachName, setSelectedCoach } = useRole();
@@ -364,48 +266,6 @@ export function AppSidebar() {
     return orgs.find(o => o.id === activeOrgId);
   }, [orgs, activeOrgId]);
 
-const FISIO_MODULES: Module[] = [
-  {
-    id: "medico", title: "Área Médica & Fisioterapia", icon: Stethoscope, url: "/medico",
-    items: [
-      { title: "Portal de Fisioterapia", url: "/medico" },
-      { title: "Agenda de Citas", url: "/medico/citas" },
-      { title: "Lesiones & Retorno", url: "/rendimiento/lesiones" },
-      { title: "Control de Wellness", url: "/rendimiento/wellness" },
-    ]
-  },
-  { id: "jugadores", title: "Expedientes de Jugadores", icon: Users, url: "/jugadores" },
-  { id: "muro", title: "Muro de la Academia", icon: MessageSquare, url: "/muro" },
-];
-
-  const modules = useMemo(() => {
-    let baseModules: Module[] = [];
-    if (role === "coach") {
-      baseModules = COACH_MODULES.map(m => {
-        if (m.id === "coach") {
-          return {
-            ...m,
-            items: m.items?.map(sub =>
-              sub.title === "Mis Equipos" ? { ...sub, items: coachTeamItems } : sub
-            )
-          };
-        }
-        return m;
-      });
-    } else if (role === "fisioterapeuta") {
-      baseModules = FISIO_MODULES;
-    } else {
-      baseModules = role === "admin" ? ADMIN_MODULES : PADRES_MODULES;
-    }
-
-    // Filter out "Centro de Mando" if not superadmin
-    if (!isSuperAdmin) {
-      baseModules = baseModules.filter(m => m.id !== "saas-admin");
-    }
-
-    return baseModules;
-  }, [role, coachTeamItems, isSuperAdmin]);
-
   // Load coaches from Supabase for admin coach selector
   const loadCoaches = async () => {
     if (role !== "admin" || coachesList.length > 0) return;
@@ -422,24 +282,8 @@ const FISIO_MODULES: Module[] = [
   const { state, isMobile, setOpenMobile, setOpen } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const searchObj = useRouterState({ select: (r) => r.location.search }) as Record<string, any>;
   const isActive = (p: string) => pathname === p || (p !== "/" && pathname.startsWith(p + "/"));
-  const groupActive = (m: Module) =>
-    (m.url && m.url !== "#" && isActive(m.url)) ||
-    (m.items?.some((s) => s.url && s.url !== "#" && isActive(s.url)) ?? false);
-
-  const activeModule = useMemo(() => {
-    return modules.find((m) => groupActive(m));
-  }, [modules, pathname]);
-
-  const [openId, setOpenId] = useState<string | null>(
-    () => activeModule?.id ?? null
-  );
-
-  useEffect(() => {
-    if (activeModule) {
-      setOpenId(activeModule.id);
-    }
-  }, [pathname, activeModule]);
 
   useEffect(() => {
     setMounted(true);
@@ -482,6 +326,54 @@ const FISIO_MODULES: Module[] = [
     RendimientoStore.setActiveOrganizacionId(newOrg.id);
     window.location.reload();
   };
+
+  const navSections = useMemo(() => {
+    if (role === "coach") {
+      return [
+        {
+          header: "ÁREA TÉCNICA",
+          items: [
+            {
+              id: "coach_os",
+              title: "Coach OS",
+              icon: Laptop,
+              url: "/coach",
+              subLinks: [
+                { title: "Sesiones", url: "/entrenamientos" },
+                { title: "Biblioteca", url: "/biblioteca" },
+                { title: "Objetivos", url: "/objetivos" },
+                { title: "Evaluaciones Jugadores", url: "/evaluaciones" },
+                { title: "Bitácora", url: "/diario" },
+              ],
+            },
+            { id: "coordinacion", title: "Centro Táctico", icon: Presentation, url: "/tactica/dashboard" },
+            { id: "competiciones", title: "Competiciones", icon: Trophy, url: "/competiciones" },
+            { id: "alto_rendimiento", title: "Alto Rendimiento", icon: Gauge, url: "/rendimiento/sports-science" },
+          ],
+        },
+        {
+          header: "SISTEMA",
+          items: [
+            { id: "ia", title: "IA & Automatización", icon: Sparkles, url: "/ia" },
+            { id: "mensajes", title: "Mensajes", icon: MessageSquare, url: "/notificaciones" },
+            { id: "configuracion", title: "Configuración", icon: Settings, url: "/configuracion" },
+          ],
+        },
+      ];
+    }
+
+    let sections = ADMIN_NAV_SECTIONS;
+    if (isSuperAdmin) {
+      sections = [
+        {
+          header: "SAAS ADMIN",
+          items: [{ id: "saas-admin", title: "Centro de Mando", icon: Building2, url: "/saas-admin" }],
+        },
+        ...ADMIN_NAV_SECTIONS,
+      ];
+    }
+    return sections;
+  }, [role, isSuperAdmin]);
 
   return (
     <Sidebar collapsible="icon" key={`${role}-${coachName}-${activeOrgId}`}>
@@ -576,8 +468,13 @@ const FISIO_MODULES: Module[] = [
           </DialogContent>
         </Dialog>
       </SidebarHeader>
+
       <SidebarContent
         onClick={(e) => {
+          if (collapsed) {
+            setOpen(true);
+            return;
+          }
           const target = e.target as HTMLElement;
           if (target.closest("a")) {
             if (isMobile) {
@@ -588,132 +485,196 @@ const FISIO_MODULES: Module[] = [
           }
         }}
       >
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {modules.map((m) => {
-                const active = groupActive(m);
-                if (!m.items) {
-                  return (
-                    <SidebarMenuItem key={m.id}>
-                      <SidebarMenuButton asChild isActive={isActive(m.url)} tooltip={m.title}>
-                        <Link to={m.url} className="flex items-center gap-3">
-                          <m.icon className="h-4 w-4 shrink-0" />
-                          <span>{m.title}</span>
+        {navSections.map((section, sIdx) => {
+          const renderItem = (item: SidebarItem, level: number = 0) => {
+            const active = isActive(item.url);
+            const Icon = item.icon;
+            const hasChildren = (item.childrenItems && item.childrenItems.length > 0) || (item.subLinks && item.subLinks.length > 0);
+            const isChildActive = (item.childrenItems?.some(c => isActive(c.url) || c.subLinks?.some(s => isActive(s.url))) ?? false) ||
+                                  (item.subLinks?.some(s => isActive(s.url)) ?? false);
+            const startOpen = active || isChildActive;
+
+            const plClass = level === 0 ? "" : level === 1 ? "pl-2" : "pl-4";
+            const subPlClass = level === 0 ? "pl-9" : level === 1 ? "pl-10" : "pl-11";
+
+            if (hasChildren && !collapsed) {
+              return (
+                <Collapsible key={item.id} defaultOpen={startOpen} className="group/collapsible space-y-0.5">
+                  <SidebarMenuItem className={plClass}>
+                    <CollapsibleTrigger asChild>
+                      {item.url ? (
+                        <Link
+                          to={item.url}
+                          className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg hover:bg-sidebar-accent/40 transition-colors group/row select-none cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <Icon strokeWidth={1.5} size={17} color="currentColor" className="shrink-0 text-sidebar-foreground/80" />
+                            <span className="flex-1 text-left text-[13px] font-semibold truncate leading-tight text-sidebar-foreground">
+                              {item.title}
+                            </span>
+                          </div>
+                          <div className="p-1 text-sidebar-foreground/60 group-hover/row:text-sidebar-foreground shrink-0 ml-2 rounded-md">
+                            <ChevronUp className="h-4 w-4 block group-data-[state=open]/collapsible:hidden" />
+                            <ChevronDown className="h-4 w-4 hidden group-data-[state=open]/collapsible:block" />
+                          </div>
                         </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                }
-                const isOpen = openId === m.id;
-                const targetUrl = m.items?.[0]?.url || m.url;
-                return (
-                  <Collapsible
-                    key={m.id}
-                    open={isOpen && !collapsed}
-                    onOpenChange={(v) => setOpenId(v ? m.id : null)}
-                  >
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton asChild isActive={active} tooltip={m.title} className="py-2.5 h-auto cursor-pointer">
-                          <Link
-                            to={targetUrl}
-                            className="flex items-center gap-3 w-full min-w-0"
-                            onClick={() => {
-                              setOpenId(isOpen ? null : m.id);
+                      ) : (
+                        <div className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-lg hover:bg-sidebar-accent/40 transition-colors group/row select-none cursor-pointer">
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <Icon strokeWidth={1.5} size={17} color="currentColor" className="shrink-0 text-sidebar-foreground/80" />
+                            <span className="flex-1 text-left text-[13px] font-semibold truncate leading-tight text-sidebar-foreground">
+                              {item.title}
+                            </span>
+                          </div>
+                          <div className="p-1 text-sidebar-foreground/60 group-hover/row:text-sidebar-foreground shrink-0 ml-2 rounded-md">
+                            <ChevronUp className="h-4 w-4 block group-data-[state=open]/collapsible:hidden" />
+                            <ChevronDown className="h-4 w-4 hidden group-data-[state=open]/collapsible:block" />
+                          </div>
+                        </div>
+                      )}
+                    </CollapsibleTrigger>
+
+                    <CollapsibleContent className="space-y-0.5 mt-0.5">
+                      {/* Admin Coach Selector — solo en Coach OS */}
+                      {role === "admin" && item.id === "coach_os" && (
+                        <div className="pl-8 pr-2 py-1.5">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50 mb-1">
+                            VER COMO ENTRENADOR
+                          </p>
+                          <select
+                            value={selectedCoachId || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (!val) {
+                                setSelectedCoach(null, null);
+                              } else {
+                                const found = coachesList.find((c: any) => c.id === val);
+                                if (found) setSelectedCoach(found.id, found.nombre, found.identificacion || null);
+                              }
                             }}
+                            onFocus={loadCoaches}
+                            className="w-full text-xs bg-sidebar-accent/60 border border-sidebar-border/80 rounded px-2 py-1 text-sidebar-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
                           >
-                            <m.icon className="h-4 w-4 shrink-0" />
-                            <span className="flex-1 text-left text-xs leading-tight truncate font-semibold">{m.title}</span>
-                            <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
-                          </Link>
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {/* Admin Coach Selector — only shown when admin opens Coach OS */}
-                          {role === "admin" && m.id === "coach" && !collapsed && (
-                            <SidebarMenuSubItem>
-                              <div className="px-2 py-2">
-                                <p className="text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50 mb-1.5">
-                                  Ver como entrenador
-                                </p>
-                                <select
-                                  value={selectedCoachId || ""}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (!val) {
-                                      setSelectedCoach(null, null);
-                                    } else {
-                                      const found = coachesList.find((c: any) => c.id === val);
-                                      if (found) setSelectedCoach(found.id, found.nombre, found.identificacion || null);
-                                    }
-                                  }}
-                                  onFocus={loadCoaches}
-                                  className="w-full text-xs bg-sidebar-accent/60 border border-sidebar-border/80 rounded px-2 py-1.5 text-sidebar-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
-                                >
-                                  <option value="" className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
-                                    {loadingCoaches ? "Cargando..." : "— Todos —"}
-                                  </option>
-                                  {coachesList.map((c: any) => (
-                                    <option key={c.id} value={c.id} className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
-                                      {c.nombre}
-                                    </option>
-                                  ))}
-                                </select>
-                                {selectedCoachId && selectedCoachName && (
-                                  <p className="text-[10px] text-primary mt-1.5 font-medium truncate">
-                                    📋 {selectedCoachName}
-                                  </p>
-                                )}
-                              </div>
-                            </SidebarMenuSubItem>
+                            <option value="" className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
+                              {loadingCoaches ? "Cargando..." : "— Todos —"}
+                            </option>
+                            {coachesList.map((c: any) => (
+                              <option key={c.id} value={c.id} className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
+                                {c.nombre}
+                              </option>
+                            ))}
+                          </select>
+                          {selectedCoachId && selectedCoachName && (
+                            <p className="text-xs text-primary mt-1 font-medium truncate">
+                              📋 {selectedCoachName}
+                            </p>
                           )}
-                          {m.items.map((s: any, i) => {
-                            if (s.items && s.items.length > 0) {
-                              return (
-                                <Collapsible key={`${s.url}-${i}`} className="w-full">
-                                  <SidebarMenuSubItem>
-                                    <CollapsibleTrigger asChild>
-                                      <SidebarMenuSubButton className="flex items-center justify-between w-full hover:bg-sidebar-accent/50 rounded-md py-1 px-2 text-sidebar-foreground/80 hover:text-sidebar-foreground">
-                                        <span>{s.title}</span>
-                                        <ChevronRight className="h-3 w-3 transition-transform duration-200" />
-                                      </SidebarMenuSubButton>
-                                    </CollapsibleTrigger>
-                                    <CollapsibleContent>
-                                      <SidebarMenuSub className="pl-4 border-l border-sidebar-border/50 mt-1">
-                                        {s.items.map((sub: any, si: number) => (
-                                          <SidebarMenuSubItem key={`${sub.url}-${si}`}>
-                                            <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
-                                              <Link to={sub.url} search={sub.search}>{sub.title}</Link>
-                                            </SidebarMenuSubButton>
-                                          </SidebarMenuSubItem>
-                                        ))}
-                                      </SidebarMenuSub>
-                                    </CollapsibleContent>
-                                  </SidebarMenuSubItem>
-                                </Collapsible>
-                              );
+                        </div>
+                      )}
+
+                      {/* Sub-enlaces (subLinks) uno a uno en fila vertical */}
+                      {item.subLinks && item.subLinks.length > 0 && (
+                        <div className="space-y-0.5 ml-4 border-l border-sidebar-border/30 pl-2">
+                          {item.subLinks.map((sub, idx) => {
+                            const isSamePath = pathname === sub.url || (sub.url !== "/" && pathname.startsWith(sub.url + "/"));
+                            const hasSearch = sub.search && Object.keys(sub.search).length > 0;
+                            let activeSub = false;
+
+                            if (isSamePath) {
+                              if (hasSearch) {
+                                activeSub = Object.entries(sub.search!).every(([k, v]) => searchObj?.[k] === v);
+                              } else {
+                                activeSub = !item.subLinks?.some(other => other !== sub && other.url === sub.url && other.search && Object.entries(other.search).every(([k, v]) => searchObj?.[k] === v));
+                              }
                             }
+                            const SubIcon = sub.icon;
                             return (
-                              <SidebarMenuSubItem key={`${s.url}-${i}`}>
-                                <SidebarMenuSubButton asChild isActive={isActive(s.url)} className="py-1.5 h-auto leading-tight text-xs">
-                                  <Link to={s.url} search={s.search} className="truncate">{s.title}</Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
+                              <div key={sub.title + idx}>
+                                <Link
+                                  to={sub.url}
+                                  search={sub.search}
+                                  className={cn(
+                                    "flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] transition-colors w-full min-w-0",
+                                    activeSub
+                                      ? "bg-primary text-primary-foreground font-semibold shadow-sm text-white"
+                                      : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 font-medium"
+                                  )}
+                                >
+                                  {SubIcon ? (
+                                    <SubIcon strokeWidth={1.5} size={15} color="currentColor" className={cn("shrink-0", activeSub ? "text-white" : "text-sidebar-foreground/70")} />
+                                  ) : (
+                                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", activeSub ? "bg-white" : "bg-sidebar-foreground/40")} />
+                                  )}
+                                  <span className="truncate flex-1 text-left">{sub.title}</span>
+                                </Link>
+                              </div>
                             );
                           })}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                );
-              })}
+                        </div>
+                      )}
+
+                      {/* Subelementos anidados con sus propios íconos */}
+                      {item.childrenItems && item.childrenItems.length > 0 && (
+                        <SidebarMenu className="space-y-0.5 border-l border-sidebar-border/30 ml-4 pl-1">
+                          {item.childrenItems.map((child) => renderItem(child, level + 1))}
+                        </SidebarMenu>
+                      )}
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              );
+            }
+
+            return (
+              <SidebarMenuItem key={item.id} className={plClass}>
+                <SidebarMenuButton asChild isActive={active} tooltip={item.title} className="py-1.5 px-2.5 h-auto cursor-pointer rounded-lg hover:bg-sidebar-accent/40">
+                  <Link to={item.url} className="flex items-center gap-2.5 w-full min-w-0">
+                    <Icon strokeWidth={1.5} size={17} color="currentColor" className={cn("shrink-0", active ? "text-white" : "text-sidebar-foreground/80")} />
+                    <span className={cn("flex-1 text-left text-[13px] truncate leading-tight", active ? "font-semibold text-white" : "font-medium text-sidebar-foreground/90")}>
+                      {item.title}
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          };
+
+          return (
+            <SidebarGroup key={section.header || `sec-${sIdx}`} className="py-1">
+              {!collapsed && section.header && (
+                <div className="px-3 pt-3 pb-1.5 text-[12px] font-medium uppercase tracking-wider text-sidebar-foreground/50 select-none">
+                  {section.header}
+                </div>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {section.items.map((item) => renderItem(item, 0))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
+
+        {/* Bloque Independiente final: Muro del Club */}
+        <SidebarGroup className="py-2 pt-3 border-t border-sidebar-border/30 mt-2">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/muro")} tooltip="Muro del Club" className="py-2 h-auto cursor-pointer">
+                  <Link to="/muro" className="flex items-center gap-2.5 w-full min-w-0">
+                    <Megaphone strokeWidth={1.5} size={18} color="currentColor" className="shrink-0" />
+                    <span className="flex-1 text-left text-xs font-semibold truncate text-sidebar-foreground">
+                      Muro del Club
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+
+      <SidebarFooter className="border-t border-sidebar-border/40 pt-2">
         {!collapsed && (
           <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/30 p-3 text-xs text-sidebar-foreground/80">
             <p className="font-semibold text-sidebar-foreground">Plan Élite</p>
@@ -727,5 +688,5 @@ const FISIO_MODULES: Module[] = [
   );
 }
 
-// suppress unused icon warnings for future use
-export const _reserved = { Users, Building2, Receipt, UserRound, Dribbble, Layers, ShieldHalf, Megaphone, CalendarDays, ClipboardCheck, CalendarRange, MapPinned, BarChart3, FileText, Banknote, MessageSquare, Bell, ScrollText, ScanLine, Target, UserPlus, ClipboardList, AlertTriangle, Lightbulb, TrendingUp, Bot, Dumbbell, BookOpen, LayoutTemplate, Swords, HeartPulse, Flag, NotebookPen, Star, Medal, ListOrdered, Gauge, Stethoscope, Timer, Flame, Filter, GitBranch, MessageCircle, Mail, HandCoins, AlertOctagon, GraduationCap, ShieldCheck, KeyRound, Sliders, Plug };
+// suppress unused icon warnings
+export const _reserved = { Users, Building2, UserRound, ShieldHalf, CalendarDays, ScanLine, MessageSquare, Command, Stethoscope, Laptop, Presentation, Trophy, Sparkles, Settings, Megaphone };

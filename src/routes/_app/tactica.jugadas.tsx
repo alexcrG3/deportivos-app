@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TacticalStore, TacticalPlay, PlayCategory, BoardSession } from "@/lib/tactical-store";
 import { Play, Plus, BookOpen, Target, Tag, User, Calendar, Filter, Eye, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { getPlayerOS } from "@/lib/mock-data";
+import RendimientoStore from "@/lib/rendimiento-store";
 
 export const Route = createFileRoute("/_app/tactica/jugadas")({ component: JugadasTacticas });
 
@@ -165,16 +165,17 @@ function JugadasTacticas() {
                         nombre: `Simulación: ${play.nombre}`,
                         sport: play.disciplina.toLowerCase() === "baloncesto" ? "basketball" : "football",
                         formationId: "f-433",
-                        players: firstFrame?.players.map((p) => {
-                          const pOs = getPlayerOS(p.jugadorId);
+                        players: firstFrame?.players.map((p: any) => {
+                          const allJugadores = RendimientoStore.getJugadores();
+                          const pOs = allJugadores.find(j => j.id === p.jugadorId);
                           return {
                             slotId: p.slotId,
-                            jugadorId: p.jugadorId,
+                            jugadorId: p.jugadorId || p.slotId,
                             x: p.x,
                             y: p.y,
                             nombre: pOs?.nombre ?? p.slotId,
-                            numero: pOs?.numero,
-                            avatar: pOs?.avatar,
+                            numero: (pOs as any)?.dorsal || (pOs as any)?.numero || 10,
+                            avatar: (pOs as any)?.avatar || "",
                           };
                         }) ?? [],
                         arrows: firstFrame?.arrows ?? [],
@@ -267,16 +268,17 @@ function JugadasTacticas() {
                       nombre: `Simulación: ${selectedPlay.nombre}`,
                       sport: selectedPlay.disciplina.toLowerCase() === "baloncesto" ? "basketball" : "football",
                       formationId: "f-433",
-                      players: firstFrame?.players.map((p) => {
-                        const pOs = getPlayerOS(p.jugadorId);
+                      players: firstFrame?.players.map((p: any) => {
+                        const allJugadores = RendimientoStore.getJugadores();
+                        const pOs = allJugadores.find(j => j.id === p.jugadorId);
                         return {
                           slotId: p.slotId,
-                          jugadorId: p.jugadorId,
+                          jugadorId: p.jugadorId || p.slotId,
                           x: p.x,
                           y: p.y,
                           nombre: pOs?.nombre ?? p.slotId,
-                          numero: pOs?.numero,
-                          avatar: pOs?.avatar,
+                          numero: (pOs as any)?.dorsal || (pOs as any)?.numero || 10,
+                          avatar: (pOs as any)?.avatar || "",
                         };
                       }) ?? [],
                       arrows: firstFrame?.arrows ?? [],

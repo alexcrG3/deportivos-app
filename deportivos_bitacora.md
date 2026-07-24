@@ -3,6 +3,90 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
+## [24/07/2026 - Área Médica Enterprise, Indicador Inteligente de Revisión, Panel Lateral de Vista Rápida & Correcciones de SSR]
+
+- **Submenú Ampliado y Rediseñado de Área Médica (`src/components/app-sidebar.tsx`):**
+  - Actualización completa de la navegación de **Área Médica** con 7 sub-enlaces oficiales e iconos Lucide dedicados:
+    - 🏥 `Área Médica` (`/medico`) - Icono `Hospital`
+    - 👤 `Historial Clínico` (`/medico?tab=historial`) - Icono `User`
+    - 🚑 `Lesiones` (`/medico/lesiones`) - Icono `Ambulance`
+    - 🩺 `Fisioterapia` (`/medico/fisioterapia`) - Icono `Stethoscope`
+    - 💊 `Tratamientos` (`/medico/tratamientos`) - Icono `Pill`
+    - 📅 `Citas` (`/medico/citas`) - Icono `CalendarDays`
+    - 📝 `Aptitud Deportiva` (`/medico/aptitud`) - Icono `ClipboardCheck`
+    - 📈 `Reportes` (`/medico/reportes`) - Icono `LineChart`
+
+- **Indicador Inteligente de Próxima Revisión (`src/routes/_app/medico.index.tsx`):**
+  - Implementación del helper y badge dinámico de estado en la columna *Próxima Revisión* del Historial Clínico para evitar la lectura manual de fechas por parte del equipo médico:
+    - 🟢 **Programada:** `🟢 30 Jul 2026` (> 7 días para la revisión).
+    - 🟡 **Próxima:** `🟡 En 2 días` (Entre 1 y 7 días para la revisión).
+    - 🟠 **Hoy:** `🟠 Hoy` (La revisión es el día actual).
+    - 🔴 **Vencida:** `🔴 Hace 4 días` (Fecha de revisión superada).
+    - ⚪ **Sin programar:** `⚪ Sin programar` (Sin fecha agendada).
+
+- **Panel Lateral de Vista Rápida - Quick View Drawer (`src/routes/_app/medico.index.tsx`):**
+  - Sustitución de modal básico por un Drawer lateral completo al presionar `Ver` en la tabla de deportistas.
+  - **Encabezado:** Nombre del jugador, foto/avatar, categoría, edad, sede, entrenador a cargo y badge de aptitud (`🟢 APTO PARA COMPETIR`).
+  - **Desglose Clínico Dinámico:** Última Valoración, Badge de Próxima Revisión, Tipo de Sangre, Alergias, Lesiones Activas, Tratamiento Actual, Fisioterapia, Medicamentos y Observaciones Médicas provenientes directamente de `RendimientoStore`.
+  - **Navegación:** Botón primario `[📄 Abrir Expediente Completo]` que redirige a la ficha individual del jugador (`/medico/jugador/$id`).
+  - **Grid de Acciones Rápidas (5 Botones en 2 columnas):** `🩺 Nueva Valoración`, `🩹 Registrar Lesión`, `📅 Programar Revisión`, `🏃 Dar Alta Médica`, `📄 Descargar PDF`.
+
+- **Estabilidad y Corrección de Errores SSR / Servidor (`src/server.ts`, `inventario.tsx`, `medico.index.tsx`):**
+  - **Fix Error 500 (`NilError`):** Configuración de `ssr: false` en las rutas de cliente (`/inventario` y `/medico`) para prevenir fallos de hidratación en recargas directas del navegador (F5) generados por lectura de storage en Node.
+  - **Interceptación de Excepciones Nitro/h3:** Modificado `isCatastrophicSsrErrorBody` en `src/server.ts` para capturar cualquier respuesta JSON con `unhandled: true` y garantizar que el servidor devuelva HTML limpio en lugar de texto plano JSON.
+  - **Limpieza de Caché del Router Generator:** Eliminado archivo en conflicto `src/routeTree.gen.ts` para resolver SyntaxErrors en el parser de rutas de TanStack.
+
+---
+
+## [23/07/2026 - Módulo Operativo, Área Técnica v2.0, Planificación Metodológica y Coach OS (Enterprise 2.0)]
+
+- **Dashboard Principal Enterprise 2.0 (`src/routes/_app/dashboard.tsx`):**
+  - Reestructuración ejecutiva de 3 niveles: **Nivel 1 (Alertas IA & Insights del Club)** con diagnósticos proactivos de Finanzas, Carga Física, Retención CRM y Performance; **Nivel 2 (Resumen Ejecutivo KPIs Macro)** con métricas financieras, deportivas, metodológicas y ACWR; **Nivel 3 (Panel Dividido)** con feed transversal y minutero de canchas por sedes; **Pie de Pantalla** con embudo de conversión CRM y partidos destacados.
+
+- **Dashboard Interno: Operación Deportiva (`src/routes/_app/operacion.tsx`):**
+  - Reorganizado el Sidebar con 4 sub-módulos limpios (`Estructura Base`, `Planificación Temporal`, `Control de Campo`, `Infraestructura`).
+  - **Parrilla de Canchas (Minutero en Tiempo Real):** Evaluaciones dinámicas de los horarios y planteles reales de la DB según el día de la semana (`Asoderive U11`, `Asoderive U13`, etc.), eliminando cualquier texto hardcodeado o prefijos estáticos ("Sintética").
+  - **KPIs Operativos & Check-ins QR:** Monitoreo dinámico de Asistencia Diaria, Ocupación de Instalaciones, Total Jugadores Activos y Ausencias de Staff.
+
+- **Área Técnica v2.0 & Gobierno Deportivo (`src/routes/_app/tactica.index.tsx`):**
+  - Reestructurado el menú desplegable del sidebar con los 6 pilares Enterprise v2.0 (`Inicio / Dashboard Técnico`, `Planificación Metodológica`, `Coach OS`, `Centro Táctico`, `Competiciones`, `Alto Rendimiento`).
+  - **Bandeja de Aprobación Metodológica & Flujo IA:** Contraste automático de Athletix AI sobre entregas semanales de los planteles reales del club, incluyendo botón interactivo `[Revisar y Aprobar]` que aprueba dinámicamente la planificación e inyecta las sesiones en Coach OS.
+  - **KPIs y Controles:** % Cumplimiento Metodológico, Eficiencia de Planificación, Carga Promedio (ACWR), Alertas Wellness y Diarios pendientes.
+
+- **Submódulo: Planificación Metodológica (`src/routes/_app/tactica.planificacion.tsx`):**
+  - **Arquitectura de 3 Pilares:**
+    1. **🤖 Motor de Auditoría e IA (Gobernanza):** Bandeja ejecutiva de revisiones y Métricas BI de cumplimiento semanal en vivo totalmente integradas a `RendimientoStore`.
+    2. **⚙️ El Taller del Entrenador:** Panel de Mis Planificaciones (Borradores, Enviado a IA, Aprobados), Calendario Semanal Drag & Drop, Biblioteca de Sesiones y Historial.
+    3. **📐 El ADN del Club:** Objetivos Formativos por Categoría y Libro de Estilo Institucional (Metodología 4-3-3).
+  - Eliminación de datos estáticos y sincronización 100% con los equipos e instituciones reales del club.
+
+- **Módulo Core: Coach OS - El Escritorio del Entrenador (`src/routes/_app/coach.tsx`):**
+  - **Menú Exclusivo de 12 Submódulos:** Inicio / Control de Mando, Mi Agenda, Mis Equipos, Planificaciones, Sesiones (Modo Cancha), Biblioteca, Jugadores, Evaluaciones, Alto Rendimiento, Centro Táctico, Competiciones y Reportes & Coach Score.
+  - **Flujo Guiado Cronológico (El Viaje del Día):** Barra interactiva guiando al míster hora a hora desde la mañana (Wellness) hasta la tarde (Modo Cancha) y noche (Coach Score).
+  - **Flujo Guiado de Campo (Card Interactiva):** Próximo evento en vivo con accesos directos a `📐 VER PIZARRA TÁCTICA`, `📺 VER VIDEOANÁLISIS` y `▶️ INICIAR SESIÓN EN CANCHA`.
+  - **Entorno Interactivo Modo Cancha (Modal en Vivo):** Cronómetro flotante en vivo, Escáner/Pase de Lista QR, Checklist de Ejercicios del Día con botón **`[ 📺 Charla Técnica ]`** para proyectar diagramas/videos a los jugadores en la cancha y Diario de Entrenamiento cualitativo.
+  - **Reportes & Coach Score Gamificado:** Puntuación Élite 94/100, desglose de fortalezas y sugerencias inteligentes de Athletix AI Advisor para variar estímulos de entrenamiento.
+  - **Estructura del Menú Coach OS (6 ítems oficiales):**
+    - `🏠 Inicio / Dashboard`: **Centro de Trabajo Diario del Míster (`/coach`)** ➔ Entorno operativo vivo con 4 bloques core (El Minutero, Alertas Wellness, Flujo Guiado de Campo y Checklist de Tareas Pendientes).
+    - `⚽ Sesiones`: Modo Cancha con cronómetro en vivo y pase de lista por Check-in QR (`/entrenamientos`).
+    - `📚 Biblioteca`: Colección de ejercicios, circuitos, juegos reducidos y plantillas tácticas (`/biblioteca`).
+    - `🎯 Objetivos`: Objetivos formativos semanal e individual (`/objetivos`).
+    - `📊 Evaluaciones`: Evaluaciones cualitativas y cuantitativas por rúbrica (`/evaluaciones`).
+    - `📝 Bitácora`: Diario cualitativo del entrenador (`/diario`).
+
+- **Área Técnica & Gobierno Deportivo (`src/routes/_app/tactica.index.tsx`):**
+  - Dashboard exclusivo de **Gobierno Deportivo** (`/tactica`) con KPIs de % Cumplimiento Metodológico, Eficiencia de Planificación, ACWR y Efectividad en Competición.
+  - **Bandeja de Auditoría Metodológica & Flujo IA:** Contraste automático de planificaciones entregadas por entrenadores con botón interactivo `[Revisar y Aprobar]` que aprueba e inyecta la sesión en Coach OS.
+
+- **Módulo: Centro Táctico (`src/routes/_app/tactica.*`):**
+  - **Dashboard Táctico (`/tactica/dashboard`):** Fila de 4 KPIs (Pizarras Guardadas, Táctica Fija, Minutos de Video, Clips Compartidos), Mesa de Trabajo con Pizarras Recientes y Videoteca Scouting, Buscador IA e indexador por Concepto Táctico (*Transición Ofensiva, Bloque Bajo, Presión Alta, Saques de Banda, Balón Parado*) y botones de acción rápida `[➕ NUEVA PIZARRA TÁCTICA]` y `[➕ SUBIR / ANALIZAR VIDEO]`.
+  - **Pizarra Interactiva (`/tactica/pizarra`):** Lienzo interactivo 2D/3D directo (Drag & Drop) con planteles reales de la DB, optimizador de alineación IA e integración a tablet de campo.
+  - **Sistemas y Jugadas (`/tactica/jugadas`):** Estrategias de balón parado y sistemas estructurales (4-3-3, 3-5-2).
+  - **Videoanálisis (`/tactica/video`):** Reproductor con herramientas de dibujo, recortes de clips y etiquetas scouting.
+
+---
+
+
 ## [22/07/2026 - Planificación de Landing Page SaaS Elite & Inicialización de Servidor Local]
 
 - **Planificación de Landing Page de Alto Rendimiento (SaaS Elite):**

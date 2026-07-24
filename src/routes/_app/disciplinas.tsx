@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -155,9 +155,31 @@ function DisciplinasPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pestañas Dashboard Estructura */}
+      <div className="flex items-center gap-1.5 border-b pb-3">
+        <Link
+          to="/equipos"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          👥 Equipos
+        </Link>
+        <Link
+          to="/categorias"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          🏷️ Categorías
+        </Link>
+        <Link
+          to="/disciplinas"
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        >
+          ⚽ Disciplinas
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Disciplinas</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Estructura — Disciplinas</h1>
           <p className="text-sm text-muted-foreground">Administra las disciplinas deportivas de la academia.</p>
         </div>
         <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant">

@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -140,9 +140,31 @@ function CategoriasPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pestañas Dashboard Estructura */}
+      <div className="flex items-center gap-1.5 border-b pb-3">
+        <Link
+          to="/equipos"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          👥 Equipos
+        </Link>
+        <Link
+          to="/categorias"
+          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+        >
+          🏷️ Categorías
+        </Link>
+        <Link
+          to="/disciplinas"
+          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+        >
+          ⚽ Disciplinas
+        </Link>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Categorías</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Estructura Deportiva</h1>
           <p className="text-sm text-muted-foreground">{filtered.length} categorías deportivas registradas.</p>
         </div>
         <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">

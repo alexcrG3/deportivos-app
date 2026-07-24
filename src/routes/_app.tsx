@@ -12,6 +12,7 @@ import { Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
+  ssr: false,
 });
 
 function AppLayout() {
@@ -39,17 +40,32 @@ function AppLayout() {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+    const safetyTimer = setTimeout(() => {
+      if (mounted) setIsSyncing(false);
+    }, 2000);
+
     if (!RendimientoStore.isStoreSynced()) {
       setIsSyncing(true);
       Promise.all([
-        RendimientoStore.syncFromSupabase(),
-        TacticalStore.syncFromSupabase()
+        RendimientoStore.syncFromSupabase().catch((err) => console.warn("Rendimiento sync warning:", err)),
+        TacticalStore.syncFromSupabase().catch((err) => console.warn("Tactical sync warning:", err))
       ]).finally(() => {
-        setIsSyncing(false);
-        // Inject demo partido + convocatoria vs Heredia U13 (Paso 5 example)
-        seedEjemploPaso5();
+        if (mounted) {
+          clearTimeout(safetyTimer);
+          setIsSyncing(false);
+          try { seedEjemploPaso5(); } catch {}
+        }
       });
+    } else {
+      clearTimeout(safetyTimer);
+      setIsSyncing(false);
     }
+
+    return () => {
+      mounted = false;
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   if (isSyncing) {
