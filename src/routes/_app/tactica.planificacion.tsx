@@ -1175,8 +1175,6 @@ function PlanificacionTactica() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto py-2">
-      {/* Header Widget */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/80 pb-5">
       {/* Header de Módulo */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
