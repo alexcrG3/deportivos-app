@@ -537,7 +537,7 @@ function Dashboard() {
               </div>
             </div>
             <Link to="/ia/asistente" className="w-full mt-2">
-              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-semibold gap-1.5 shadow-sm hover:bg-primary/90">
+              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-bold gap-1.5 shadow-sm hover:bg-primary/90">
                 <Brain className="h-3.5 w-3.5" /> Consultar Asistente IA <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
@@ -554,35 +554,35 @@ function Dashboard() {
             
             <div className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
               <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
                   <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Finanzas / Morosidad:</span>
                 </div>
-                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{morosidadPorCat}</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 font-semibold text-xs shrink-0">{morosidadPorCat}</span>
               </div>
 
               <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
                   <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Carga Física / Riesgo:</span>
                 </div>
-                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{riesgoLesionDet}</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 font-semibold text-xs shrink-0">{riesgoLesionDet}</span>
               </div>
 
               <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0" />
                   <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">CRM / Retención:</span>
                 </div>
-                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{desercionDet}</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 font-semibold text-xs shrink-0">{desercionDet}</span>
               </div>
 
               <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
                   <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Performance Destacado:</span>
                 </div>
-                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{destacadosDet}</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 font-semibold text-xs shrink-0">{destacadosDet}</span>
               </div>
             </div>
           </Card>
@@ -673,7 +673,9 @@ function Dashboard() {
               </CardTitle>
               <CardDescription className="text-xs text-slate-500">Eventos en tiempo real: Finanzas, Operaciones, Médica y Técnica</CardDescription>
             </div>
-            <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-semibold text-[10px]">En Vivo</Badge>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-bold tracking-tight">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> En Vivo
+            </span>
           </CardHeader>
           <CardContent className="space-y-1.5 pt-3">
             {actividad.length > 0 ? (
