@@ -684,7 +684,7 @@ function Dashboard() {
                   </div>
                   <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{a.text}</p>
-                    <p className="text-[10px] text-slate-400 shrink-0 font-mono">{a.tiempo}</p>
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px] font-semibold shrink-0 border border-slate-200/60 dark:border-slate-700/60">{a.tiempo}</span>
                   </div>
                 </div>
               ))
