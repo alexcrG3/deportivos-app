@@ -683,7 +683,7 @@ function Dashboard() {
             {actividad.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
                 {actividad.map((a, i) => (
-                  <div key={i} className="flex items-center gap-4 py-3 px-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                  <div key={i} className="flex items-center gap-4 py-3 px-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors duration-150 cursor-pointer">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                       <a.icon className="h-3.5 w-3.5" />
                     </div>
@@ -725,7 +725,11 @@ function Dashboard() {
               </div>
               <div className="flex items-baseline gap-2 my-1">
                 <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight">{ocupacionCanchasHoy.length}</span>
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">reservas activas hoy</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {ocupacionCanchasHoy.length > 0 
+                    ? `Próxima reserva a las ${ocupacionCanchasHoy[0].hora}` 
+                    : "reservas activas hoy"}
+                </span>
               </div>
 
               {ocupacionCanchasHoy.length > 0 ? (
