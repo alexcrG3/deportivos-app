@@ -716,54 +716,73 @@ function Dashboard() {
               <CardDescription className="text-xs text-slate-500">Horarios de canchas y tareas requeridas</CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4 pt-4">
-            {/* Ocupación de Canchas Dinámica */}
-            <div className="space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                <span>Ocupación de Canchas Hoy</span>
-                <span className="text-slate-900 dark:text-slate-100 font-semibold">{ocupacionCanchasHoy.length} Reservas</span>
-              </p>
-              <div className="space-y-1.5 text-xs">
-                {ocupacionCanchasHoy.map((oc) => (
-                  <div key={oc.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
-                    <div className="min-w-0 flex-1 pr-2">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">{oc.sede} · {oc.cancha}</span>
-                      <p className="text-[10px] text-slate-400 truncate">{oc.hora} · {oc.equipo}</p>
-                    </div>
-                    <Badge variant="outline" className={`text-[9px] shrink-0 ${oc.estado === "En curso" ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700 font-bold" : "text-slate-500 border-slate-200"}`}>
-                      {oc.estado}
-                    </Badge>
-                  </div>
-                ))}
+          <CardContent className="p-5 flex flex-col justify-between h-full">
+            {/* Ocupación de Canchas Dinámica con Estructura de KPI Macro */}
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Ocupación de Canchas Hoy</p>
+                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">En Tiempo Real</Badge>
               </div>
+              <div className="flex items-baseline gap-2 my-1">
+                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight">{ocupacionCanchasHoy.length}</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">reservas activas hoy</span>
+              </div>
+
+              {ocupacionCanchasHoy.length > 0 ? (
+                <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs mt-2">
+                  {ocupacionCanchasHoy.map((oc) => (
+                    <div key={oc.id} className="py-2 flex items-center justify-between">
+                      <div className="min-w-0 flex-1 pr-2">
+                        <span className="font-bold text-slate-900 dark:text-slate-100 block truncate">{oc.sede} · {oc.cancha}</span>
+                        <p className="text-[11px] text-slate-500 truncate">{oc.hora} • {oc.equipo}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px] font-semibold shrink-0 border border-slate-200/60 dark:border-slate-700/60">{oc.estado}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 mt-1">Sin reservas activas registradas para el día de hoy.</p>
+              )}
             </div>
 
+            {/* Línea Divisoria Horizontal Ultra Sutil (#E2E8F0) */}
+            <div className="border-t border-slate-100 dark:border-slate-800 my-4" />
+
             {/* Centro de Atención & Tareas Pendientes Dinámicas */}
-            <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 mb-2">
                 <ClipboardCheck className="h-3.5 w-3.5 text-slate-400" /> Tareas & Aprobaciones Pendientes
               </p>
-              <div className="space-y-1.5 text-xs">
-                <Link to="/rendimiento/planificacion" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">3 Planificaciones por aprobar</span>
+              
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                <Link to="/rendimiento/planificacion" className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 mr-1">3</span> planificaciones por aprobar
+                    </p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 </Link>
-                <Link to="/retencion" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-red-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{aiRiskScores.filter(r => r.nivelAbandono === "critico" || r.nivelAbandono === "alto").length} Alumnos en riesgo de abandono</span>
+
+                <Link to="/retencion" className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 mr-1">{aiRiskScores.filter(r => r.nivelAbandono === "critico" || r.nivelAbandono === "alto").length}</span> alumnos en riesgo de abandono
+                    </p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 </Link>
-                <Link to="/convocatorias" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{convocatoriasPend} Convocatorias por confirmar</span>
+
+                <Link to="/convocatorias" className="py-2.5 flex items-center justify-between hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                  <div className="flex items-center gap-3 min-w-0 pr-2">
+                    <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0" />
+                    <p className="text-slate-600 dark:text-slate-400 font-medium truncate">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 mr-1">{convocatoriasPend}</span> convocatorias por confirmar
+                    </p>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 </Link>
               </div>
             </div>
