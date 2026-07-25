@@ -1,17 +1,16 @@
 // Service Worker oficial de DeportivOS PWA
-const CACHE_NAME = "deportivos-pwa-v1";
+const CACHE_NAME = "deportivos-pwa-v2";
 const PRECACHE_URLS = [
-  "/",
-  "/index.html",
   "/favicon.png",
   "/manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_URLS);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -31,6 +30,24 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET" || event.request.url.startsWith("chrome-extension")) return;
+
+  const isHtmlNavigation = 
+    event.request.mode === "navigate" || 
+    event.request.headers.get("accept")?.includes("text/html");
+
+  // Para navegaciones HTML (páginas y redirecciones), usar Network-First
+  if (isHtmlNavigation) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match(event.request).then((cached) => {
+          return cached || caches.match("/index.html");
+        });
+      })
+    );
+    return;
+  }
+
+  // Para assets estáticos, usar Cache-First con actualización en segundo plano
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -41,11 +58,8 @@ self.addEventListener("fetch", (event) => {
         }).catch(() => {});
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {
-        if (event.request.headers.get("accept")?.includes("text/html")) {
-          return caches.match("/index.html");
-        }
-      });
+      return fetch(event.request);
     })
   );
 });
+
