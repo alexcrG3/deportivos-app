@@ -666,109 +666,141 @@ function JugadoresPage() {
   return (
     <div className="space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Gestión de Jugadores</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} atletas en la nómina activa</p>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Estructura Académica · Plantilla
+          </Badge>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            Gestión de Jugadores
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">{filtered.length} atletas en la nómina activa</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => downloadAthleteTemplate()} className="gap-1.5 text-xs h-9 border-primary/30 text-primary hover:bg-primary/5 font-semibold">
-            <Download className="h-4 w-4" /> Plantilla Excel
+          <Button variant="outline" onClick={() => downloadAthleteTemplate()} className="gap-1.5 text-xs h-9 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 font-bold rounded-xl">
+            <Download className="h-4 w-4 text-primary" /> Plantilla Excel
           </Button>
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing} className="gap-1.5 text-xs h-9 font-semibold">
+          <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing} className="gap-1.5 text-xs h-9 font-bold border-slate-200 dark:border-slate-800 rounded-xl">
             <Upload className="h-4 w-4" /> {importing ? "Importando..." : "Importar Excel"}
           </Button>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportFile} />
           {jugadoresList.length > 0 && (
-            <Button variant="destructive" onClick={handleClearAllPlayers} className="gap-1.5 text-xs h-9 font-semibold bg-red-600 hover:bg-red-700 text-white">
+            <Button variant="outline" onClick={handleClearAllPlayers} className="gap-1.5 text-xs h-9 font-semibold border-slate-200 text-rose-600 dark:text-rose-400 hover:bg-rose-50 rounded-xl">
               <Trash2 className="h-4 w-4" /> Vaciar
             </Button>
           )}
-          <Button asChild className="bg-gradient-to-r from-rose-600 via-indigo-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-black text-xs h-9 rounded-2xl gap-1.5 shadow-md animate-pulse ring-2 ring-rose-500/40">
+          <Button variant="outline" asChild className="gap-1.5 text-xs h-9 font-bold border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 rounded-xl">
             <Link to="/medico">
-              <Stethoscope className="h-4 w-4" /> Área Médica
+              <Stethoscope className="h-4 w-4 text-primary" /> Área Médica
             </Link>
           </Button>
-          <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant gap-1.5 text-xs h-9 font-semibold">
+          <Button onClick={() => setOpenCreate(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-sm text-xs h-9 px-4 rounded-xl gap-1.5">
             <Plus className="h-4 w-4" /> Nuevo jugador
           </Button>
         </div>
       </div>
 
-      {/* Modern KPI Summary Header Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <Card className="p-3.5 border-l-4 border-l-primary bg-card/60 backdrop-blur-sm shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-            <span>TOTAL ATLETAS</span>
-            <Users className="h-4 w-4 text-primary" />
-          </div>
-          <p className="text-2xl font-black text-foreground">{kpis.total}</p>
-        </Card>
-        <Card className="p-3.5 border-l-4 border-l-blue-500 bg-card/60 backdrop-blur-sm shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-            <span>ACTIVOS</span>
-            <UserCheck className="h-4 w-4 text-blue-500" />
-          </div>
-          <p className="text-2xl font-black text-blue-600 dark:text-blue-400">{kpis.activos}</p>
-        </Card>
-        <Card className="p-3.5 border-l-4 border-l-emerald-500 bg-card/60 backdrop-blur-sm shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-            <span>AL DÍA</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          </div>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{kpis.alDia}</p>
-        </Card>
-        <Card className="p-3.5 border-l-4 border-l-amber-500 bg-card/60 backdrop-blur-sm shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold">
-            <span>PENDIENTES/MOROSOS</span>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-          </div>
-          <p className="text-2xl font-black text-amber-600 dark:text-amber-400">{kpis.morosos}</p>
-        </Card>
-        <Card 
+      {/* 🔝 Fila de KPIs Macro (Regla 3: Estructura de 3 Niveles Verticales Estrictos) */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        {/* KPI 1: TOTAL ATLETAS */}
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            TOTAL ATLETAS
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 my-1 font-mono tracking-tight">
+            {kpis.total}
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Fichas registradas en sistema
+          </p>
+        </div>
+
+        {/* KPI 2: ACTIVOS */}
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            ACTIVOS
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 my-1 font-mono tracking-tight">
+            {kpis.activos}
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Habilitados en nómina
+          </p>
+        </div>
+
+        {/* KPI 3: AL DÍA */}
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            AL DÍA
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 my-1 font-mono tracking-tight">
+            {kpis.alDia}
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Cuotas al día este mes
+          </p>
+        </div>
+
+        {/* KPI 4: PENDIENTES / MOROSOS */}
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            PENDIENTES / MOROSOS
+          </p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 my-1 font-mono tracking-tight">
+            {kpis.morosos}
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Morosidad actual • {kpis.morosos} deudores
+          </p>
+        </div>
+
+        {/* KPI 5: SUSPENDIDOS */}
+        <div 
           onClick={() => setOpenSuspendedListModal(true)} 
-          className="p-3.5 border-l-4 border-l-rose-500 bg-card/60 backdrop-blur-sm shadow-sm space-y-1 col-span-2 sm:col-span-1 cursor-pointer hover:shadow-md hover:border-l-rose-600 transition-all group"
+          className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1 col-span-2 sm:col-span-1 cursor-pointer hover:border-slate-300 transition-all group"
         >
-          <div className="flex items-center justify-between text-muted-foreground text-xs font-semibold group-hover:text-rose-600 transition-colors">
-            <span>SUSPENDIDOS</span>
-            <PowerOff className="h-4 w-4 text-rose-500 group-hover:scale-110 transition-transform" />
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            SUSPENDIDOS
+          </p>
+          <p className="text-2xl font-bold text-rose-600 dark:text-rose-400 my-1 font-mono tracking-tight">
+            {kpis.suspendidos}
+          </p>
+          <div className="flex items-center justify-between text-xs text-slate-500 font-normal">
+            <span>Sanciones o bajas</span>
+            <span className="text-[10px] text-primary font-bold hover:underline">Ver Lista →</span>
           </div>
-          <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{kpis.suspendidos}</p>
-            <span className="text-[10px] text-rose-500 font-bold hover:underline">Ver Lista →</span>
-          </div>
-        </Card>
+        </div>
       </div>
 
-      {/* Main Table Card */}
-      <Card className="shadow-card border-border/60">
-        <CardContent className="p-4 space-y-4">
+      {/* Main Table Card (Regla 2: Fondo Blanco Puro #FFFFFF, Borde 1px #E2E8F0, Radio 12px, Padding 24px) */}
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+        <CardContent className="p-6 space-y-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[240px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar por nombre, apellido, cédula o club..." value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} className="pl-9 h-9 text-xs" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input placeholder="Buscar por nombre, apellido, cédula o club..." value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} className="pl-9 h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl" />
             </div>
             <Select value={categoriaFilter} onValueChange={(v) => { setCategoriaFilter(v); setPage(1); }}>
-              <SelectTrigger className="w-[180px] h-9 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[180px] h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas las categorías</SelectItem>
                 {categories.map((c) => <SelectItem key={c.id} value={c.nombre}>{c.nombre}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={sede} onValueChange={(v) => { setSede(v); setPage(1); }}>
-              <SelectTrigger className="w-[180px] h-9 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[180px] h-9 text-xs border-slate-200 dark:border-slate-800 rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todas">Todas las sedes</SelectItem>
                 {sedes.map((s) => <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5"><Filter className="h-3.5 w-3.5" /> Filtros</Button>
+            <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5 border-slate-200 dark:border-slate-800 rounded-xl"><Filter className="h-3.5 w-3.5" /> Filtros</Button>
           </div>
 
-          <div className="rounded-xl border border-border/60 overflow-hidden">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-100/70 dark:bg-slate-900/70 hover:bg-slate-100/70 dark:hover:bg-slate-900/70">
+                <TableRow className="bg-slate-50/70 dark:bg-slate-800/40 hover:bg-slate-50/70 border-b border-slate-200/80 dark:border-slate-800">
                   <TableHead className="text-xs font-bold text-slate-700 dark:text-slate-300">Jugador</TableHead>
                   <TableHead className="text-xs font-bold text-slate-700 dark:text-slate-300">Deporte / Camiseta</TableHead>
                   <TableHead className="text-xs font-bold text-slate-700 dark:text-slate-300">Categoría</TableHead>
@@ -778,24 +810,24 @@ function JugadoresPage() {
                   <TableHead className="text-right pr-6 w-24 text-xs font-bold text-slate-700 dark:text-slate-300">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {view.map((j) => {
                   const isSuspended = !!j.esSuspendido;
                   return (
-                    <TableRow key={j.id} className={`group hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors ${isSuspended ? "bg-rose-500/5 dark:bg-rose-950/20" : ""}`}>
+                    <TableRow key={j.id} className={`group hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors border-b border-slate-100 dark:border-slate-800 ${isSuspended ? "bg-rose-500/5 dark:bg-rose-950/20" : ""}`}>
                       <TableCell>
                         <Link to="/jugadores/$id" params={{ id: j.id }} className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                          <Avatar className="h-9 w-9">
                             <AvatarImage src={j.avatar} />
                             <AvatarFallback>{(j.nombre || "J")[0]}</AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-xs font-bold group-hover:text-primary transition-colors flex items-center gap-1.5">
+                            <p className="text-xs font-bold group-hover:text-primary transition-colors flex items-center gap-1.5 text-slate-900 dark:text-slate-100">
                               {j.nombre}
                               {isSuspended && (
-                                <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-rose-500/10 text-rose-500 border-rose-500/30 font-bold uppercase">
+                                <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 text-[9px] font-bold uppercase">
                                   SUSPENDIDO ({j.razonSuspension || "En revisión"})
-                                </Badge>
+                                </span>
                               )}
                               {(() => {
                                 const sem = playerLoadsMap.get(j.id);
@@ -805,24 +837,34 @@ function JugadoresPage() {
                                 return null;
                               })()}
                             </p>
-                            <p className="text-[11px] text-muted-foreground">{j.identificacion} · {j.edad} años</p>
+                            <p className="text-[11px] text-slate-500">{j.identificacion} • {j.edad} años</p>
                           </div>
                         </Link>
                       </TableCell>
                       <TableCell>
                         <div className="text-xs">
-                          <span className="font-semibold">{j.disciplina || "Fútbol"}</span>
-                          <span className="text-muted-foreground block text-[10px]">Camiseta: #{j.numero || 10}</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{j.disciplina || "Fútbol"}</span>
+                          <span className="text-slate-400 block text-[10px]">Camiseta: #{j.numero || 10}</span>
                         </div>
                       </TableCell>
-                      <TableCell><Badge variant="outline" className="text-[10px] font-bold">{j.categoria}</Badge></TableCell>
-                      <TableCell className="text-xs font-medium">{j.sede}</TableCell>
+                      <TableCell>
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 text-[10px] font-bold">
+                          {j.categoria}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-xs font-medium text-slate-700 dark:text-slate-300">{j.sede}</TableCell>
                       <TableCell className="text-center">
                         <div className="inline-flex flex-col items-center gap-0.5">
-                          <Badge className={estadoPagoLabel[j.estadoPago].cls} variant="secondary">
-                            {estadoPagoLabel[j.estadoPago].label}
-                          </Badge>
-                          <span className="text-[10px] text-muted-foreground font-semibold">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            j.estadoPago === "al_dia" 
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20" 
+                              : j.estadoPago === "moroso"
+                              ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                          }`}>
+                            {estadoPagoLabel[j.estadoPago]?.label || "Al día"}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium">
                             ₡{(j.montoFinal || 25000).toLocaleString("es-CR")} / mes
                           </span>
                         </div>
