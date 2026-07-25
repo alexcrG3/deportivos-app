@@ -793,18 +793,18 @@ function Dashboard() {
             </div>
 
             <div className="space-y-3.5 my-2">
-              {/* Etapa 1: Base fría / Prospectos */}
+              {/* Etapa 1: Base fría / Prospectos (Entrada masiva de arriba) */}
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1.5">
                   <span className="text-slate-600 dark:text-slate-300 font-semibold">1. Prospectos / Leads recibidos</span>
                   <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.prospectos} prospectos</span>
                 </div>
                 <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-sky-400 dark:bg-sky-500 rounded-full transition-all duration-500" style={{ width: "100%" }} />
+                  <div className="h-full bg-slate-400 dark:bg-slate-500 rounded-full transition-all duration-500" style={{ width: "100%" }} />
                 </div>
               </div>
 
-              {/* Etapa 2: En proceso / En prueba */}
+              {/* Etapa 2: En proceso / En prueba (Intermedio) */}
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1.5">
                   <span className="text-slate-600 dark:text-slate-300 font-semibold">2. En Clase de Prueba / Evaluación</span>
@@ -815,14 +815,14 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Etapa 3: Éxito / Ganado */}
+              {/* Etapa 3: Éxito / Cierre ganado (Abajo) */}
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1.5">
                   <span className="text-slate-600 dark:text-slate-300 font-semibold">3. Inscritos Formalmente</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
                 </div>
                 <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${crmStats.percentInscritos}%` }} />
+                  <div className="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${crmStats.percentInscritos}%` }} />
                 </div>
               </div>
             </div>
