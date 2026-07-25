@@ -169,22 +169,12 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         title: "Personal",
         icon: UserCheck,
         url: "/entrenadores",
-        subLinks: [
-          { title: "Asistencia", url: "/asistencia-staff", icon: CalendarCheck },
-          { title: "Evaluaciones", url: "/evaluaciones-staff", icon: Star },
-          { title: "Rendimiento", url: "/reportes", icon: TrendingUp },
-          { title: "Nómina", url: "/finanzas", search: { tab: "nomina" }, icon: Banknote },
-        ],
       },
       {
         id: "finanzas",
         title: "Finanzas y Caja",
         icon: Wallet,
         url: "/finanzas",
-        subLinks: [
-          { title: "Mensualidades", url: "/pagos" },
-          { title: "Estados de Cuenta", url: "/balance" },
-        ],
       },
       {
         id: "area_medica",
@@ -194,9 +184,7 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         subLinks: [
           { title: "Historial Clínico", url: "/medico", search: { tab: "historial" }, icon: User },
           { title: "Lesiones", url: "/rendimiento/lesiones", icon: Ambulance },
-          { title: "Fisioterapia", url: "/medico/citas", icon: Stethoscope },
-          { title: "Tratamientos", url: "/medico", search: { tab: "tratamientos" }, icon: Pill },
-          { title: "Citas", url: "/medico/citas", icon: CalendarDays },
+          { title: "Directorio Médico", url: "/medico/citas", icon: Stethoscope },
           { title: "Aptitud Deportiva", url: "/medico", search: { tab: "aptitud" }, icon: ClipboardCheck },
           { title: "Reportes", url: "/reportes", search: { tab: "medico" }, icon: LineChart },
         ],

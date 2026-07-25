@@ -7,6 +7,7 @@ import { asistenciaMensual, crecimientoJugadores, disciplinas } from "@/lib/mock
 import { Download, FileSpreadsheet, FileText, BarChart3, Users, CalendarCheck, MapPinned, Activity, Swords, BookOpen, Loader2 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
+import RendimientoStore from "@/lib/rendimiento-store";
 
 export const Route = createFileRoute("/_app/reportes")({ component: ReportesPage });
 
@@ -33,36 +34,161 @@ function ReportesPage() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [activeReportDownload, setActiveReportDownload] = useState<string | null>(null);
 
-  const handleExportExcelAll = () => {
+  // ── Utility: trigger a real browser download from a Blob ──
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    // Clean up after short delay so browser has time to start download
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 300);
+  };
+
+  const generateExcelBlob = async (sheets: { name: string; rows: any[] }[]): Promise<Blob> => {
+    // Dynamic import so it only loads when needed
+    const XLSX = await import("xlsx");
+    const wb = XLSX.utils.book_new();
+    sheets.forEach(({ name, rows }) => {
+      const ws = XLSX.utils.json_to_sheet(rows.length > 0 ? rows : [{ "Sin datos": "—" }]);
+      XLSX.utils.book_append_sheet(wb, ws, name.substring(0, 31));
+    });
+    const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    return new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+  };
+
+  const generatePdfBlob = (title: string, rows: Record<string, any>[]): Blob => {
+    const cols = rows.length > 0 ? Object.keys(rows[0]) : ["Sin datos"];
+    const tableRows = rows.slice(0, 100).map(r =>
+      `<tr>${cols.map(c => `<td style="border:1px solid #ddd;padding:6px 10px;font-size:12px">${r[c] ?? "—"}</td>`).join("")}</tr>`
+    ).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>${title}</title>
+    <style>
+      body{font-family:Arial,sans-serif;padding:32px;color:#1a1a1a}
+      h1{font-size:20px;margin-bottom:4px}p{font-size:12px;color:#666;margin-bottom:24px}
+      table{border-collapse:collapse;width:100%}
+      th{background:#5b21b6;color:#fff;padding:8px 10px;font-size:12px;text-align:left}
+      tr:nth-child(even) td{background:#f5f3ff}
+      @media print{body{padding:0}}
+    </style></head><body>
+    <h1>${title}</h1>
+    <p>Generado por DeportivOS · ${new Date().toLocaleDateString("es-CR", { day:"2-digit", month:"long", year:"numeric" })}</p>
+    <table><thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+    <tbody>${tableRows}</tbody></table>
+    </body></html>`;
+
+    return new Blob([html], { type: "text/html;charset=utf-8" });
+  };
+
+  // ── Data builders per report type ──
+  const getReportData = (label: string): { name: string; rows: any[] }[] => {
+    const jugadores = RendimientoStore.getJugadores().map(j => ({
+      Nombre: j.nombre,
+      Categoría: j.categoria,
+      Posición: j.posicion,
+      Estado: j.estado,
+      "Fecha Nac.": j.fechaNacimiento ?? "—",
+    }));
+    const entrenadores = RendimientoStore.getEntrenadores().map(e => ({
+      Nombre: e.nombre,
+      Especialidad: e.especialidad,
+      Estado: (e as any).estado ?? "—",
+    }));
+    const sedes = RendimientoStore.getSedes ? RendimientoStore.getSedes().map((s: any) => ({
+      Nombre: s.nombre,
+      Dirección: s.direccion ?? "—",
+      Capacidad: s.capacidad ?? "—",
+    })) : [];
+
+    switch (label) {
+      case "Jugadores activos":
+        return [{ name: "Jugadores", rows: jugadores }];
+      case "Entrenadores":
+        return [{ name: "Entrenadores", rows: entrenadores }];
+      case "Uso de instalaciones":
+        return [{ name: "Instalaciones", rows: sedes }];
+      case "Asistencia general":
+        return [{ name: "Asistencia", rows: asistenciaMensual.map(a => ({ Mes: a.mes, Porcentaje: `${a.porcentaje ?? a.valor ?? "—"}%` })) }];
+      case "Ocupación de categorías":
+        return [{ name: "Categorías", rows: disciplinas.map(d => ({ Disciplina: d.nombre, Activos: d.activos, Capacidad: (d as any).capacidad ?? "—" })) }];
+      default:
+        return [{ name: label.substring(0, 31), rows: jugadores }];
+    }
+  };
+
+  const handleExportExcelAll = async () => {
     setExportingExcel(true);
     toast.loading("Compilando base de datos consolidada...", { id: "export-excel" });
-    
-    setTimeout(() => {
+    try {
+      const jugadores = RendimientoStore.getJugadores().map(j => ({
+        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: j.estado,
+      }));
+      const entrenadores = RendimientoStore.getEntrenadores().map(e => ({
+        Nombre: e.nombre, Especialidad: e.especialidad,
+      }));
+      const sedes = RendimientoStore.getSedes ? RendimientoStore.getSedes().map((s: any) => ({
+        Nombre: s.nombre, Dirección: s.direccion ?? "—",
+      })) : [];
+
+      const blob = await generateExcelBlob([
+        { name: "Jugadores", rows: jugadores },
+        { name: "Entrenadores", rows: entrenadores },
+        { name: "Instalaciones", rows: sedes },
+        { name: "Asistencia", rows: asistenciaMensual.map(a => ({ Mes: a.mes, Asistencia: `${a.porcentaje ?? a.valor ?? "—"}%` })) },
+      ]);
+
+      triggerDownload(blob, "Consolidado_Deportivo_DeportivOS.xlsx");
+      toast.success("¡Archivo descargado! Revisa tu carpeta de Descargas.", { id: "export-excel" });
+    } catch (err) {
+      toast.error("Error generando el archivo Excel.", { id: "export-excel" });
+      console.error(err);
+    } finally {
       setExportingExcel(false);
-      toast.success("¡Base de datos exportada! Descargando 'Consolidado_Deportivo_DeportivOS.xlsx'...", { id: "export-excel" });
-    }, 1500);
+    }
   };
 
-  const handleExportPdfAll = () => {
+  const handleExportPdfAll = async () => {
     setExportingPdf(true);
-    toast.loading("Generando informe consolidado en PDF...", { id: "export-pdf" });
-    
-    setTimeout(() => {
+    toast.loading("Generando informe consolidado...", { id: "export-pdf" });
+    try {
+      const jugadores = RendimientoStore.getJugadores().map(j => ({
+        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: j.estado,
+      }));
+      const blob = generatePdfBlob("Reporte Global DeportivOS", jugadores);
+      triggerDownload(blob, "Reporte_Global_DeportivOS.html");
+      toast.success("¡Reporte descargado! Ábrelo en el navegador e imprime como PDF.", { id: "export-pdf" });
+    } catch (err) {
+      toast.error("Error generando el reporte PDF.", { id: "export-pdf" });
+    } finally {
       setExportingPdf(false);
-      toast.success("¡Documento PDF listo! Descargando 'Reporte_Global_DeportivOS.pdf'...", { id: "export-pdf" });
-    }, 1500);
+    }
   };
 
-  const handleDownloadSingleReport = (reportLabel: string) => {
+  const handleDownloadSingleReport = async (reportLabel: string) => {
     setActiveReportDownload(reportLabel);
     toast.loading(`Generando reporte de ${reportLabel}...`, { id: "single-report" });
-    
-    setTimeout(() => {
+    try {
+      const sheets = getReportData(reportLabel);
+      const blob = await generateExcelBlob(sheets);
+      const filename = reportLabel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
+      triggerDownload(blob, `${filename}_deportivos.xlsx`);
+      toast.success(`¡Reporte descargado! Revisa tu carpeta de Descargas.`, { id: "single-report" });
+    } catch (err) {
+      toast.error("Error generando el reporte.", { id: "single-report" });
+      console.error(err);
+    } finally {
       setActiveReportDownload(null);
-      const sanitizedFilename = reportLabel.toLowerCase().replace(/ /g, "_");
-      toast.success(`¡Reporte generado! Descargando '${sanitizedFilename}_deportivos.xlsx'...`, { id: "single-report" });
-    }, 1200);
+    }
   };
+
 
   return (
     <div className="space-y-6">

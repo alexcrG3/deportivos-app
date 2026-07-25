@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -8,6 +8,7 @@ import { ActiveStepFloatingWidget } from "@/components/ActiveStepFloatingWidget"
 import RendimientoStore from "@/lib/rendimiento-store";
 import { TacticalStore } from "@/lib/tactical-store";
 import { seedEjemploPaso5 } from "@/lib/seed-ejemplo-paso5";
+import { ensureStaffDBDataSeeded } from "@/lib/seed-staff-db";
 import { Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_app")({
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayout() {
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
+  const hiddenAIRoutes = ["/muro"];
+  const showFloatAI = !hiddenAIRoutes.some(r => currentPath.startsWith(r));
   // Initialize isSyncing based on store status to prevent the empty dashboard flash
   const [isSyncing, setIsSyncing] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -54,7 +59,10 @@ function AppLayout() {
         if (mounted) {
           clearTimeout(safetyTimer);
           setIsSyncing(false);
-          try { seedEjemploPaso5(); } catch {}
+          try { 
+            seedEjemploPaso5(); 
+            ensureStaffDBDataSeeded();
+          } catch {}
         }
       });
     } else {
@@ -101,7 +109,7 @@ function AppLayout() {
             <Outlet />
           </main>
         </SidebarInset>
-        <FloatAIButton />
+        {showFloatAI && <FloatAIButton />}
         <ActiveStepFloatingWidget />
       </div>
     </SidebarProvider>

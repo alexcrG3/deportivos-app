@@ -3,7 +3,33 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
-## [24/07/2026 - Área Médica Enterprise, Indicador Inteligente de Revisión, Panel Lateral de Vista Rápida & Correcciones de SSR]
+## [24/07/2026 - Módulo de Finanzas v2.0, Persistencia 100% Supabase BD, Edición Directa & Formato UTC-6]
+
+- **Desconexión Absoluta de LocalStorage & Mock Data en Finanzas (`src/routes/_app/finanzas.tsx`, `src/components/finanzas-balance.tsx`):**
+  - Eliminada la inicialización de estados desde `RendimientoStore` (`localStorage`). `activePlayers` y `pagosRealizados` arrancan en `[]` vacíos y se alimentan de forma 100% estricta en tiempo real desde las tablas `jugadores` y `pagos` en Supabase.
+  - Eliminados los valores estáticos por defecto (fallbacks `|| 35000` y `|| 50000`) al parsear transacciones de la BD.
+
+- **Herramienta de Edición Directa de Movimientos (CRUD Completo en BD):**
+  - Incorporación del botón **Lápiz 🔵 (Editar)** en la columna de Acciones de la Tabla de Auditoría.
+  - Implementación del modal de edición que permite modificar *Fecha*, *Monto*, *Concepto/Detalle*, *Cliente/Proveedor*, *Categoría* y *Método de Pago*, aplicando cambios directos en Supabase con `.update()`.
+
+- **Mantenimiento e Integridad de Categorías en Supabase (`pagos` table):**
+  - Dado que la tabla `pagos` de Supabase no cuenta con columna nativa `categoria`, se codificó el formato parseable `[CAT:Categoría] EGRESO / INGRESO: Detalle` en la columna `referencia`.
+  - El motor de lectura extrae dinámicamente `[CAT:...]` de la referencia para asignar y mantener la categoría correcta en los gráficos de pastel ("Distribución de Salidas") y filtros.
+  - Habilitada la opción **`✏️ Otro/a (escribir...)`** con caja de texto libre tanto para Métodos de Pago como para Categorías en los modales de egresos e ingresos.
+
+- **Sincronización de KPIs & Gráficas de Evolución:**
+  - Sincronizados los cálculos entre "Balance y Libro de Caja" y "Gráficas de Evolución" para evaluar únicamente las transacciones del mes en curso y separar ingresos de egresos reales.
+  - Reemplazada la estimación artificial del 45% en los egresos del gráfico de barras mensual por la sumatoria real de egresos de Supabase.
+  - Rediseñado el tooltip flotante del gráfico de barras con fondo oscuro contrastado (`#1e293b`) y texto en blanco brillante para una legibilidad impecable.
+
+- **Normalización de Fechas y Zona Horaria Local (UTC-6 / Costa Rica):**
+  - Reemplazadas todas las conversiones `.toISOString().split("T")[0]` por el formateador local `getLocalDateStr()`. Esto evita que transacciones registradas después de las 6:00 PM (18:00 hrs local) salten al día siguiente en UTC y distorsionen los totales.
+  - Corregido el bug de sintaxis `const rawRef` a `let rawRef` que interrumpía la ejecución del fetch en segundo plano.
+  - Ajustado el desempate secundario del orden cronológico utilizando el timestamp extraído de IDs alfanuméricos (`pag-${Date.now()}-xxx`) para garantizar que las transacciones más recientes aparezcan siempre en la parte superior.
+
+---
+
 
 - **Submenú Ampliado y Rediseñado de Área Médica (`src/components/app-sidebar.tsx`):**
   - Actualización completa de la navegación de **Área Médica** con 7 sub-enlaces oficiales e iconos Lucide dedicados:

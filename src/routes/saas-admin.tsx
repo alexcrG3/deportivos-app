@@ -12,7 +12,8 @@ import {
   RotateCw, Ban, ChevronRight, Activity, LogOut,
   BookOpen, Globe, Heart, Award, Sparkles, Trophy,
   LifeBuoy, MessageSquare, Clock, CheckCircle2, AlertCircle,
-  HelpCircle, Send, FileText, Filter, ShieldAlert
+  HelpCircle, Send, FileText, Filter, ShieldAlert,
+  Lock, CheckCheck
 } from "lucide-react";
 import RendimientoStore, { StoreSupportTicket } from "@/lib/rendimiento-store";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ function SaasAdminDashboard() {
   const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
   const [selectedTicketAdmin, setSelectedTicketAdmin] = useState<StoreSupportTicket | null>(null);
   const [adminReplyText, setAdminReplyText] = useState("");
+  const [adminReplyType, setAdminReplyType] = useState<"public" | "internal">("public");
   
   // Registration modal state
   const [openCreate, setOpenCreate] = useState(false);
@@ -117,11 +119,12 @@ function SaasAdminDashboard() {
   }, [tickets, ticketStatusFilter, ticketOrgFilter, ticketSearchQuery]);
 
   const handleUpdateTicketStatus = (ticketId: string, newStatus: StoreSupportTicket["estado"]) => {
-    RendimientoStore.updateSupportTicketStatus(ticketId, newStatus);
+    RendimientoStore.updateSupportTicketStatus(ticketId, newStatus, "Soporte Central");
     toast.success("Estado del ticket actualizado correctamente");
     refreshTickets();
-    if (selectedTicketAdmin && selectedTicketAdmin.id === ticketId) {
-      setSelectedTicketAdmin(prev => prev ? { ...prev, estado: newStatus } : null);
+    const updated = RendimientoStore.getSupportTickets().find(t => t.id === ticketId);
+    if (updated && selectedTicketAdmin && selectedTicketAdmin.id === ticketId) {
+      setSelectedTicketAdmin(updated);
     }
   };
 
@@ -131,9 +134,10 @@ function SaasAdminDashboard() {
       autorNombre: "Soporte Central DeportivOS SaaS",
       autorEmail: "soporte@deportivos.com",
       mensaje: adminReplyText.trim(),
-      esAdminSaaS: true
+      esAdminSaaS: true,
+      type: adminReplyType
     });
-    toast.success("Respuesta oficial enviada a la academia");
+    toast.success(adminReplyType === "internal" ? "Nota interna guardada con éxito" : "Respuesta oficial enviada a la academia");
     setAdminReplyText("");
     refreshTickets();
     const updated = RendimientoStore.getSupportTickets().find(t => t.id === selectedTicketAdmin.id);
@@ -822,42 +826,134 @@ function SaasAdminDashboard() {
                     Aún no hay respuestas en este ticket.
                   </p>
                 ) : (
-                  selectedTicketAdmin.respuestas.map((r) => (
-                    <div 
-                      key={r.id} 
-                      className={`p-3.5 rounded-xl text-xs space-y-1.5 border ${
-                        r.esAdminSaaS 
-                          ? "bg-purple-500/10 border-purple-500/20 text-foreground ml-4" 
-                          : "bg-muted/60 border-border text-foreground mr-4"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span className="flex items-center gap-1.5 text-primary">
-                          {r.esAdminSaaS && <Sparkles className="h-3.5 w-3.5 text-purple-500" />}
-                          {r.autorNombre}
-                          {r.esAdminSaaS && <Badge className="bg-purple-600 text-white text-[9px] py-0 px-1">SuperAdmin SaaS</Badge>}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">{formatRelativeTime(r.fecha)}</span>
+                  selectedTicketAdmin.respuestas.map((r) => {
+                    if (r.type === "system_event") {
+                      return (
+                        <div key={r.id} className="py-1 text-center text-xs text-muted-foreground font-medium flex items-center justify-center gap-1.5">
+                          <span>🔄 {r.autorNombre} {r.mensaje}</span>
+                          <span>•</span>
+                          <span className="text-[11px]">{formatRelativeTime(r.fecha)}</span>
+                        </div>
+                      );
+                    }
+
+                    if (r.type === "internal") {
+                      return (
+                        <div 
+                          key={r.id} 
+                          className="p-3.5 rounded-xl text-xs space-y-1.5 border bg-[#FFF9E6] border-amber-300/80 text-amber-950 dark:bg-amber-950/40 dark:border-amber-800/60 dark:text-amber-100 ml-4 shadow-sm"
+                        >
+                          <div className="flex items-center justify-between font-semibold">
+                            <span className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
+                              <Lock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                              {r.autorNombre}
+                              <Badge className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 text-[9px] py-0 px-1">
+                                Nota Interna (Sólo Equipo)
+                              </Badge>
+                            </span>
+                            <span className="text-[10px] text-amber-700/70 dark:text-amber-400/70">{formatRelativeTime(r.fecha)}</span>
+                          </div>
+                          <p className="leading-relaxed text-xs">{r.mensaje}</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div 
+                        key={r.id} 
+                        className={`p-3.5 rounded-xl text-xs space-y-1.5 border relative ${
+                          r.esAdminSaaS 
+                            ? "bg-purple-500/10 border-purple-500/20 text-foreground ml-4" 
+                            : "bg-muted/60 border-border text-foreground mr-4"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-semibold">
+                          <span className="flex items-center gap-1.5 text-primary">
+                            {r.esAdminSaaS && <Sparkles className="h-3.5 w-3.5 text-purple-500" />}
+                            {r.autorNombre}
+                            {r.esAdminSaaS && <Badge className="bg-purple-600 text-white text-[9px] py-0 px-1">SuperAdmin SaaS</Badge>}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{formatRelativeTime(r.fecha)}</span>
+                        </div>
+                        <p className="leading-relaxed text-xs">{r.mensaje}</p>
+
+                        {r.esAdminSaaS && (
+                          <div className="flex items-center justify-end gap-1 pt-1 text-[10px] text-muted-foreground">
+                            <span className="text-[9px] opacity-75">{r.read_by_client ? "Visto por la academia" : "Enviado"}</span>
+                            <CheckCheck 
+                              className={`h-4 w-4 ${r.read_by_client ? "text-purple-600 dark:text-purple-400" : "text-muted-foreground/60"}`} 
+                              title={r.read_by_client ? "Visto por el cliente" : "Entregado"}
+                            />
+                          </div>
+                        )}
                       </div>
-                      <p className="leading-relaxed text-xs">{r.mensaje}</p>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
 
             {/* Admin Response Box */}
             <div className="pt-3 border-t border-border space-y-2">
-              <Label className="text-xs font-semibold text-muted-foreground">Responder como Soporte Central SaaS</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-muted-foreground">Escribir mensaje o nota</Label>
+                {/* Tabs */}
+                <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setAdminReplyType("public")}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
+                      adminReplyType === "public"
+                        ? "bg-background text-foreground shadow-sm font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Respuesta Oficial
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminReplyType("internal")}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1 ${
+                      adminReplyType === "internal"
+                        ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 shadow-sm font-semibold border border-amber-300/50"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Lock className="h-3 w-3 text-amber-600" /> Nota Interna
+                  </button>
+                </div>
+              </div>
+
               <div className="flex gap-2">
                 <Textarea
                   value={adminReplyText}
                   onChange={(e) => setAdminReplyText(e.target.value)}
-                  placeholder="Escribe la respuesta oficial para la academia..."
-                  className="text-xs flex-1 min-h-[60px]"
+                  placeholder={
+                    adminReplyType === "internal"
+                      ? "Escribe una nota privada técnica visible sólo para el equipo de soporte..."
+                      : "Escribe la respuesta oficial para la academia..."
+                  }
+                  className={`text-xs flex-1 min-h-[60px] ${
+                    adminReplyType === "internal" ? "bg-[#FFF9E6]/50 border-amber-300 dark:bg-amber-950/20" : ""
+                  }`}
                 />
-                <Button onClick={handleAdminSendReply} className="bg-gradient-primary gap-1 self-end shadow-elegant">
-                  <Send className="h-3.5 w-3.5" /> Responder
+                <Button 
+                  onClick={handleAdminSendReply} 
+                  className={`gap-1 self-end shadow-elegant text-xs ${
+                    adminReplyType === "internal" 
+                      ? "bg-amber-600 hover:bg-amber-700 text-white" 
+                      : "bg-gradient-primary"
+                  }`}
+                >
+                  {adminReplyType === "internal" ? (
+                    <>
+                      <Lock className="h-3.5 w-3.5" /> Guardar Nota
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5" /> Responder
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

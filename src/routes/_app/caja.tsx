@@ -13,23 +13,32 @@ import {
   Banknote, ArrowDownCircle, ArrowUpCircle, Lock, Unlock, Wallet, Clock, Receipt, ArrowRight, ShieldCheck
 } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+
 export const Route = createFileRoute("/_app/caja")({ component: CajaPage });
 
 function buildHistorico(pagos: any[]) {
-  const byDate = new Map<string, number>();
+  const byDate = new Map<string, { ingresos: number; egresos: number }>();
   pagos.forEach((p) => {
     const d = p.fecha || "Sin fecha";
-    byDate.set(d, (byDate.get(d) || 0) + (p.monto || 0));
+    const current = byDate.get(d) || { ingresos: 0, egresos: 0 };
+    const rawMonto = Number(p.monto || 0);
+    if (rawMonto < 0 || String(p.referencia || "").startsWith("EGRESO:")) {
+      current.egresos += Math.abs(rawMonto);
+    } else {
+      current.ingresos += Math.abs(rawMonto);
+    }
+    byDate.set(d, current);
   });
   return [...byDate.entries()]
     .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-    .map(([fecha, ingresos], i) => ({
+    .map(([fecha, val], i) => ({
       id: i,
       fecha,
-      ingresos,
-      egresos: 0,
-      esperado: ingresos,
-      contado: ingresos,
+      ingresos: val.ingresos,
+      egresos: val.egresos,
+      esperado: val.ingresos - val.egresos,
+      contado: val.ingresos - val.egresos,
       diferencia: 0,
     }));
 }
@@ -38,19 +47,26 @@ function CajaPage() {
   const [pagosHoy, setPagosHoy]     = useState<any[]>([]);
   const [historico, setHistorico]   = useState<ReturnType<typeof buildHistorico>>([]);
   const [ingresos, setIngresos]     = useState(0);
+  const [egresosHoy, setEgresosHoy] = useState(0);
 
   useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const todos  = RendimientoStore.getPagos();
-    const hoy    = todos.filter((p) => p.fecha === today);
-    const total  = hoy.reduce((a, p) => a + (p.monto || 0), 0);
+    async function loadCajaFromDB() {
+      const today = new Date().toISOString().split("T")[0];
+      const { data } = await supabase.from("pagos").select("*");
+      const todos = data || [];
+      const hoy = todos.filter((p: any) => p.fecha === today);
+      const totalIngresos = hoy.filter((p: any) => Number(p.monto) > 0 && !String(p.referencia || "").startsWith("EGRESO:")).reduce((a, p: any) => a + Math.abs(Number(p.monto)), 0);
+      const totalEgresos = hoy.filter((p: any) => Number(p.monto) < 0 || String(p.referencia || "").startsWith("EGRESO:")).reduce((a, p: any) => a + Math.abs(Number(p.monto)), 0);
 
-    setPagosHoy(hoy);
-    setIngresos(total);
-    setHistorico(buildHistorico(todos));
+      setPagosHoy(hoy);
+      setIngresos(totalIngresos);
+      setEgresosHoy(totalEgresos);
+      setHistorico(buildHistorico(todos));
+    }
+    loadCajaFromDB();
   }, []);
 
-  const esperado = ingresos;
+  const esperado = ingresos - egresosHoy;
 
   return (
     <div className="space-y-6">
@@ -88,8 +104,8 @@ function CajaPage() {
         />
         <StatCard
           label="Egresos Hoy"
-          value={formatCRC(0)}
-          hint="Sin egresos registrados"
+          value={formatCRC(egresosHoy)}
+          hint="Gastos y salidas del día en BD"
           icon={ArrowUpCircle}
           accent="destructive"
         />

@@ -42,6 +42,12 @@ function SoporteAcademiaPage() {
     refreshTickets();
   }, []);
 
+  useEffect(() => {
+    if (selectedTicket?.id) {
+      RendimientoStore.markTicketAsRead(selectedTicket.id);
+    }
+  }, [selectedTicket?.id]);
+
   const filteredTickets = useMemo(() => {
     return tickets.filter(t => {
       const matchStatus = statusFilter === "todos" ? true : t.estado === statusFilter;
@@ -367,32 +373,49 @@ function SoporteAcademiaPage() {
                   <MessageSquare className="h-3.5 w-3.5" /> Conversación ({selectedTicket.respuestas?.length || 0})
                 </h4>
 
-                {(!selectedTicket.respuestas || selectedTicket.respuestas.length === 0) ? (
-                  <p className="text-xs text-muted-foreground italic bg-muted/20 p-3 rounded-lg text-center">
-                    Aún no hay respuestas del equipo de soporte. Te notificaremos cuando haya una actualización.
-                  </p>
-                ) : (
-                  selectedTicket.respuestas.map((r) => (
-                    <div 
-                      key={r.id} 
-                      className={`p-3.5 rounded-xl text-xs space-y-1.5 border ${
-                        r.esAdminSaaS 
-                          ? "bg-purple-500/10 border-purple-500/20 text-foreground ml-4" 
-                          : "bg-muted/60 border-border text-foreground mr-4"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span className="flex items-center gap-1.5 text-primary">
-                          {r.esAdminSaaS && <Sparkles className="h-3 w-3 text-purple-500" />}
-                          {r.autorNombre}
-                          {r.esAdminSaaS && <Badge className="bg-purple-500 text-[9px] py-0 px-1">Soporte SaaS</Badge>}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">{formatRelativeTime(r.fecha)}</span>
+                {(() => {
+                  const publicResponses = (selectedTicket.respuestas || []).filter(r => r.type !== "internal");
+                  if (publicResponses.length === 0) {
+                    return (
+                      <p className="text-xs text-muted-foreground italic bg-muted/20 p-3 rounded-lg text-center">
+                        Aún no hay respuestas del equipo de soporte. Te notificaremos cuando haya una actualización.
+                      </p>
+                    );
+                  }
+
+                  return publicResponses.map((r) => {
+                    if (r.type === "system_event") {
+                      return (
+                        <div key={r.id} className="py-1 text-center text-xs text-muted-foreground font-medium flex items-center justify-center gap-1.5">
+                          <span>🔄 {r.autorNombre} {r.mensaje}</span>
+                          <span>•</span>
+                          <span className="text-[11px]">{formatRelativeTime(r.fecha)}</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div 
+                        key={r.id} 
+                        className={`p-3.5 rounded-xl text-xs space-y-1.5 border ${
+                          r.esAdminSaaS 
+                            ? "bg-purple-500/10 border-purple-500/20 text-foreground ml-4" 
+                            : "bg-muted/60 border-border text-foreground mr-4"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between font-semibold">
+                          <span className="flex items-center gap-1.5 text-primary">
+                            {r.esAdminSaaS && <Sparkles className="h-3 w-3 text-purple-500" />}
+                            {r.autorNombre}
+                            {r.esAdminSaaS && <Badge className="bg-purple-500 text-[9px] py-0 px-1">Soporte SaaS</Badge>}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{formatRelativeTime(r.fecha)}</span>
+                        </div>
+                        <p className="leading-relaxed text-xs">{r.mensaje}</p>
                       </div>
-                      <p className="leading-relaxed text-xs">{r.mensaje}</p>
-                    </div>
-                  ))
-                )}
+                    );
+                  });
+                })()}
               </div>
             </div>
 

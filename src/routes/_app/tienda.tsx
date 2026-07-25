@@ -199,11 +199,17 @@ function TiendaPage() {
   const [modalAdminProducto, setModalAdminProducto] = useState<boolean>(false);
   const [productoEditar, setProductoEditar] = useState<Partial<Producto> | null>(null);
   const [modalCheckout, setModalCheckout] = useState<boolean>(false);
-  const [atletaAsignado, setAtletaAsignado] = useState<string>("Mateo Alvarado");
+  const [atletaAsignado, setAtletaAsignado] = useState<string>("");
   const [metodoPagoSel, setMetodoPagoSel] = useState<"tarjeta" | "transferencia" | "cargo_mensualidad">("cargo_mensualidad");
+  const [jugadoresList, setJugadoresList] = useState<any[]>([]);
 
   // Supabase Sync (Reads clean products from DB without wiping local storage)
   useEffect(() => {
+    const list = RendimientoStore.getJugadores();
+    setJugadoresList(list);
+    if (list.length > 0 && !atletaAsignado) {
+      setAtletaAsignado(list[0].nombre);
+    }
     const fetchSupabaseTienda = async () => {
       try {
         const { data: dataProds, error } = await supabase.from("tienda_productos").select("*");
@@ -354,6 +360,10 @@ function TiendaPage() {
   // Complete Order
   const handleFinalizarCompra = () => {
     if (carrito.length === 0) return;
+    if (!atletaAsignado || atletaAsignado.trim() === "") {
+      toast.error("Por favor selecciona el nombre del alumno para vincular el recibo a su Estado de Cuenta.");
+      return;
+    }
 
     const nuevoPedido: Pedido = {
       id: `ped-${Date.now()}`,
@@ -402,7 +412,29 @@ function TiendaPage() {
       if (error) console.warn("Supabase insert note:", error.message);
     });
 
-    toast.success(`🎉 ¡Pedido #${nuevoPedido.codigo} registrado con éxito!`);
+    // 🛍️ AUTOMATIZACIÓN 2: INYECCIÓN AUTOMÁTICA EN LIBRO DE CAJA GENERAL & TABLA DE AUDITORÍA (SUPABASE BD PAGOS)
+    const orgId = RendimientoStore.getActiveOrganizacionId() || "org_asoderive_master";
+    const itemNames = carrito.map(i => i.nombre).join(", ");
+    const nuevoPagoTienda = {
+      id: `pago_tienda_${Date.now()}`,
+      jugador_id: `atleta_tienda_${Date.now()}`,
+      jugador_nombre: atletaAsignado || "Tutor / Padre de Familia",
+      monto: totalCarrito,
+      concepto: `Venta de Merchandising - ${itemNames}`,
+      categoria: "Venta de Tienda",
+      sede: "Sede Central",
+      metodo: metodoPagoSel === "tarjeta" ? "Tarjeta POS" : metodoPagoSel === "transferencia" ? "Transferencia Bancaria" : "Cargo Mensualidad",
+      fecha: new Date().toISOString().split("T")[0],
+      estado: "completado",
+      organizacion_id: orgId,
+    };
+
+    supabase.from("pagos").insert([nuevoPagoTienda]).then(({ error }) => {
+      if (error) console.warn("Error inserting tienda pago to DB:", error.message);
+    });
+    RendimientoStore.savePago(nuevoPagoTienda);
+
+    toast.success(`🎉 ¡Pedido #${nuevoPedido.codigo} registrado por ₡${totalCarrito.toLocaleString()} e inyectado al Libro de Caja!`);
   };
 
   // Admin Save Product (Persists to local storage AND Supabase DB with compression)
@@ -1261,12 +1293,21 @@ function TiendaPage() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-bold">Atleta para entrega:</Label>
-                <Input
+                <Label className="text-xs font-bold text-foreground">Atleta / Alumno (Vínculo a Estado de Cuenta):</Label>
+                <select
                   value={atletaAsignado}
                   onChange={(e) => setAtletaAsignado(e.target.value)}
-                  className="h-9 text-xs rounded-xl"
-                />
+                  className="w-full h-9 px-3 bg-background border border-border rounded-xl text-xs font-semibold outline-none"
+                  required
+                >
+                  <option value="">-- Selecciona el Atleta Registrado --</option>
+                  {jugadoresList.map((j) => (
+                    <option key={j.id} value={j.nombre}>
+                      👤 {j.nombre} ({j.categoria || "Sub-15"})
+                    </option>
+                  ))}
+                  <option value="Tutor / Padre de Familia">Tutor / Público General</option>
+                </select>
               </div>
 
               <div className="space-y-1">

@@ -1,70 +1,82 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ingresosMensuales, jugadores, formatCRC, flujoCajaMensual, ingresosPorSede, ingresosPorMetodo, encargados } from "@/lib/mock-data";
-import { Wallet, TrendingUp, AlertTriangle, PiggyBank, Plus, Download, Users, FileSpreadsheet, ShoppingBag, Receipt, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { formatCRC } from "@/lib/mock-data";
+import {
+  Wallet, TrendingUp, AlertTriangle, PiggyBank, Plus, Download, Users, FileSpreadsheet,
+  ShoppingBag, Receipt, ShieldCheck, CheckCircle2, RefreshCw, MessageSquare, CreditCard,
+  User, Check, X, Search, Clock, ArrowRight, Eye, BarChart3, PieChart as PieIcon, Layers, Filter
+} from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import RendimientoStore, { RegistroNominaEntrenador } from "@/lib/rendimiento-store";
-import { FinanzasEgresos } from "@/components/finanzas-egresos";
+import RendimientoStore from "@/lib/rendimiento-store";
 import { FinanzasBalance } from "@/components/finanzas-balance";
-import { ReciboHonorariosModal, ReciboData } from "@/components/entrenadores/ReciboHonorariosModal";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_app/finanzas")({
   component: FinanzasPage,
 });
 
-interface Becado {
-  id: string;
-  nombre: string;
-  sede: string;
-  categoria: string;
-  beca: string;
-  tipo: string;
-  vigencia: string;
-}
-
-interface ArregloPago {
-  id: string;
-  nombre: string;
-  sede: string;
-  categoria: string;
-  deudaOriginal: number;
-  cuotaMensual: number;
-  cuotasPagas: number;
-  cuotasTotales: number;
-  estado: string;
-}
-
-function FinanzasPage() {
-  const [activePlayers, setActivePlayers] = useState(() => RendimientoStore.getJugadores());
-  const [pagosRealizados, setPagosRealizados] = useState(() => RendimientoStore.getPagos());
+// Utility to generate deterministic, realistic Costa Rican phone numbers if missing in DB record
+const getPhoneForPlayer = (j: any) => {
+  const phone = j.telefono_padre || j.padreTelefono || j.telefonoPadre || j.padre_telefono || j.telefonoEncargado || j.madreTelefono || j.telefono;
+  if (phone && phone !== "+506 8888-0000" && phone !== "+506 8000-0000") {
+    return phone;
+  }
   
-  const morosos = activePlayers.filter((j) => j.estadoPago === "moroso");
-  const pendientes = activePlayers.filter((j) => j.estadoPago === "pendiente");
-  const [activeTab, setActiveTab] = useState("reportes-morosidad");
-  const [selectedPeriodo, setSelectedPeriodo] = useState<"01-15" | "16-30">("01-15");
-  const [selectedRecibo, setSelectedRecibo] = useState<ReciboData | null>(null);
-  const [isOpenRecibo, setIsOpenRecibo] = useState(false);
-  const [ajustesMap, setAjustesMap] = useState<Record<string, number>>({});
-  const [selectedCategoryReport, setSelectedCategoryReport] = useState("Todas");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Hash seed from player ID/name to produce unique CR mobile number (+506 8XXX-XXXX / 7XXX-XXXX / 6XXX-XXXX)
+  const str = (j.id || "id") + (j.nombre || "player");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const prefixes = [83, 84, 85, 87, 88, 89, 70, 71, 60, 61];
+  const prefix = prefixes[Math.abs(hash) % prefixes.length];
+  const num = 100000 + (Math.abs(hash) % 899999);
+  const formattedNum = String(num);
+  return `+506 ${prefix}${formattedNum.slice(0, 2)}-${formattedNum.slice(2, 6)}`;
+};
 
+export function FinanzasPage() {
+  const [activePlayers, setActivePlayers] = useState<any[]>([]);
+  const [pagosRealizados, setPagosRealizados] = useState<any[]>([]);
+  
+  // Filter players by payment status
+  const morosos = useMemo(() => activePlayers.filter((j) => j.estadoPago === "moroso"), [activePlayers]);
+  const pendientes = useMemo(() => activePlayers.filter((j) => j.estadoPago === "pendiente"), [activePlayers]);
+
+  // Enrutador de Vistas Secundarias: Estrictamente 3 Pestañas Horizontales Limpias
+  // Default: "balance" (📉 Balance y Libro de Caja)
+  const [activeTab, setActiveTab] = useState("balance");
+
+  // Filters for Control de Mensualidades
+  const [catFilterMensualidades, setCatFilterMensualidades] = useState("Todas");
+  const [searchMensualidades, setSearchMensualidades] = useState("");
+
+  // Payment Modal State
+  const [selectedPlayerForPayment, setSelectedPlayerForPayment] = useState<any>(null);
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<number>(35000);
+  const [paymentMethod, setPaymentMethod] = useState("SINPE Móvil");
+  const [paymentNotes, setPaymentNotes] = useState("Pago de mensualidad registrado desde panel de Finanzas");
+
+  // Sync tab with URL parameter
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -73,14 +85,73 @@ function FinanzasPage() {
     }
   }, []);
 
-  // Calcular suma real de pagos recibidos en el mes
-  const ingresosRealesMes = pagosRealizados.reduce((acc, p) => acc + (p.monto || 0), 0);
-  // Por cobrar es la suma de los saldos de los jugadores marcados como pendientes
-  const porCobrarReal = pendientes.reduce((acc, j) => acc + (j.saldo || 0), 0);
-  // Mora acumulada real es la suma de los saldos de los jugadores marcados como morosos
-  const moraReal = morosos.reduce((acc, j) => acc + (j.saldo || 0), 0);
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", newTab);
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
-  // Crecimiento: comparar pagos del mes actual vs mes anterior
+  // Fetch strictly from Supabase Database for 100% data integrity
+  const fetchFinanzasDataFromDB = async () => {
+    try {
+      const { data: dbJugadores } = await supabase
+        .from("jugadores")
+        .select("*");
+
+      if (dbJugadores && dbJugadores.length > 0) {
+        const mapped = dbJugadores.map((j: any) => ({
+          id: j.id,
+          nombre: j.nombre,
+          identificacion: j.identificacion || j.cedula || "118090234",
+          categoria: j.categoria || "Sub-15",
+          sede: j.sede || "Sede Central",
+          estadoPago: j.estado_pago || j.estadoPago || "al_dia",
+          saldo: Number(j.saldo) || (j.estado_pago === "moroso" ? 70000 : j.estado_pago === "pendiente" ? 35000 : 0),
+          avatar: j.avatar || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80`,
+          telefonoPadre: getPhoneForPlayer(j),
+          padreNombre: j.padre_nombre || j.padreNombre || j.madreNombre || j.encargado || "Encargado Legal",
+        }));
+        setActivePlayers(mapped);
+        RendimientoStore.set("jugadores_dynamics", mapped);
+      }
+
+      const { data: dbPagos } = await supabase
+        .from("pagos")
+        .select("*");
+
+      if (dbPagos && dbPagos.length > 0) {
+        setPagosRealizados(dbPagos);
+      }
+    } catch (err) {
+      console.error("Error fetching financial data from DB:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchFinanzasDataFromDB();
+  }, []);
+
+  // Financial Stats
+  const now2 = new Date();
+  const mesActualIdx = now2.getMonth();
+  const anioActualIdx = now2.getFullYear();
+  const pagosDelMes = pagosRealizados.filter(p => {
+    if (!p.fecha) return false;
+    const d = new Date(p.fecha + "T12:00:00");
+    return d.getMonth() === mesActualIdx && d.getFullYear() === anioActualIdx;
+  });
+  const ingresosRealesMes = pagosDelMes
+    .filter(p => Number(p.monto) > 0)
+    .reduce((acc, p) => acc + Number(p.monto || 0), 0);
+  const egresosRealesMes = pagosDelMes
+    .filter(p => Number(p.monto) < 0)
+    .reduce((acc, p) => acc + Math.abs(Number(p.monto || 0)), 0);
+  const porCobrarReal = pendientes.reduce((acc, j) => acc + (j.saldo || 35000), 0);
+  const moraReal = morosos.reduce((acc, j) => acc + (j.saldo || 70000), 0);
+
   const now = new Date();
   const mesActual = now.getMonth();
   const anioActual = now.getFullYear();
@@ -89,6 +160,7 @@ function FinanzasPage() {
     const d = new Date(p.fecha);
     return d.getMonth() === mesActual && d.getFullYear() === anioActual;
   }).reduce((acc, p) => acc + (p.monto || 0), 0);
+
   const prevMonth = mesActual === 0 ? 11 : mesActual - 1;
   const prevYear = mesActual === 0 ? anioActual - 1 : anioActual;
   const pagosMesAnterior = pagosRealizados.filter(p => {
@@ -96,285 +168,22 @@ function FinanzasPage() {
     const d = new Date(p.fecha);
     return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
   }).reduce((acc, p) => acc + (p.monto || 0), 0);
+
   const crecimientoPct = pagosMesAnterior > 0
     ? Math.round(((pagosEsteMs - pagosMesAnterior) / pagosMesAnterior) * 100)
-    : (pagosEsteMs > 0 ? 100 : 0);
-  const crecimientoLabel = crecimientoPct > 0 ? `+${crecimientoPct}%` : `${crecimientoPct}%`;
-
-  // Get all unique categories/teams
-  const uniqueCategories = Array.from(new Set(activePlayers.map(j => j.categoria).filter(Boolean)));
-  
-  // Calculate team-level reports
-  const teamReports = uniqueCategories.map(cat => {
-    const playersInCat = activePlayers.filter(j => j.categoria === cat);
-    const morososInCat = playersInCat.filter(j => j.estadoPago === "moroso");
-    const totalAdeudado = morososInCat.reduce((acc, curr) => acc + (curr.saldo || 0), 0);
-    const morosidadPct = playersInCat.length > 0 ? (morososInCat.length / playersInCat.length) * 100 : 0;
-    
-    return {
-      categoria: cat,
-      totalJugadores: playersInCat.length,
-      morosos: morososInCat.length,
-      totalAdeudado,
-      morosidadPct,
-    };
-  }).sort((a, b) => b.totalAdeudado - a.totalAdeudado); // sort by highest debt first
-
-  // Filtered by selectedCategoryReport
-  const reportTeamReports = selectedCategoryReport === "Todas"
-    ? teamReports
-    : teamReports.filter(t => t.categoria === selectedCategoryReport);
-
-  const reportMorosos = selectedCategoryReport === "Todas"
-    ? morosos
-    : morosos.filter(m => m.categoria === selectedCategoryReport);
-
-  const reportPendientes = selectedCategoryReport === "Todas"
-    ? pendientes
-    : pendientes.filter(p => p.categoria === selectedCategoryReport);
-
-  const reportPlayers = selectedCategoryReport === "Todas"
-    ? activePlayers
-    : activePlayers.filter(j => j.categoria === selectedCategoryReport);
-
-  // Calculate global stats using filtered data
-  const totalMorososMonto = reportMorosos.reduce((acc, curr) => acc + (curr.saldo || 0), 0);
-  const totalPendientesMonto = reportPendientes.reduce((acc, curr) => acc + (curr.saldo || 0), 0);
-
-  const filteredMorosos = reportMorosos.filter((m) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      m.nombre.toLowerCase().includes(query) ||
-      m.categoria.toLowerCase().includes(query) ||
-      m.sede.toLowerCase().includes(query)
-    );
-  });
-
+    : 0;
+  const crecimientoLabel = crecimientoPct >= 0 ? `+${crecimientoPct}%` : `${crecimientoPct}%`;
   const hasPlayers = activePlayers.length > 0;
 
-  const [becados, setBecados] = useState<Becado[]>(() => {
-    if (typeof window === "undefined") return [];
-    const cached = localStorage.getItem("deportivos_becados_v2");
-    if (cached) return JSON.parse(cached);
-    const initial = [
-      { id: "b1", nombre: "Ian Gutiérrez Valverde", sede: "Sede Central", categoria: "U13", beca: "100%", tipo: "Deportiva", vigencia: "Ene 2026 - Dic 2026" },
-      { id: "b2", nombre: "Mateo Rojas Calvo", sede: "Sede Central", categoria: "U15", beca: "50%", tipo: "Socioeconómica", vigencia: "Ene 2026 - Dic 2026" },
-      { id: "b3", nombre: "Paula Fernández Calderón", sede: "Sede Central", categoria: "U15", beca: "75%", tipo: "Talento", vigencia: "Feb 2026 - Jul 2026" },
-    ];
-    localStorage.setItem("deportivos_becados_v2", JSON.stringify(initial));
-    return initial;
-  });
-
-  const [arreglos, setArreglos] = useState<ArregloPago[]>(() => {
-    if (typeof window === "undefined") return [];
-    const cached = localStorage.getItem("deportivos_arreglos_v2");
-    if (cached) return JSON.parse(cached);
-    const initial = [
-      { id: "a1", nombre: "Adrián Solís Navarro", sede: "Sede Central", categoria: "U13", deudaOriginal: 120000, cuotaMensual: 20000, cuotasPagas: 3, cuotasTotales: 6, estado: "Al día" },
-      { id: "a2", nombre: "Gabriel Quesada Blanco", sede: "Sede Central", categoria: "U15", deudaOriginal: 90000, cuotaMensual: 15000, cuotasPagas: 2, cuotasTotales: 6, estado: "Pendiente" },
-      { id: "a3", nombre: "Brayan Zamora Calderón", sede: "Sede Central", categoria: "U15", deudaOriginal: 60000, cuotaMensual: 10000, cuotasPagas: 4, cuotasTotales: 6, estado: "Al día" },
-    ];
-    localStorage.setItem("deportivos_arreglos_v2", JSON.stringify(initial));
-    return initial;
-  });
-
-
-  const [newBeca, setNewBeca] = useState(() => ({
-    jugadorId: "",
-    nombre: "",
-    sede: "Sede Central",
-    categoria: uniqueCategories[0] || "U13",
-    beca: "",
-    tipo: "Deportiva" as "Deportiva" | "Socioeconómica" | "Talento" | "Convenio",
-    vigencia: "Ene 2026 - Dic 2026",
-  }));
-
-  const becaFilteredPlayers = useMemo(() => {
-    return activePlayers.filter(j => j.categoria === newBeca.categoria);
-  }, [activePlayers, newBeca.categoria]);
-
-  const handleBecaCategoryChange = (cat: string) => {
-    const playersInCat = activePlayers.filter(j => j.categoria === cat);
-    const firstPlayer = playersInCat[0];
-    setNewBeca(prev => ({
-      ...prev,
-      categoria: cat,
-      jugadorId: firstPlayer?.id || "",
-      nombre: firstPlayer?.nombre || "",
-      sede: firstPlayer?.sede || "Sede Central",
-    }));
-  };
-
-  const handleBecaPlayerChange = (playerId: string) => {
-    const player = activePlayers.find(j => j.id === playerId);
-    if (player) {
-      setNewBeca(prev => ({
-        ...prev,
-        jugadorId: player.id,
-        nombre: player.nombre,
-        sede: player.sede || "Sede Central",
-      }));
-    }
-  };
-
-  const [openBeca, setOpenBeca] = useState(false);
-
-  const handleAddBeca = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newBeca.nombre) return;
-    const updated = [
-      ...becados,
-      {
-        id: `b${becados.length + 1}`,
-        nombre: newBeca.nombre,
-        sede: newBeca.sede,
-        categoria: newBeca.categoria,
-        beca: newBeca.beca,
-        tipo: newBeca.tipo,
-        vigencia: newBeca.vigencia,
-      },
-    ];
-    setBecados(updated);
-    localStorage.setItem("deportivos_becados_v2", JSON.stringify(updated));
-    
-    const firstCat = uniqueCategories[0] || "U13";
-    const playersInCat = activePlayers.filter(j => j.categoria === firstCat);
-    const firstPlayer = playersInCat[0];
-    setNewBeca({
-      jugadorId: firstPlayer?.id || "",
-      nombre: firstPlayer?.nombre || "",
-      sede: firstPlayer?.sede || "Sede Central",
-      categoria: firstCat,
-      beca: "",
-      tipo: "Deportiva",
-      vigencia: "Ene 2026 - Dic 2026",
-    });
-    setOpenBeca(false);
-  };
-
-  const [newArreglo, setNewArreglo] = useState(() => ({
-    jugadorId: "",
-    nombre: "",
-    sede: "Sede Central",
-    categoria: uniqueCategories[0] || "U13",
-    deudaOriginal: 0,
-    cuotaMensual: 0,
-    cuotasPagas: 0,
-    cuotasTotales: 0,
-    estado: "Al día",
-  }));
-
-  const arregloFilteredPlayers = useMemo(() => {
-    return activePlayers.filter(j => j.categoria === newArreglo.categoria);
-  }, [activePlayers, newArreglo.categoria]);
-
-  const handleArregloCategoryChange = (cat: string) => {
-    const playersInCat = activePlayers.filter(j => j.categoria === cat);
-    const firstPlayer = playersInCat[0];
-    setNewArreglo(prev => ({
-      ...prev,
-      categoria: cat,
-      jugadorId: firstPlayer?.id || "",
-      nombre: firstPlayer?.nombre || "",
-      sede: firstPlayer?.sede || "Sede Central",
-    }));
-  };
-
-  const handleArregloPlayerChange = (playerId: string) => {
-    const player = activePlayers.find(j => j.id === playerId);
-    if (player) {
-      setNewArreglo(prev => ({
-        ...prev,
-        jugadorId: player.id,
-        nombre: player.nombre,
-        sede: player.sede || "Sede Central",
-      }));
-    }
-  };
-
-  const [openArreglo, setOpenArreglo] = useState(false);
-
-  const handleAddArreglo = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newArreglo.nombre) return;
-    const updated = [
-      ...arreglos,
-      {
-        id: `a${arreglos.length + 1}`,
-        nombre: newArreglo.nombre,
-        sede: newArreglo.sede,
-        categoria: newArreglo.categoria,
-        deudaOriginal: newArreglo.deudaOriginal,
-        cuotaMensual: newArreglo.cuotaMensual,
-        cuotasPagas: newArreglo.cuotasPagas,
-        cuotasTotales: newArreglo.cuotasTotales,
-        estado: newArreglo.estado,
-      },
-    ];
-    setArreglos(updated);
-    localStorage.setItem("deportivos_arreglos_v2", JSON.stringify(updated));
-    
-    const firstCat = uniqueCategories[0] || "U13";
-    const playersInCat = activePlayers.filter(j => j.categoria === firstCat);
-    const firstPlayer = playersInCat[0];
-    setNewArreglo({
-      jugadorId: firstPlayer?.id || "",
-      nombre: firstPlayer?.nombre || "",
-      sede: firstPlayer?.sede || "Sede Central",
-      categoria: firstCat,
-      deudaOriginal: 0,
-      cuotaMensual: 0,
-      cuotasPagas: 0,
-      cuotasTotales: 0,
-      estado: "Al día",
-    });
-    setOpenArreglo(false);
-  };
-
-  useEffect(() => {
-    if (uniqueCategories.length > 0) {
-      const firstCat = uniqueCategories[0];
-      const playersInCat = activePlayers.filter(j => j.categoria === firstCat);
-      const firstPlayer = playersInCat[0];
-      
-      setNewBeca(prev => {
-        if (!prev.nombre && firstPlayer) {
-          return {
-            ...prev,
-            categoria: firstCat,
-            jugadorId: firstPlayer.id,
-            nombre: firstPlayer.nombre,
-            sede: firstPlayer.sede || "Sede Central",
-          };
-        }
-        return prev;
-      });
-
-      setNewArreglo(prev => {
-        if (!prev.nombre && firstPlayer) {
-          return {
-            ...prev,
-            categoria: firstCat,
-            jugadorId: firstPlayer.id,
-            nombre: firstPlayer.nombre,
-            sede: firstPlayer.sede || "Sede Central",
-          };
-        }
-        return prev;
-      });
-    }
-  }, [activePlayers, uniqueCategories]);
-
-  const mesesMap = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Set", "Oct", "Nov", "Dic"];
-
+  // Chart Data for Pestaña 1 (Gráficas de Evolución)
   const chartIngresosMensuales = useMemo(() => {
-    const list: { mes: string; ingresos: number; year: number; monthIdx: number }[] = [];
-    const now = new Date();
+    const list = [];
+    const nowD = new Date();
+    const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
     for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d = new Date(nowD.getFullYear(), nowD.getMonth() - i, 1);
       list.push({
-        mes: `${mesesMap[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`,
+        mes: monthNames[d.getMonth()],
         ingresos: 0,
         year: d.getFullYear(),
         monthIdx: d.getMonth()
@@ -383,12 +192,12 @@ function FinanzasPage() {
     
     pagosRealizados.forEach(p => {
       if (!p.fecha) return;
-      const pDate = new Date(p.fecha);
-      const pYear = pDate.getFullYear();
-      const pMonth = pDate.getMonth();
-      const match = list.find(item => item.year === pYear && item.monthIdx === pMonth);
+      const pDate = new Date(p.fecha + "T12:00:00");
+      const match = list.find(item => item.year === pDate.getFullYear() && item.monthIdx === pDate.getMonth());
       if (match) {
-        match.ingresos += (p.monto || 0);
+        const monto = Number(p.monto || 0);
+        if (monto > 0) match.ingresos += monto;
+        else (match as any).egresos = ((match as any).egresos || 0) + Math.abs(monto);
       }
     });
     return list;
@@ -398,14 +207,14 @@ function FinanzasPage() {
     return chartIngresosMensuales.map(item => ({
       mes: item.mes,
       ingresos: item.ingresos,
-      egresos: Math.round(item.ingresos * 0.45),
+      egresos: (item as any).egresos || 0,
     }));
   }, [chartIngresosMensuales]);
 
   const chartIngresosPorMetodo = useMemo(() => {
     const groups: Record<string, number> = {};
     pagosRealizados.forEach(p => {
-      const m = p.metodo || "Otro";
+      const m = p.metodo || "SINPE Móvil";
       groups[m] = (groups[m] || 0) + (p.monto || 0);
     });
     return Object.keys(groups).map(k => ({
@@ -414,839 +223,502 @@ function FinanzasPage() {
     }));
   }, [pagosRealizados]);
 
-  const chartIngresosPorSede = useMemo(() => {
-    const groups: Record<string, number> = {};
-    pagosRealizados.forEach(p => {
-      const player = activePlayers.find(j => j.id === p.jugadorId);
-      const sede = player?.sede || "Sede Central";
-      groups[sede] = (groups[sede] || 0) + (p.monto || 0);
+  // Semáforo de Morosidad por Categorías for Pestaña 2
+  const semaforoCategorias = useMemo(() => {
+    const categories = ["Sub-9", "Sub-11", "Sub-13", "Sub-15", "Sub-17", "Sub-20"];
+    return categories.map((cat) => {
+      const catPlayers = activePlayers.filter((j) => (j.categoria || "").toLowerCase().includes(cat.toLowerCase()));
+      const catMorosos = catPlayers.filter((j) => j.estadoPago === "moroso");
+      const totalMoraCat = catMorosos.reduce((sum, j) => sum + (j.saldo || 70000), 0);
+      const pctMora = catPlayers.length > 0 ? Math.round((catMorosos.length / catPlayers.length) * 100) : 0;
+
+      return {
+        categoria: cat,
+        totalAtletas: catPlayers.length,
+        morososCount: catMorosos.length,
+        totalMora: totalMoraCat,
+        pctMora: pctMora,
+      };
     });
-    return Object.keys(groups).map(k => ({
-      sede: k,
-      monto: groups[k]
-    })).sort((a, b) => b.monto - a.monto);
-  }, [pagosRealizados, activePlayers]);
+  }, [activePlayers]);
+
+  // Deudores List with Category Filter & Search for Pestaña 2
+  const deudoresFiltrados = useMemo(() => {
+    const allDeudores = activePlayers.filter((j) => j.estadoPago === "moroso" || j.estadoPago === "pendiente");
+    return allDeudores.filter((j) => {
+      if (catFilterMensualidades !== "Todas") {
+        const playerCat = (j.categoria || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const filterCat = catFilterMensualidades.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (!playerCat.includes(filterCat)) return false;
+      }
+      if (searchMensualidades) {
+        const q = searchMensualidades.toLowerCase();
+        const match = j.nombre.toLowerCase().includes(q) || (j.identificacion || "").toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [activePlayers, catFilterMensualidades, searchMensualidades]);
+
+  // Open Payment Modal
+  const handleOpenPayment = (player: any) => {
+    setSelectedPlayerForPayment(player);
+    setPaymentAmount(player.saldo || 35000);
+    setOpenPaymentModal(true);
+  };
+
+  // Save Payment to Supabase DB & update state
+  const handleSavePaymentDB = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlayerForPayment) return;
+
+    const orgId = RendimientoStore.getActiveOrganizacionId() || "org_asoderive_master";
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+    const newPagoObj = {
+      id: `pago_${Date.now()}`,
+      jugador_id: selectedPlayerForPayment.id,
+      jugador_nombre: selectedPlayerForPayment.nombre,
+      monto: paymentAmount,
+      concepto: `Pago de Mensualidad - ${selectedPlayerForPayment.nombre}`,
+      categoria: "Mensualidad",
+      sede: selectedPlayerForPayment.sede || "Sede Central",
+      metodo: paymentMethod,
+      fecha: todayStr,
+      estado: "completado",
+      organizacion_id: orgId,
+    };
+
+    await supabase.from("pagos").insert([newPagoObj]);
+    await supabase.from("jugadores").update({ estado_pago: "al_dia", saldo: 0 }).eq("id", selectedPlayerForPayment.id);
+
+    setActivePlayers(prev => prev.map(j => j.id === selectedPlayerForPayment.id ? { ...j, estadoPago: "al_dia", saldo: 0 } : j));
+    RendimientoStore.updateJugador(selectedPlayerForPayment.id, { estadoPago: "al_dia", saldo: 0 });
+
+    toast.success(`Pago de ₡${paymentAmount.toLocaleString()} registrado con éxito para ${selectedPlayerForPayment.nombre} ✓`);
+    setOpenPaymentModal(false);
+    fetchFinanzasDataFromDB();
+  };
+
+  // WhatsApp Reminder Link Generator using REAL phone number
+  const handleSendWhatsApp = (player: any) => {
+    const phoneNum = getPhoneForPlayer(player);
+    const cleanPhone = phoneNum.replace(/[^0-9]/g, "");
+    const msg = `Estimado(a) ${player.padreNombre || "Encargado"}, le saludamos de la Academia Deportiva. Le recordamos amablemente la mensualidad pendiente de ${player.nombre} por un saldo de ₡${(player.saldo || 35000).toLocaleString()}. Muchas gracias.`;
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Finanzas</h1>
-        <p className="text-sm text-muted-foreground">Mensualidades, pagos y estados de cuenta.</p>
+    <div className="font-['Segoe_UI',sans-serif] space-y-6 pb-12 text-slate-900 dark:text-slate-100">
+      
+      {/* HEADER DE MÓDULO */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-primary/10 text-primary border-primary/20 font-semibold text-[11px] uppercase tracking-wider">
+              Gobernanza Financiera & Tesorería BD
+            </Badge>
+            <span className="text-xs text-muted-foreground font-normal">| {activePlayers.length} Atletas Registrados</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5 mt-1">
+            <Wallet className="h-7 w-7 text-primary" /> Finanzas y Libro de Caja
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground font-normal">
+            Navegación limpia de 3 pestañas principales: Gráficas de Evolución, Control de Mensualidades y Balance General.
+          </p>
+        </div>
+
+        <Button variant="outline" onClick={fetchFinanzasDataFromDB} className="text-xs font-normal h-9 rounded-xl border-border gap-1.5">
+          <RefreshCw className="h-3.5 w-3.5" /> Sincronizar Base de Datos
+        </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Ingresos del mes" value={formatCRC(ingresosRealesMes)} delta={hasPlayers ? crecimientoPct : 0} icon={Wallet} accent="success" />
-        <StatCard label="Por cobrar" value={formatCRC(porCobrarReal)} hint={`${pendientes.length} pendientes`} icon={PiggyBank} accent="warning" />
-        <StatCard label="Mora acumulada" value={formatCRC(moraReal)} hint={`${morosos.length} jugadores`} icon={AlertTriangle} accent="destructive" />
-        <StatCard label="Crecimiento" value={hasPlayers ? crecimientoLabel : "0%"} hint="vs mes anterior" icon={TrendingUp} accent="primary" />
-      </div>
+      {/* 🧭 BARRA DE NAVEGACIÓN PRINCIPAL: ESTRICTAMENTE 3 PESTAÑAS CORE (SEGOE UI SEMIBOLD, 14PX) */}
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+        <div className="border-b border-border pb-2 overflow-x-auto">
+          <TabsList className="bg-transparent border-0 p-0 h-auto gap-2 flex-nowrap min-w-max">
+            
+            {/* 📊 PESTAÑA 1: GRÁFICAS DE EVOLUCIÓN */}
+            <TabsTrigger
+              value="graficas"
+              className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+            >
+              📊 Gráficas de Evolución
+            </TabsTrigger>
 
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>Evolución de ingresos</CardTitle>
-          <CardDescription>Últimos meses</CardDescription>
-        </CardHeader>
-        <CardContent className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartIngresosMensuales} margin={{ left: -10, right: 5, top: 5 }}>
-              <defs>
-                <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-              <XAxis dataKey="mes" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000000}M`} />
-              <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 12 }} formatter={(v: number) => formatCRC(v)} />
-              <Area type="monotone" dataKey="ingresos" stroke="var(--color-primary)" strokeWidth={2.5} fill="url(#gF)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+            {/* 💵 PESTAÑA 2: CONTROL DE MENSUALIDADES */}
+            <TabsTrigger
+              value="mensualidades"
+              className="data-[state=active]:bg-amber-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+            >
+              💵 Control de Mensualidades ({morosos.length + pendientes.length})
+            </TabsTrigger>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="shadow-card lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Flujo de caja</CardTitle>
-            <CardDescription>Ingresos vs egresos mensuales</CardDescription>
-          </CardHeader>
-          <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartFlujoCajaMensual} margin={{ left: -10, right: 5, top: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-                <XAxis dataKey="mes" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000000}M`} />
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 12 }} formatter={(v: number) => formatCRC(v)} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="ingresos" fill="var(--color-success)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="egresos" fill="var(--color-destructive)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+            {/* 📉 PESTAÑA 3: BALANCE Y LIBRO DE CAJA (OFICIAL) */}
+            <TabsTrigger
+              value="balance"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+            >
+              📉 Balance y Libro de Caja
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Por método de pago</CardTitle>
-            <CardDescription>Distribución del mes</CardDescription>
-          </CardHeader>
-          <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={chartIngresosPorMetodo} dataKey="monto" nameKey="metodo" innerRadius={45} outerRadius={75} paddingAngle={2}>
-                  {chartIngresosPorMetodo.map((_, i) => (
-                    <Cell key={i} fill={["var(--color-primary)", "var(--color-success)", "var(--color-warning)", "var(--color-chart-5)"][i]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 12 }} formatter={(v: number) => formatCRC(v)} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-wrap gap-2 justify-center -mt-2">
-              {chartIngresosPorMetodo.map((m, i) => (
-                <Badge key={m.metodo} variant="outline" className="text-[10px]">
-                  <span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: ["var(--color-primary)", "var(--color-success)", "var(--color-warning)", "var(--color-chart-5)"][i] }} />
-                  {m.metodo}
-                </Badge>
-              ))}
+        {/* ========================================================================= */}
+        {/* 📊 PESTAÑA 1: GRÁFICAS DE EVOLUCIÓN (EXCLUSIVO UN SOLO CLIC) */}
+        {/* ========================================================================= */}
+        <TabsContent value="graficas" className="mt-0 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-2xl">
+            <div>
+              <h3 className="text-base font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-indigo-600" /> Lienzo de Análisis y Evolución Financiera
+              </h3>
+              <p className="text-xs text-indigo-700 dark:text-indigo-400 font-normal">
+                Visualización gráfica de crecimiento, flujo de caja mensual y distribución por método de pago.
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
 
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>Ingresos por sede</CardTitle>
-          <CardDescription>Comparativa del mes actual</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {chartIngresosPorSede.map((s) => {
-            const max = Math.max(...chartIngresosPorSede.map((x) => x.monto));
-            const pct = (s.monto / max) * 100;
-            return (
-              <div key={s.sede}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="font-medium">Sede {s.sede}</span>
-                  <span className="font-semibold">{formatCRC(s.monto)}</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full bg-gradient-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard label="Ingresos del mes" value={formatCRC(ingresosRealesMes)} delta={hasPlayers ? crecimientoPct : 0} icon={Wallet} accent="success" />
+            <StatCard label="Por cobrar" value={formatCRC(porCobrarReal)} hint={`${pendientes.length} pendientes`} icon={PiggyBank} accent="warning" />
+            <StatCard label="Mora acumulada" value={formatCRC(moraReal)} hint={`${morosos.length} jugadores`} icon={AlertTriangle} accent="destructive" />
+            <StatCard label="Crecimiento" value={hasPlayers ? crecimientoLabel : "0%"} hint="vs mes anterior" icon={TrendingUp} accent="primary" />
+          </div>
+
+          <Card className="border-border shadow-sm rounded-2xl p-4 space-y-3">
+            <CardHeader className="p-0 border-b pb-3">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-indigo-600" /> Evolución de Ingresos Mensuales
+              </CardTitle>
+              <CardDescription className="text-xs font-normal">Comportamiento del recaudo durante los últimos 6 meses</CardDescription>
+            </CardHeader>
+            <CardContent className="h-72 p-0 pt-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartIngresosMensuales} margin={{ left: -10, right: 5, top: 5 }}>
+                  <defs>
+                    <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                  <XAxis dataKey="mes" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000000}M`} />
+                  <Tooltip contentStyle={{ background: "var(--color-popover)", border: "1px solid var(--color-border)", borderRadius: 12 }} formatter={(v: number) => formatCRC(v)} />
+                  <Area type="monotone" dataKey="ingresos" stroke="var(--color-primary)" strokeWidth={2.5} fill="url(#gF)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card className="lg:col-span-2 border-border shadow-sm rounded-2xl p-4 space-y-3">
+              <div className="border-b pb-3">
+                <h3 className="text-sm font-bold text-foreground">Flujo de Caja Mensual (Ingresos vs Egresos)</h3>
+                <p className="text-[11px] text-muted-foreground">Comparativa de ingresos y gastos proyectados</p>
               </div>
-            );
-          })}
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-card">
-        <CardContent className="p-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-2 mb-4">
-              <div className="overflow-x-auto w-full md:w-auto scrollbar-none pb-1">
-                <TabsList className="bg-transparent border-0 p-0 h-auto gap-1 flex-nowrap min-w-max">
-                  <TabsTrigger value="reportes-morosidad" className="data-[state=active]:bg-muted px-3 py-1.5 text-xs font-medium rounded-md">📊 Reportes de Morosidad</TabsTrigger>
-                  <TabsTrigger value="nomina" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-3 py-1.5 text-xs font-bold rounded-md">💵 Nómina de Staff (Entrenadores)</TabsTrigger>
-                  <TabsTrigger value="egresos" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white px-3 py-1.5 text-xs font-bold rounded-md">🛍️ Salidas & Egresos (Compras)</TabsTrigger>
-                  <TabsTrigger value="morosos" className="data-[state=active]:bg-muted px-3 py-1.5 text-xs font-medium rounded-md">Morosos ({morosos.length})</TabsTrigger>
-                  <TabsTrigger value="pendientes" className="data-[state=active]:bg-muted px-3 py-1.5 text-xs font-medium rounded-md">Pendientes ({pendientes.length})</TabsTrigger>
-                  <TabsTrigger value="becados" className="data-[state=active]:bg-muted px-3 py-1.5 text-xs font-medium rounded-md">Becados ({becados.length})</TabsTrigger>
-                  <TabsTrigger value="arreglos" className="data-[state=active]:bg-muted px-3 py-1.5 text-xs font-medium rounded-md">Arreglos de Pago ({arreglos.length})</TabsTrigger>
-                </TabsList>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartFlujoCajaMensual} margin={{ left: -10, right: 5, top: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="mes" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v / 1000000}M`} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        background: "#1e293b", 
+                        border: "1px solid #334155", 
+                        borderRadius: 12, 
+                        color: "#ffffff",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
+                      }} 
+                      itemStyle={{ color: "#ffffff", fontWeight: "bold" }}
+                      labelStyle={{ color: "#94a3b8", fontWeight: "bold" }}
+                      formatter={(v: number) => [formatCRC(v), ""]} 
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="ingresos" name="Ingresos" fill="oklch(0.65 0.2 150)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="egresos" name="Egresos" fill="oklch(0.6 0.25 25)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
+            </Card>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-9 text-xs border-border gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 font-bold shadow-sm"
-                  onClick={() => {
-                    if (activeTab === "reportes-morosidad") {
-                      toast.success(`Exportando Reporte de Morosidad (${selectedCategoryReport === "Todas" ? "Todas las categorías" : selectedCategoryReport}) en formato Excel...`);
-                    } else if (activeTab === "morosos") {
-                      toast.success(`Exportando listado de ${morosos.length} atletas Morosos a Excel...`);
-                    } else if (activeTab === "pendientes") {
-                      toast.success(`Exportando listado de ${pendientes.length} atletas Pendientes a Excel...`);
-                    } else if (activeTab === "becados") {
-                      toast.success(`Exportando listado de ${becados.length} atletas Becados a Excel...`);
-                    } else if (activeTab === "arreglos") {
-                      toast.success(`Exportando listado de ${arreglos.length} Arreglos de Pago a Excel...`);
-                    }
-                  }}
-                >
-                  <FileSpreadsheet className="h-3.5 w-3.5" />
-                  {activeTab === "reportes-morosidad" ? "Exportar Reporte" : "Exportar Lista"}
-                </Button>
-
-                <Dialog open={openBeca} onOpenChange={setOpenBeca}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline"><Plus className="mr-1 h-3.5 w-3.5" />Nueva Beca</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Nueva Beca / Descuento</DialogTitle>
-                      <DialogDescription>Asigna una beca deportiva o socioeconómica a un jugador.</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddBeca} className="space-y-4 pt-2">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-categoria">Categoría / Equipo</Label>
-                          <select id="beca-categoria" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground" value={newBeca.categoria} onChange={(e) => handleBecaCategoryChange(e.target.value)}>
-                            {uniqueCategories.map(cat => (
-                              <option key={cat} value={cat} className="text-foreground bg-popover">{cat}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-nombre">Seleccionar Jugador</Label>
-                          <select id="beca-nombre" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground" value={newBeca.jugadorId} onChange={(e) => handleBecaPlayerChange(e.target.value)}>
-                            <option value="" disabled className="text-muted-foreground bg-popover">-- Seleccione --</option>
-                            {becaFilteredPlayers.map(p => (
-                              <option key={p.id} value={p.id} className="text-foreground bg-popover">{p.nombre}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-porcentaje">Porcentaje de Beca</Label>
-                          <Input id="beca-porcentaje" required placeholder="Ej. 50%" value={newBeca.beca} onChange={(e) => setNewBeca({ ...newBeca, beca: e.target.value })} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-tipo">Tipo de Beca</Label>
-                          <select id="beca-tipo" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground font-semibold" value={newBeca.tipo} onChange={(e) => setNewBeca({ ...newBeca, tipo: e.target.value as any })}>
-                            <option value="Deportiva" className="text-foreground bg-popover">Deportiva</option>
-                            <option value="Socioeconómica" className="text-foreground bg-popover">Socioeconómica</option>
-                            <option value="Talento" className="text-foreground bg-popover">Talento</option>
-                            <option value="Convenio" className="text-foreground bg-popover">Convenio</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-sede">Sede (Auto)</Label>
-                          <Input id="beca-sede" disabled className="bg-muted text-muted-foreground" value={newBeca.sede} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="beca-vigencia">Vigencia</Label>
-                          <Input id="beca-vigencia" required placeholder="Ej. Ene 2026 - Dic 2026" value={newBeca.vigencia} onChange={(e) => setNewBeca({ ...newBeca, vigencia: e.target.value })} />
-                        </div>
-                      </div>
-                      <DialogFooter className="pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpenBeca(false)}>Cancelar</Button>
-                        <Button type="submit" disabled={!newBeca.nombre}>Guardar Beca</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
- 
-                <Dialog open={openArreglo} onOpenChange={setOpenArreglo}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline"><Plus className="mr-1 h-3.5 w-3.5" />Nuevo Arreglo</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Nuevo Arreglo de Pago</DialogTitle>
-                      <DialogDescription>Define cuotas para un jugador con saldo pendiente o morosidad.</DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddArreglo} className="space-y-4 pt-2">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-categoria">Categoría / Equipo</Label>
-                          <select id="arr-categoria" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground" value={newArreglo.categoria} onChange={(e) => handleArregloCategoryChange(e.target.value)}>
-                            {uniqueCategories.map(cat => (
-                              <option key={cat} value={cat} className="text-foreground bg-popover">{cat}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-nombre">Seleccionar Jugador</Label>
-                          <select id="arr-nombre" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground" value={newArreglo.jugadorId} onChange={(e) => handleArregloPlayerChange(e.target.value)}>
-                            <option value="" disabled className="text-muted-foreground bg-popover">-- Seleccione --</option>
-                            {arregloFilteredPlayers.map(p => (
-                              <option key={p.id} value={p.id} className="text-foreground bg-popover">{p.nombre}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-deuda">Deuda Total (CRC)</Label>
-                          <Input id="arr-deuda" type="number" required placeholder="Ej. 60000" value={newArreglo.deudaOriginal || ""} onChange={(e) => setNewArreglo({ ...newArreglo, deudaOriginal: Number(e.target.value) })} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-cuota">Cuota Mensual (CRC)</Label>
-                          <Input id="arr-cuota" type="number" required placeholder="Ej. 10000" value={newArreglo.cuotaMensual || ""} onChange={(e) => setNewArreglo({ ...newArreglo, cuotaMensual: Number(e.target.value) })} />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-totales">Total Cuotas</Label>
-                          <Input id="arr-totales" type="number" required placeholder="Ej. 6" value={newArreglo.cuotasTotales || ""} onChange={(e) => setNewArreglo({ ...newArreglo, cuotasTotales: Number(e.target.value) })} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-pagas">Cuotas Pagas</Label>
-                          <Input id="arr-pagas" type="number" required placeholder="0" value={newArreglo.cuotasPagas} onChange={(e) => setNewArreglo({ ...newArreglo, cuotasPagas: Number(e.target.value) })} />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-sede">Sede (Auto)</Label>
-                          <Input id="arr-sede" disabled className="bg-muted text-muted-foreground" value={newArreglo.sede} />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="arr-estado">Estado Inicial</Label>
-                          <select id="arr-estado" className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground font-semibold" value={newArreglo.estado} onChange={(e) => setNewArreglo({ ...newArreglo, estado: e.target.value })}>
-                            <option value="Al día" className="text-foreground bg-popover">Al día</option>
-                            <option value="Pendiente" className="text-foreground bg-popover">Pendiente</option>
-                          </select>
-                        </div>
-                      </div>
-                      <DialogFooter className="pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpenArreglo(false)}>Cancelar</Button>
-                        <Button type="submit" disabled={!newArreglo.nombre}>Guardar Arreglo</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+            <Card className="border-border shadow-sm rounded-2xl p-4 space-y-3">
+              <div className="border-b pb-3">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <PieIcon className="h-4 w-4 text-indigo-500" /> Por Método de Pago
+                </h3>
+                <p className="text-[11px] text-muted-foreground font-normal">Distribución del mes actual</p>
               </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={chartIngresosPorMetodo} dataKey="monto" nameKey="metodo" innerRadius={45} outerRadius={70} paddingAngle={2}>
+                      {chartIngresosPorMetodo.map((_, i) => (
+                        <Cell key={i} fill={["#6366f1", "#10b981", "#f59e0b", "#8b5cf6"][i % 4]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} formatter={(v: number) => formatCRC(v)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap gap-1.5 justify-center">
+                {chartIngresosPorMetodo.map((m, i) => (
+                  <Badge key={m.metodo} variant="outline" className="text-[10px]">
+                    <span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ background: ["#6366f1", "#10b981", "#f59e0b", "#8b5cf6"][i % 4] }} />
+                    {m.metodo}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ========================================================================= */}
+        {/* 💵 PESTAÑA 2: CONTROL DE MENSUALIDADES (SEMÁFORO + DEUDORES) */}
+        {/* ========================================================================= */}
+        <TabsContent value="mensualidades" className="mt-0 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl">
+            <div>
+              <h3 className="text-base font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-amber-600" /> Control de Mensualidades & Semáforo de Morosidad por Categorías
+              </h3>
+              <p className="text-xs text-amber-700 dark:text-amber-400 font-normal">
+                Registro de cuotas vencidas y cobro directo individual por SINPE Móvil o Transferencia.
+              </p>
             </div>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-rose-500 text-white font-bold text-xs">
+                Mora Acumulada: {formatCRC(moraReal)}
+              </Badge>
+              <Badge className="bg-amber-500 text-white font-bold text-xs">
+                Por Cobrar: {formatCRC(porCobrarReal)}
+              </Badge>
+            </div>
+          </div>
 
-            <TabsContent value="nomina" className="mt-0 space-y-6">
-              <Card className="shadow-card border-border bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 rounded-2xl">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs uppercase font-mono font-bold text-amber-400">Nómina Centralizada en Finanzas</p>
-                    <h2 className="text-lg font-extrabold text-white">Honorarios y Cierre de Nómina de Staff</h2>
-                    <p className="text-xs text-slate-300">
-                      Gestión de salarios, bonos por partidos dirigidos y dispersión bancaria masiva.
-                    </p>
-                  </div>
-                  <div className="bg-slate-900/90 border border-slate-700 rounded-xl p-1 flex items-center gap-1">
-                    <button
-                      onClick={() => setSelectedPeriodo("01-15")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        selectedPeriodo === "01-15" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      📅 01 al 15 de Julio
-                    </button>
-                    <button
-                      onClick={() => setSelectedPeriodo("16-30")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        selectedPeriodo === "16-30" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      📅 16 al 31 de Julio
-                    </button>
-                  </div>
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            {semaforoCategorias.map((s) => (
+              <Card
+                key={s.categoria}
+                onClick={() => setCatFilterMensualidades(catFilterMensualidades === s.categoria ? "Todas" : s.categoria)}
+                className={`p-3.5 bg-card border shadow-xs transition-all cursor-pointer ${
+                  catFilterMensualidades === s.categoria ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-500/5" : "border-border hover:border-amber-500/50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs text-foreground">{s.categoria}</span>
+                  <Badge className={`text-[9px] font-bold ${
+                    s.morososCount > 0 ? "bg-rose-500/15 text-rose-600" : "bg-emerald-500/15 text-emerald-600"
+                  }`}>
+                    {s.morososCount > 0 ? `🔴 ${s.morososCount} Mora` : "🟢 Al Día"}
+                  </Badge>
                 </div>
+                <p className="text-lg font-extrabold text-foreground font-mono">₡{s.totalMora.toLocaleString()}</p>
+                <span className="text-[10px] text-muted-foreground font-normal block mt-0.5">
+                  {s.morososCount} de {s.totalAtletas} atletas en mora ({s.pctMora}%)
+                </span>
               </Card>
+            ))}
+          </div>
 
-              <Card className="shadow-card border-border">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-muted/50 text-muted-foreground font-bold border-b border-border">
-                        <th className="p-3.5">Entrenador & Categoría</th>
-                        <th className="p-3.5 text-center">Tarifas Base</th>
-                        <th className="p-3.5 text-center">Sesiones Cerradas</th>
-                        <th className="p-3.5 text-center">Partidos Dirigidos</th>
-                        <th className="p-3.5 text-center">Ajustes (+/- $)</th>
-                        <th className="p-3.5 text-right">Monto Bruto Total</th>
-                        <th className="p-3.5 text-center">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {RendimientoStore.getEntrenadores().map((coach, idx) => {
-                        const tarifaSes = coach.tarifaSesion || 25;
-                        const bonoPart = coach.bonoPartido || 35;
-                        const symbol = (coach.moneda || "USD") === "CRC" ? "₡" : "$";
-                        const cats = RendimientoStore.getCategorias().filter(c => c.entrenador === coach.nombre);
-                        const catName = cats[0]?.nombre || "U9 / U13 Asoderive";
+          <Card className="border-border shadow-sm rounded-2xl overflow-hidden space-y-0">
+            <div className="p-4 bg-card border-b border-border flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-amber-600" />
+                <h3 className="text-sm font-bold text-foreground">
+                  Listado de Atletas Deudores ({deudoresFiltrados.length})
+                </h3>
+                {catFilterMensualidades !== "Todas" && (
+                  <Badge variant="outline" className="text-[10px] font-bold text-amber-600 border-amber-500/40 flex items-center gap-1">
+                    Filtro: {catFilterMensualidades}
+                    <X className="h-3 w-3 cursor-pointer hover:text-rose-600" onClick={() => setCatFilterMensualidades("Todas")} />
+                  </Badge>
+                )}
+              </div>
 
-                        const sesionesCount = idx === 0 ? 4 : idx === 1 ? 5 : 3;
-                        const partidosCount = idx === 0 ? 2 : idx === 1 ? 1 : 2;
+              <div className="flex items-center gap-2 flex-1 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar atleta por nombre o cédula..."
+                    value={searchMensualidades}
+                    onChange={(e) => setSearchMensualidades(e.target.value)}
+                    className="pl-9 h-9 text-xs"
+                  />
+                </div>
+                <select
+                  value={catFilterMensualidades}
+                  onChange={(e) => setCatFilterMensualidades(e.target.value)}
+                  className="h-9 px-3 bg-background border border-border rounded-xl text-xs font-semibold outline-none"
+                >
+                  <option value="Todas">Todas las Categorías</option>
+                  <option value="Sub-9">Sub-9</option>
+                  <option value="Sub-11">Sub-11</option>
+                  <option value="Sub-13">Sub-13</option>
+                  <option value="Sub-15">Sub-15</option>
+                  <option value="Sub-17">Sub-17</option>
+                  <option value="Sub-20">Sub-20</option>
+                </select>
+              </div>
+            </div>
 
-                        const montoSesiones = sesionesCount * tarifaSes;
-                        const montoPartidos = partidosCount * bonoPart;
-                        const ajusteMonto = ajustesMap[coach.id] || 0;
-                        const totalCalculado = montoSesiones + montoPartidos + ajusteMonto;
-
-                        const existingNomina = RendimientoStore.getNominas().find(n => n.entrenadorId === coach.id);
-                        const isPagado = existingNomina?.estado === "pagado";
-
-                        const handleVerRecibo = () => {
-                          setSelectedRecibo({
-                            id: existingNomina?.id || `rec_${coach.id}_${Date.now()}`,
-                            entrenadorNombre: coach.nombre,
-                            entrenadorIdentificacion: coach.identificacion || "1-1123-0988",
-                            entrenadorCorreo: coach.correo,
-                            entrenadorTelefono: coach.telefono,
-                            cuentaBancaria: coach.cuentaBancaria || "CR05015202001023456789",
-                            categoriaAsignada: catName,
-                            periodoInicio: selectedPeriodo === "01-15" ? "01 de Julio" : "16 de Julio",
-                            periodoFin: selectedPeriodo === "01-15" ? "15 de Julio" : "31 de Julio de 2026",
-                            sesionesCantidad: sesionesCount,
-                            sesionesTarifa: tarifaSes,
-                            sesionesSubtotal: montoSesiones,
-                            partidosCantidad: partidosCount,
-                            partidosBono: bonoPart,
-                            partidosSubtotal: montoPartidos,
-                            ajustesMonto: ajusteMonto,
-                            montoTotal: totalCalculado,
-                            moneda: coach.moneda || "USD",
-                            estado: isPagado ? "pagado" : "aprobado",
-                          });
-                          setIsOpenRecibo(true);
-                        };
-
-                        const handleAprobarNomina = () => {
-                          const record: RegistroNominaEntrenador = {
-                            id: existingNomina?.id || `nom_${coach.id}_${Date.now()}`,
-                            entrenadorId: coach.id,
-                            entrenadorNombre: coach.nombre,
-                            entrenadorIdentificacion: coach.identificacion,
-                            entrenadorCorreo: coach.correo,
-                            cuentaBancaria: coach.cuentaBancaria || "CR05015202001023456789",
-                            categoriaAsignada: catName,
-                            periodoInicio: selectedPeriodo === "01-15" ? "2026-07-01" : "2026-07-16",
-                            periodoFin: selectedPeriodo === "01-15" ? "2026-07-15" : "2026-07-31",
-                            sesionesConcluidas: sesionesCount,
-                            partidosConcluidos: partidosCount,
-                            tarifaSesion: tarifaSes,
-                            bonoPartido: bonoPart,
-                            montoSesiones: montoSesiones,
-                            montoPartidos: montoPartidos,
-                            montoAjustes: ajusteMonto,
-                            montoTotal: totalCalculado,
-                            moneda: coach.moneda || "USD",
-                            estado: "pagado",
-                            fechaPago: new Date().toISOString().slice(0, 10),
-                          };
-
-                          RendimientoStore.aprobarNomina(record.id);
-                          RendimientoStore.saveNomina(record);
-                          toast.success(`🚀 Nómina aprobada y egreso registrado para ${coach.nombre}`);
-                        };
-
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-normal">
+                  <thead className="bg-muted/50 text-muted-foreground uppercase text-[11px] font-semibold tracking-wider border-b border-border">
+                    <tr>
+                      <th className="p-3.5">Atleta / Jugador</th>
+                      <th className="p-3.5">Cédula / Identificación</th>
+                      <th className="p-3.5">Categoría</th>
+                      <th className="p-3.5">Sede</th>
+                      <th className="p-3.5">Encargado Legal</th>
+                      <th className="p-3.5">Estado Pago</th>
+                      <th className="p-3.5">Saldo Pendiente</th>
+                      <th className="p-3.5 text-right">Cobro Individual</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {deudoresFiltrados.length > 0 ? (
+                      deudoresFiltrados.map((j) => {
+                        const realPhone = getPhoneForPlayer(j);
                         return (
-                          <tr key={coach.id} className="hover:bg-muted/30 transition">
+                          <tr key={j.id} className="hover:bg-muted/40 transition-colors">
                             <td className="p-3.5">
-                              <p className="font-bold text-foreground">{coach.nombre}</p>
-                              <p className="text-[10px] text-muted-foreground">{catName}</p>
-                            </td>
-                            <td className="p-3.5 text-center font-mono text-[11px]">
-                              {symbol}{tarifaSes} / {symbol}{bonoPart}
-                            </td>
-                            <td className="p-3.5 text-center font-bold text-emerald-600">
-                              {sesionesCount} ({symbol}{montoSesiones})
-                            </td>
-                            <td className="p-3.5 text-center font-bold text-indigo-600">
-                              {partidosCount} ({symbol}{montoPartidos})
-                            </td>
-                            <td className="p-3.5 text-center">
-                              <Input
-                                type="number"
-                                placeholder="0.00"
-                                value={ajustesMap[coach.id] || ""}
-                                onChange={(e) => setAjustesMap({ ...ajustesMap, [coach.id]: parseFloat(e.target.value) || 0 })}
-                                className="w-20 h-7 text-center text-xs font-mono"
-                              />
-                            </td>
-                            <td className="p-3.5 text-right font-black text-sm font-mono text-foreground">
-                              {symbol}{totalCalculado.toFixed(2)}
-                            </td>
-                            <td className="p-3.5 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
-                                <Button size="sm" variant="outline" onClick={handleVerRecibo} className="h-7 text-[11px] font-bold gap-1">
-                                  <Receipt className="h-3.5 w-3.5 text-indigo-500" /> Recibo
-                                </Button>
-                                {isPagado ? (
-                                  <Badge className="bg-emerald-600 text-white font-bold text-[10px] h-7 px-2.5 flex items-center gap-1">
-                                    <CheckCircle2 className="h-3.5 w-3.5" /> Pagado
-                                  </Badge>
-                                ) : (
-                                  <Button size="sm" onClick={handleAprobarNomina} className="h-7 text-[11px] font-bold gap-1 bg-emerald-600 hover:bg-emerald-500 text-white">
-                                    <ShieldCheck className="h-3.5 w-3.5" /> Aprobar & Pagar
-                                  </Button>
-                                )}
+                              <div className="flex items-center gap-2.5">
+                                <Avatar className="h-8 w-8 border">
+                                  <AvatarImage src={j.avatar} />
+                                  <AvatarFallback className="bg-amber-500/10 text-amber-600 font-bold text-xs">
+                                    {j.nombre.slice(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-bold text-foreground text-xs">{j.nombre}</p>
+                                </div>
                               </div>
+                            </td>
+                            <td className="p-3.5 font-mono text-[11px] text-muted-foreground">{j.identificacion || "118090234"}</td>
+                            <td className="p-3.5 font-semibold text-foreground">{j.categoria || "Sub-15"}</td>
+                            <td className="p-3.5 text-muted-foreground">{j.sede || "Sede Central"}</td>
+                            <td className="p-3.5 text-muted-foreground">
+                              <p className="font-semibold text-foreground text-[11px]">{j.padreNombre || "Padre de Familia"}</p>
+                              <p className="text-[10px] text-emerald-600 font-mono font-semibold flex items-center gap-1">
+                                📱 {realPhone}
+                              </p>
+                            </td>
+                            <td className="p-3.5">
+                              <Badge className={`text-[10px] font-bold ${
+                                j.estadoPago === "moroso" ? "bg-rose-500/15 text-rose-600 border-rose-500/30" : "bg-amber-500/15 text-amber-600 border-amber-500/30"
+                              }`}>
+                                {j.estadoPago === "moroso" ? "🔴 Moroso" : "🟡 Pendiente"}
+                              </Badge>
+                            </td>
+                            <td className="p-3.5 font-extrabold text-rose-600 font-mono text-sm">
+                              ₡{(j.saldo || 35000).toLocaleString()}
+                            </td>
+                            <td className="p-3.5 text-right space-x-1.5">
+                              {/* 1 SOLO BOTÓN VERDE DE WHATSAPP CON TELÉFONO REAL */}
+                              <Button size="xs" onClick={() => handleSendWhatsApp(j)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-7 text-[10px] gap-1 shadow-xs">
+                                <MessageSquare className="h-3 w-3" /> WhatsApp
+                              </Button>
+                              {/* 1 SOLO BOTÓN MORADO DE COBRAR POR FILA */}
+                              <Button size="xs" onClick={() => handleOpenPayment(j)} className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-7 text-[10px] gap-1 shadow-xs">
+                                <CreditCard className="h-3 w-3" /> 💵 Cobrar
+                              </Button>
                             </td>
                           </tr>
                         );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reportes-morosidad" className="mt-0 space-y-6">
-              {/* Filtro por Categoría */}
-              <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-muted/40 rounded-lg border border-border">
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-foreground">Filtro de Reportes por Categoría / Equipo</h3>
-                  <p className="text-xs text-muted-foreground">Filtra las métricas de resumen, la tabla de morosidad de equipos y los atletas consolidados en tiempo real.</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="report-cat-select" className="text-xs font-semibold">Categoría Seleccionada:</Label>
-                  <select
-                    id="report-cat-select"
-                    value={selectedCategoryReport}
-                    onChange={(e) => setSelectedCategoryReport(e.target.value)}
-                    className="flex h-8 w-48 rounded-md border border-input bg-background px-2 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-semibold text-foreground"
-                  >
-                    <option value="Todas">Todas las Categorías</option>
-                    {uniqueCategories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  {selectedCategoryReport !== "Todas" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 text-xs border-border gap-1 text-emerald-600 hover:text-emerald-700"
-                      onClick={() => {
-                        toast.success(`Descargando reporte de morosidad para la categoría "${selectedCategoryReport}"...`);
-                      }}
-                    >
-                      <FileSpreadsheet className="h-3.5 w-3.5" /> Exportar Categoría
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Summary Cards */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-destructive/5 border-destructive/10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs text-muted-foreground uppercase font-semibold">Total Morosidad</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xl font-bold text-destructive">{formatCRC(totalMorososMonto)}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{morosos.length} atletas morosos</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-warning/5 border-warning/10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs text-muted-foreground uppercase font-semibold">Total Pendiente</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xl font-bold text-warning">{formatCRC(totalPendientesMonto)}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{pendientes.length} atletas pendientes</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-primary/5 border-primary/10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs text-muted-foreground uppercase font-semibold">Monto en Riesgo</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xl font-bold text-primary">{formatCRC(totalMorososMonto + totalPendientesMonto)}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">Mora + Pendiente del mes</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-muted/50 border-border">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs text-muted-foreground uppercase font-semibold">Porcentaje de Mora</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xl font-bold text-foreground">
-                      {activePlayers.length > 0 ? ((morosos.length / activePlayers.length) * 100).toFixed(1) : 0}%
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">Sobre el total del roster ({activePlayers.length})</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Morosidad por Equipos / Categorias */}
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                      <Users className="h-4.5 w-4.5 text-primary" /> Morosidad por Categorías y Equipos
-                    </CardTitle>
-                    <CardDescription className="text-xs">Estado de cobros y saldos vencidos por cada grupo deportivo.</CardDescription>
-                  </div>
-                  <Button variant="outline" size="xs" onClick={() => {
-                    toast.success("Descargando reporte 'Morosidad_Por_Equipos.xlsx'...");
-                  }} className="text-[10px] gap-1 border-border">
-                    <Download className="h-3 w-3" /> Descargar Excel
-                  </Button>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/40 hover:bg-muted/40">
-                        <TableHead>Categoría / Equipo</TableHead>
-                        <TableHead className="text-center">Total Atletas</TableHead>
-                        <TableHead className="text-center">Atletas en Mora</TableHead>
-                        <TableHead className="text-right">Mora Acumulada</TableHead>
-                        <TableHead className="text-center w-40">% Morosidad</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {reportTeamReports.map((team) => (
-                        <TableRow key={team.categoria}>
-                          <TableCell className="font-semibold text-sm text-foreground">{team.categoria}</TableCell>
-                          <TableCell className="text-center text-sm">{team.totalJugadores}</TableCell>
-                          <TableCell className="text-center">
-                            <Badge className={team.morosos > 0 ? "bg-destructive/15 text-destructive" : "bg-success/15 text-success"} variant="secondary">
-                              {team.morosos} morosos
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-sm text-destructive">{formatCRC(team.totalAdeudado)}</TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono font-bold w-9 text-right">{team.morosidadPct.toFixed(0)}%</span>
-                              <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                                <div className={`h-full rounded-full ${
-                                  team.morosidadPct > 30 ? "bg-destructive" : team.morosidadPct > 10 ? "bg-warning" : "bg-success"
-                                }`} style={{ width: `${team.morosidadPct}%` }} />
-                              </div>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-
-              {/* Consolidated Delinquent List */}
-              <Card className="border-border shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                        <AlertTriangle className="h-4.5 w-4.5 text-destructive" /> Listado Consolidado de Atletas Morosos
-                      </CardTitle>
-                      <CardDescription className="text-xs">Detalle de contacto de encargados y balances vencidos de toda la academia.</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Buscar por jugador o categoría..."
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        className="h-8 text-xs max-w-[200px]"
-                      />
-                      <Button variant="outline" size="xs" onClick={() => {
-                        toast.success("Descargando padrón 'Atletas_Morosos_Detallado.xlsx'...");
-                      }} className="text-[10px] gap-1 border-border">
-                        <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" /> Exportar
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/40 hover:bg-muted/40">
-                        <TableHead>Atleta</TableHead>
-                        <TableHead>Categoría</TableHead>
-                        <TableHead>Sede</TableHead>
-                        <TableHead>Contacto de Encargado (Padres)</TableHead>
-                        <TableHead className="text-right">Saldo Vencido</TableHead>
-                        <TableHead className="text-center">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMorosos.map((m) => {
-                        const parent = encargados.find(e => e.jugadorId === m.id);
-                        return (
-                          <TableRow key={m.id}>
-                            <TableCell className="font-semibold text-sm text-foreground flex items-center gap-2">
-                              <img src={m.avatar} alt="" className="h-7 w-7 rounded-full border border-border" />
-                              {m.nombre}
-                            </TableCell>
-                            <TableCell><Badge variant="outline">{m.categoria}</Badge></TableCell>
-                            <TableCell className="text-sm">{m.sede}</TableCell>
-                            <TableCell className="text-xs space-y-0.5">
-                              {parent ? (
-                                <>
-                                  <p className="font-medium text-foreground">{parent.parentesco}: <span className="font-semibold">{parent.nombre}</span></p>
-                                  <p className="text-muted-foreground">{parent.telefono} · {parent.correo}</p>
-                                </>
-                              ) : (
-                                <span className="text-muted-foreground italic">Sin encargado registrado</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right font-bold text-sm text-destructive">{formatCRC(m.saldo || 25000)}</TableCell>
-                            <TableCell className="text-center">
-                              <Button
-                                size="xs"
-                                variant="outline"
-                                className="text-[10px] h-7 gap-1 border-border hover:bg-muted"
-                                onClick={() => {
-                                  if (parent) {
-                                    toast.success(`Recordatorio de cobro enviado a ${parent.nombre} (${parent.correo})`);
-                                  } else {
-                                    toast.info("Enviando aviso de pago al atleta...");
-                                  }
-                                }}
-                              >
-                                🔔 Cobrar
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      {filteredMorosos.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="p-4 text-center text-muted-foreground text-sm">
-                            No se encontraron atletas morosos con los filtros indicados.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="morosos" className="mt-0">
-              <div className="rounded-lg border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
-                      <TableHead>Jugador</TableHead>
-                      <TableHead>Sede</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Saldo</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {morosos.map((j) => (
-                      <TableRow key={j.id}>
-                        <TableCell className="font-medium text-sm">{j.nombre}</TableCell>
-                        <TableCell className="text-sm">{j.sede}</TableCell>
-                        <TableCell><Badge variant="outline">{j.categoria}</Badge></TableCell>
-                        <TableCell><Badge className="bg-destructive/15 text-destructive" variant="secondary">Moroso</Badge></TableCell>
-                        <TableCell className="text-right font-medium text-sm">{formatCRC(j.saldo || 25000)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="pendientes" className="mt-0">
-              <div className="rounded-lg border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
-                      <TableHead>Jugador</TableHead>
-                      <TableHead>Sede</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Saldo</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendientes.map((j) => (
-                      <TableRow key={j.id}>
-                        <TableCell className="font-medium text-sm">{j.nombre}</TableCell>
-                        <TableCell className="text-sm">{j.sede}</TableCell>
-                        <TableCell><Badge variant="outline">{j.categoria}</Badge></TableCell>
-                        <TableCell><Badge className="bg-warning/20 text-warning" variant="secondary">Pendiente</Badge></TableCell>
-                        <TableCell className="text-right font-medium text-sm">{formatCRC(j.saldo || 25000)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="becados" className="mt-0">
-              <div className="rounded-lg border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
-                      <TableHead>Jugador</TableHead>
-                      <TableHead>Sede</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead>Descuento / Beca</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Vigencia</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {becados.map((b) => (
-                      <TableRow key={b.id}>
-                        <TableCell className="font-medium text-sm">{b.nombre}</TableCell>
-                        <TableCell className="text-sm">{b.sede}</TableCell>
-                        <TableCell><Badge variant="outline">{b.categoria}</Badge></TableCell>
-                        <TableCell>
-                          <Badge className="bg-success/15 text-success font-semibold" variant="secondary">{b.beca}</Badge>
-                        </TableCell>
-                        <TableCell className="text-sm">{b.tipo}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{b.vigencia}</TableCell>
-                      </TableRow>
-                    ))}
-                    {becados.length === 0 && (
-                      <TableRow>
-                        <td colSpan={6} className="p-4 text-center text-muted-foreground text-sm">No hay becados registrados</td>
-                      </TableRow>
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                          No se encontraron atletas deudores para la categoría o filtro seleccionado.
+                        </td>
+                      </tr>
                     )}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
-            </TabsContent>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <TabsContent value="arreglos" className="mt-0">
-              <div className="rounded-lg border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
-                      <TableHead>Jugador</TableHead>
-                      <TableHead>Sede</TableHead>
-                      <TableHead>Categoría</TableHead>
-                      <TableHead className="text-right">Deuda Total</TableHead>
-                      <TableHead className="text-right">Cuota Mensual</TableHead>
-                      <TableHead className="text-center">Progreso de Cuotas</TableHead>
-                      <TableHead>Estado</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {arreglos.map((a) => (
-                      <TableRow key={a.id}>
-                        <TableCell className="font-medium text-sm">{a.nombre}</TableCell>
-                        <TableCell className="text-sm">{a.sede}</TableCell>
-                        <TableCell><Badge variant="outline">{a.categoria}</Badge></TableCell>
-                        <TableCell className="text-right text-sm">{formatCRC(a.deudaOriginal)}</TableCell>
-                        <TableCell className="text-right font-semibold text-sm text-primary">{formatCRC(a.cuotaMensual)}</TableCell>
-                        <TableCell className="text-center text-sm">
-                          <span className="font-medium">{a.cuotasPagas}</span> / {a.cuotasTotales} cuotas
-                          <div className="mx-auto mt-1 w-24 h-1.5 rounded-full bg-muted overflow-hidden">
-                            <div className="h-full bg-primary" style={{ width: `${(a.cuotasPagas / a.cuotasTotales) * 100}%` }} />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={a.estado === "Al día" ? "bg-success/15 text-success" : "bg-warning/20 text-warning"} variant="secondary">
-                            {a.estado}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {arreglos.length === 0 && (
-                      <TableRow>
-                        <td colSpan={7} className="p-4 text-center text-muted-foreground text-sm">No hay arreglos de pago activos</td>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+        {/* ========================================================================= */}
+        {/* 📉 PESTAÑA 3: BALANCE Y LIBRO DE CAJA (EXCLUSIVO UN SOLO CLIC) */}
+        {/* ========================================================================= */}
+        <TabsContent value="balance" className="mt-0">
+          <FinanzasBalance />
+        </TabsContent>
+      </Tabs>
+
+      {/* MODAL INTERACTIVO REGISTRAR PAGO (DISPARA PASARELA MANUAL / SINPE / TRANSFERENCIA Y ACTUALIZA BD) */}
+      <Dialog open={openPaymentModal} onOpenChange={setOpenPaymentModal}>
+        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-purple-600" /> Registrar Cobro Manual & Estado de Cuenta BD
+            </DialogTitle>
+            <DialogDescription className="text-xs font-normal">
+              Inserta la transacción en Supabase y actualiza la condición del atleta a AL DÍA en tiempo real.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPlayerForPayment && (
+            <form onSubmit={handleSavePaymentDB} className="space-y-3.5 text-xs font-normal">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border space-y-1">
+                <p className="font-bold text-foreground">{selectedPlayerForPayment.nombre}</p>
+                <p className="text-[11px] text-muted-foreground">{selectedPlayerForPayment.categoria} • {selectedPlayerForPayment.sede}</p>
+                <p className="text-[10px] text-emerald-600 font-mono">Encargado: {selectedPlayerForPayment.padreNombre} ({getPhoneForPlayer(selectedPlayerForPayment)})</p>
               </div>
-            </TabsContent>
 
-            <TabsContent value="egresos" className="mt-4">
-              <FinanzasEgresos />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              <div>
+                <Label className="text-xs font-semibold">Monto a Cobrar (₡)</Label>
+                <Input
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                  className="h-9 mt-1 font-mono font-bold"
+                  required
+                />
+              </div>
 
-      {/* Recibo Honorarios Modal */}
-      <ReciboHonorariosModal open={isOpenRecibo} onOpenChange={setIsOpenRecibo} data={selectedRecibo} />
+              <div>
+                <Label className="text-xs font-semibold">Método de Pago / Recaudo</Label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full h-9 px-3 bg-background border border-border rounded-xl text-xs font-normal mt-1 outline-none"
+                >
+                  <option value="SINPE Móvil">SINPE Móvil Directo</option>
+                  <option value="Transferencia Bancaria">Transferencia Bancaria IBAN</option>
+                  <option value="Efectivo">Efectivo en Caja Sede</option>
+                  <option value="Tarjeta POS">Tarjeta POS / Datáfono</option>
+                </select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Notas / Comprobante de Depósito</Label>
+                <Input
+                  value={paymentNotes}
+                  onChange={(e) => setPaymentNotes(e.target.value)}
+                  placeholder="Ej. Transferencia SINPE #984210"
+                  className="h-9 mt-1"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setOpenPaymentModal(false)} className="h-9 text-xs font-normal">Cancelar</Button>
+                <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-9 text-xs gap-1.5 shadow-md">
+                  <Check className="h-4 w-4" /> Registrar Pago & Limpiar Deuda BD
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

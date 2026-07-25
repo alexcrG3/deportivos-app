@@ -145,7 +145,43 @@ export const Route = createFileRoute("/_app/medico/")({
   ssr: false,
 });
 
+// Formateador de fecha latino DD/MM/YYYY
+export function formatFechaLatino(dateInput?: string): string {
+  if (!dateInput || dateInput === "Sin programar") return dateInput || "Sin programar";
+
+  const clean = dateInput.trim();
+  // If already in DD/MM/YYYY
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(clean)) return clean;
+
+  // If ISO date string YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(clean)) {
+    const parts = clean.split("T")[0].split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+  }
+
+  // Text formats like "15 Jul 2026", "24 Jul 2026"
+  const monthsMap: Record<string, string> = {
+    ene: "01", feb: "02", mar: "03", abr: "04", may: "05", jun: "06",
+    jul: "07", ago: "08", sep: "09", oct: "10", nov: "11", dic: "12",
+    jan: "01", apr: "04", aug: "08", dec: "12"
+  };
+
+  const parts = clean.split(" ");
+  if (parts.length === 3) {
+    const day = parts[0].padStart(2, "0");
+    const monthKey = parts[1].substring(0, 3).toLowerCase();
+    const year = parts[2];
+    const monthNum = monthsMap[monthKey] || "07";
+    return `${day}/${monthNum}/${year}`;
+  }
+
+  return clean;
+}
+
 export function MedicoIndexPage() {
+  const [userRole, setUserRole] = useState<"admin" | "entrenador" | "padre">("admin");
   const searchObj = useRouterState({ select: (r) => r.location.search }) as Record<string, any>;
   const initialTab = searchObj?.tab === "historial" ? "directorio" : "dashboard";
   const [activeMainTab, setActiveMainTab] = useState<"dashboard" | "directorio">(initialTab);
@@ -199,23 +235,23 @@ export function MedicoIndexPage() {
       const estadosPosibles = ["alta", "alta", "alta", "rehabilitacion", "precaucion", "baja"];
       const estMed = hist.estadoMedico || estadosPosibles[idx % estadosPosibles.length];
       
-      const ultimasFechas = ["15 Jul 2026", "12 Jul 2026", "08 Jul 2026", "01 Jul 2026"];
+      const ultimasFechas = ["24/07/2026", "15/07/2026", "12/07/2026", "08/07/2026", "01/07/2026"];
       const proximasFechas = [
-        "30 Jul 2026",
-        "25 Jul 2026",
+        "30/07/2026",
+        "28/07/2026",
         "Sin programar",
-        "23 Jul 2026",
-        "19 Jul 2026",
-        "28 Jul 2026",
+        "24/07/2026",
+        "20/07/2026",
+        "28/07/2026",
       ];
 
       return {
         ...j,
         estadoMedico: estMed, // 'alta' | 'precaucion' | 'rehabilitacion' | 'baja'
-        diagnosticoActual: hist.diagnosticoActual || (estMed === "baja" ? "Esguince de Tobillo Grado 2" : estMed === "rehabilitacion" ? "Sobrecarga Muscular Isquiotibiales" : estMed === "precaucion" ? "Molestia articular rodilla" : "Apto sin restricciones"),
+        diagnosticoActual: hist.diagnosticoActual || (estMed === "baja" ? "Esguince de Tobillo Grado 2" : estMed === "rehabilitacion" ? "Sobrecarga Muscular Isquiotibiales" : estMed === "precaucion" ? "Molestia articular rodilla" : "Apto para alta competencia deportiva"),
         medico: hist.medicoAsignado || (idx % 2 === 0 ? "Dr. Solano" : "Licda. Castro"),
-        ultimaValoracion: hist.fechaUltimaValoracion ? hist.fechaUltimaValoracion : ultimasFechas[idx % ultimasFechas.length],
-        proximaRevision: hist.fechaProximaRevision || proximasFechas[idx % proximasFechas.length],
+        ultimaValoracion: formatFechaLatino(hist.fechaUltimaValoracion ? hist.fechaUltimaValoracion : ultimasFechas[idx % ultimasFechas.length]),
+        proximaRevision: formatFechaLatino(hist.fechaProximaRevision || proximasFechas[idx % proximasFechas.length]),
         tipoSangre: hist.tipoSangre || j.tipoSangre || (idx % 2 === 0 ? "O+" : "A+"),
         alergias: hist.alergias || (idx % 3 === 0 ? "Sin alergias registradas" : "Alergia a AINEs"),
         lesionesActivas: hist.lesionesActivas || (estMed === "baja" ? "Esguince de Tobillo Grado 2" : estMed === "rehabilitacion" ? "Distensión Abductor" : "Ninguna"),
@@ -293,10 +329,20 @@ export function MedicoIndexPage() {
     ];
   }, [citas, p0, p1, p2, p3]);
 
-  // Filtrado exhaustivo multi-criterio para el Historial Clínico
+  // 🔒 MATRIZ DE PRIVACIDAD MÉDICA QUIRÚRGICA (SECTORIZACIÓN POR ROLES Y RLS)
   const filtered = useMemo(() => {
     return jugadoresConEstado.filter((j) => {
-      // 1. Buscador por texto
+      // 🔒 1. Rol Padre: Candado estricto por ID de hijo
+      if (userRole === "padre") {
+        if (j.id !== "j1" && !j.nombre.toLowerCase().includes("aaron pacheco")) return false;
+      }
+
+      // 🔒 2. Rol Entrenador (Coach OS): Candado por plantilla asignada (Sub-15 / Sub-13)
+      if (userRole === "entrenador") {
+        if (j.categoria !== "Sub-15" && j.categoria !== "U15" && j.categoria !== "Sub-13") return false;
+      }
+
+      // 1. Buscador por texto (Sólo permitido si pasa los candados de rol)
       const matchSearch =
         j.nombre.toLowerCase().includes(q.toLowerCase()) ||
         j.identificacion.toLowerCase().includes(q.toLowerCase()) ||
@@ -317,7 +363,7 @@ export function MedicoIndexPage() {
 
       return true;
     });
-  }, [jugadoresConEstado, q, filterSede, filterCategoria, filterMedico, filterEstado]);
+  }, [jugadoresConEstado, q, filterSede, filterCategoria, filterMedico, filterEstado, userRole]);
 
   const handleCrearValoracion = () => {
     if (!valJugadorId) {
@@ -639,27 +685,54 @@ export function MedicoIndexPage() {
       {/* VISTA 2: HISTORIAL CLÍNICO REDISEÑADO CON HERRAMIENTAS Y VISTA RÁPIDA */}
       {activeMainTab === "directorio" && (
         <div className="space-y-6">
-          {/* HERO HEADER HISTORIAL CLÍNICO */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-6 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+          {/* HERO HEADER HISTORIAL CLÍNICO CON CONTROL DE PRIVACIDAD RLS */}
+          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-6 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4 w-full max-w-full overflow-hidden box-border">
             <div className="space-y-1">
-              <Badge className="bg-indigo-500/20 text-indigo-300 font-bold text-[10px] uppercase tracking-wider border border-indigo-500/30">
-                MÓDULO DE EXPEDIENTES Y APTITUD DEPORTIVA
-              </Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-indigo-500/20 text-indigo-300 font-bold text-[10px] uppercase tracking-wider border border-indigo-500/30">
+                  MÓDULO DE EXPEDIENTES Y APTITUD DEPORTIVA
+                </Badge>
+                <Badge className="bg-purple-500/20 text-purple-300 font-bold text-[10px] uppercase tracking-wider border border-purple-500/30">
+                  {userRole === "admin" ? "🏢 ROL ADMINISTRADOR GLOBAL (81 EXPEDIENTES)" : userRole === "entrenador" ? "📋 ROL ENTRENADOR (SUB-15 PLANTILLA)" : "👨‍👩‍👦 ROL PADRE DE FAMILIA (HIJO EXCLUSIVO)"}
+                </Badge>
+              </div>
               <h1 className="text-xl sm:text-2xl font-black flex items-center gap-2 text-white">
                 <User className="h-6 w-6 text-indigo-400" /> Historial Clínico
               </h1>
               <p className="text-xs text-slate-300 max-w-xl">
-                Administra los expedientes médicos de todos los deportistas, registra valoraciones, lesiones y controla su aptitud deportiva.
+                {userRole === "admin"
+                  ? "Acceso total para auditar y consultar los expedientes médicos de los 81 deportistas del club."
+                  : userRole === "entrenador"
+                  ? "Acceso sectorizado exclusivo para la plantilla de atletas asignada en Coach OS."
+                  : "Acceso protegido exclusivo para la ficha médica y bitácora clínica de tu hijo."}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={() => setOpenNewValoracion(true)} className="bg-gradient-primary shadow-elegant font-bold rounded-2xl text-xs h-9 gap-1.5">
-                <Plus className="h-4 w-4" /> Nueva Valoración
-              </Button>
-              <Button onClick={() => setOpenNewExpediente(true)} variant="outline" className="border-indigo-400/30 text-indigo-200 hover:bg-indigo-500/10 font-bold rounded-2xl text-xs h-9 gap-1.5">
-                <UserPlus className="h-4 w-4 text-indigo-400" /> Nuevo Expediente
-              </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              {/* CONTROL DE SIMULACIÓN DE ROL RLS */}
+              <div className="flex items-center gap-1.5 bg-slate-950/80 border border-indigo-500/40 p-1.5 rounded-2xl text-xs font-semibold">
+                <span className="text-[10px] text-slate-400 font-mono uppercase pl-2">Vista por Rol:</span>
+                <select
+                  value={userRole}
+                  onChange={(e: any) => setUserRole(e.target.value)}
+                  className="bg-indigo-900 text-white font-bold h-7 px-2 rounded-xl text-xs outline-none border border-indigo-400/40 cursor-pointer"
+                >
+                  <option value="admin">🏢 Administrador (81 Atletas - Acceso Total)</option>
+                  <option value="entrenador">📋 Entrenador (Plantilla Asignada Coach OS)</option>
+                  <option value="padre">👨‍👩‍👦 Padre / Tutor (Hijo Exclusivo)</option>
+                </select>
+              </div>
+
+              {userRole === "admin" && (
+                <>
+                  <Button onClick={() => setOpenNewValoracion(true)} className="bg-gradient-primary shadow-elegant font-bold rounded-2xl text-xs h-9 gap-1.5">
+                    <Plus className="h-4 w-4" /> Nueva Valoración
+                  </Button>
+                  <Button onClick={() => setOpenNewExpediente(true)} variant="outline" className="border-indigo-400/30 text-indigo-200 hover:bg-indigo-500/10 font-bold rounded-2xl text-xs h-9 gap-1.5">
+                    <UserPlus className="h-4 w-4 text-indigo-400" /> Nuevo Expediente
+                  </Button>
+                </>
+              )}
             </div>
           </div>
           {/* 📊 1. TARJETAS KPIS ÚTILES (4 TARJETAS) */}

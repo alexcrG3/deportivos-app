@@ -979,8 +979,8 @@ class RendimientoStore {
         seguroEps: j.seguro_eps,
         enfermedades: j.enfermedades,
         cirugias: j.cirugias,
-        alergiasInput: j.alergias_input,
-        lesionesInput: j.lesiones_input,
+        alergiasInput: j.alergias || j.alergias_input,
+        lesionesInput: j.lesiones || j.lesiones_input,
         institucionEducativa: j.institucion_educativa,
         gradoActual: j.grado_actual,
         peso: j.peso,
@@ -1458,8 +1458,8 @@ class RendimientoStore {
           seguro_eps: j.seguroEps,
           enfermedades: j.enfermedades,
           cirugias: j.cirugias,
-          alergias_input: j.alergiasInput,
-          lesiones_input: j.lesionesInput,
+          alergias: j.alergiasInput || j.alergias,
+          lesiones: j.lesionesInput || j.lesiones,
           institucion_educativa: j.institucionEducativa,
           grado_actual: j.gradoActual,
           peso: j.peso,
@@ -1471,8 +1471,35 @@ class RendimientoStore {
         }));
         const { error } = await supabase.from("jugadores").upsert(batch);
         if (error) {
-          console.error("[Supabase Error] jugadores batch upsert failed:", error.message);
-          toast.error("Error al guardar jugadores en la base de datos: " + error.message);
+          console.warn("[Supabase Warning] Extended jugadores upsert warning, retrying core columns:", error.message);
+          const coreBatch = jugadoresList.map((j) => ({
+            id: j.id,
+            nombre: j.nombre,
+            identificacion: j.identificacion,
+            correo: j.correo,
+            telefono: j.telefono,
+            genero: j.genero,
+            fecha_nacimiento: j.fechaNacimiento,
+            disciplina: j.disciplina,
+            categoria: j.categoria,
+            sede: j.sede,
+            sede_id: j.sedeId,
+            estado: j.esSuspendido ? "suspendido" : (j.estado || "activo"),
+            estado_pago: j.estadoPago,
+            saldo: j.saldo,
+            avatar: j.avatar,
+            qr: j.qr,
+            encargado: j.encargado,
+            parentesco: j.parentesco,
+            telefono_encargado: j.telefonoEncargado,
+            correo_encargado: j.correoEncargado,
+            posicion: j.posicion,
+            organizacion_id: activeOrg,
+          }));
+          const { error: coreError } = await supabase.from("jugadores").upsert(coreBatch);
+          if (coreError) {
+            console.error("[Supabase Error] Core jugadores upsert failed:", coreError.message);
+          }
         }
       } 
       else if (key === "pagos_dynamics") {
@@ -2372,7 +2399,7 @@ class RendimientoStore {
         id: "cit-1",
         jugadorId: jugadorId || "j1",
         jugadorNombre: "Santiago Jiménez Valverde",
-        fisioterapeutaNombre: "Licda. Mariela Castro",
+        fisioterapeutaNombre: "Licda. Melissa Fernández",
         fecha: "2026-07-23",
         hora: "15:00",
         motivo: "Descarga muscular miofascial y estiramientos dirigidos (U13)",
@@ -2384,7 +2411,7 @@ class RendimientoStore {
         id: "cit-2",
         jugadorId: jugadorId || "j2",
         jugadorNombre: "Ian Gutiérrez Solano",
-        fisioterapeutaNombre: "Lic. Carlos Fonseca",
+        fisioterapeutaNombre: "Dr. Mauricio Alpízar",
         fecha: "2026-07-18",
         hora: "14:00",
         motivo: "Rehabilitación de sobrecarga articular pre-partido",
@@ -2396,7 +2423,7 @@ class RendimientoStore {
         id: "cit-3",
         jugadorId: jugadorId || "j3",
         jugadorNombre: "Mateo Rojas Calvo",
-        fisioterapeutaNombre: "Licda. Mariela Castro",
+        fisioterapeutaNombre: "Dr. José Carlos Sánchez",
         fecha: "2026-07-25",
         hora: "10:30",
         motivo: "Evaluación biomecánica y readaptación de rodilla",
@@ -2405,11 +2432,30 @@ class RendimientoStore {
         estado: "programada"
       }
     ]);
+
+    // Homologación automática de nombres legados a los médicos oficiales del directorio DB
+    let migrated = false;
+    const cleanList = list.map((c) => {
+      if (c.fisioterapeutaNombre === "Licda. Mariela Castro") {
+        migrated = true;
+        return { ...c, fisioterapeutaNombre: "Licda. Melissa Fernández" };
+      }
+      if (c.fisioterapeutaNombre === "Lic. Carlos Fonseca") {
+        migrated = true;
+        return { ...c, fisioterapeutaNombre: "Dr. Mauricio Alpízar" };
+      }
+      return c;
+    });
+
+    if (migrated) {
+      this.set("citas_fisioterapia", cleanList);
+    }
+
     if (jugadorId) {
-      const filtered = list.filter(c => c.jugadorId === jugadorId);
+      const filtered = cleanList.filter(c => c.jugadorId === jugadorId);
       if (filtered.length > 0) return filtered;
     }
-    return list;
+    return cleanList;
   }
 
   public static addCitaFisioterapia(c: any): any {
@@ -3578,8 +3624,8 @@ class RendimientoStore {
   // --- EGRESOS Y COMPRAS ---
   public static getEgresos(): StoreEgreso[] {
     if (!this.isBrowser()) return INITIAL_EGRESOS;
-    const stored = this.get<StoreEgreso[]>("egresos", []);
-    if (!stored || stored.length === 0) {
+    const stored = this.get<StoreEgreso[] | null>("egresos", null);
+    if (stored === null || stored === undefined) {
       this.set("egresos", INITIAL_EGRESOS);
       return INITIAL_EGRESOS;
     }
@@ -3598,10 +3644,22 @@ class RendimientoStore {
     return newEgreso;
   }
 
+  public static saveEgreso(egreso: StoreEgreso): void {
+    if (!this.isBrowser()) return;
+    const currentDynamics = this.get<StoreEgreso[]>("egresos_dynamics", []);
+    this.set("egresos_dynamics", [egreso, ...currentDynamics]);
+    const stored = this.getEgresos();
+    this.set("egresos", [egreso, ...stored]);
+  }
+
   public static deleteEgreso(id: string): void {
+    const clean = id.replace(/^(egreso_|egr_|egreso_local_)/, "");
     const list = this.getEgresos();
-    const filtered = list.filter((x) => x.id !== id);
+    const filtered = list.filter((x) => x.id !== id && x.id !== clean && `egreso_${x.id}` !== id && `egr_${x.id}` !== id);
     this.set("egresos", filtered);
+    const dynamics = this.get<StoreEgreso[]>("egresos_dynamics", []);
+    const filteredDyn = dynamics.filter((x) => x.id !== id && x.id !== clean);
+    this.set("egresos_dynamics", filteredDyn);
   }
 
   // --- SOPORTE & TICKETS ---
@@ -3671,7 +3729,15 @@ class RendimientoStore {
       organizacion_id: activeOrgId,
       organizacion_nombre: currentOrg ? currentOrg.nombre : "Academia DeportivOS",
       creadoEn: new Date().toISOString(),
-      respuestas: []
+      respuestas: [
+        {
+          id: generateUniqueId("resp"),
+          autorNombre: ticket.creadorNombre,
+          mensaje: "creó el ticket con estado 'Abierto'",
+          fecha: new Date().toISOString(),
+          type: "system_event"
+        }
+      ]
     };
 
     const updated = [newTicket, ...list];
@@ -3699,16 +3765,38 @@ class RendimientoStore {
     return newTicket;
   }
 
-  public static updateSupportTicketStatus(id: string, estado: StoreSupportTicket["estado"]): void {
+  public static updateSupportTicketStatus(id: string, estado: StoreSupportTicket["estado"], autorNombre: string = "Soporte Central"): void {
     const list = this.getSupportTickets();
     const idx = list.findIndex(t => t.id === id);
     if (idx !== -1) {
-      list[idx] = { ...list[idx], estado, actualizadoEn: new Date().toISOString() };
+      const statusLabels: Record<string, string> = {
+        abierto: "Abierto",
+        en_progreso: "En progreso",
+        resuelto: "Resuelto",
+        cerrado: "Cerrado"
+      };
+      const statusText = statusLabels[estado] || estado;
+      const eventResp: StoreTicketResponse = {
+        id: generateUniqueId("resp"),
+        autorNombre,
+        mensaje: `cambió el estado a '${statusText}'`,
+        fecha: new Date().toISOString(),
+        type: "system_event"
+      };
+      const updatedRespuestas = [...(list[idx].respuestas || []), eventResp];
+
+      list[idx] = { 
+        ...list[idx], 
+        estado, 
+        respuestas: updatedRespuestas,
+        actualizadoEn: new Date().toISOString() 
+      };
       this.set("support_tickets_dynamics_v3", list);
 
       if (this.isBrowser()) {
         supabase.from("support_tickets").update({ 
           estado, 
+          respuestas: updatedRespuestas,
           updated_at: new Date().toISOString() 
         }).eq("id", id).then(({ error }) => {
           if (error) console.error("[Supabase Error] update ticket status failed:", error.message);
@@ -3724,7 +3812,9 @@ class RendimientoStore {
       const newResp: StoreTicketResponse = {
         ...respuesta,
         id: generateUniqueId("resp"),
-        fecha: new Date().toISOString()
+        fecha: new Date().toISOString(),
+        type: respuesta.type || "public",
+        read_by_client: respuesta.esAdminSaaS ? false : true
       };
       const ticket = list[idx];
       const updatedRespuestas = [...(ticket.respuestas || []), newResp];
@@ -3746,6 +3836,42 @@ class RendimientoStore {
       return newResp;
     }
     return null;
+  }
+
+  public static markTicketAsRead(id: string): void {
+    const list = this.getSupportTickets();
+    const idx = list.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      let hasChanges = false;
+      const updatedRespuestas = (list[idx].respuestas || []).map(r => {
+        if (r.esAdminSaaS && !r.read_by_client) {
+          hasChanges = true;
+          return { ...r, read_by_client: true };
+        }
+        return r;
+      });
+
+      if (hasChanges) {
+        list[idx] = { ...list[idx], respuestas: updatedRespuestas };
+        this.set("support_tickets_dynamics_v3", list);
+        if (this.isBrowser()) {
+          supabase.from("support_tickets").update({ 
+            respuestas: updatedRespuestas, 
+            updated_at: new Date().toISOString() 
+          }).eq("id", id).then(({ error }) => {
+            if (error) console.error("[Supabase Error] mark ticket as read failed:", error.message);
+          });
+        }
+      }
+    }
+  }
+
+  public static filterTicketResponsesForRole(ticket: StoreSupportTicket, isSuperAdmin: boolean = false): StoreSupportTicket {
+    if (isSuperAdmin) return ticket;
+    return {
+      ...ticket,
+      respuestas: (ticket.respuestas || []).filter(r => r.type !== "internal")
+    };
   }
 
   // --- RETENCIÓN & COHORTES DE ATLETAS ---
@@ -3919,97 +4045,6 @@ export const MONEDAS_LATAM = [
   { code: "BZD", symbol: "BZ$", name: "Dólar Beliceño", flag: "🇧🇿", label: "🇧🇿 BZD (BZ$) · Dólar Beliceño" },
 ];
 
-export const INITIAL_EGRESOS: StoreEgreso[] = [
-  {
-    id: "egr-101",
-    nombre: "Balones de fútbol Nike Flight U13",
-    categoria: "Equipamiento Deportivo",
-    sede: "Sede Central",
-    sedeId: "sede-central",
-    moneda: "CRC",
-    simboloMoneda: "₡",
-    precioUnitario: 18000,
-    cantidad: 10,
-    montoTotal: 180000,
-    fecha: "2026-07-20",
-    descripcion: "Lote de 10 balones oficiales entrenamiento para categoría U13",
-    comprobante: "factura_deportes_101.pdf",
-    metodoPago: "Transferencia SINPE",
-    proveedor: "Deportes Extremos S.A.",
-    creadoEn: "2026-07-20T10:00:00Z"
-  },
-  {
-    id: "egr-102",
-    nombre: "Mantenimiento césped sintético Cancha 1",
-    categoria: "Mantenimiento y Servicios",
-    sede: "Sede Este",
-    sedeId: "sede-este",
-    moneda: "USD",
-    simboloMoneda: "$",
-    precioUnitario: 450,
-    cantidad: 1,
-    montoTotal: 450,
-    fecha: "2026-07-18",
-    descripcion: "Revisión de caucho, peinado de fibra y reparación de líneas",
-    comprobante: "recibo_mantenimiento_450.pdf",
-    metodoPago: "Transferencia Banco",
-    proveedor: "Sintéticos CR Ltda.",
-    creadoEn: "2026-07-18T14:30:00Z"
-  },
-  {
-    id: "egr-103",
-    nombre: "Pago de Arbitraje Jornada 8 Torneo Apertura",
-    categoria: "Arbitraje y Torneaje",
-    sede: "Sede Norte",
-    sedeId: "sede-norte",
-    moneda: "CRC",
-    simboloMoneda: "₡",
-    precioUnitario: 35000,
-    cantidad: 4,
-    montoTotal: 140000,
-    fecha: "2026-07-15",
-    descripcion: "Honorarios de terna arbitral para 4 partidos de liga",
-    comprobante: "comprobante_arbitral_j8.jpg",
-    metodoPago: "Efectivo",
-    proveedor: "Asociación de Árbitros de CR",
-    creadoEn: "2026-07-15T18:00:00Z"
-  },
-  {
-    id: "egr-104",
-    nombre: "Petos de entrenamiento fluorescentes (Set de 30)",
-    categoria: "Equipamiento Deportivo",
-    sede: "Sede Central",
-    sedeId: "sede-central",
-    moneda: "EUR",
-    simboloMoneda: "€",
-    precioUnitario: 12,
-    cantidad: 30,
-    montoTotal: 360,
-    fecha: "2026-07-12",
-    descripcion: "Importación de petos transpirables bicolor verde/naranja",
-    comprobante: "invoice_petos_eu.pdf",
-    metodoPago: "Tarjeta de Crédito",
-    proveedor: "SportEquip Europe",
-    creadoEn: "2026-07-12T09:15:00Z"
-  },
-  {
-    id: "egr-105",
-    nombre: "Transporte en bus para partido vs Liga Alajuelense",
-    categoria: "Transporte y Viajes",
-    sede: "Sede Sur",
-    sedeId: "sede-sur",
-    moneda: "CRC",
-    simboloMoneda: "₡",
-    precioUnitario: 125000,
-    cantidad: 1,
-    montoTotal: 125000,
-    fecha: "2026-07-10",
-    descripcion: "Traslado ida y vuelta de delegación U15 a Alajuela",
-    comprobante: "factura_bus_transporte.pdf",
-    metodoPago: "Transferencia SINPE",
-    proveedor: "Transportes del Este",
-    creadoEn: "2026-07-10T11:40:00Z"
-  }
-];
+export const INITIAL_EGRESOS: StoreEgreso[] = [];
 
 export default RendimientoStore;
