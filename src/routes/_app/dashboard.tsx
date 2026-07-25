@@ -605,57 +605,59 @@ function Dashboard() {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Financiero */}
-          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Estado Financiero</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Facturado</Badge>
+          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Estado Financiero</p>
+                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Facturado</Badge>
+              </div>
+              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
-            <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold">Morosidad actual:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{morosos.length} deudores</span>
-            </div>
+            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+              Morosidad actual <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{morosos.length} deudores</span>
+            </p>
           </Card>
 
           {/* Card 2: Deportivo */}
-          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Estado Deportivo</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Semanal</Badge>
+          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Estado Deportivo</p>
+                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Semanal</Badge>
+              </div>
+              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}%</p>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}% <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Asistencia</span></p>
-            <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold">Lesiones activas:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
-            </div>
+            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+              Asistencia promedio <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{sportsScienceAdminStats.lesionesActivasCount} lesiones</span>
+            </p>
           </Card>
 
           {/* Card 3: Staff & Metodología */}
-          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Staff & Metodología</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Supervisado</Badge>
+          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Staff & Metodología</p>
+                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Supervisado</Badge>
+              </div>
+              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92%</p>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92% <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Aprobadas</span></p>
-            <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold">Sesiones semana:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">{trainingSessions.length} programadas</span>
-            </div>
+            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+              Sesiones aprobadas <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{trainingSessions.length} sem.</span>
+            </p>
           </Card>
 
           {/* Card 4: Sports Science & Cargas */}
-          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Sports Science & Carga</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
+          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Sports Science & Carga</p>
+                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
+              </div>
+              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)}</p>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Prom. ACWR</span></p>
-            <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-600 dark:text-slate-300 font-semibold">Jugadores riesgo alto:</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} atletas
-              </span>
-            </div>
+            <p className="text-xs font-normal text-slate-600 dark:text-slate-300 flex items-center">
+              Promedio ACWR <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} en riesgo</span>
+            </p>
           </Card>
         </div>
       </section>
