@@ -537,7 +537,7 @@ function Dashboard() {
               </div>
             </div>
             <Link to="/ia/asistente" className="w-full mt-2">
-              <Button size="sm" variant="outline" className="w-full border-primary/40 text-primary hover:bg-primary/10 text-xs font-semibold gap-1.5 shadow-sm">
+              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-semibold gap-1.5 shadow-sm hover:bg-primary/90">
                 <Brain className="h-3.5 w-3.5" /> Consultar Asistente IA <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
