@@ -33,17 +33,17 @@ function TodayCard({
   icon: Icon, label, count, hint, to, prio,
 }: { icon: React.ComponentType<{ className?: string }>; label: string; count: number; hint: string; to: string; prio: Prio }) {
   return (
-    <Link to={to} className="group rounded-xl border bg-card p-4 shadow-card hover:shadow-elegant hover:-translate-y-0.5 transition-all">
+    <Link to={to} className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${dotColor[prio]}`} />
-          <Icon className="h-4 w-4 text-muted-foreground" />
+          <Icon className="h-4 w-4 text-slate-400" />
         </div>
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-all" />
       </div>
-      <p className="mt-3 text-3xl font-semibold tracking-tight">{count}</p>
-      <p className="text-sm font-medium">{label}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>
+      <p className="mt-3 text-3xl font-bold font-mono tracking-tight text-slate-900 dark:text-slate-100">{count}</p>
+      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">{label}</p>
+      <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>
     </Link>
   );
 }
@@ -307,39 +307,44 @@ function Dashboard() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
             Centro de Operaciones Enterprise 2.0
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold uppercase">Executive UI</Badge>
+            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold uppercase tracking-wider">Executive UI</Badge>
           </h1>
-          <p className="text-sm text-muted-foreground">Visión 360° del club: IA, Finanzas, Deporte, Staff y Operaciones Diarias.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Visión 360° del club: IA, Finanzas, Deporte, Staff y Operaciones Diarias.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline"><Bell className="h-4 w-4" /> Alertas</Button>
-          <Button className="bg-gradient-primary shadow-elegant"><Plus className="h-4 w-4" /> Nuevo jugador</Button>
+          <Button variant="outline" className="border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <Bell className="h-4 w-4" /> Alertas
+          </Button>
+          <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 font-semibold">
+            <Plus className="h-4 w-4" /> Nuevo jugador
+          </Button>
         </div>
       </div>
 
       {/* ⚡ BANNER DE MIGRACIÓN DE LOCALSTORAGE A SUPABASE ⚡ */}
       {migrableKeys.length > 0 && (
-        <Card className="border-amber-500/30 bg-amber-500/10 shadow-elegant relative overflow-hidden">
+        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-500/25 text-amber-700 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/25 font-bold text-[10px] uppercase tracking-wider">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" />
+                  <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase tracking-wider">
                     Migración de datos a la Nube
                   </Badge>
                 </div>
-                <h3 className="text-base font-bold tracking-tight">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                   ¡Detectamos datos locales listos para sincronizar!
                 </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
                   Tienes <strong>{migrableKeys.map(k => k.replace("_dynamics", "")).join(", ")}</strong> guardados en la memoria local de este navegador.
                   Presiona el botón para migrarlos directamente a tu base de datos Supabase en la nube.
                 </p>
               </div>
               <Button
-                className="bg-amber-600 hover:bg-amber-700 text-white shadow-elegant font-bold flex gap-2 shrink-0"
+                className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 font-bold flex gap-2 shrink-0"
                 onClick={handleCloudMigration}
               >
                 <TrendingUp className="h-4 w-4" /> Sincronizar con Supabase
@@ -350,32 +355,32 @@ function Dashboard() {
       )}
 
       {showWizard && !wizardCompleted && (
-        <Card className="bg-gradient-to-r from-primary/5 via-violet-500/[0.03] to-background border-primary/20 shadow-elegant relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500 text-foreground">
+        <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-bold text-[10px] uppercase tracking-wider">
+                  <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase tracking-wider">
                     Asistente de Configuración
                   </Badge>
-                  <span className="text-[10px] text-muted-foreground font-semibold">Tus primeros pasos en DeportivOS</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Tus primeros pasos en DeportivOS</span>
                 </div>
-                <h3 className="text-lg font-bold tracking-tight">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                   ¡Te damos la bienvenida a {activeOrg?.nombre || "tu nueva academia"}!
                 </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Completa las siguientes tareas esenciales para habilitar todas las herramientas operativas de rendimiento, finanzas y entrenamientos de tu academia.
                 </p>
                 
                 {/* Progress bar */}
                 <div className="space-y-1.5 pt-2">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-muted-foreground">Progreso de la configuración</span>
-                    <span className="text-primary font-bold">{progressPercent}% completado</span>
+                  <div className="flex items-center justify-between text-xs font-medium">
+                    <span className="text-slate-500">Progreso de la configuración</span>
+                    <span className="text-slate-900 dark:text-slate-100 font-bold">{progressPercent}% completado</span>
                   </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-primary rounded-full transition-all duration-500 ease-out"
+                      className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -388,18 +393,18 @@ function Dashboard() {
                   to="/configuracion" 
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-xs font-semibold ${
                     hasLogo 
-                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-                      : "bg-card hover:bg-muted/40 text-foreground border-border"
+                      ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100" 
+                      : "bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <div className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 border ${
-                    hasLogo ? "bg-emerald-500 text-white border-emerald-500" : "bg-muted border-border"
+                    hasLogo ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100" : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                   }`}>
                     {hasLogo ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px]">1</span>}
                   </div>
                   <div className="flex-1 truncate">
-                    <p className={hasLogo ? "line-through opacity-85" : ""}>Sube el Logo del Club</p>
-                    <span className="text-[9px] opacity-75 font-normal">Ajustes generales</span>
+                    <p className={hasLogo ? "line-through opacity-70" : ""}>Sube el Logo del Club</p>
+                    <span className="text-[9px] text-slate-400 font-normal">Ajustes generales</span>
                   </div>
                 </Link>
 
@@ -407,18 +412,18 @@ function Dashboard() {
                   to="/entrenadores" 
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-xs font-semibold ${
                     hasCoaches 
-                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-                      : "bg-card hover:bg-muted/40 text-foreground border-border"
+                      ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100" 
+                      : "bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <div className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 border ${
-                    hasCoaches ? "bg-emerald-500 text-white border-emerald-500" : "bg-muted border-border"
+                    hasCoaches ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100" : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                   }`}>
                     {hasCoaches ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px]">2</span>}
                   </div>
                   <div className="flex-1 truncate">
-                    <p className={hasCoaches ? "line-through opacity-85" : ""}>Registra un Coach</p>
-                    <span className="text-[9px] opacity-75 font-normal">Cuerpo técnico</span>
+                    <p className={hasCoaches ? "line-through opacity-70" : ""}>Registra un Coach</p>
+                    <span className="text-[9px] text-slate-400 font-normal">Cuerpo técnico</span>
                   </div>
                 </Link>
 
@@ -426,18 +431,18 @@ function Dashboard() {
                   to="/equipos" 
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-xs font-semibold ${
                     hasTeams 
-                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-                      : "bg-card hover:bg-muted/40 text-foreground border-border"
+                      ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100" 
+                      : "bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <div className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 border ${
-                    hasTeams ? "bg-emerald-500 text-white border-emerald-500" : "bg-muted border-border"
+                    hasTeams ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100" : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                   }`}>
                     {hasTeams ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px]">3</span>}
                   </div>
                   <div className="flex-1 truncate">
-                    <p className={hasTeams ? "line-through opacity-85" : ""}>Crea un Equipo</p>
-                    <span className="text-[9px] opacity-75 font-normal">Operación deportiva</span>
+                    <p className={hasTeams ? "line-through opacity-70" : ""}>Crea un Equipo</p>
+                    <span className="text-[9px] text-slate-400 font-normal">Operación deportiva</span>
                   </div>
                 </Link>
 
@@ -445,18 +450,18 @@ function Dashboard() {
                   to="/jugadores" 
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-xs font-semibold ${
                     hasPlayers 
-                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
-                      : "bg-card hover:bg-muted/40 text-foreground border-border"
+                      ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100" 
+                      : "bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"
                   }`}
                 >
                   <div className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 border ${
-                    hasPlayers ? "bg-emerald-500 text-white border-emerald-500" : "bg-muted border-border"
+                    hasPlayers ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100" : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                   }`}>
                     {hasPlayers ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px]">4</span>}
                   </div>
                   <div className="flex-1 truncate">
-                    <p className={hasPlayers ? "line-through opacity-85" : ""}>Inscribe un Atleta</p>
-                    <span className="text-[9px] opacity-75 font-normal">Roster del club</span>
+                    <p className={hasPlayers ? "line-through opacity-70" : ""}>Inscribe un Atleta</p>
+                    <span className="text-[9px] text-slate-400 font-normal">Roster del club</span>
                   </div>
                 </Link>
               </div>
@@ -465,7 +470,7 @@ function Dashboard() {
             {/* Close button */}
             <button 
               onClick={() => setShowWizard(false)}
-              className="absolute top-3 right-3 text-muted-foreground/60 hover:text-foreground p-1 transition"
+              className="absolute top-3 right-3 text-slate-400 hover:text-slate-700 p-1 transition"
               title="Ocultar asistente"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -482,11 +487,11 @@ function Dashboard() {
       <section className="space-y-3 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-500/10 text-violet-500 font-bold text-xs">🤖</span>
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">🤖</span>
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
               Alertas IA / Insights del Club
             </h2>
-            <Badge variant="outline" className="text-[10px] border-violet-500/30 text-violet-600 dark:text-violet-400 font-semibold">Proactivo</Badge>
+            <Badge variant="outline" className="text-[10px] border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold">Proactivo</Badge>
           </div>
           <Link to="/ia/asistente" className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
             Abrir DeportivOS AI Copilot <ArrowRight className="h-3 w-3" />
@@ -494,80 +499,90 @@ function Dashboard() {
         </div>
         
         <div className="grid gap-3 md:grid-cols-3">
-          {/* Tarjeta 1: Copilot Status */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border bg-gradient-to-br from-violet-950/20 via-card to-card relative overflow-hidden flex flex-col justify-between col-span-1 border-violet-500/20">
+          {/* Tarjeta 1: Copilot Status Monocromático */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between col-span-1">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <Badge className="bg-gradient-to-r from-violet-600 to-amber-500 text-white font-bold text-[9px] uppercase tracking-wider">Copilot Enterprise</Badge>
-                <Sparkles className="h-4 w-4 text-amber-500 animate-pulse" />
+                <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 font-bold text-[9px] uppercase tracking-wider">
+                  Copilot Enterprise
+                </Badge>
+                <Sparkles className="h-4 w-4 text-primary" />
               </div>
-              <p className="text-xs font-bold text-muted-foreground">Diagnóstico Automático Hoy</p>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Diagnóstico Automático Hoy</p>
               <div className="grid grid-cols-2 gap-2 my-3 text-xs">
-                <div className="bg-red-500/10 p-2.5 rounded-xl border border-red-500/20">
-                  <div className="text-red-500 font-bold text-xs">⚠️ Riesgos</div>
-                  <span className="font-black text-lg text-foreground">{alertasIA.length}</span> Alertas
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
+                    <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" /> Riesgos
+                  </div>
+                  <span className="font-bold text-lg text-slate-900 dark:text-slate-100 mt-1 block">{alertasIA.length}</span>
                 </div>
-                <div className="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/20">
-                  <div className="text-amber-500 font-bold text-xs">💡 Recomend.</div>
-                  <span className="font-black text-lg text-foreground">7</span> Sugerencias
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
+                    <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" /> Sugerencias
+                  </div>
+                  <span className="font-bold text-lg text-slate-900 dark:text-slate-100 mt-1 block">7</span>
                 </div>
-                <div className="bg-sky-500/10 p-2.5 rounded-xl border border-sky-500/20">
-                  <div className="text-sky-500 font-bold text-xs">🚨 Fugas CRM</div>
-                  <span className="font-black text-lg text-foreground">{aiRiskScores.filter(r => r.nivelAbandono === "critico").length || 2}</span> Abandos
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
+                    <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0" /> Fugas CRM
+                  </div>
+                  <span className="font-bold text-lg text-slate-900 dark:text-slate-100 mt-1 block">{aiRiskScores.filter(r => r.nivelAbandono === "critico").length || 2}</span>
                 </div>
-                <div className="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20">
-                  <div className="text-emerald-500 font-bold text-xs">🔥 Prioridad</div>
-                  <span className="font-black text-lg text-foreground">1</span> Inmediata
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700/80">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-semibold text-[11px]">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" /> Prioridad
+                  </div>
+                  <span className="font-bold text-lg text-slate-900 dark:text-slate-100 mt-1 block">1</span>
                 </div>
               </div>
             </div>
             <Link to="/ia/asistente" className="w-full mt-2">
-              <Button size="sm" className="w-full bg-gradient-to-r from-violet-600 to-amber-500 text-white text-xs font-bold gap-1 shadow-md hover:opacity-90">
+              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-semibold gap-1 shadow-sm hover:bg-primary/90">
                 <Brain className="h-3.5 w-3.5" /> Consultar Asistente IA <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </Card>
 
-          {/* Tarjeta 2: Panel de Detecciones Específicas Reales */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border bg-card col-span-1 md:col-span-2">
-            <div className="flex items-center justify-between mb-3 border-b pb-2">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> Detecciones Prioritarias de Negocio & Deporte
+          {/* Tarjeta 2: Panel de Detecciones Monocromático con Dots */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl col-span-1 md:col-span-2">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-slate-500" /> Detecciones Prioritarias de Negocio & Deporte
               </p>
-              <Badge variant="secondary" className="text-[10px]">Datos Reales de Base de Datos</Badge>
+              <Badge variant="secondary" className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Base de Datos</Badge>
             </div>
             
             <div className="grid gap-2 text-xs">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-red-500/5 border border-red-500/15">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1 rounded bg-red-500/20 text-red-500 font-bold text-[10px]">⚠️ FINANZAS</span>
-                  <span className="text-muted-foreground truncate">Mayor riesgo de morosidad:</span>
+                  <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">Finanzas / Morosidad:</span>
                 </div>
-                <span className="font-bold text-red-600 dark:text-red-400 shrink-0">{morosidadPorCat}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{morosidadPorCat}</span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-orange-500/5 border border-orange-500/15">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1 rounded bg-orange-500/20 text-orange-500 font-bold text-[10px]">🏥 CARGA FÍSICA</span>
-                  <span className="text-muted-foreground truncate">Mayor riesgo de lesión:</span>
+                  <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">Carga Física / Riesgo:</span>
                 </div>
-                <span className="font-bold text-orange-600 dark:text-orange-400 shrink-0">{riesgoLesionDet}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{riesgoLesionDet}</span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/15">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1 rounded bg-amber-500/20 text-amber-500 font-bold text-[10px]">🚨 CRM / RETENCIÓN</span>
-                  <span className="text-muted-foreground truncate">Riesgo de deserción por inasistencia:</span>
+                  <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">CRM / Retención:</span>
                 </div>
-                <span className="font-bold text-amber-600 dark:text-amber-400 shrink-0">{desercionDet}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{desercionDet}</span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1 rounded bg-emerald-500/20 text-emerald-500 font-bold text-[10px]">⭐ PERFORMANCE</span>
-                  <span className="text-muted-foreground truncate">Entrenador y Jugador destacados:</span>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">Performance Destacado:</span>
                 </div>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">{destacadosDet}</span>
+                <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{destacadosDet}</span>
               </div>
             </div>
           </Card>
@@ -580,83 +595,85 @@ function Dashboard() {
       <section className="space-y-3 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs">📊</span>
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">📊</span>
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
               Resumen Ejecutivo · KPIs Macro del Club
             </h2>
           </div>
-          <span className="text-xs text-muted-foreground">Finanzas · Deporte · Staff & Metodología</span>
+          <span className="text-xs text-slate-400">Finanzas · Deporte · Staff & Metodología</span>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Financiero */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border-l-4 border-l-emerald-500 bg-card">
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">💰 Estado Financiero</p>
-              <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-500/30">Facturado</Badge>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Financiero</p>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Facturado</Badge>
             </div>
-            <p className="text-xl font-black mt-2 text-foreground">{formatCRC(ingresosMes)}</p>
-            <div className="mt-2 space-y-1">
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
+            <div className="mt-2 space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">Morosidad actual:</span>
-                <span className="font-bold text-amber-500">{morosos.length} deudores</span>
+                <span className="text-slate-500">Morosidad actual:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{morosos.length} deudores</span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, Math.max(10, 100 - (morosos.length / Math.max(currentPlayers.length, 1)) * 100))}%` }} />
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, Math.max(10, 100 - (morosos.length / Math.max(currentPlayers.length, 1)) * 100))}%` }} />
               </div>
             </div>
           </Card>
 
           {/* Card 2: Deportivo */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border-l-4 border-l-primary bg-card">
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">⚽ Estado Deportivo</p>
-              <Badge variant="outline" className="text-[10px] text-primary border-primary/30">Semanal</Badge>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Deportivo</p>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Semanal</Badge>
             </div>
-            <p className="text-xl font-black mt-2 text-foreground">{asistenciaProm}% <span className="text-xs font-normal text-muted-foreground">Asistencia global</span></p>
-            <div className="mt-2 space-y-1">
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}% <span className="text-xs font-normal text-slate-400">Asistencia</span></p>
+            <div className="mt-2 space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">Lesiones activas:</span>
-                <span className="font-bold text-red-500">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
+                <span className="text-slate-500">Lesiones activas:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div className="h-full bg-primary rounded-full" style={{ width: `${asistenciaProm}%` }} />
               </div>
             </div>
           </Card>
 
           {/* Card 3: Staff & Metodología */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border-l-4 border-l-sky-500 bg-card">
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">🎯 Staff & Metodología</p>
-              <Badge variant="outline" className="text-[10px] text-sky-600 dark:text-sky-400 border-sky-500/30">Supervisado</Badge>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Staff & Metodología</p>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Supervisado</Badge>
             </div>
-            <p className="text-xl font-black mt-2 text-foreground">92% <span className="text-xs font-normal text-muted-foreground">Planif. Aprobadas</span></p>
-            <div className="mt-2 space-y-1">
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92% <span className="text-xs font-normal text-slate-400">Aprobadas</span></p>
+            <div className="mt-2 space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">Sesiones esta semana:</span>
-                <span className="font-bold text-sky-600 dark:text-sky-400">{trainingSessions.length} programadas</span>
+                <span className="text-slate-500">Sesiones semana:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">{trainingSessions.length} programadas</span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full" style={{ width: "92%" }} />
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full" style={{ width: "92%" }} />
               </div>
             </div>
           </Card>
 
           {/* Card 4: Sports Science & Cargas */}
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border-l-4 border-l-amber-500 bg-card">
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">🏋️ Sports Science & Carga</p>
-              <Badge variant="outline" className="text-[10px] text-amber-600 dark:text-amber-400 border-amber-500/30">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
+              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sports Science & Carga</p>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
             </div>
-            <p className="text-xl font-black mt-2 text-foreground">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-normal text-muted-foreground">Prom. ACWR</span></p>
-            <div className="mt-2 space-y-1">
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-normal text-slate-400">Prom. ACWR</span></p>
+            <div className="mt-2 space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-muted-foreground">Jugadores riesgo alto:</span>
-                <span className="font-bold text-red-500">🔴 {sportsScienceAdminStats.jugadoresEnRiesgo} atletas</span>
+                <span className="text-slate-500">Jugadores riesgo alto:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} atletas
+                </span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: "75%" }} />
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full" style={{ width: "75%" }} />
               </div>
             </div>
           </Card>
@@ -668,31 +685,31 @@ function Dashboard() {
       {/* ================================================================================= */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Bloque Inferior Izquierdo: Actividad Reciente */}
-        <Card className="lg:col-span-2 shadow-card">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
+        <Card className="lg:col-span-2 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Activity className="h-4 w-4 text-primary" /> 👥 Actividad Reciente (Feed Transversal)
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+                <Activity className="h-4 w-4 text-primary" /> Actividad Reciente (Feed Transversal)
               </CardTitle>
-              <CardDescription>Eventos en tiempo real: Finanzas, Operaciones, Médica y Técnica</CardDescription>
+              <CardDescription className="text-xs text-slate-500">Eventos en tiempo real: Finanzas, Operaciones, Médica y Técnica</CardDescription>
             </div>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-bold">En Vivo</Badge>
+            <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-semibold text-[10px]">En Vivo</Badge>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5 pt-3">
             {actividad.length > 0 ? (
               actividad.map((a, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-xl p-2.5 hover:bg-muted/50 transition border border-transparent hover:border-border">
-                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted ${a.color}`}>
-                    <a.icon className="h-4 w-4" />
+                <div key={i} className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/60">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                    <a.icon className="h-3.5 w-3.5" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-foreground">{a.text}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{a.tiempo}</p>
+                  <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{a.text}</p>
+                    <p className="text-[10px] text-slate-400 shrink-0 font-mono">{a.tiempo}</p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-xs text-muted-foreground">
+              <div className="text-center py-8 text-xs text-slate-400">
                 No hay actividad reciente registrada.
               </div>
             )}
@@ -700,30 +717,30 @@ function Dashboard() {
         </Card>
 
         {/* Bloque Inferior Derecho: Agenda del Día & Centro de Atención Dinámico */}
-        <Card className="shadow-card flex flex-col justify-between">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b">
+        <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between">
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Calendar className="h-4 w-4 text-sky-500" /> 📅 Agenda del Día & Atención
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+                <Calendar className="h-4 w-4 text-primary" /> Agenda del Día & Atención
               </CardTitle>
-              <CardDescription>Horarios de canchas y tareas según base de datos</CardDescription>
+              <CardDescription className="text-xs text-slate-500">Horarios de canchas y tareas requeridas</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             {/* Ocupación de Canchas Dinámica */}
             <div className="space-y-2">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                <span>⚽ Ocupación de Canchas Hoy</span>
-                <span className="text-emerald-500 font-semibold">{ocupacionCanchasHoy.length} Reservas</span>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>Ocupación de Canchas Hoy</span>
+                <span className="text-slate-900 dark:text-slate-100 font-semibold">{ocupacionCanchasHoy.length} Reservas</span>
               </p>
               <div className="space-y-1.5 text-xs">
                 {ocupacionCanchasHoy.map((oc) => (
-                  <div key={oc.id} className="p-2 rounded-lg bg-muted/60 border flex items-center justify-between">
+                  <div key={oc.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
                     <div className="min-w-0 flex-1 pr-2">
-                      <span className="font-semibold text-foreground truncate block">{oc.sede} · {oc.cancha}</span>
-                      <p className="text-[10px] text-muted-foreground truncate">{oc.hora} · {oc.equipo}</p>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">{oc.sede} · {oc.cancha}</span>
+                      <p className="text-[10px] text-slate-400 truncate">{oc.hora} · {oc.equipo}</p>
                     </div>
-                    <Badge variant="outline" className={`text-[9px] shrink-0 ${oc.estado === "En curso" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" : ""}`}>
+                    <Badge variant="outline" className={`text-[9px] shrink-0 ${oc.estado === "En curso" ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700 font-bold" : "text-slate-500 border-slate-200"}`}>
                       {oc.estado}
                     </Badge>
                   </div>
@@ -732,31 +749,31 @@ function Dashboard() {
             </div>
 
             {/* Centro de Atención & Tareas Pendientes Dinámicas */}
-            <div className="space-y-2 border-t pt-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                <ClipboardCheck className="h-3.5 w-3.5 text-amber-500" /> Tareas & Aprobaciones Pendientes
+            <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                <ClipboardCheck className="h-3.5 w-3.5 text-slate-400" /> Tareas & Aprobaciones Pendientes
               </p>
               <div className="space-y-1.5 text-xs">
-                <Link to="/rendimiento/planificacion" className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-between hover:bg-amber-500/15 transition">
+                <Link to="/rendimiento/planificacion" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span className="font-medium text-foreground">3 Planificaciones por aprobar</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">3 Planificaciones por aprobar</span>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                 </Link>
-                <Link to="/retencion" className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-between hover:bg-red-500/15 transition">
+                <Link to="/retencion" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-red-500" />
-                    <span className="font-medium text-foreground">{aiRiskScores.filter(r => r.nivelAbandono === "critico" || r.nivelAbandono === "alto").length} Alumnos en riesgo de abandono</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{aiRiskScores.filter(r => r.nivelAbandono === "critico" || r.nivelAbandono === "alto").length} Alumnos en riesgo de abandono</span>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                 </Link>
-                <Link to="/convocatorias" className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-between hover:bg-sky-500/15 transition">
+                <Link to="/convocatorias" className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <span className="font-medium text-foreground">{convocatoriasPend} Convocatorias por confirmar</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{convocatoriasPend} Convocatorias por confirmar</span>
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                 </Link>
               </div>
             </div>
@@ -770,8 +787,8 @@ function Dashboard() {
       <section className="space-y-3 animate-in fade-in duration-500">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 font-bold text-xs">📈</span>
-            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs">📈</span>
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
               Estado de Crecimiento del Club & Embudo CRM
             </h2>
           </div>
@@ -781,73 +798,73 @@ function Dashboard() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          {/* Panel Embudo CRM Dinámico */}
-          <Card className="shadow-card p-4">
-            <div className="flex items-center justify-between mb-3">
+          {/* Panel Embudo CRM Dinámico Monocromático */}
+          <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
               <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-emerald-500" /> Conversión de Leads en CRM
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" /> Conversión de Leads en CRM
                 </CardTitle>
-                <CardDescription className="text-xs">Captación de alumnos y matrículas activas</CardDescription>
+                <CardDescription className="text-xs text-slate-500">Captación de alumnos y matrículas activas</CardDescription>
               </div>
-              <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-bold text-[10px]">
+              <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-semibold text-[10px]">
                 CRM Activo
               </Badge>
             </div>
 
             <div className="space-y-3 my-2">
               <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">1. Prospectos / Leads recibidos</span>
-                  <span className="text-foreground">{crmStats.prospectos} prospectos</span>
+                <div className="flex justify-between text-xs font-medium mb-1">
+                  <span className="text-slate-500">1. Prospectos / Leads recibidos</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.prospectos} prospectos</span>
                 </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-sky-500 rounded-full" style={{ width: "100%" }} />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">2. En Clase de Prueba / Evaluación</span>
-                  <span className="text-foreground">{crmStats.pruebas} atletas ({crmStats.percentPruebas}%)</span>
-                </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500 rounded-full" style={{ width: `${crmStats.percentPruebas}%` }} />
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-slate-400 dark:bg-slate-600 rounded-full" style={{ width: "100%" }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold mb-1">
-                  <span className="text-muted-foreground">3. Inscritos Formalmente</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
+                <div className="flex justify-between text-xs font-medium mb-1">
+                  <span className="text-slate-500">2. En Clase de Prueba / Evaluación</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.pruebas} atletas ({crmStats.percentPruebas}%)</span>
                 </div>
-                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${crmStats.percentInscritos}%` }} />
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-slate-600 dark:bg-slate-400 rounded-full" style={{ width: `${crmStats.percentPruebas}%` }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-medium mb-1">
+                  <span className="text-slate-500">3. Inscritos Formalmente</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${crmStats.percentInscritos}%` }} />
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t mt-3 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Roster de la academia:</span>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Roster de la academia:</span>
               <Link to="/jugadores" className="text-primary font-semibold hover:underline">Ver Atletas ({currentPlayers.length}) →</Link>
             </div>
           </Card>
 
-          {/* Panel Próximos Eventos y Partidos Dinámicos */}
-          <Card className="shadow-card p-4">
-            <div className="flex items-center justify-between mb-3">
+          {/* Panel Próximos Eventos y Partidos Monocromático */}
+          <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
               <div>
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <CalendarClock className="h-4 w-4 text-primary" /> Próximos Eventos & Partidos Destacados
                 </CardTitle>
-                <CardDescription className="text-xs">Calendario institucional del club</CardDescription>
+                <CardDescription className="text-xs text-slate-500">Calendario institucional del club</CardDescription>
               </div>
               <Link to="/partidos" className="text-xs text-primary hover:underline font-semibold">Ver agenda</Link>
             </div>
 
             <div className="space-y-2">
               {proximos.slice(0, 4).map((e) => (
-                <div key={e.id} className="flex items-center gap-3 rounded-xl border p-2.5 hover:bg-muted/50 transition">
+                <div key={e.id} className="flex items-center gap-3 rounded-xl border border-slate-200/80 dark:border-slate-700/60 p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
                   <div className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
                     <span className="text-[9px] uppercase leading-none">{new Date(e.fecha).toLocaleDateString("es-CR", { month: "short" })}</span>
                     <span className="text-xs leading-none">{new Date(e.fecha).getDate()}</span>
