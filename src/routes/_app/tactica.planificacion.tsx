@@ -1177,19 +1177,23 @@ function PlanificacionTactica() {
     <div className="space-y-6 max-w-6xl mx-auto py-2">
       {/* Header Widget */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/80 pb-5">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-elegant animate-pulse-subtle">
-            <BookOpen className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black tracking-tight bg-clip-text text-foreground">Planificación Táctica</h1>
-            <p className="text-xs text-muted-foreground font-medium mt-0.5">Semanal · Microciclos · Mesociclos · Temporada completa</p>
-          </div>
+      {/* Header de Módulo */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+        <div>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Centro Táctico · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            📐 Planificación Táctica
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Semanal · Microciclos · Mesociclos · Temporada completa
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <select
-            className="flex h-9 w-44 rounded-lg border border-input bg-background px-3 py-1 text-xs shadow-sm font-semibold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex h-9 w-44 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-bold shadow-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-slate-900 dark:text-slate-100"
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
           >
@@ -1202,15 +1206,15 @@ function PlanificacionTactica() {
             <Button
               size="sm"
               variant="outline"
-              className="border-primary/30 hover:border-primary text-primary bg-primary/5 gap-1.5 text-xs font-bold h-9 px-4 rounded-xl transition-all duration-300"
+              className="border-slate-200 dark:border-slate-800 text-primary hover:bg-slate-50 font-bold gap-1.5 text-xs h-9 px-4 rounded-xl"
             >
-              <Sparkles className="h-4 w-4 animate-pulse" /> Diseñar con IA
+              <Sparkles className="h-4 w-4 text-primary" /> Diseñar con IA
             </Button>
           </Link>
 
           <Button
             size="sm"
-            className="bg-gradient-primary hover:opacity-90 text-white gap-1.5 shadow-elegant text-xs font-bold h-9 px-4 rounded-xl transition-all duration-300"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold gap-1.5 shadow-sm text-xs h-9 px-4 rounded-xl"
             onClick={() => setOpenSelectorModal(true)}
           >
             <Plus className="h-4 w-4" /> Nuevo Ciclo
@@ -1219,59 +1223,58 @@ function PlanificacionTactica() {
       </div>
 
       {/* 3 Pillars Main Navigation Bar */}
-      <div className="bg-card border rounded-2xl p-2 shadow-sm flex flex-wrap gap-2">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm flex flex-wrap gap-2">
         <button
           onClick={() => setMainSection("auditoria")}
-          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
             mainSection === "auditoria"
-              ? "bg-primary text-white shadow-elegant scale-[1.01]"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
-          <Sparkles className="h-4 w-4 text-violet-300 animate-pulse" /> 🤖 Motor de Auditoría e IA
+          <Sparkles className="h-4 w-4" /> Motor de Auditoría e IA
         </button>
 
         <button
           onClick={() => setMainSection("taller")}
-          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
             mainSection === "taller"
-              ? "bg-primary text-white shadow-elegant scale-[1.01]"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
-          <BookOpen className="h-4 w-4" /> ⚙️ El Taller del Entrenador
+          <BookOpen className="h-4 w-4" /> El Taller del Entrenador
         </button>
 
         <button
           onClick={() => setMainSection("adn")}
-          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-black transition-all ${
+          className={`flex-1 min-w-[200px] flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
             mainSection === "adn"
-              ? "bg-primary text-white shadow-elegant scale-[1.01]"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
           }`}
         >
-          <Target className="h-4 w-4" /> 📐 El ADN del Club
+          <Target className="h-4 w-4" /> El ADN del Club
         </button>
       </div>
 
       {/* 🤖 SECCIÓN 3: MOTOR DE AUDITORÍA E IA (Wireframe Conceptual & Gobernanza Ejecutiva) */}
       {mainSection === "auditoria" && (
         <div className="space-y-6">
-          {/* Wireframe Conceptual Box */}
-          <Card className="border-2 border-primary/30 shadow-elegant bg-card overflow-hidden">
-            <CardHeader className="bg-primary/5 border-b pb-4">
+          <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <CardTitle className="text-base font-extrabold flex items-center gap-2">
+                  <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     🌟 BANDEJA DE AUDITORÍA METODOLÓGICA (Coordinador de Academia)
                   </CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-xs text-slate-500">
                     Auditoría automatizada por Athletix AI: Contraste directo de ejercicios contra el ADN del Club
                   </CardDescription>
                 </div>
-                <Badge className="bg-primary text-white text-[10px] font-extrabold px-3 py-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold border border-slate-200/60">
                   AI Auditor v2.0 Active
-                </Badge>
+                </span>
               </div>
             </CardHeader>
 
@@ -1279,108 +1282,108 @@ function PlanificacionTactica() {
               {/* ⏳ PENDIENTES DE REVISIÓN */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                     <Clock className="h-4 w-4 text-amber-500" /> ⏳ Pendientes de Revisión (2)
                   </h3>
-                  <span className="text-[11px] text-muted-foreground">Filtro de IA pre-aprobado</span>
+                  <span className="text-[11px] text-slate-400">Filtro de IA pre-aprobado</span>
                 </div>
 
                 {/* Tarjeta 1: Pendiente */}
-                <div className="border rounded-xl p-4 bg-muted/30 hover:bg-muted/50 transition space-y-3">
+                <div className="border border-slate-200/60 dark:border-slate-800 rounded-xl p-4 bg-slate-50/40 dark:bg-slate-800/30 hover:bg-slate-50/80 transition space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">⚽</span>
                       <div>
-                        <p className="font-extrabold text-sm text-foreground">Asoderive U13 (Sub-13)</p>
-                        <p className="text-xs text-muted-foreground">Entrenador: <span className="font-semibold text-foreground">Edgar Calderón</span> · Sesión: <span className="font-semibold text-foreground font-mono">"Salida de Presión y Transiciones Rápidas"</span></p>
+                        <p className="font-bold text-xs text-slate-900 dark:text-slate-100">Asoderive U13 (Sub-13)</p>
+                        <p className="text-xs text-slate-500">Entrenador: <span className="font-semibold text-slate-800 dark:text-slate-200">Edgar Calderón</span> · Sesión: <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">"Salida de Presión y Transiciones Rápidas"</span></p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 text-[10px] font-bold">
                       ⏳ Pendiente de Coordinador
-                    </Badge>
+                    </span>
                   </div>
 
-                  <div className="p-3 rounded-lg border bg-violet-500/5 border-violet-500/20 text-xs space-y-1">
-                    <p className="font-extrabold text-violet-700 dark:text-violet-300 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-violet-500" /> 🤖 Diagnóstico Athletix AI:
+                  <div className="p-3 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-1">
+                    <p className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500" /> Diagnóstico Athletix AI:
                     </p>
-                    <p className="text-muted-foreground text-[11px] font-semibold">
+                    <p className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">
                       ⚠️ Alerta: 20% más de volumen físico que el límite del microciclo para Sub-13. Se sugiere reducir 10 min en bloque 2.
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <Button size="sm" variant="outline" className="text-xs font-bold gap-1">
-                      <FileText className="h-3.5 w-3.5" /> 📥 Ver Sesión Completa
+                    <Button size="sm" variant="outline" className="text-xs font-semibold gap-1 border-slate-200 dark:border-slate-800">
+                      <FileText className="h-3.5 w-3.5 text-primary" /> Ver Sesión Completa
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => toast.success("Planificación de Asoderive U13 aprobada y liberada a campo (Inyectada a Coach OS)!")}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs gap-1 shadow-sm"
+                      onClick={() => toast.success("Planificación de Asoderive U13 aprobada y liberada a campo!")}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1 shadow-sm rounded-xl"
                     >
-                      <Check className="h-3.5 w-3.5" /> 🟢 Aprobar y Liberar a Campo
+                      <Check className="h-3.5 w-3.5" /> Aprobar y Liberar a Campo
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => toast.error("Sesión devuelta al entrenador Edgar Calderón con observaciones.")}
-                      className="text-xs font-bold gap-1"
+                      className="text-xs font-bold gap-1 rounded-xl"
                     >
-                      <X className="h-3.5 w-3.5" /> 🔴 Devolver con Observaciones
+                      <X className="h-3.5 w-3.5" /> Devolver con Observaciones
                     </Button>
                   </div>
                 </div>
 
                 {/* Tarjeta 2: Pendiente */}
-                <div className="border rounded-xl p-4 bg-muted/30 hover:bg-muted/50 transition space-y-3">
+                <div className="border border-slate-200/60 dark:border-slate-800 rounded-xl p-4 bg-slate-50/40 dark:bg-slate-800/30 hover:bg-slate-50/80 transition space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">⚽</span>
                       <div>
-                        <p className="font-extrabold text-sm text-foreground">Élite Sub-12 A</p>
-                        <p className="text-xs text-muted-foreground">Entrenador: <span className="font-semibold text-foreground">Carlos Méndez</span> · Sesión: <span className="font-semibold text-foreground font-mono font-bold">"Control Orientado y Perfiles en Salida"</span></p>
+                        <p className="font-bold text-xs text-slate-900 dark:text-slate-100">Élite Sub-12 A</p>
+                        <p className="text-xs text-slate-500">Entrenador: <span className="font-semibold text-slate-800 dark:text-slate-200">Carlos Méndez</span> · Sesión: <span className="font-semibold text-slate-800 dark:text-slate-200 font-mono">"Control Orientado y Perfiles en Salida"</span></p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px] font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-bold">
                       ✨ 95% Apego Metodológico
-                    </Badge>
+                    </span>
                   </div>
 
-                  <div className="p-3 rounded-lg border bg-emerald-500/5 border-emerald-500/20 text-xs space-y-1">
-                    <p className="font-extrabold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> 🤖 Diagnóstico Athletix AI:
+                  <div className="p-3 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs space-y-1">
+                    <p className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Diagnóstico Athletix AI:
                     </p>
-                    <p className="text-muted-foreground text-[11px] font-semibold">
-                      ✅ Check: El volumen de carga física es 100% coherente con el día de la semana. Ejercicios alineados al manual Sub-12.
+                    <p className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">
+                      Check: El volumen de carga física es 100% coherente con el día de la semana. Ejercicios alineados al manual Sub-12.
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2 pt-1">
-                    <Button size="sm" variant="outline" className="text-xs font-bold gap-1">
-                      <FileText className="h-3.5 w-3.5" /> 📥 Ver Sesión Completa
+                    <Button size="sm" variant="outline" className="text-xs font-semibold gap-1 border-slate-200 dark:border-slate-800">
+                      <FileText className="h-3.5 w-3.5 text-primary" /> Ver Sesión Completa
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => toast.success("Planificación de Élite Sub-12 A aprobada y liberada a campo!")}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs gap-1 shadow-sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1 shadow-sm rounded-xl"
                     >
-                      <Check className="h-3.5 w-3.5" /> 🟢 Aprobar y Liberar a Campo
+                      <Check className="h-3.5 w-3.5" /> Aprobar y Liberar a Campo
                     </Button>
                     <Button
                       size="sm"
                       variant="destructive"
                       onClick={() => toast.error("Sesión devuelta con observaciones.")}
-                      className="text-xs font-bold gap-1"
+                      className="text-xs font-bold gap-1 rounded-xl"
                     >
-                      <X className="h-3.5 w-3.5" /> 🔴 Devolver con Observaciones
+                      <X className="h-3.5 w-3.5" /> Devolver con Observaciones
                     </Button>
                   </div>
                 </div>
               </div>
 
               {/* 📊 CUMPLIMIENTO METODOLÓGICO DE LA SEMANA */}
-              <div className="space-y-3 pt-4 border-t">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                   <Activity className="h-4 w-4 text-primary" /> 📊 Cumplimiento Metodológico de la Semana (Métricas BI en vivo)
                 </h3>
 
@@ -1394,20 +1397,16 @@ function PlanificacionTactica() {
                         : score >= 80
                         ? "Desvío menor en tiempos de calentamiento"
                         : "Alerta: Ejercicios no validados por manual";
-                    const colorBg =
-                      score >= 90
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
-                        : score >= 80
-                        ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
-                        : "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400";
                     const textScoreColor =
-                      score >= 90 ? "text-emerald-600" : score >= 80 ? "text-amber-600" : "text-red-600";
+                      score >= 90 ? "text-emerald-600 dark:text-emerald-400" : score >= 80 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400";
 
                     return (
-                      <div key={eq.id || idx} className={`p-3.5 rounded-xl border ${colorBg} space-y-1`}>
-                        <p className="text-xs font-black truncate">{eq.nombre}</p>
-                        <p className={`text-2xl font-black ${textScoreColor}`}>{score}%</p>
-                        <p className="text-[10px] font-bold">{statusText}</p>
+                      <div key={eq.id || idx} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1 flex flex-col justify-between">
+                        <div>
+                          <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 truncate">{eq.nombre}</p>
+                          <p className={`text-2xl font-bold my-1 font-mono tracking-tight ${textScoreColor}`}>{score}%</p>
+                        </div>
+                        <p className="text-[10px] font-medium text-slate-500">{statusText}</p>
                       </div>
                     );
                   })}

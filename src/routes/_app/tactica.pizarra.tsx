@@ -661,40 +661,40 @@ function PizarraTactica() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4 border-b border-white/10 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-violet-600 text-white shadow-lg shrink-0">
-            <ShieldHalf className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Pizarra Táctica</h1>
-            <p className="text-sm text-muted-foreground">
-              Interactiva · Drag &amp; Drop · <span className="text-primary font-semibold">{boardCount}</span> jugador{boardCount !== 1 ? "es" : ""} en campo
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+        <div>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Centro Táctico · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            📐 Pizarra Táctica & Estrategia
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Interactiva · Drag &amp; Drop · <span className="text-primary font-semibold">{boardCount}</span> jugador{boardCount !== 1 ? "es" : ""} en campo
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-4 items-end">
+        <div className="flex flex-wrap gap-3 items-end">
           {/* Mode Switcher */}
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider mb-1">Modo de Pizarra</span>
-            <div className="flex bg-slate-800/80 border border-white/10 rounded-xl p-1 h-10 items-center">
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Modo de Pizarra</span>
+            <div className="flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 h-9 items-center">
               <button
                 onClick={() => setBoardMode("partido")}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-8 ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-7 ${
                   boardMode === "partido"
-                    ? "bg-primary text-white shadow"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 ⚽ Partido
               </button>
               <button
                 onClick={() => setBoardMode("entrenamiento")}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-8 ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-7 ${
                   boardMode === "entrenamiento"
-                    ? "bg-primary text-white shadow"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 📋 Entrenamiento
@@ -704,21 +704,21 @@ function PizarraTactica() {
 
           {/* Sport / Discipline Selector */}
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider mb-1">Deporte</span>
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Deporte</span>
             {isSingleDiscipline && !isAdmin && allowedSportOptions.length === 1 ? (
-              <Badge className="bg-primary/10 text-primary border border-primary/20 py-2.5 px-4 rounded-xl text-sm font-semibold h-10 flex items-center">
+              <span className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200/60 inline-block">
                 {sportLabels[allowedSportOptions[0]]}
-              </Badge>
+              </span>
             ) : (
               <div className="relative">
                 <select
                   value={selectedSport}
                   onChange={e => handleSportChange(e.target.value as SportType)}
-                  className="appearance-none bg-slate-800 border border-white/20 rounded-xl px-4 pr-9 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary cursor-pointer h-10 min-w-[140px]"
+                  className="appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 pr-8 py-1.5 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-1 focus:ring-primary cursor-pointer h-9 min-w-[130px]"
                 >
-                  {allowedSportOptions.map(s => <option key={s} value={s} className="bg-slate-900 text-white">{sportLabels[s]}</option>)}
+                  {allowedSportOptions.map(s => <option key={s} value={s} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{sportLabels[s]}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
               </div>
             )}
           </div>
