@@ -605,76 +605,56 @@ function Dashboard() {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Financiero */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Financiero</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Facturado</Badge>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Facturado</Badge>
             </div>
             <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Morosidad actual:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">{morosos.length} deudores</span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(100, Math.max(10, 100 - (morosos.length / Math.max(currentPlayers.length, 1)) * 100))}%` }} />
-              </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Morosidad actual:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{morosos.length} deudores</span>
             </div>
           </Card>
 
           {/* Card 2: Deportivo */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Deportivo</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Semanal</Badge>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Semanal</Badge>
             </div>
             <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}% <span className="text-xs font-normal text-slate-400">Asistencia</span></p>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Lesiones activas:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: `${asistenciaProm}%` }} />
-              </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Lesiones activas:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
             </div>
           </Card>
 
           {/* Card 3: Staff & Metodología */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Staff & Metodología</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">Supervisado</Badge>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Supervisado</Badge>
             </div>
             <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92% <span className="text-xs font-normal text-slate-400">Aprobadas</span></p>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Sesiones semana:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">{trainingSessions.length} programadas</span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "92%" }} />
-              </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Sesiones semana:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{trainingSessions.length} programadas</span>
             </div>
           </Card>
 
           {/* Card 4: Sports Science & Cargas */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
               <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sports Science & Carga</p>
-              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
+              <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
             </div>
             <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-normal text-slate-400">Prom. ACWR</span></p>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">Jugadores riesgo alto:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} atletas
-                </span>
-              </div>
-              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-primary rounded-full" style={{ width: "75%" }} />
-              </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+              <span className="text-slate-500">Jugadores riesgo alto:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} atletas
+              </span>
             </div>
           </Card>
         </div>
