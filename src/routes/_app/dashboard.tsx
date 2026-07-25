@@ -537,7 +537,7 @@ function Dashboard() {
               </div>
             </div>
             <Link to="/ia/asistente" className="w-full mt-2">
-              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-semibold gap-1 shadow-sm hover:bg-primary/90">
+              <Button size="sm" variant="outline" className="w-full border-primary/40 text-primary hover:bg-primary/10 text-xs font-semibold gap-1.5 shadow-sm">
                 <Brain className="h-3.5 w-3.5" /> Consultar Asistente IA <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
@@ -549,38 +549,38 @@ function Dashboard() {
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 text-slate-500" /> Detecciones Prioritarias de Negocio & Deporte
               </p>
-              <Badge variant="secondary" className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">Base de Datos</Badge>
+              <Badge variant="secondary" className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold">Base de Datos</Badge>
             </div>
             
-            <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/50 transition">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                  <span className="font-medium text-slate-600 dark:text-slate-400 truncate">Finanzas / Morosidad:</span>
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Finanzas / Morosidad:</span>
                 </div>
                 <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{morosidadPorCat}</span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/50 transition">
+              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
-                  <span className="font-medium text-slate-600 dark:text-slate-400 truncate">Carga Física / Riesgo:</span>
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Carga Física / Riesgo:</span>
                 </div>
                 <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{riesgoLesionDet}</span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/50 transition">
+              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0" />
-                  <span className="font-medium text-slate-600 dark:text-slate-400 truncate">CRM / Retención:</span>
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">CRM / Retención:</span>
                 </div>
                 <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{desercionDet}</span>
               </div>
 
-              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/50 transition">
+              <div className="flex items-center justify-between py-2.5 px-1 bg-white dark:bg-slate-900 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="font-medium text-slate-600 dark:text-slate-400 truncate">Performance Destacado:</span>
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 truncate">Performance Destacado:</span>
                 </div>
                 <span className="font-bold text-slate-900 dark:text-slate-100 shrink-0">{destacadosDet}</span>
               </div>
@@ -600,59 +600,59 @@ function Dashboard() {
               Resumen Ejecutivo · KPIs Macro del Club
             </h2>
           </div>
-          <span className="text-xs text-slate-400">Finanzas · Deporte · Staff & Metodología</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Finanzas · Deporte · Staff & Metodología</span>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1: Financiero */}
           <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Financiero</p>
+              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Estado Financiero</p>
               <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Facturado</Badge>
             </div>
             <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
             <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Morosidad actual:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{morosos.length} deudores</span>
+              <span className="text-slate-600 dark:text-slate-300 font-semibold">Morosidad actual:</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{morosos.length} deudores</span>
             </div>
           </Card>
 
           {/* Card 2: Deportivo */}
           <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Estado Deportivo</p>
+              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Estado Deportivo</p>
               <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Semanal</Badge>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}% <span className="text-xs font-normal text-slate-400">Asistencia</span></p>
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}% <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Asistencia</span></p>
             <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Lesiones activas:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
+              <span className="text-slate-600 dark:text-slate-300 font-semibold">Lesiones activas:</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{sportsScienceAdminStats.lesionesActivasCount} en seguimiento</span>
             </div>
           </Card>
 
           {/* Card 3: Staff & Metodología */}
           <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Staff & Metodología</p>
+              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Staff & Metodología</p>
               <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">Supervisado</Badge>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92% <span className="text-xs font-normal text-slate-400">Aprobadas</span></p>
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92% <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Aprobadas</span></p>
             <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Sesiones semana:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{trainingSessions.length} programadas</span>
+              <span className="text-slate-600 dark:text-slate-300 font-semibold">Sesiones semana:</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{trainingSessions.length} programadas</span>
             </div>
           </Card>
 
           {/* Card 4: Sports Science & Cargas */}
           <Card className="p-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sports Science & Carga</p>
+              <p className="text-[10px] uppercase font-bold text-slate-600 dark:text-slate-400 tracking-wider">Sports Science & Carga</p>
               <Badge variant="outline" className="text-[10px] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
             </div>
-            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-normal text-slate-400">Prom. ACWR</span></p>
+            <p className="text-2xl font-bold mt-2 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)} <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Prom. ACWR</span></p>
             <div className="mt-3 flex items-center justify-between text-[11px]">
-              <span className="text-slate-500">Jugadores riesgo alto:</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <span className="text-slate-600 dark:text-slate-300 font-semibold">Jugadores riesgo alto:</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} atletas
               </span>
             </div>
@@ -778,7 +778,7 @@ function Dashboard() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          {/* Panel Embudo CRM Dinámico Monocromático */}
+          {/* Panel Embudo CRM Dinámico Monocromático con Barras por Temperatura de Etapa */}
           <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
               <div>
@@ -792,39 +792,42 @@ function Dashboard() {
               </Badge>
             </div>
 
-            <div className="space-y-3 my-2">
+            <div className="space-y-3.5 my-2">
+              {/* Etapa 1: Base fría / Prospectos */}
               <div>
-                <div className="flex justify-between text-xs font-medium mb-1">
-                  <span className="text-slate-500">1. Prospectos / Leads recibidos</span>
+                <div className="flex justify-between text-xs font-medium mb-1.5">
+                  <span className="text-slate-600 dark:text-slate-300 font-semibold">1. Prospectos / Leads recibidos</span>
                   <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.prospectos} prospectos</span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-slate-400 dark:bg-slate-600 rounded-full" style={{ width: "100%" }} />
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-sky-400 dark:bg-sky-500 rounded-full transition-all duration-500" style={{ width: "100%" }} />
                 </div>
               </div>
 
+              {/* Etapa 2: En proceso / En prueba */}
               <div>
-                <div className="flex justify-between text-xs font-medium mb-1">
-                  <span className="text-slate-500">2. En Clase de Prueba / Evaluación</span>
+                <div className="flex justify-between text-xs font-medium mb-1.5">
+                  <span className="text-slate-600 dark:text-slate-300 font-semibold">2. En Clase de Prueba / Evaluación</span>
                   <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.pruebas} atletas ({crmStats.percentPruebas}%)</span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-slate-600 dark:bg-slate-400 rounded-full" style={{ width: `${crmStats.percentPruebas}%` }} />
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${crmStats.percentPruebas}%` }} />
                 </div>
               </div>
 
+              {/* Etapa 3: Éxito / Ganado */}
               <div>
-                <div className="flex justify-between text-xs font-medium mb-1">
-                  <span className="text-slate-500">3. Inscritos Formalmente</span>
-                  <span className="text-slate-900 dark:text-slate-100 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
+                <div className="flex justify-between text-xs font-medium mb-1.5">
+                  <span className="text-slate-600 dark:text-slate-300 font-semibold">3. Inscritos Formalmente</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">{crmStats.inscritos} nuevos jugadores ({crmStats.percentInscritos}%)</span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: `${crmStats.percentInscritos}%` }} />
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${crmStats.percentInscritos}%` }} />
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
+            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 mt-3 flex items-center justify-between text-xs">
               <span className="text-slate-500">Roster de la academia:</span>
               <Link to="/jugadores" className="text-primary font-semibold hover:underline">Ver Atletas ({currentPlayers.length}) →</Link>
             </div>
