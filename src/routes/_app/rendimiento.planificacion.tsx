@@ -153,15 +153,18 @@ function PlanificacionPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Planificación Deportiva</h1>
-          <p className="text-sm text-muted-foreground">Estructura temporadas, macrociclos, mesociclos y sesiones diarias.</p>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Coordinación General · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Planificación Metodológica</h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Estructura temporadas, macrociclos, mesociclos y sesiones diarias.</p>
         </div>
         <div className="flex gap-2">
           <Sheet open={openNuevaSesion} onOpenChange={setOpenNuevaSesion}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm"><Plus className="mr-1 h-4 w-4" />Nueva Sesión</Button>
+              <Button variant="outline" size="sm" className="font-semibold border-slate-200 dark:border-slate-800"><Plus className="mr-1 h-4 w-4 text-primary" />Nueva Sesión</Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-md overflow-y-auto">
               <SheetHeader>
@@ -203,14 +206,14 @@ function PlanificacionPage() {
                   <label className="text-xs font-medium">Equipo / Categoría</label>
                   <Input required value={newSesion.equipo} onChange={(e) => setNewSesion({ ...newSesion, equipo: e.target.value })} />
                 </div>
-                <Button type="submit" className="w-full">Guardar Sesión</Button>
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold">Guardar Sesión</Button>
               </form>
             </SheetContent>
           </Sheet>
 
           <Sheet open={openNuevoCiclo} onOpenChange={setOpenNuevoCiclo}>
             <SheetTrigger asChild>
-              <Button size="sm" className="bg-gradient-primary shadow-elegant"><Plus className="mr-1 h-4 w-4" />Nuevo Ciclo</Button>
+              <Button size="sm" className="bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-sm"><Plus className="mr-1 h-4 w-4" />Nuevo Ciclo</Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-md overflow-y-auto">
               <SheetHeader>
@@ -273,7 +276,7 @@ function PlanificacionPage() {
                   <label className="text-xs font-medium">Objetivo</label>
                   <Textarea required placeholder="Escribe el objetivo deportivo..." value={newCiclo.objetivo} onChange={(e) => setNewCiclo({ ...newCiclo, objetivo: e.target.value })} />
                 </div>
-                <Button type="submit" className="w-full">Guardar Ciclo</Button>
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold">Guardar Ciclo</Button>
               </form>
             </SheetContent>
           </Sheet>
@@ -281,17 +284,17 @@ function PlanificacionPage() {
       </div>
 
       {activeLesiones.length > 0 && (
-        <Card className="border-destructive/40 bg-destructive/5 shadow-card">
+        <Card className="border border-red-200 dark:border-red-900 bg-red-500/5 shadow-sm rounded-xl">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base text-destructive"><ShieldAlert className="h-4 w-4" /> Alertas Médicas (Riesgo en Planificación)</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-red-600 dark:text-red-400"><ShieldAlert className="h-4 w-4 text-red-500" /> Alertas Médicas (Riesgo en Planificación)</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm">
-            <p className="text-muted-foreground">Los siguientes jugadores tienen lesiones activas. El planificador les bloqueará la carga excesiva de trabajo y restringirá las sesiones intensas:</p>
+          <CardContent className="text-xs">
+            <p className="text-slate-600 dark:text-slate-400 font-medium">Los siguientes jugadores tienen lesiones activas. El planificador les bloqueará la carga excesiva de trabajo y restringirá las sesiones intensas:</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {activeLesiones.map((l) => (
-                <Badge key={l.id} variant="secondary" className="bg-destructive/15 text-destructive border-destructive/20 font-medium">
+                <span key={l.id} className="px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 font-bold text-[10px]">
                   {l.jugador} ({l.zonaCorporal}) — RTP: {l.progresoRtp}% — Max carga: {l.cargaPermitida}%
-                </Badge>
+                </span>
               ))}
             </div>
           </CardContent>
@@ -299,17 +302,17 @@ function PlanificacionPage() {
       )}
 
       {stagnantTests.length > 0 && (
-        <Card className="border-warning/40 bg-warning/5 shadow-card">
+        <Card className="border border-amber-200 dark:border-amber-900 bg-amber-500/5 shadow-sm rounded-xl">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base text-warning-foreground"><Award className="h-4 w-4" /> Alerta de Rendimiento (Tests Físicos)</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-700 dark:text-amber-400"><Award className="h-4 w-4 text-amber-500" /> Alerta de Rendimiento (Tests Físicos)</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm">
-            <p className="text-muted-foreground">Se detectó estancamiento físico en evaluaciones de atletas. Se recomienda programar microciclos con enfoque en las capacidades rezagadas:</p>
+          <CardContent className="text-xs">
+            <p className="text-slate-600 dark:text-slate-400 font-medium">Se detectó estancamiento físico en evaluaciones de atletas. Se recomienda programar microciclos con enfoque en las capacidades rezagadas:</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {stagnantTests.map((t) => (
-                <Badge key={t.id} variant="outline" className="border-warning/30 text-warning-foreground bg-warning/10">
+                <span key={t.id} className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 font-bold text-[10px]">
                   {t.jugador}: Estancado en {t.tipo} ({t.nombreTest}) — Sugerencia: Foco en {t.tipo} en microciclo
-                </Badge>
+                </span>
               ))}
             </div>
           </CardContent>
@@ -317,20 +320,67 @@ function PlanificacionPage() {
       )}
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-[500px] grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="ciclos">Ciclos</TabsTrigger>
-          <TabsTrigger value="planificador">Planificador</TabsTrigger>
-          <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
+        <TabsList className="grid w-full max-w-[500px] grid-cols-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <TabsTrigger value="dashboard" className="text-xs font-semibold">Dashboard</TabsTrigger>
+          <TabsTrigger value="ciclos" className="text-xs font-semibold">Ciclos</TabsTrigger>
+          <TabsTrigger value="planificador" className="text-xs font-semibold">Planificador</TabsTrigger>
+          <TabsTrigger value="objetivos" className="text-xs font-semibold">Objetivos</TabsTrigger>
         </TabsList>
 
         {/* DASHBOARD TAB */}
         <TabsContent value="dashboard" className="space-y-6 mt-0">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={Calendar} label="Sesiones Totales" value={(sesionesRealizadas + sesionesPendientes).toString()} hint={`${sesionesRealizadas} completadas`} accent="primary" />
-            <StatCard icon={Timer} label="Horas Planificadas" value={`${totalHoras} hrs`} hint="Volumen total" accent="success" />
-            <StatCard icon={Activity} label="Carga Acumulada" value={totalCarga.toLocaleString()} hint="AU (min * RPE)" accent="warning" />
-            <StatCard icon={Target} label="Objetivos Activos" value="8" hint="Táctico/Físico/Técnico" accent="destructive" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Sesiones Totales</p>
+                  <Calendar className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{(sesionesRealizadas + sesionesPendientes).toString()}</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Realizadas <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{sesionesRealizadas} completadas</span>
+              </p>
+            </Card>
+
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Horas Planificadas</p>
+                  <Timer className="h-4 w-4 text-emerald-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{totalHoras} hrs</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Volumen total <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Temporada activa</span>
+              </p>
+            </Card>
+
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Carga Acumulada</p>
+                  <Activity className="h-4 w-4 text-amber-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{totalCarga.toLocaleString()}</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Unidades AU <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">min * RPE</span>
+              </p>
+            </Card>
+
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Objetivos Activos</p>
+                  <Target className="h-4 w-4 text-rose-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">8</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Enfoque <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Táctico / Físico</span>
+              </p>
+            </Card>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">

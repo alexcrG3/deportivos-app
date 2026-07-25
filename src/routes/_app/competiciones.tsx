@@ -224,24 +224,24 @@ function CompeticionesPage() {
   return (
     <div className="space-y-6">
       {/* HEADER DE MÓDULO */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase mb-1">
-            Organización General del Club
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Organización General del Club · Área Técnica
           </Badge>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             🏆 Torneos, Ligas & Matriz de Posiciones
           </h1>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="text-xs text-slate-500 font-medium mt-1">
             Mapa macro de la participación competitiva oficial de la academia.
           </p>
         </div>
 
         <Button
           onClick={() => setIsOpenCreate(true)}
-          className="bg-gradient-primary text-white font-extrabold gap-2 shadow-elegant rounded-xl"
+          className="bg-primary text-primary-foreground font-bold gap-2 shadow-sm rounded-xl hover:bg-primary/90"
         >
-          <Plus className="h-4 w-4" /> ➕ Registrar Nuevo Torneo / Liga
+          <Plus className="h-4 w-4" /> Registrar Nuevo Torneo / Liga
         </Button>
       </div>
 
@@ -249,41 +249,44 @@ function CompeticionesPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {competicionesList.map((comp) => {
           const isSelected = sel?.id === comp.id;
-          const badgeClass = tipoColor[comp.tipo] || "bg-muted text-foreground";
           const progressPercent = comp.jornadas > 0 ? Math.round((comp.jornadaActual / comp.jornadas) * 100) : 0;
 
           return (
             <Card
               key={comp.id}
               onClick={() => setSel(comp)}
-              className={`cursor-pointer transition border hover:shadow-md ${
-                isSelected ? "border-2 border-primary bg-primary/5 shadow-elegant" : "bg-card"
+              className={`cursor-pointer transition border p-5 rounded-2xl shadow-sm ${
+                isSelected
+                  ? "border-2 border-primary bg-white dark:bg-slate-900 shadow-sm"
+                  : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:bg-slate-50/50"
               }`}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="p-0 pb-3">
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline" className={`font-extrabold text-[10px] uppercase ${badgeClass}`}>
+                  <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px] uppercase border border-slate-200/60">
                     {comp.tipo}
-                  </Badge>
-                  <span className="text-xs font-mono font-bold text-muted-foreground">
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-500">
                     Jornada {comp.jornadaActual} / {comp.jornadas}
                   </span>
                 </div>
-                <CardTitle className="text-base font-extrabold text-foreground pt-1">
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 pt-2">
                   {comp.nombre}
                 </CardTitle>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-xs text-slate-500">
                   {comp.categoria} · {comp.disciplina} · {comp.equipos} Equipos
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="pt-0 space-y-2">
+              <CardContent className="p-0 pt-2 space-y-2">
                 <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] font-bold text-muted-foreground">
+                  <div className="flex justify-between text-[10px] font-bold text-slate-500">
                     <span>Avance del Campeonato</span>
                     <span>{progressPercent}%</span>
                   </div>
-                  <Progress value={progressPercent} className="h-1.5" />
+                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -293,26 +296,26 @@ function CompeticionesPage() {
 
       {/* INTERACCIÓN INTERNA DEL TORNEO SELECCIONADO */}
       {sel && (
-        <Card className="shadow-card border bg-card">
-          <CardHeader className="pb-3 border-b flex flex-row items-center justify-between flex-wrap gap-2">
+        <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between flex-wrap gap-2">
             <div>
-              <Badge className="bg-primary/10 text-primary border-primary/30 text-[10px] uppercase font-bold mb-1">
+              <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] uppercase font-bold mb-1 border border-slate-200/60 inline-block">
                 {sel.tipo} · Categoría {sel.categoria}
-              </Badge>
-              <CardTitle className="text-lg font-extrabold text-foreground">{sel.nombre}</CardTitle>
+              </span>
+              <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">{sel.nombre}</CardTitle>
             </div>
 
-            <span className="text-xs font-bold text-muted-foreground">
+            <span className="text-xs font-semibold text-slate-500">
               📍 Sedes: {Array.isArray(sel.sedes) ? sel.sedes.join(", ") : sel.sedes || "Sede Central"}
             </span>
           </CardHeader>
 
           <CardContent className="p-6">
             <Tabs defaultValue="posiciones" className="space-y-4">
-              <TabsList className="grid grid-cols-3 bg-muted p-1 rounded-xl">
-                <TabsTrigger value="posiciones" className="text-xs font-bold">📊 Tabla de Posiciones Dinámica</TabsTrigger>
-                <TabsTrigger value="fixture" className="text-xs font-bold">🗓️ Calendario Completo (Fixture)</TabsTrigger>
-                <TabsTrigger value="reglamento" className="text-xs font-bold">📄 Reglamento Oficial PDF</TabsTrigger>
+              <TabsList className="grid grid-cols-3 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <TabsTrigger value="posiciones" className="text-xs font-bold">📊 Tabla de Posiciones</TabsTrigger>
+                <TabsTrigger value="fixture" className="text-xs font-bold">🗓️ Calendario (Fixture)</TabsTrigger>
+                <TabsTrigger value="reglamento" className="text-xs font-bold">📄 Reglamento PDF</TabsTrigger>
               </TabsList>
 
               {/* 1. Tabla de Posiciones Dinámica */}
@@ -320,7 +323,7 @@ function CompeticionesPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="border-b bg-muted/50 text-muted-foreground font-extrabold uppercase text-[10px]">
+                      <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-500 font-bold uppercase text-[10px]">
                         <th className="p-2.5">#</th>
                         <th className="p-2.5">Equipo / Club</th>
                         <th className="p-2.5 text-center">PJ</th>
@@ -330,10 +333,10 @@ function CompeticionesPage() {
                         <th className="p-2.5 text-center">GF</th>
                         <th className="p-2.5 text-center">GC</th>
                         <th className="p-2.5 text-center font-bold">DG</th>
-                        <th className="p-2.5 text-right font-extrabold text-primary text-sm">PTS</th>
+                        <th className="p-2.5 text-right font-bold text-primary text-sm">PTS</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {tabla.length === 0 ? (
                         <tr>
                           <td colSpan={10} className="py-8 text-center text-xs text-muted-foreground">

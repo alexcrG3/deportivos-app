@@ -94,32 +94,32 @@ function EvolucionFisicaPage() {
   return (
     <div className="space-y-6">
       {/* HEADER DE MÓDULO */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase mb-1">
-            Módulo de Alto Rendimiento Enterprise
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Alto Rendimiento · Área Técnica
           </Badge>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             📈 Evolución Física & Antropometría
           </h1>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="text-xs text-slate-500 font-medium mt-1">
             Seguimiento biológico del crecimiento, composición corporal y maduración PHV.
           </p>
         </div>
 
         <Button
           onClick={() => setIsOpenModal(true)}
-          className="bg-gradient-primary text-white font-extrabold gap-2 shadow-elegant rounded-xl"
+          className="bg-primary text-primary-foreground font-bold gap-2 shadow-sm rounded-xl hover:bg-primary/90"
         >
-          <Plus className="h-4 w-4" /> ➕ Nueva Ficha Antropométrica
+          <Plus className="h-4 w-4" /> Nueva Ficha Antropométrica
         </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Selector de Jugadores */}
-        <Card className="lg:col-span-4 shadow-card border bg-card">
-          <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-xs font-extrabold uppercase text-muted-foreground">
+        <Card className="lg:col-span-4 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+            <CardTitle className="text-xs font-bold uppercase text-slate-500">
               👥 Atletas de la Academia
             </CardTitle>
           </CardHeader>
@@ -131,14 +131,14 @@ function EvolucionFisicaPage() {
                 className={`w-full text-left p-3 rounded-xl border transition flex items-center justify-between ${
                   selectedJugadorId === j.id
                     ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-border hover:bg-muted/40"
+                    : "border-slate-200/60 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-800/40"
                 }`}
               >
                 <div>
-                  <p className="font-extrabold text-xs text-foreground">{j.nombre}</p>
-                  <p className="text-[10px] text-muted-foreground">{j.categoria} · {j.posicion || "Atleta"}</p>
+                  <p className="font-bold text-xs text-slate-900 dark:text-slate-100">{j.nombre}</p>
+                  <p className="text-[10px] text-slate-500">{j.categoria} · {j.posicion || "Atleta"}</p>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-slate-400" />
               </button>
             ))}
           </CardContent>
@@ -148,48 +148,48 @@ function EvolucionFisicaPage() {
         {selectedJugador ? (
           <div className="lg:col-span-8 space-y-6">
             {/* Header del Atleta */}
-            <Card className="shadow-card border bg-card">
-              <CardHeader className="pb-3 border-b">
+            <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] uppercase font-bold mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] uppercase font-bold mb-1 border border-slate-200/60 inline-block">
                       {selectedJugador.categoria}
-                    </Badge>
-                    <CardTitle className="text-lg font-extrabold text-foreground">{selectedJugador.nombre}</CardTitle>
+                    </span>
+                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">{selectedJugador.nombre}</CardTitle>
                   </div>
-                  <Badge className={`text-xs font-extrabold uppercase ${phvCalculation?.badgeColor}`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase border ${phvCalculation?.badgeColor}`}>
                     {phvCalculation?.estadoEtapa}
-                  </Badge>
+                  </span>
                 </div>
               </CardHeader>
 
               <CardContent className="p-4 grid gap-3 sm:grid-cols-4">
-                <div className="p-3 rounded-xl border bg-muted/30">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground">📏 Estatura</p>
-                  <p className="text-lg font-black text-foreground">{selectedJugador.estatura || 168} cm</p>
+                <div className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500">📏 Estatura</p>
+                  <p className="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight">{selectedJugador.estatura || 168} cm</p>
                 </div>
 
-                <div className="p-3 rounded-xl border bg-muted/30">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground">⚖️ Peso Corporal</p>
-                  <p className="text-lg font-black text-foreground">{selectedJugador.peso || 62} kg</p>
+                <div className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500">⚖️ Peso Corporal</p>
+                  <p className="text-xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight">{selectedJugador.peso || 62} kg</p>
                 </div>
 
-                <div className="p-3 rounded-xl border bg-muted/30">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground">💧 % Masa Grasa</p>
-                  <p className="text-lg font-black text-emerald-600">13.2%</p>
+                <div className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500">💧 % Masa Grasa</p>
+                  <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">13.2%</p>
                 </div>
 
-                <div className="p-3 rounded-xl border bg-muted/30">
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground">💪 % Masa Muscular</p>
-                  <p className="text-lg font-black text-primary">44.5%</p>
+                <div className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500">💪 % Masa Muscular</p>
+                  <p className="text-xl font-bold text-primary font-mono tracking-tight">44.5%</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Gráfica Evolutiva Temporal */}
-            <Card className="shadow-card border bg-card">
-              <CardHeader className="pb-2 border-b">
-                <CardTitle className="text-xs font-extrabold flex items-center gap-2">
+            <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+              <CardHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                <CardTitle className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" /> 📈 Evolución Biológica (Estatura vs. Peso)
                 </CardTitle>
               </CardHeader>
@@ -201,7 +201,7 @@ function EvolucionFisicaPage() {
                     <YAxis stroke="#888888" fontSize={11} />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="estatura" name="Estatura (cm)" stroke="#8b5cf6" strokeWidth={3} />
+                    <Line type="monotone" dataKey="estatura" name="Estatura (cm)" stroke="#1D4ED8" strokeWidth={3} />
                     <Line type="monotone" dataKey="peso" name="Peso (kg)" stroke="#10b981" strokeWidth={3} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -209,18 +209,18 @@ function EvolucionFisicaPage() {
             </Card>
 
             {/* Ficha de Maduración PHV */}
-            <Card className="shadow-card border border-primary/30 bg-primary/5">
+            <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900 rounded-2xl">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-extrabold flex items-center gap-2 text-foreground">
+                <CardTitle className="text-xs font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
                   <Sparkles className="h-4 w-4 text-primary" /> 🧬 Diagnóstico de Maduración PHV (Peak Height Velocity)
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 text-xs space-y-2">
-                <p className="text-foreground font-semibold">
+                <p className="text-slate-900 dark:text-slate-100 font-semibold">
                   Offset de Crecimiento Estimado: <span className="font-mono font-bold text-primary">{phvCalculation?.offsetPHV} años</span> respecto al pico de velocidad.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  <strong className="text-foreground">Recomendación para Preparador Físico:</strong> {phvCalculation?.recomendaciones}
+                <p className="text-slate-500 font-medium leading-relaxed">
+                  <strong className="text-slate-900 dark:text-slate-100">Recomendación para Preparador Físico:</strong> {phvCalculation?.recomendaciones}
                 </p>
               </CardContent>
             </Card>

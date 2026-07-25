@@ -195,17 +195,20 @@ function TestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tests Físicos & Evaluaciones</h1>
-          <p className="text-sm text-muted-foreground">Historial de tests de velocidad, resistencia, VO2, agilidad y fuerza explosiva.</p>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Alto Rendimiento · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Tests Físicos & Evaluaciones</h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Historial de tests de velocidad, resistencia, VO2, agilidad y fuerza explosiva.</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Equipo:</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Equipo:</span>
           <select
             value={selectedTeamName}
             onChange={(e) => setSelectedTeamName(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 py-1 text-xs font-bold shadow-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-foreground mr-2"
+            className="h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-bold shadow-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-slate-900 dark:text-slate-100 mr-2"
           >
             <option value="all">Todos los equipos</option>
             {myTeams.map((t) => (
@@ -214,13 +217,13 @@ function TestsPage() {
               </option>
             ))}
           </select>
-          <Button variant="outline" size="sm" className="gap-1 border-primary/40 text-primary hover:bg-primary/10 font-bold" onClick={() => setModalCatalogo(true)}>
+          <Button variant="outline" size="sm" className="gap-1 border-slate-200 dark:border-slate-800 text-primary hover:bg-slate-50 font-bold" onClick={() => setModalCatalogo(true)}>
             ⚙️ Configurar Pruebas
           </Button>
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.success("Evaluaciones físicas exportadas a PDF/Excel")}><FileSpreadsheet className="h-4 w-4" /> Exportar</Button>
+          <Button variant="outline" size="sm" className="gap-1 font-semibold border-slate-200 dark:border-slate-800" onClick={() => toast.success("Evaluaciones físicas exportadas a PDF/Excel")}><FileSpreadsheet className="h-4 w-4 text-primary" /> Exportar</Button>
           <Sheet open={openNewTest} onOpenChange={setOpenNewTest}>
             <SheetTrigger asChild>
-              <Button className="bg-gradient-primary shadow-elegant"><Plus className="mr-1 h-4 w-4" />Registrar Test</Button>
+              <Button className="bg-primary text-primary-foreground font-bold shadow-sm hover:bg-primary/90 rounded-xl"><Plus className="mr-1 h-4 w-4" />Registrar Test</Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-md overflow-y-auto">
               <SheetHeader>
@@ -267,7 +270,7 @@ function TestsPage() {
                   <label className="text-xs font-medium">Fecha de Evaluación</label>
                   <Input type="date" required value={newTest.fecha} onChange={(e) => setNewTest({ ...newTest, fecha: e.target.value })} />
                 </div>
-                <Button type="submit" className="w-full">Guardar Evaluación</Button>
+                <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold">Guardar Evaluación</Button>
               </form>
             </SheetContent>
           </Sheet>
@@ -275,34 +278,69 @@ function TestsPage() {
       </div>
 
       {tests.length === 0 ? (
-        <Card className="shadow-card">
-          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
-            <Award className="h-10 w-10 text-muted-foreground animate-pulse" />
-            <p className="text-sm font-medium">No hay evaluaciones físicas registradas para este equipo</p>
-            <p className="text-xs text-center max-w-sm">Asegúrate de que hay jugadores asignados a la categoría de este equipo y registra su primer test físico.</p>
+        <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+          <CardContent className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
+            <Award className="h-10 w-10 text-slate-300 animate-pulse" />
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">No hay evaluaciones físicas registradas para este equipo</p>
+            <p className="text-xs text-center max-w-sm text-slate-500">Asegúrate de que hay jugadores asignados a la categoría de este equipo y registra su primer test físico.</p>
           </CardContent>
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <StatCard icon={Award} label="Total Evaluaciones" value={totalEvaluaciones.toString()} hint="Tests guardados" accent="primary" />
-        <StatCard icon={TrendingUp} label="Mejor Progresión" value={`+${mejorProgresion}%`} hint="Crecimiento físico" accent="success" />
-        <StatCard icon={ShieldAlert} label="Atletas Estancados" value={estancadosCount.toString()} hint="Requieren ajuste de macrociclo" accent="warning" />
-      </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Total Evaluaciones</p>
+                  <Award className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{totalEvaluaciones.toString()}</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Registradas <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Tests guardados</span>
+              </p>
+            </Card>
 
-      {estancadosCount > 0 && (
-        <Card className="border-warning/40 bg-warning/5 shadow-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base text-warning-foreground"><ShieldAlert className="h-4 w-4" /> Recomendación IA por Estancamiento Físico</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm">
-            <p className="text-muted-foreground">La IA ha detectado falta de progresión deportiva. Se recomienda reprogramar los microciclos de los atletas correspondientes para incorporar volumen específico.</p>
-          </CardContent>
-        </Card>
-      )}
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Mejor Progresión</p>
+                  <TrendingUp className="h-4 w-4 text-emerald-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">+{mejorProgresion}%</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Crecimiento <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Evolución atlética</span>
+              </p>
+            </Card>
+
+            <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Atletas Estancados</p>
+                  <ShieldAlert className="h-4 w-4 text-amber-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{estancadosCount.toString()}</p>
+              </div>
+              <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+                Atención <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Revisión de macrociclo</span>
+              </p>
+            </Card>
+          </div>
+
+          {estancadosCount > 0 && (
+            <Card className="border border-amber-200 dark:border-amber-900 bg-amber-500/5 shadow-sm rounded-xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold text-amber-800 dark:text-amber-300"><ShieldAlert className="h-4 w-4 text-amber-500" /> Recomendación IA por Estancamiento Físico</CardTitle>
+              </CardHeader>
+              <CardContent className="text-xs">
+                <p className="text-slate-600 dark:text-slate-400 font-medium">La IA ha detectado falta de progresión deportiva. Se recomienda reprogramar los microciclos de los atletas correspondientes para incorporar volumen específico.</p>
+              </CardContent>
+            </Card>
+          )}
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2 shadow-card">
+        <Card className="lg:col-span-2 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
           <CardHeader>
             <CardTitle>Historial de Evaluaciones y Progreso</CardTitle>
             <CardDescription>Crecimiento en porcentaje del rendimiento atlético</CardDescription>

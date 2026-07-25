@@ -316,22 +316,22 @@ function CargasPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-400 text-white shadow-elegant">
-            <Flame className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Control de Cargas</h1>
-            <p className="text-sm text-muted-foreground">Motor ACWR · Fatiga · Recuperación · Semáforo de Riesgo</p>
-          </div>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+        <div>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Alto Rendimiento · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            🔥 Control de Cargas & Motor ACWR
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Motor ACWR · Fatiga · Recuperación · Semáforo de Riesgo</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Equipo:</span>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Equipo:</span>
           <select
             value={selectedTeamName}
             onChange={(e) => setSelectedTeamName(e.target.value)}
-            className="h-9 rounded-xl border border-input bg-background px-3 py-1 text-xs font-bold shadow-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-foreground"
+            className="h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-bold shadow-sm focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer text-slate-900 dark:text-slate-100"
           >
             <option value="all">Todos los equipos</option>
             {myTeams.map((t) => (
@@ -341,17 +341,17 @@ function CargasPage() {
             ))}
           </select>
           {alertas.filter(a => a.severidad === "critica").length > 0 && (
-            <Badge variant="destructive" className="gap-1 text-xs">
-              <Bell className="h-3 w-3" /> {alertas.filter(a => a.severidad === "critica").length} críticas
-            </Badge>
+            <span className="px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 font-bold text-[10px]">
+              ⚠️ {alertas.filter(a => a.severidad === "critica").length} críticas
+            </span>
           )}
-          <Button variant="outline" size="sm" onClick={loadData} className="gap-1">
-            <RefreshCw className="h-3.5 w-3.5" /> Actualizar
+          <Button variant="outline" size="sm" onClick={loadData} className="gap-1 font-semibold border-slate-200 dark:border-slate-800">
+            <RefreshCw className="h-3.5 w-3.5 text-primary" /> Actualizar
           </Button>
           {/* Registro Sheet */}
           <Sheet open={openReg} onOpenChange={setOpenReg}>
             <SheetTrigger asChild>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-400 text-white shadow-elegant gap-1">
+              <Button className="bg-primary text-primary-foreground font-bold shadow-sm gap-1 hover:bg-primary/90 rounded-xl">
                 <Plus className="h-4 w-4" /> Registrar Entrenamiento
               </Button>
             </SheetTrigger>

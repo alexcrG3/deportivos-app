@@ -77,25 +77,75 @@ function GPSPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">GPS & Wearables</h1>
-          <p className="text-sm text-muted-foreground">Importación y análisis de datos de dispositivos de rendimiento y sensores.</p>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Alto Rendimiento · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">GPS & Wearables</h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Importación y análisis de datos de dispositivos de rendimiento y sensores.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.success("Importador CSV abierto")}><Upload className="h-4 w-4" /> Importar CSV</Button>
-          <Button size="sm" className="gap-1 bg-gradient-primary shadow-elegant" onClick={handleSyncDevice} disabled={isSyncing}>
+          <Button variant="outline" size="sm" className="gap-1 font-semibold border-slate-200 dark:border-slate-800" onClick={() => toast.success("Importador CSV abierto")}><Upload className="h-4 w-4 text-primary" /> Importar CSV</Button>
+          <Button size="sm" className="gap-1 bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-sm rounded-xl" onClick={handleSyncDevice} disabled={isSyncing}>
             <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} /> 
             {isSyncing ? "Sincronizando..." : "Sincronizar Dispositivo"}
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={Activity} label="Distancia Total Sincronizada" value={`${(totalDist / 1000).toFixed(1)} km`} hint="GPS acumulado" accent="primary" />
-        <StatCard icon={Zap} label="Velocidad Máxima Registrada" value={`${maxVel} km/h`} hint="Sprint pico" accent="warning" />
-        <StatCard icon={Heart} label="Frecuencia Cardíaca Promedio" value={`${avgHR} bpm`} hint="En entrenamientos" accent="success" />
-        <StatCard icon={Cpu} label="Dispositivo Enlazado" value={selectedBrand} hint="Sincronización activa" accent="destructive" />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Distancia Sincronizada</p>
+              <Activity className="h-4 w-4 text-primary" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{(totalDist / 1000).toFixed(1)} km</p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Acumulado <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">GPS en vivo</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Velocidad Máxima</p>
+              <Zap className="h-4 w-4 text-amber-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{maxVel} km/h</p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Sprint pico <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Récord de equipo</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Frecuencia Cardíaca</p>
+              <Heart className="h-4 w-4 text-rose-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{avgHR} bpm</p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Promedio FC <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Zona aeróbica</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Dispositivo Enlazado</p>
+              <Cpu className="h-4 w-4 text-sky-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{selectedBrand}</p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Estado <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Sincronización activa</span>
+          </p>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

@@ -303,24 +303,24 @@ function WellnessPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 text-white shadow-elegant">
-            <Heart className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Wellness</h1>
-            <p className="text-sm text-muted-foreground">Monitoreo diario de bienestar del atleta · check-in en 20 segundos</p>
-          </div>
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+        <div>
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Alto Rendimiento · Área Técnica
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+            ❤️ Wellness & Monitoreo de Atletas
+          </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">Monitoreo diario de bienestar del atleta · check-in en 20 segundos</p>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/rendimiento/sports-science">
-            <Button variant="outline" size="sm" className="gap-1">
-              <Activity className="h-4 w-4" /> Sports Science
+            <Button variant="outline" size="sm" className="gap-1 font-semibold border-slate-200 dark:border-slate-800">
+              <Activity className="h-4 w-4 text-primary" /> Sports Science
             </Button>
           </Link>
           <Button
-            className="bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-elegant gap-1"
+            className="bg-primary text-primary-foreground font-bold shadow-sm gap-1 hover:bg-primary/90 rounded-xl"
             onClick={() => setShowCheckin(true)}
           >
             <Plus className="h-4 w-4" /> Registrar Wellness
@@ -330,17 +330,16 @@ function WellnessPage() {
 
       {/* Alertas activas */}
       {alertas.length > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/80 dark:border-amber-800/40 dark:bg-amber-900/10 p-4">
+        <div className="rounded-xl border border-amber-200/80 bg-amber-50/70 dark:border-amber-900/40 dark:bg-amber-950/20 p-4">
           <div className="flex items-center gap-2 mb-2">
             <Bell className="h-4 w-4 text-amber-600" />
-            <span className="text-sm font-semibold text-amber-700 dark:text-amber-400">{alertas.length} alertas activas</span>
+            <span className="text-xs font-bold text-amber-800 dark:text-amber-300">{alertas.length} Alertas Activas de Bienestar</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {alertas.slice(0, 4).map(a => (
-              <Badge key={a.id} variant="outline" className={`text-xs gap-1 ${a.severidad === "critica" ? "border-red-400 text-red-600" : "border-amber-400 text-amber-700"}`}>
-                <AlertTriangle className="h-3 w-3" />
-                {a.jugador.split(" ")[0]} — {a.mensaje}
-              </Badge>
+              <span key={a.id} className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${a.severidad === "critica" ? "border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-300" : "border-amber-500/20 bg-amber-500/10 text-amber-800 dark:text-amber-300"}`}>
+                ⚠️ {a.jugador.split(" ")[0]} — {a.mensaje}
+              </span>
             ))}
           </div>
         </div>
@@ -348,25 +347,57 @@ function WellnessPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          { icon: Heart,  label: "Wellness Promedio", value: `${avgScore}`,      suffix: "/100",   color: "from-emerald-500 to-teal-400" },
-          { icon: Moon,   label: "Horas Sueño",       value: `${avgSueno}`,      suffix: " hrs",   color: "from-sky-500 to-blue-400" },
-          { icon: Zap,    label: "Energía Promedio",  value: `${avgEnergia}`,    suffix: "/5",     color: "from-amber-500 to-orange-400" },
-          { icon: Brain,  label: "Dolor Muscular",    value: `${avgDolor}`,      suffix: "/5",     color: "from-violet-500 to-purple-400" },
-        ].map(c => (
-          <Card key={c.label} className="shadow-card overflow-hidden">
-            <CardContent className="p-4">
-              <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${c.color} text-white`}>
-                <c.icon className="h-4 w-4" />
-              </div>
-              <div className="flex items-end gap-0.5">
-                <span className="text-2xl font-bold">{c.value}</span>
-                <span className="text-sm text-muted-foreground mb-0.5">{c.suffix}</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{c.label}</p>
-            </CardContent>
-          </Card>
-        ))}
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Wellness Promedio</p>
+              <Heart className="h-4 w-4 text-emerald-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{avgScore} <span className="text-xs text-slate-400 font-normal">/100</span></p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Salud general <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Óptimo</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Horas Sueño</p>
+              <Moon className="h-4 w-4 text-sky-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{avgSueno} <span className="text-xs text-slate-400 font-normal">hrs</span></p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Descanso <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Recuperación</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Energía Promedio</p>
+              <Zap className="h-4 w-4 text-amber-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{avgEnergia} <span className="text-xs text-slate-400 font-normal">/5</span></p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            Vitalidad <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Buen nivel</span>
+          </p>
+        </Card>
+
+        <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Dolor Muscular</p>
+              <Brain className="h-4 w-4 text-violet-500" />
+            </div>
+            <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{avgDolor} <span className="text-xs text-slate-400 font-normal">/5</span></p>
+          </div>
+          <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
+            DOMS muscular <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">Controlado</span>
+          </p>
+        </Card>
       </div>
 
       {/* Filters */}

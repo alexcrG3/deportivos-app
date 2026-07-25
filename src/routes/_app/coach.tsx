@@ -258,21 +258,21 @@ function CoachDashboard() {
   return (
     <div className="space-y-6">
       {/* HEADER DE SALUDO OPERATIVO */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase mb-1">
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
             Coach OS Enterprise v2.0 · Entorno de Trabajo Vivo
           </Badge>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             🏠 Coach OS: Centro de Trabajo Diario
           </h1>
-          <p className="text-sm text-muted-foreground font-medium">
-            ¡Buenos días, Míster <span className="text-foreground font-bold">{activeCoachName.split(" ")[0]}</span>! Tu centro operativo en vivo para el día de hoy.
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+            ¡Buenos días, Míster <span className="text-slate-900 dark:text-slate-100 font-bold">{activeCoachName.split(" ")[0]}</span>! Tu centro operativo en vivo para el día de hoy.
           </p>
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" asChild className="gap-1.5 font-bold">
+          <Button variant="outline" size="sm" asChild className="gap-1.5 font-semibold border-slate-200 dark:border-slate-800">
             <Link to="/tactica/planificacion">
               <Calendar className="h-4 w-4 text-primary" /> Planificación
             </Link>
@@ -281,7 +281,7 @@ function CoachDashboard() {
           <Button
             size="sm"
             onClick={handleStartModoCancha}
-            className="bg-gradient-primary text-white font-extrabold gap-1.5 shadow-elegant rounded-xl px-4"
+            className="bg-primary text-primary-foreground font-bold gap-1.5 shadow-sm rounded-xl px-4 hover:bg-primary/90"
           >
             <Play className="h-4 w-4 fill-current" /> ▶️ Modo Cancha en Vivo
           </Button>
@@ -289,21 +289,21 @@ function CoachDashboard() {
       </div>
 
       {/* 🔝 1. EL MINUTERO (Agenda Cronológica de Hoy) */}
-      <Card className="shadow-card border bg-card">
-        <CardHeader className="pb-3 border-b">
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+        <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+            <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" /> 🔝 1. El Minutero (Agenda Cronológica de Hoy)
             </CardTitle>
-            <span className="text-xs text-muted-foreground font-semibold">
+            <span className="text-xs text-slate-500 font-medium">
               {new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })}
             </span>
           </div>
         </CardHeader>
 
-        <CardContent className="p-4">
+        <CardContent className="p-5">
           {minuteroAgenda.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground text-xs font-medium">
+            <div className="py-8 text-center text-slate-400 text-xs font-medium">
               <Calendar className="h-8 w-8 mx-auto mb-2 opacity-30" />
               <p>No hay sesiones ni partidos programados en la DB para hoy.</p>
               <p className="text-[10px] mt-1 opacity-60">Los eventos aparecerán aquí cuando se registren sesiones y partidos en la academia.</p>
@@ -313,18 +313,18 @@ function CoachDashboard() {
               {minuteroAgenda.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-xl border bg-muted/30 hover:bg-muted transition flex flex-col justify-between space-y-2"
+                  className="p-4 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/60 transition flex flex-col justify-between space-y-2"
                 >
                   <div className="flex items-center justify-between">
-                    <Badge variant="outline" className={`font-mono text-[10px] font-extrabold ${item.badgeColor}`}>
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px] font-bold border border-slate-200/60 dark:border-slate-700/60">
                       {item.hora}
-                    </Badge>
-                    <span className="text-[10px] font-bold text-muted-foreground">{item.tipo}</span>
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-500">{item.tipo}</span>
                   </div>
 
                   <div className="space-y-0.5">
-                    <p className="font-extrabold text-xs text-foreground leading-snug">{item.titulo}</p>
-                    <p className="text-[11px] text-muted-foreground font-medium">📍 {item.lugar}</p>
+                    <p className="font-bold text-xs text-slate-900 dark:text-slate-100 leading-snug">{item.titulo}</p>
+                    <p className="text-[11px] text-slate-500 font-medium">📍 {item.lugar}</p>
                   </div>
                 </div>
               ))}
@@ -334,126 +334,121 @@ function CoachDashboard() {
       </Card>
 
       {/* 🚨 2. ALERTAS DE BIENESTAR (Sports Science & Cargas en Vivo) */}
-      <Card className="shadow-card border border-red-500/30 bg-card">
-        <CardHeader className="pb-3 border-b flex flex-row items-center justify-between">
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+        <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-sm font-extrabold flex items-center gap-2 text-red-600 dark:text-red-400">
+            <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
               <HeartPulse className="h-4 w-4 text-red-500" /> 🚨 2. Alertas de Bienestar (Sports Science & Cargas en Vivo)
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-xs text-slate-500">
               Banderas rojas del Wellness matutino enviado por los jugadores desde sus Apps
             </CardDescription>
           </div>
-          <Link to="/rendimiento/wellness" className="text-xs text-primary font-bold hover:underline">
+          <Link to="/rendimiento/wellness" className="text-xs text-primary font-semibold hover:underline">
             Ver todas →
           </Link>
         </CardHeader>
 
-        <CardContent className="p-4 space-y-2.5">
-          {alertasBienestar.map((alerta) => (
-            <div
-              key={alerta.id}
-              className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs ${
-                alerta.severidad === "rojo"
-                  ? "bg-red-500/10 border-red-500/30"
-                  : alerta.severidad === "amarillo"
-                  ? "bg-amber-500/10 border-amber-500/30"
-                  : "bg-blue-500/10 border-blue-500/30"
-              }`}
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`text-[9px] uppercase font-black ${
-                      alerta.severidad === "rojo"
-                        ? "bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/40"
-                        : alerta.severidad === "amarillo"
-                        ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40"
-                        : "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/40"
-                    }`}
-                  >
-                    ⚠️ [{alerta.tipo}]
-                  </Badge>
-                  <p className="font-extrabold text-foreground">{alerta.jugador}</p>
-                </div>
-                <p className="text-[11px] text-muted-foreground font-medium">{alerta.detalle}</p>
-              </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-[10px] font-bold shrink-0 self-start sm:self-center border-slate-300 dark:border-slate-800"
-                asChild
+        <CardContent className="p-5">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
+            {alertasBienestar.map((alerta) => (
+              <div
+                key={alerta.id}
+                className="py-3 px-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition"
               >
-                <Link to="/rendimiento/wellness">Ajustar Entreno</Link>
-              </Button>
-            </div>
-          ))}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        alerta.severidad === "rojo"
+                          ? "bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20"
+                          : alerta.severidad === "amarillo"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                          : "bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20"
+                      }`}
+                    >
+                      ⚠️ [{alerta.tipo}]
+                    </span>
+                    <p className="font-bold text-slate-900 dark:text-slate-100">{alerta.jugador}</p>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">{alerta.detalle}</p>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-[10px] font-semibold shrink-0 self-start sm:self-center border-slate-200 dark:border-slate-800"
+                  asChild
+                >
+                  <Link to="/rendimiento/wellness">Ajustar Entreno</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
       {/* 🚀 3. EL FLUJO GUIADO DE CAMPO (El Botón de Acción Principal) */}
-      <Card className="border-2 border-primary/50 shadow-elegant bg-card overflow-hidden">
-        <CardHeader className="bg-primary/5 border-b pb-4">
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-800 pb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <CardTitle className="text-base font-extrabold flex items-center gap-2 text-foreground">
+              <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Play className="h-5 w-5 text-primary fill-primary" /> 🚀 3. El Flujo Guiado de Campo (El Corazón Operativo)
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs text-slate-500">
                 Tarjeta central interactiva con acciones del próximo evento en tu agenda
               </CardDescription>
             </div>
-            <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-extrabold text-xs">
-              🟢 Planificación Aprobada por Coordinación
-            </Badge>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-[10px] font-bold">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Planificación Aprobada por Coordinación
+            </span>
           </div>
         </CardHeader>
 
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-6 space-y-5">
           {minuteroAgenda.length > 0 ? (
-            <div className="space-y-1.5 bg-muted/40 p-4 rounded-xl border">
-              <p className="text-sm font-black text-foreground">
+            <div className="space-y-1 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                 Próximo Evento: <span className="text-primary font-mono">{minuteroAgenda[0].titulo} ({minuteroAgenda[0].hora})</span>
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
-                Tipo: <span className="text-foreground font-bold">{minuteroAgenda[0].tipo}</span> · Sede: <span className="text-foreground font-bold">{minuteroAgenda[0].lugar}</span>
+              <p className="text-xs text-slate-500 font-medium">
+                Tipo: <span className="text-slate-700 dark:text-slate-300 font-semibold">{minuteroAgenda[0].tipo}</span> · Sede: <span className="text-slate-700 dark:text-slate-300 font-semibold">{minuteroAgenda[0].lugar}</span>
               </p>
             </div>
           ) : (
-            <div className="space-y-1.5 bg-muted/40 p-4 rounded-xl border">
-              <p className="text-sm font-black text-foreground">
+            <div className="space-y-1 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                 Sin eventos programados en la DB para hoy
               </p>
-              <p className="text-xs text-muted-foreground font-medium">
+              <p className="text-xs text-slate-500 font-medium">
                 Registra sesiones y partidos en la academia para que aparezcan aquí.
               </p>
             </div>
           )}
 
           <div className="space-y-2">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Acciones Contextuales Previas (Para repasar en el vestuario):
             </p>
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 asChild
                 variant="outline"
-                className="w-full h-11 text-xs font-extrabold gap-2 border-slate-300 dark:border-slate-800 hover:border-violet-500 justify-start px-4"
+                className="w-full h-11 text-xs font-semibold gap-2 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 justify-start px-4"
               >
                 <Link to="/tactica/pizarra">
-                  <ShieldHalf className="h-4 w-4 text-violet-500" /> 📐 [ VER PIZARRA TÁCTICA ]
+                  <ShieldHalf className="h-4 w-4 text-primary" /> 📐 [ VER PIZARRA TÁCTICA ]
                 </Link>
               </Button>
 
               <Button
                 asChild
                 variant="outline"
-                className="w-full h-11 text-xs font-extrabold gap-2 border-slate-300 dark:border-slate-800 hover:border-teal-500 justify-start px-4"
+                className="w-full h-11 text-xs font-semibold gap-2 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 justify-start px-4"
               >
                 <Link to="/tactica/video">
-                  <Tv className="h-4 w-4 text-teal-500" /> 📺 [ VER VIDEOANÁLISIS ]
+                  <Tv className="h-4 w-4 text-primary" /> 📺 [ VER VIDEOANÁLISIS ]
                 </Link>
               </Button>
             </div>
@@ -463,58 +458,58 @@ function CoachDashboard() {
           <div className="pt-2">
             <Button
               onClick={handleStartModoCancha}
-              className="w-full h-14 bg-gradient-primary text-white font-extrabold text-sm gap-3 shadow-elegant rounded-2xl text-center flex items-center justify-center hover:scale-[1.01] transition-transform"
+              className="w-full h-12 bg-primary text-primary-foreground font-bold text-xs gap-2.5 shadow-sm rounded-xl text-center flex items-center justify-center hover:bg-primary/90 transition-colors"
             >
-              <Play className="h-5 w-5 fill-current" /> ▶️ [ INICIAR SESIÓN EN CANCHA ]
+              <Play className="h-4 w-4 fill-current" /> ▶️ [ INICIAR SESIÓN EN CANCHA ]
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* 📝 4. CHECKLIST DE TAREAS PENDIENTES (Gobernanza Operativa) */}
-      <Card className="shadow-card border bg-card">
-        <CardHeader className="pb-3 border-b">
-          <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+        <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
+          <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <CheckSquare className="h-4 w-4 text-primary" /> 📝 4. Checklist de Tareas Pendientes (Gobernanza Operativa)
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-xs text-slate-500">
             Recordatorio automático para cerrar los procesos administrativos del día sin salir de cancha
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-5 space-y-4">
           {/* Input para agregar nuevas tareas */}
           <form onSubmit={handleAddCustomTask} className="flex gap-2">
             <Input
               placeholder="➕ Escribe una nueva tarea para el día (ej: Revisar petos y balones)..."
               value={newTaskText}
               onChange={(e) => setNewTaskText(e.target.value)}
-              className="h-10 text-xs flex-1 bg-background"
+              className="h-10 text-xs flex-1 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
             />
-            <Button type="submit" size="sm" className="h-10 text-xs font-bold gap-1 shrink-0 px-4">
+            <Button type="submit" size="sm" className="h-10 text-xs font-bold gap-1 shrink-0 px-4 bg-primary text-primary-foreground hover:bg-primary/90">
               <Plus className="h-4 w-4" /> Agregar Tarea
             </Button>
           </form>
 
-          <div className="space-y-2 pt-2">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800/80 text-xs">
             {tasksChecklist.map((task) => (
               <div
                 key={task.id}
                 onClick={() => toggleTask(task.id)}
-                className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition select-none ${
+                className={`py-3 px-1 flex items-center gap-3 cursor-pointer transition select-none ${
                   task.completada
-                    ? "bg-emerald-500/5 border-emerald-500/20 text-muted-foreground line-through"
-                    : "bg-muted/40 hover:bg-muted border-border text-foreground font-semibold"
+                    ? "text-slate-400 line-through"
+                    : "hover:bg-slate-50/70 dark:hover:bg-slate-800/40 text-slate-800 dark:text-slate-200 font-semibold"
                 }`}
               >
-                <div className="pointer-events-none">
+                <div className="pointer-events-none shrink-0">
                   <Checkbox checked={task.completada} />
                 </div>
                 <span className="text-xs flex-1">{task.texto}</span>
                 {task.completada && (
-                  <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[9px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold border border-emerald-500/20">
                     ✓ Completado
-                  </Badge>
+                  </span>
                 )}
               </div>
             ))}
