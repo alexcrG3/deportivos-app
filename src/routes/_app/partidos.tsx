@@ -297,7 +297,7 @@ function PartidosPage() {
         {role !== "padres" && (
           <Button
             onClick={() => setIsOpenCreate(true)}
-            className="bg-gradient-primary text-white font-extrabold gap-2 shadow-elegant rounded-xl"
+            className="btn-primary gap-2 shadow-sm"
           >
             <Plus className="h-4 w-4" /> ➕ Programar Partido
           </Button>
@@ -373,14 +373,14 @@ function PartidosPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-foreground truncate">{m.equipo}</span>
                       <Badge
-                        className={`text-[9px] font-black uppercase ${
+                        className={`badge-pill border-none ${
                           m.estado === "jugado"
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                            ? "badge-success"
                             : m.estado === "en_curso"
-                            ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                            ? "badge-warning"
                             : m.estado === "suspendido"
-                            ? "bg-red-500/10 text-red-600 border-red-500/30"
-                            : "bg-blue-500/10 text-blue-600 border-blue-500/30"
+                            ? "badge-danger"
+                            : "badge-info"
                         }`}
                       >
                         {m.estado === "jugado"
@@ -557,7 +557,7 @@ function PartidosPage() {
             <Button
               size="sm"
               onClick={() => setIsOpenActaModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs gap-1.5 rounded-xl shadow-elegant"
+              className="btn-primary gap-1.5 shadow-sm"
             >
               <Upload className="h-4 w-4" /> 📎 Cargar Acta Arbitral PDF/Foto
             </Button>

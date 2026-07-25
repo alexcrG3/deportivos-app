@@ -431,24 +431,24 @@ export function MedicoIndexPage() {
       {activeMainTab === "dashboard" && (
         <div className="space-y-6">
           {/* HERO HEADER DASHBOARD MÉDICO */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-6 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-4">
+          <div className="page-header flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <Badge className="bg-indigo-500/20 text-indigo-300 font-bold text-[10px] uppercase tracking-wider border border-indigo-500/30">
+              <Badge className="badge-pill badge-neutral border-none">
                 DEPARTAMENTO MÉDICO & REHABILITACIÓN
               </Badge>
-              <h1 className="text-xl sm:text-2xl font-black flex items-center gap-2 text-white">
+              <h1 className="page-header-title flex items-center gap-2">
                 <Stethoscope className="h-6 w-6 text-indigo-400" /> Dashboard Médico
               </h1>
-              <p className="text-xs text-slate-300 max-w-xl">
+              <p className="page-header-subtitle max-w-xl">
                 Monitorea el estado de salud de los deportistas, lesiones, rehabilitaciones y disponibilidad deportiva.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={() => setOpenNewValoracion(true)} className="bg-gradient-primary shadow-elegant font-bold rounded-2xl text-xs h-9 gap-1.5">
+              <Button onClick={() => setOpenNewValoracion(true)} className="btn-primary gap-1.5">
                 <Plus className="h-4 w-4" /> Nueva Valoración
               </Button>
-              <Button asChild variant="outline" className="border-indigo-400/30 text-indigo-200 hover:bg-indigo-500/10 font-bold rounded-2xl text-xs h-9 gap-1.5">
+              <Button asChild variant="outline" className="btn-secondary gap-1.5">
                 <Link to="/medico/citas">
                   <Calendar className="h-4 w-4 text-indigo-400" /> Agenda de Hoy ({agendaHoy.length})
                 </Link>
@@ -466,13 +466,13 @@ export function MedicoIndexPage() {
               <span className="text-[10px] text-muted-foreground font-medium mt-0.5 block">Todos registrados</span>
             </Card>
 
-            <Card className="p-3.5 bg-card border-border shadow-xs hover:border-emerald-500/50 transition-all">
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-bold">Aptos para jugar</span>
+            <Card className="premium-card-sm">
+              <div className="flex items-center justify-between mb-1">
+                <span className="kpi-label">Aptos para jugar</span>
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               </div>
-              <p className="text-2xl font-black text-foreground">{aptosCount}</p>
-              <span className="text-[10px] text-emerald-500 font-bold mt-0.5 block">{aptosPercent}% disponibilidad</span>
+              <p className="kpi-number">{aptosCount}</p>
+              <span className="kpi-subtext block">{aptosPercent}% disponibilidad</span>
             </Card>
 
             <Card className="p-3.5 bg-card border-border shadow-xs hover:border-rose-500/50 transition-all">

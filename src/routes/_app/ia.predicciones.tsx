@@ -8,17 +8,17 @@ import { TrendingUp, ArrowRight, Clock, AlertTriangle, ShieldCheck, HelpCircle }
 export const Route = createFileRoute("/_app/ia/predicciones")({ component: PrediccionesIA });
 
 const tipoColors: Record<string, string> = {
-  lesion: "text-red-500 bg-red-500/10 border-red-500/20",
-  abandono: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-  mora: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-  asistencia: "text-blue-500 bg-blue-500/10 border-blue-500/20",
-  rendimiento: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+  lesion: "bg-red-500/10 text-red-700",
+  abandono: "bg-orange-500/10 text-orange-700",
+  mora: "bg-amber-500/10 text-amber-700",
+  asistencia: "bg-blue-500/10 text-blue-700",
+  rendimiento: "bg-emerald-500/10 text-emerald-700"
 };
 
 const confidenceColors = {
-  Alta: "text-emerald-400 bg-emerald-500/10",
-  Media: "text-amber-400 bg-amber-500/10",
-  Baja: "text-red-400 bg-red-500/10"
+  Alta: "bg-emerald-500/10 text-emerald-700",
+  Media: "bg-amber-500/10 text-amber-700",
+  Baja: "bg-red-500/10 text-red-700"
 };
 
 function PrediccionesIA() {
@@ -40,18 +40,18 @@ function PrediccionesIA() {
 
       <div className="grid gap-4">
         {predictions.map((p) => (
-          <Card key={p.id} className="bg-card shadow-card border border-white/5 overflow-hidden hover:border-white/10 transition">
+          <Card key={p.id} className="bg-white border border-[#E2E8F0] rounded-[12px] shadow-sm overflow-hidden hover:border-[#CBD5E1] transition">
             <CardContent className="p-5 flex flex-col md:flex-row items-start md:items-center gap-5">
               {/* Left Column: Avatar & Name */}
               <div className="flex items-center gap-3 shrink-0">
                 <img src={p.avatar} alt="" className="h-12 w-12 rounded-full border border-white/10" />
                 <div>
-                  <h4 className="font-bold text-sm text-white">{p.jugador}</h4>
+                  <h4 className="font-bold text-[28px] text-[#0F172A] my-1 font-mono tracking-tight">{p.jugador}</h4>
                   <div className="flex gap-1.5 mt-1">
-                    <Badge className={`text-[9px] uppercase font-bold tracking-wider ${tipoColors[p.tipo]}`}>
+                    <Badge className={`text-[12px] rounded-full px-[10px] py-[4px] uppercase font-medium tracking-wider ${tipoColors[p.tipo]}`}>
                       {p.tipo}
                     </Badge>
-                    <Badge variant="outline" className="text-[9px] font-medium border-white/10 text-muted-foreground">
+                    <Badge variant="outline" className="text-[12px] rounded-full px-[10px] py-[4px] font-medium border-[#E2E8F0] text-[#475569]">
                       H: {p.horizonte}
                     </Badge>
                   </div>
@@ -61,12 +61,12 @@ function PrediccionesIA() {
               {/* Middle Column: Details, variables, explanation */}
               <div className="flex-1 space-y-2 min-w-0">
                 <div className="text-xs text-muted-foreground leading-relaxed">
-                  <span className="font-bold text-white">Análisis Predictivo:</span> {p.explicacion}
+                  <span className="font-bold text-[#0F172A]">Análisis Predictivo:</span> {p.explicacion}
                 </div>
                 <div className="flex flex-wrap gap-1 items-center">
                   <span className="text-[10px] text-muted-foreground mr-1">Variables correlacionadas:</span>
                   {p.variables.map((v, i) => (
-                    <Badge key={i} variant="outline" className="text-[9px] bg-white/5 text-white/95 border-white/10">
+                    <Badge key={i} variant="outline" className="text-[12px] bg-slate-100 text-[#475569] border-[#E2E8F0] rounded-full px-[10px] py-[4px] font-medium">
                       {v}
                     </Badge>
                   ))}
@@ -76,11 +76,11 @@ function PrediccionesIA() {
               {/* Right Column: Probabilities & Confidence indicators */}
               <div className="flex md:flex-col items-end gap-3 justify-between w-full md:w-auto shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-white/5">
                 <div className="text-right">
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Probabilidad</p>
-                  <p className="text-3xl font-black text-white">{p.probabilidad}%</p>
+                  <p className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Probabilidad</p>
+                  <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">{p.probabilidad}%</p>
                 </div>
                 <div className="text-right space-y-1">
-                  <Badge className={`text-[9px] font-bold ${confidenceColors[p.nivelConfianza]}`}>
+                  <Badge className={`text-[12px] font-medium rounded-full px-[10px] py-[4px] ${confidenceColors[p.nivelConfianza]}`}>
                     Confianza: {p.nivelConfianza}
                   </Badge>
                   <div>
@@ -92,16 +92,16 @@ function PrediccionesIA() {
               </div>
             </CardContent>
             {/* Progress bar along the bottom of the card */}
-            <Progress value={p.probabilidad} className="h-1.5 rounded-none bg-white/5" />
+            <Progress value={p.probabilidad} className="h-1.5 rounded-none bg-slate-100" />
           </Card>
         ))}
       </div>
 
       {/* Warning Disclaimer */}
-      <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-4 flex gap-3 text-xs text-amber-300 leading-relaxed max-w-2xl">
+      <div className="border border-[#E2E8F0] bg-white rounded-[12px] p-6 shadow-sm flex gap-3 text-xs text-[#475569] leading-relaxed max-w-2xl">
         <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />
         <div>
-          <p className="font-bold text-white mb-0.5">Nota Importante de Confianza Predictiva</p>
+          <p className="font-bold text-[#0F172A] mb-0.5">Nota Importante de Confianza Predictiva</p>
           DeportivOS AI nunca presenta una recomendación o predicción como una verdad absoluta. Cada cálculo se basa en tendencias matemáticas, wellness diario e históricos de entrenamiento. Por favor, complemente este análisis con evaluaciones clínicas y la experiencia de su cuerpo técnico.
         </div>
       </div>

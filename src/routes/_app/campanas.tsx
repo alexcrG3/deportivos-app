@@ -26,8 +26,8 @@ function CampanasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Campañas</h1>
-          <p className="text-sm text-muted-foreground">Captación masiva por WhatsApp y Email</p>
+          <h1 className="page-header-title">Campañas</h1>
+          <p className="page-header-subtitle">Captación masiva por WhatsApp y Email</p>
         </div>
         <NewCampanaDialog onCreate={(c) => setCampanas((p) => [c, ...p])} />
       </div>

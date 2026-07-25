@@ -54,22 +54,22 @@ function JugadasTacticas() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-elegant">
-            <BookOpen className="h-5 w-5" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">
+            <BookOpen className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Biblioteca de Jugadas</h1>
-            <p className="text-xs text-muted-foreground">Repositorio táctico profesional por categorías</p>
+            <h1 className="text-[28px] font-bold text-[#0F172A] tracking-tight">Biblioteca de Jugadas</h1>
+            <p className="text-[#64748B] text-sm">Repositorio táctico profesional por categorías</p>
           </div>
         </div>
         <Button
           size="sm"
-          className="gap-1.5 text-xs bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold"
+          className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5"
           onClick={() => toast.info("Editor de jugadas — Próximamente en Parte 2/3")}
         >
-          <Plus className="h-3.5 w-3.5" /> Nueva Jugada
+          <Plus className="h-4 w-4" /> Nueva Jugada
         </Button>
       </div>
 
@@ -80,10 +80,10 @@ function JugadasTacticas() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition border ${
+            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition border ${
               activeCategory === cat
-                ? "bg-primary text-white border-primary"
-                : "bg-muted text-muted-foreground hover:bg-muted/85 hover:text-foreground border-transparent"
+                ? "bg-[#2563EB] text-white border-[#2563EB]"
+                : "bg-white text-[#475569] hover:bg-slate-50 border-[#E2E8F0]"
             }`}
           >
             {cat === "todas" ? "📋 Todas" : CATEGORY_LABELS[cat as PlayCategory]}
@@ -98,33 +98,33 @@ function JugadasTacticas() {
           {filtered.map(play => (
             <Card
               key={play.id}
-              className={`bg-card shadow-card cursor-pointer hover:shadow-elegant transition-all border-border hover:border-border/80 ${
-                selectedPlay?.id === play.id ? "border-primary/30 bg-primary/5" : ""
+              className={`bg-white shadow-sm cursor-pointer transition-all border rounded-[12px] hover:border-slate-300 ${
+                selectedPlay?.id === play.id ? "border-[#2563EB] ring-1 ring-[#2563EB]" : "border-[#E2E8F0]"
               }`}
               onClick={() => setSelectedPlay(play.id === selectedPlay?.id ? null : play)}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-sm leading-snug text-foreground">{play.nombre}</CardTitle>
-                  <Badge variant="outline" className={`shrink-0 text-[8px] font-bold uppercase ${NIVEL_COLORS[play.nivel]}`}>
+                  <CardTitle className="text-base font-bold text-[#0F172A] leading-snug">{play.nombre}</CardTitle>
+                  <Badge variant="outline" className={`shrink-0 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase ${NIVEL_COLORS[play.nivel]}`}>
                     {play.nivel}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex flex-wrap gap-1.5">
-                  <Badge variant="outline" className={`text-[9px] font-bold ${CATEGORY_COLORS[play.categoria]}`}>
+                  <Badge variant="outline" className={`border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium ${CATEGORY_COLORS[play.categoria]}`}>
                     {CATEGORY_LABELS[play.categoria]}
                   </Badge>
-                  <Badge variant="outline" className="text-[9px]">{play.disciplina}</Badge>
+                  <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{play.disciplina}</Badge>
                 </div>
 
-                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{play.descripcion}</p>
+                <p className="text-sm text-[#64748B] leading-relaxed line-clamp-2">{play.descripcion}</p>
 
-                <div className="border-t border-border pt-2">
-                  <p className="text-[9px] uppercase font-bold text-muted-foreground mb-1">Objetivo</p>
-                  <p className="text-[10px] text-foreground/80 leading-relaxed line-clamp-2 flex items-start gap-1">
-                    <Target className="h-3 w-3 shrink-0 text-amber-500 mt-0.5" />
+                <div className="border-t border-[#E2E8F0] pt-2">
+                  <p className="text-[11px] uppercase font-bold text-[#64748B] mb-1">Objetivo</p>
+                  <p className="text-sm text-[#0F172A] leading-relaxed line-clamp-2 flex items-start gap-1">
+                    <Target className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
                     {play.objetivo}
                   </p>
                 </div>
@@ -133,30 +133,30 @@ function JugadasTacticas() {
                 {play.etiquetas.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {play.etiquetas.map(tag => (
-                      <span key={tag} className="inline-flex items-center gap-0.5 text-[8px] bg-muted border border-border px-1.5 py-0.5 rounded-full text-muted-foreground">
-                        <Tag className="h-2 w-2" />{tag}
+                      <span key={tag} className="inline-flex items-center gap-0.5 text-[11px] bg-slate-50 border border-[#E2E8F0] px-2 py-1 rounded-full text-[#64748B]">
+                        <Tag className="h-3 w-3" />{tag}
                       </span>
                     ))}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between text-[9px] text-muted-foreground border-t border-border pt-2">
-                  <span className="flex items-center gap-1"><User className="h-2.5 w-2.5" />{play.autor}</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-2.5 w-2.5" />{play.fecha}</span>
+                <div className="flex items-center justify-between text-xs text-[#64748B] border-t border-[#E2E8F0] pt-2">
+                  <span className="flex items-center gap-1"><User className="h-3 w-3" />{play.autor}</span>
+                  <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{play.fecha}</span>
                 </div>
 
                 <div className="flex gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 text-[10px] h-7 gap-1"
+                    className="flex-1 border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-1"
                     onClick={(e) => { e.stopPropagation(); setSelectedPlay(play); }}
                   >
-                    <Eye className="h-3 w-3" /> Detalles
+                    <Eye className="h-4 w-4" /> Detalles
                   </Button>
                   <Button
                     size="sm"
-                    className="flex-1 text-[10px] h-7 gap-1 bg-amber-500 hover:bg-amber-600 text-black font-bold"
+                    className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       const firstFrame = play.frames[0];
@@ -209,58 +209,58 @@ function JugadasTacticas() {
         </div>
 
         {selectedPlay && (
-          <Card className="bg-card shadow-card border-primary/20 lg:col-span-1 h-fit sticky top-4">
-             <CardHeader className="pb-3">
+          <Card className="bg-white shadow-sm border border-[#E2E8F0] rounded-[12px] lg:col-span-1 h-fit sticky top-4">
+             <CardHeader className="pb-3 border-b border-[#E2E8F0]">
                <div className="flex items-start justify-between">
-                 <CardTitle className="text-base text-foreground">{selectedPlay.nombre}</CardTitle>
-                 <button onClick={() => setSelectedPlay(null)} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+                 <CardTitle className="text-base text-[#0F172A] font-bold">{selectedPlay.nombre}</CardTitle>
+                 <button onClick={() => setSelectedPlay(null)} className="text-[#64748B] hover:text-[#0F172A] p-1">✕</button>
                </div>
-               <CardDescription>Vista detallada de la jugada</CardDescription>
+               <CardDescription className="text-sm text-[#64748B]">Vista detallada de la jugada</CardDescription>
              </CardHeader>
-            <CardContent className="space-y-4 text-xs">
+            <CardContent className="space-y-4 text-sm pt-4">
               <div className="flex flex-wrap gap-1.5">
-                <Badge variant="outline" className={`text-[9px] font-bold ${CATEGORY_COLORS[selectedPlay.categoria]}`}>
+                <Badge variant="outline" className={`border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium ${CATEGORY_COLORS[selectedPlay.categoria]}`}>
                   {CATEGORY_LABELS[selectedPlay.categoria]}
                 </Badge>
-                <Badge variant="outline" className={`text-[9px] ${NIVEL_COLORS[selectedPlay.nivel]}`}>{selectedPlay.nivel}</Badge>
-                <Badge variant="outline" className="text-[9px]">{selectedPlay.disciplina}</Badge>
+                <Badge variant="outline" className={`border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium ${NIVEL_COLORS[selectedPlay.nivel]}`}>{selectedPlay.nivel}</Badge>
+                <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{selectedPlay.disciplina}</Badge>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-bold text-muted-foreground">Descripción</p>
-                <p className="text-foreground/85 leading-relaxed">{selectedPlay.descripcion}</p>
+                <p className="text-[11px] uppercase font-bold text-[#64748B]">Descripción</p>
+                <p className="text-[#0F172A] leading-relaxed">{selectedPlay.descripcion}</p>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-bold text-muted-foreground">Objetivo Táctico</p>
-                <p className="text-amber-600 dark:text-amber-400 leading-relaxed flex items-start gap-1">
-                  <Target className="h-3 w-3 shrink-0 mt-0.5" />{selectedPlay.objetivo}
+                <p className="text-[11px] uppercase font-bold text-[#64748B]">Objetivo Táctico</p>
+                <p className="text-[#0F172A] leading-relaxed flex items-start gap-1">
+                  <Target className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />{selectedPlay.objetivo}
                 </p>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-bold text-muted-foreground">Etiquetas</p>
+                <p className="text-[11px] uppercase font-bold text-[#64748B]">Etiquetas</p>
                 <div className="flex flex-wrap gap-1">
                   {selectedPlay.etiquetas.map(tag => (
-                    <span key={tag} className="text-[9px] bg-muted border border-border px-2 py-0.5 rounded-full text-muted-foreground">#{tag}</span>
+                    <span key={tag} className="text-[11px] bg-slate-50 border border-[#E2E8F0] px-2 py-1 rounded-full text-[#64748B]">#{tag}</span>
                   ))}
                 </div>
               </div>
 
-              <div className="border-t border-border pt-3 flex gap-2">
+              <div className="border-t border-[#E2E8F0] pt-3 flex gap-2">
                 <div className="flex-1">
-                  <p className="text-[9px] text-muted-foreground">Autor</p>
-                  <p className="font-semibold text-foreground">{selectedPlay.autor}</p>
+                  <p className="text-[11px] text-[#64748B]">Autor</p>
+                  <p className="font-medium text-[#0F172A]">{selectedPlay.autor}</p>
                 </div>
                 <div className="flex-1">
-                  <p className="text-[9px] text-muted-foreground">Fecha</p>
-                  <p className="font-semibold text-foreground">{selectedPlay.fecha}</p>
+                  <p className="text-[11px] text-[#64748B]">Fecha</p>
+                  <p className="font-medium text-[#0F172A]">{selectedPlay.fecha}</p>
                 </div>
               </div>
 
               <Link to="/tactica/pizarra" className="w-full block">
                 <Button
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs gap-1.5"
+                  className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5"
                   onClick={() => {
                     const firstFrame = selectedPlay.frames[0];
                     const session: BoardSession = {

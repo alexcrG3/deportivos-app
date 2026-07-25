@@ -276,8 +276,8 @@ function ConfigPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Configuración</h1>
-        <p className="text-sm text-muted-foreground">Ajustes y control de acceso de tu organización.</p>
+        <h1 className="page-header-title">Configuración</h1>
+        <p className="page-header-subtitle">Ajustes y control de acceso de tu organización.</p>
       </div>      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="org">Organización</TabsTrigger>
@@ -293,7 +293,7 @@ function ConfigPage() {
         </TabsList>
         <TabsContent value="org" className="mt-4 space-y-6">
           {/* Card 1: Identidad & Perfil General */}
-          <Card className="shadow-card border/80 bg-card text-foreground">
+          <Card className="premium-card border/80 bg-card text-foreground">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" /> Datos & Perfil de la Organización
@@ -384,7 +384,7 @@ function ConfigPage() {
           </Card>
 
           {/* Card 2: Información de Contacto Directo */}
-          <Card className="shadow-card border/80 bg-card text-foreground">
+          <Card className="premium-card border/80 bg-card text-foreground">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" /> Información de Contacto & Canales Digitales
@@ -418,7 +418,7 @@ function ConfigPage() {
           </Card>
 
           {/* Card 3: Ubicación Geográfica & Mapa Interactivo GPS */}
-          <Card className="shadow-card border/80 bg-card text-foreground overflow-hidden">
+          <Card className="premium-card border/80 bg-card text-foreground overflow-hidden">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" /> Ubicación & Coordenadas de Sede Principal
@@ -489,7 +489,7 @@ function ConfigPage() {
           </Card>
 
           {/* Card 4: Galería de Instalaciones del Club (Fotos Pro) */}
-          <Card className="shadow-card border/80 bg-card text-foreground">
+          <Card className="premium-card border/80 bg-card text-foreground">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-primary" /> Galería de Instalaciones del Club
@@ -550,7 +550,7 @@ function ConfigPage() {
 
               {/* Action Bar */}
               <div className="flex justify-end pt-4 border-t border-border/60">
-                <Button onClick={handleSaveOrg} className="bg-gradient-primary shadow-elegant font-semibold px-6 text-xs gap-2">
+                <Button onClick={handleSaveOrg} className="btn-primary font-semibold px-6 text-xs gap-2">
                   <Save className="h-4 w-4" /> Guardar Perfil de Organización
                 </Button>
               </div>
@@ -559,7 +559,7 @@ function ConfigPage() {
         </TabsContent>
 
         <TabsContent value="regional" className="mt-4 space-y-6">
-          <Card className="shadow-card border/80 bg-card text-foreground">
+          <Card className="premium-card border/80 bg-card text-foreground">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" /> Configuración Regional
@@ -663,7 +663,7 @@ function ConfigPage() {
 
               {/* Save Button */}
               <div className="flex justify-end pt-2">
-                <Button onClick={handleSaveOrg} className="bg-gradient-primary shadow-elegant font-semibold px-6 text-xs gap-2">
+                <Button onClick={handleSaveOrg} className="btn-primary font-semibold px-6 text-xs gap-2">
                   <Save className="h-4 w-4" /> Guardar Configuración Regional
                 </Button>
               </div>
@@ -696,7 +696,7 @@ function ConfigPage() {
 
           {/* Top Status Cards Row */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="shadow-card border/80 bg-card p-4">
+            <Card className="premium-card border/80 bg-card p-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-primary" /> Suscripción Activa Hasta
               </span>
@@ -704,7 +704,7 @@ function ConfigPage() {
               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">Renovación automática habilitada</p>
             </Card>
 
-            <Card className="shadow-card border/80 bg-card p-4">
+            <Card className="premium-card border/80 bg-card p-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <CreditCard className="h-3.5 w-3.5 text-primary" /> Método de Pago Registrado
               </span>
@@ -712,7 +712,7 @@ function ConfigPage() {
               <p className="text-[10px] text-muted-foreground mt-0.5">Soporte directo con comprobante o SINPE</p>
             </Card>
 
-            <Card className="shadow-card border/80 bg-card p-4">
+            <Card className="premium-card border/80 bg-card p-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5 text-primary" /> Deportistas Activos en Club
               </span>
@@ -874,7 +874,7 @@ function ConfigPage() {
           </Card>
 
           {/* Billing History Table */}
-          <Card className="shadow-card border/80 bg-card text-foreground">
+          <Card className="premium-card border/80 bg-card text-foreground">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-primary" /> Historial de Renovaciones & Facturas
@@ -916,7 +916,7 @@ function ConfigPage() {
         </TabsContent>
 
         <TabsContent value="notificaciones_push" className="mt-4 space-y-6">
-          <Card className="shadow-card border-border bg-gradient-to-r from-slate-900 to-amber-950 text-white p-6 rounded-2xl">
+          <Card className="premium-card border-border bg-gradient-to-r from-slate-900 to-amber-950 text-white p-6 rounded-2xl">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-xs uppercase font-mono font-bold text-amber-400">Matriz de Notificaciones Push y Alertas</p>
@@ -934,7 +934,7 @@ function ConfigPage() {
           {/* Grid of the 7 Triggers */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Trigger 1 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-indigo-500/30 text-indigo-600 font-bold">Trigger #1</Badge>
@@ -967,7 +967,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 2 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-amber-500/30 text-amber-600 font-bold">Trigger #2</Badge>
@@ -1000,7 +1000,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 3 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-rose-500/30 text-rose-600 font-bold">Trigger #3</Badge>
@@ -1033,7 +1033,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 4 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-destructive/30 text-destructive font-bold">Trigger #4</Badge>
@@ -1066,7 +1066,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 5 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-amber-500/30 text-amber-600 font-bold">Trigger #5</Badge>
@@ -1099,7 +1099,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 6 */}
-            <Card className="shadow-card border-border">
+            <Card className="premium-card border-border">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-emerald-500/30 text-emerald-600 font-bold">Trigger #6</Badge>
@@ -1132,7 +1132,7 @@ function ConfigPage() {
             </Card>
 
             {/* Trigger 7 */}
-            <Card className="shadow-card border-border md:col-span-2">
+            <Card className="premium-card border-border md:col-span-2">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="font-mono text-[10px] border-indigo-500/30 text-indigo-600 font-bold">Trigger #7</Badge>
@@ -1497,7 +1497,7 @@ function UsuariosTab() {
             <Link2 className="h-4 w-4" />
             Enlace de Inscripción Pública
           </Button>
-          <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant text-xs h-9 font-semibold gap-1.5">
+          <Button onClick={() => setOpenCreate(true)} className="btn-primary text-xs h-9 font-semibold gap-1.5">
             <UserPlus className="h-4 w-4" />
             Nuevo Usuario
           </Button>
@@ -1505,7 +1505,7 @@ function UsuariosTab() {
       </div>
 
       {/* User Table */}
-      <Card className="shadow-card overflow-hidden">
+      <Card className="premium-card overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -1674,7 +1674,7 @@ function UsuariosTab() {
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setOpenCreate(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary shadow-elegant">Generar Invitación</Button>
+              <Button type="submit" className="btn-primary">Generar Invitación</Button>
             </div>
           </form>
         </DialogContent>
@@ -1750,7 +1750,7 @@ function UsuariosTab() {
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={() => setOpenEdit(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary shadow-elegant">Guardar Cambios</Button>
+              <Button type="submit" className="btn-primary">Guardar Cambios</Button>
             </div>
           </form>
         </DialogContent>
@@ -1945,7 +1945,7 @@ function MuroPermissionsTab() {
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" /> Permisos Globales de Publicación
@@ -1979,7 +1979,7 @@ function MuroPermissionsTab() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <Users className="h-5 w-5 text-amber-500" /> Permisos por Equipo Específico
@@ -2017,7 +2017,7 @@ function MuroPermissionsTab() {
       </Card>
 
       {/* Individual Permissions Manager */}
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle className="text-base font-bold flex items-center gap-2">
             <UserCheck className="h-5 w-5 text-primary" /> Permisos de Publicación Individuales
@@ -2039,7 +2039,7 @@ function MuroPermissionsTab() {
                 ))}
               </select>
             </div>
-            <Button onClick={handleAddIndividual} size="sm" className="bg-gradient-primary shadow-elegant h-9 gap-1">
+            <Button onClick={handleAddIndividual} size="sm" className="btn-primary h-9 gap-1">
               <Plus className="h-4 w-4" /> Agregar Permiso
             </Button>
           </div>
@@ -2117,7 +2117,7 @@ function CoachConfigPage() {
         </TabsList>
 
         <TabsContent value="perfil" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Mis Datos</CardTitle>
               <CardDescription>Información básica de tu perfil docente.</CardDescription>
@@ -2134,7 +2134,7 @@ function CoachConfigPage() {
                   <Input type="password" placeholder="Nueva contraseña" />
                 </div>
                 <div className="sm:col-span-2 flex justify-end">
-                  <Button type="submit" className="bg-gradient-primary shadow-elegant">Guardar Preferencias</Button>
+                  <Button type="submit" className="btn-primary">Guardar Preferencias</Button>
                 </div>
               </CardContent>
             </form>
@@ -2142,7 +2142,7 @@ function CoachConfigPage() {
         </TabsContent>
 
         <TabsContent value="preferencias" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Preferencias de Práctica</CardTitle>
               <CardDescription>Parámetros por defecto para tus entrenamientos.</CardDescription>
@@ -2166,14 +2166,14 @@ function CoachConfigPage() {
                 <Switch defaultChecked />
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleSave} className="bg-gradient-primary shadow-elegant">Guardar</Button>
+                <Button onClick={handleSave} className="btn-primary">Guardar</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="notificaciones" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Alertas & Notificaciones</CardTitle>
               <CardDescription>Elige cómo deseas recibir notificaciones importantes.</CardDescription>
@@ -2194,7 +2194,7 @@ function CoachConfigPage() {
                 <Switch defaultChecked />
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleSave} className="bg-gradient-primary shadow-elegant">Guardar Alertas</Button>
+                <Button onClick={handleSave} className="btn-primary">Guardar Alertas</Button>
               </div>
             </CardContent>
           </Card>
@@ -2225,7 +2225,7 @@ function ParentConfigPage() {
         </TabsList>
 
         <TabsContent value="encargado" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Datos del Encargado</CardTitle>
               <CardDescription>Información del tutor legal registrado en la academia.</CardDescription>
@@ -2242,7 +2242,7 @@ function ParentConfigPage() {
                   <Input type="password" placeholder="Nueva contraseña" />
                 </div>
                 <div className="sm:col-span-2 flex justify-end">
-                  <Button type="submit" className="bg-gradient-primary shadow-elegant">Guardar Cambios</Button>
+                  <Button type="submit" className="btn-primary">Guardar Cambios</Button>
                 </div>
               </CardContent>
             </form>
@@ -2250,7 +2250,7 @@ function ParentConfigPage() {
         </TabsContent>
 
         <TabsContent value="estudiante" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Ficha del Estudiante Asociado</CardTitle>
               <CardDescription>Detalles médicos y de contacto de tu hija, Sofía Rodríguez.</CardDescription>
@@ -2265,14 +2265,14 @@ function ParentConfigPage() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleSave} className="bg-gradient-primary shadow-elegant">Guardar Ficha Médica</Button>
+                <Button onClick={handleSave} className="btn-primary">Guardar Ficha Médica</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="facturacion" className="mt-4">
-          <Card className="shadow-card">
+          <Card className="premium-card">
             <CardHeader>
               <CardTitle>Historial de Pagos y Suscripción</CardTitle>
               <CardDescription>Detalles financieros y recibos de pago.</CardDescription>
@@ -2346,7 +2346,7 @@ function LegalConfigTab() {
   }, [firmaCoordinador]);
 
   return (
-    <Card className="shadow-card">
+    <Card className="premium-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           Aspectos Legales & Redacción de Fichas
@@ -2505,7 +2505,7 @@ function LegalConfigTab() {
           </div>
 
           <div className="flex justify-end pt-2">
-            <Button type="submit" className="bg-gradient-primary shadow-elegant">
+            <Button type="submit" className="btn-primary">
               Guardar Aspectos Legales
             </Button>
           </div>
@@ -2730,7 +2730,7 @@ function IntegracionesTab() {
             <p className="text-xs text-muted-foreground mt-0.5">Define las credenciales de WhatsApp Business y Correo Electrónico. El cliente puede colocar sus propias credenciales aquí para los envíos reales.</p>
           </div>
         </div>
-        <Button onClick={handleSave} className="bg-gradient-primary shadow-elegant text-xs h-9">
+        <Button onClick={handleSave} className="btn-primary text-xs h-9">
           <Save className="h-4 w-4 mr-1.5" />
           Guardar Integraciones
         </Button>
@@ -2738,7 +2738,7 @@ function IntegracionesTab() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* WhatsApp Card */}
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2 text-green-500">
               <MessageSquare className="h-5 w-5" /> WhatsApp Business API
@@ -2835,7 +2835,7 @@ function IntegracionesTab() {
         </Card>
 
         {/* Email Card */}
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2 text-primary">
               <Mail className="h-5 w-5" /> Correo Electrónico API
@@ -2996,7 +2996,7 @@ function IntegracionesTab() {
               <Button type="button" variant="outline" onClick={() => setOpenEmailTest(false)} disabled={testing}>
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-gradient-primary shadow-elegant" disabled={testing}>
+              <Button type="submit" className="btn-primary" disabled={testing}>
                 {testing ? "Enviando..." : "Enviar Correo"}
               </Button>
             </div>

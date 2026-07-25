@@ -26,49 +26,49 @@ function MatrizDisponibilidad() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="page-header mb-6 no-print">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-600 to-emerald-700 text-white shadow-elegant">
-            <Activity className="h-5 w-5" />
+          <div className="icon-box icon-box-primary">
+            <Activity className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Matriz de Disponibilidad</h1>
-            <p className="text-xs text-muted-foreground">Estado físico y evaluación médica consolidada</p>
+            <h1 className="page-header-title">Matriz de Disponibilidad</h1>
+            <p className="page-header-subtitle">Estado físico y evaluación médica consolidada</p>
           </div>
         </div>
       </div>
 
       {/* Filters bar */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/5 pb-3">
-        <Filter className="h-4 w-4 text-muted-foreground mr-1" />
+      <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E8F0] pb-3">
+        <Filter className="h-4 w-4 text-[#64748B] mr-1" />
         <button
           onClick={() => setFilter("todos")}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition ${
-            filter === "todos" ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground border border-transparent"
+          className={`px-3.5 py-1.5 rounded-[8px] text-xs font-bold transition-colors ${
+            filter === "todos" ? "bg-[#2563EB] text-white" : "bg-white text-[#64748B] hover:bg-slate-50 border border-[#E2E8F0]"
           }`}
         >
           Todos ({jugadores.length})
         </button>
         <button
           onClick={() => setFilter("disponibles")}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition border ${
-            filter === "disponibles" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-muted text-muted-foreground hover:bg-muted/85 hover:text-foreground border border-transparent"
+          className={`px-3.5 py-1.5 rounded-[8px] text-xs font-bold transition-colors border ${
+            filter === "disponibles" ? "bg-emerald-500/10 border-emerald-200 text-emerald-700" : "bg-white text-[#64748B] hover:bg-slate-50 border-[#E2E8F0]"
           }`}
         >
           Disponibles 🟢
         </button>
         <button
           onClick={() => setFilter("precaucion")}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition border ${
-            filter === "precaucion" ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-muted text-muted-foreground hover:bg-muted/85 hover:text-foreground border border-transparent"
+          className={`px-3.5 py-1.5 rounded-[8px] text-xs font-bold transition-colors border ${
+            filter === "precaucion" ? "bg-amber-500/10 border-amber-200 text-amber-700" : "bg-white text-[#64748B] hover:bg-slate-50 border-[#E2E8F0]"
           }`}
         >
           Precaución 🟡
         </button>
         <button
           onClick={() => setFilter("riesgo")}
-          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition border ${
-            filter === "riesgo" ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-muted text-muted-foreground hover:bg-muted/85 hover:text-foreground border border-transparent"
+          className={`px-3.5 py-1.5 rounded-[8px] text-xs font-bold transition-colors border ${
+            filter === "riesgo" ? "bg-red-500/10 border-red-200 text-red-700" : "bg-white text-[#64748B] hover:bg-slate-50 border-[#E2E8F0]"
           }`}
         >
           Riesgo Alto 🔴
@@ -76,72 +76,75 @@ function MatrizDisponibilidad() {
       </div>
 
       {/* Availability table */}
-      <Card className="bg-card shadow-card">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-white/[0.01]">
-              <TableRow>
-                <TableHead className="text-xs text-muted-foreground">Jugador</TableHead>
-                <TableHead className="text-xs text-muted-foreground">Disciplina / Cat.</TableHead>
-                <TableHead className="text-xs text-muted-foreground">Sports Score</TableHead>
-                <TableHead className="text-xs text-muted-foreground">ACWR (Cargas)</TableHead>
-                <TableHead className="text-xs text-muted-foreground">Wellness</TableHead>
-                <TableHead className="text-xs text-muted-foreground">Estado Físico</TableHead>
-                <TableHead className="text-xs text-muted-foreground">Convocable</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPlayers.map(j => {
-                const load = loads.find(l => l.jugadorId === j.id);
-                const avail = getPlayerAvailability(j.id);
-                const cfg = availabilityConfig[avail];
+      <Card className="premium-card">
+        <CardContent className="p-0 overflow-hidden">
+          <div className="table-container border-none shadow-none rounded-none">
+            <Table>
+              <TableHeader className="table-header-row bg-slate-50">
+                <TableRow className="border-none">
+                  <TableHead className="table-header-cell">Jugador</TableHead>
+                  <TableHead className="table-header-cell">Disciplina / Cat.</TableHead>
+                  <TableHead className="table-header-cell">Sports Score</TableHead>
+                  <TableHead className="table-header-cell">ACWR (Cargas)</TableHead>
+                  <TableHead className="table-header-cell">Wellness</TableHead>
+                  <TableHead className="table-header-cell">Estado Físico</TableHead>
+                  <TableHead className="table-header-cell">Convocable</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPlayers.map(j => {
+                  const load = loads.find(l => l.jugadorId === j.id);
+                  const avail = getPlayerAvailability(j.id);
+                  const cfg = availabilityConfig[avail];
 
-                return (
-                  <TableRow key={j.id} className="hover:bg-white/[0.01] border-white/5">
-                    <TableCell className="font-semibold text-white flex items-center gap-2">
-                      <img src={j.avatar} alt="" className="h-7 w-7 rounded-full border border-white/10" />
-                      <div>
-                        <p className="font-bold">{j.nombre}</p>
-                        <p className="text-[10px] text-muted-foreground">{j.identificacion}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {j.disciplina} <p className="text-[10px] opacity-75">{j.categoria}</p>
-                    </TableCell>
-                    <TableCell className="font-mono font-bold text-white text-xs">
-                      {load?.recoveryScore ?? 82}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      <span className={load?.acwr && load.acwr > 1.3 ? "text-red-400 font-bold" : "text-emerald-400"}>
-                        {load?.acwr ?? "1.05"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {load?.wellnessScore ?? 85}%
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <Badge variant="outline" className={`text-[10px] font-bold ${cfg.color} ${cfg.bg} ${cfg.border}`}>
-                        {cfg.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <Badge variant="outline" className={avail === "no-recomendado" ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}>
-                        {avail === "no-recomendado" ? "No" : "Sí"}
-                      </Badge>
+                  return (
+                    <TableRow key={j.id} className="table-row">
+                      <TableCell className="table-cell font-semibold text-[#0F172A] flex items-center gap-3">
+                        <img src={j.avatar} alt="" className="h-8 w-8 rounded-full border border-[#E2E8F0]" />
+                        <div>
+                          <p className="font-bold">{j.nombre}</p>
+                          <p className="text-[11px] text-[#64748B]">{j.identificacion}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="table-cell">
+                        <div className="text-sm text-[#0F172A] font-medium">{j.disciplina}</div>
+                        <div className="text-[11px] text-[#64748B]">{j.categoria}</div>
+                      </TableCell>
+                      <TableCell className="table-cell font-mono font-bold text-[#0F172A]">
+                        {load?.recoveryScore ?? 82}
+                      </TableCell>
+                      <TableCell className="table-cell font-mono">
+                        <span className={load?.acwr && load.acwr > 1.3 ? "text-red-600 font-bold" : "text-emerald-600 font-bold"}>
+                          {load?.acwr ?? "1.05"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="table-cell font-mono text-[#0F172A] font-medium">
+                        {load?.wellnessScore ?? 85}%
+                      </TableCell>
+                      <TableCell className="table-cell">
+                        <Badge variant="outline" className={`badge-pill ${avail === 'disponible' ? 'badge-success' : avail === 'precaucion' ? 'badge-warning' : 'badge-danger'}`}>
+                          {cfg.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="table-cell">
+                        <Badge variant="outline" className={`badge-pill ${avail === "no-recomendado" ? "badge-danger" : "badge-success"}`}>
+                          {avail === "no-recomendado" ? "No" : "Sí"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+
+                {filteredPlayers.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-12 text-[#64748B] text-sm">
+                      No se encontraron jugadores con el filtro seleccionado.
                     </TableCell>
                   </TableRow>
-                );
-              })}
-
-              {filteredPlayers.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground text-xs">
-                    No se encontraron jugadores con el filtro seleccionado.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

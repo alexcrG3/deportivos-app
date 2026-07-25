@@ -545,7 +545,7 @@ function TiendaPage() {
               </Badge>
               <span className="text-xs text-indigo-200/80 font-medium">Equipamiento & Indumentaria Oficial 2026</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight flex items-center gap-2.5">
+            <h1 className="page-header-title flex items-center gap-2.5">
               <ShoppingBag className="h-7 w-7 text-indigo-400" /> Tienda & Uniformes
             </h1>
           </div>
@@ -622,7 +622,7 @@ function TiendaPage() {
           <div className="flex flex-col lg:flex-row gap-6">
             
             {/* ── LEFT SIDEBAR FILTERS (DEPORTIVOS STYLED) ── */}
-            <aside className="w-full lg:w-64 shrink-0 space-y-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-3xl shadow-card">
+            <aside className="w-full lg:w-64 shrink-0 space-y-4 premium-card">
               
               {/* Categories Navigation */}
               <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -798,7 +798,7 @@ function TiendaPage() {
                   return (
                     <Card
                       key={prod.id}
-                      className="shadow-card hover:shadow-elegant transition-all duration-300 border border-slate-200/80 dark:border-slate-800 rounded-3xl overflow-hidden bg-white dark:bg-slate-900 flex flex-col justify-between group relative min-w-0"
+                      className="premium-card transition-all duration-300 overflow-hidden flex flex-col justify-between group relative min-w-0"
                     >
                       <div>
                         {/* Square Aspect Ratio Product Image Box with Object-Contain & Click-to-Zoom */}
@@ -970,7 +970,7 @@ function TiendaPage() {
 
         {/* TAB 2: SEGUIMIENTO DE MIS PEDIDOS */}
         <TabsContent value="mis_pedidos" className="pt-2 space-y-4">
-          <Card className="shadow-card border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 p-6">
+          <Card className="premium-card">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Package className="h-5 w-5 text-indigo-600" /> HISTORIAL Y ESTADO DE PEDIDOS DE INDUMENTARIA
@@ -1016,7 +1016,7 @@ function TiendaPage() {
         {/* TAB 3: ADMIN CONTROL (SI ES ADMIN) */}
         {isAdmin && (
           <TabsContent value="admin" className="pt-2 space-y-6">
-            <Card className="shadow-card border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 p-6 space-y-4">
+            <Card className="premium-card space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Truck className="h-4 w-4 text-indigo-600" /> DESPACHO Y CONTROL DE PEDIDOS RECIBIDOS
@@ -1072,7 +1072,7 @@ function TiendaPage() {
             </Card>
 
             {/* TABLA 2: GESTOR DE PRODUCTOS E INVENTARIO POR TALLA */}
-            <Card className="shadow-card border border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 p-6 space-y-4">
+            <Card className="premium-card space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">

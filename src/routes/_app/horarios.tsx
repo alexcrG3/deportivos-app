@@ -389,7 +389,7 @@ function HorariosPage() {
             </SelectContent>
           </Select>
 
-          <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant h-9 text-xs font-bold">
+          <Button onClick={() => setIsOpenCreate(true)} className="btn-primary shadow-sm">
             <Plus className="h-4 w-4 mr-1" /> Nuevo entrenamiento
           </Button>
         </div>
@@ -577,11 +577,11 @@ function HorariosPage() {
       )}
 
       <div className="flex flex-wrap gap-2 text-xs pt-1">
-        <Badge className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15" variant="secondary">Fútbol</Badge>
-        <Badge className="bg-warning/10 text-warning border border-warning/20 hover:bg-warning/15" variant="secondary">Baloncesto</Badge>
-        <Badge className="bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/15" variant="secondary">Femenino</Badge>
+        <Badge className="badge-pill badge-info hover:bg-blue-500/20" variant="secondary">Fútbol</Badge>
+        <Badge className="badge-pill badge-warning hover:bg-amber-500/20" variant="secondary">Baloncesto</Badge>
+        <Badge className="badge-pill badge-danger hover:bg-red-500/20" variant="secondary">Femenino</Badge>
         <Badge className="bg-muted text-muted-foreground border border-transparent hover:bg-muted" variant="secondary">Natación</Badge>
-        <Badge className="bg-success/10 text-success border border-success/20 hover:bg-success/15" variant="secondary">Abierto</Badge>
+        <Badge className="badge-pill badge-success hover:bg-emerald-500/20" variant="secondary">Abierto</Badge>
       </div>
 
       {/* Create Modal */}

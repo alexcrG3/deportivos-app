@@ -159,8 +159,8 @@ function CheckinPage() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5" /> Centro operativo de acceso
           </div>
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Check-in inteligente</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="page-header-title md:text-3xl">Check-in inteligente</h1>
+          <p className="page-header-subtitle">
             Escanea, valida y registra el ingreso de atletas en segundos.
           </p>
         </div>
@@ -208,7 +208,7 @@ function CheckinPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="relative aspect-square w-full overflow-hidden rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+                <div className="relative aspect-square w-full overflow-hidden premium-card border-2 border-dashed border-primary/30">
                   <div className="absolute inset-6 rounded-lg border border-primary/40" />
                   <div className="absolute left-6 right-6 top-1/2 h-0.5 -translate-y-1/2 animate-pulse bg-primary/70 shadow-[0_0_12px_2px_var(--color-primary)]" />
                   <div className="absolute left-4 top-4 h-6 w-6 rounded-tl-lg border-l-2 border-t-2 border-primary" />
@@ -245,7 +245,7 @@ function CheckinPage() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <Link to="/jugadores/$id" params={{ id: l.jugadorId }} className="truncate font-medium hover:underline">{l.nombre}</Link>
-                              <Badge variant="outline" className={`gap-1 ${r.text} ${r.border}`}>
+                              <Badge variant="outline" className={`badge-pill gap-1 ${r.text} ${r.border}`}>
                                 <r.Icon className="h-3 w-3" />{r.label}
                               </Badge>
                             </div>
@@ -281,7 +281,7 @@ function CheckinPage() {
                   const r = resultMeta(l.resultado);
                   const s = statusMeta(l.estadoOp);
                   return (
-                    <div key={l.id} className={`rounded-xl border ${r.border} ${r.bg} p-4`}>
+                    <div key={l.id} className={`premium-card border ${r.border} ${r.bg} p-4`}>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12 ring-2 ring-background"><AvatarImage src={l.avatar} /><AvatarFallback>{l.nombre[0]}</AvatarFallback></Avatar>
                         <div className="min-w-0 flex-1">
@@ -324,7 +324,7 @@ function CheckinPage() {
                       <span className="hidden text-xs text-muted-foreground md:inline">{l.sede}</span>
                       <span className="hidden text-xs text-muted-foreground lg:inline">{l.entrenador}</span>
                       <span className="hidden text-xs text-muted-foreground lg:inline">{l.dispositivo}</span>
-                      <Badge variant="outline" className={`gap-1 ${r.text} ${r.border}`}>
+                      <Badge variant="outline" className={`badge-pill gap-1 ${r.text} ${r.border}`}>
                         <r.Icon className="h-3 w-3" />{r.label}
                       </Badge>
                     </div>

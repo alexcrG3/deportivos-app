@@ -159,19 +159,19 @@ function DisciplinasPage() {
       <div className="flex items-center gap-1.5 border-b pb-3">
         <Link
           to="/equipos"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           👥 Equipos
         </Link>
         <Link
           to="/categorias"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           🏷️ Categorías
         </Link>
         <Link
           to="/disciplinas"
-          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+          className="px-4 py-2 rounded-[8px] text-sm font-semibold bg-[#2563EB] text-white shadow-sm"
         >
           ⚽ Disciplinas
         </Link>
@@ -179,10 +179,10 @@ function DisciplinasPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Estructura — Disciplinas</h1>
-          <p className="text-sm text-muted-foreground">Administra las disciplinas deportivas de la academia.</p>
+          <h1 className="page-header-title">Estructura — Disciplinas</h1>
+          <p className="text-[#64748B] text-sm">Administra las disciplinas deportivas de la academia.</p>
         </div>
-        <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setIsOpenCreate(true)} className="btn-primary">
           <Plus className="h-4 w-4 mr-1" /> Nueva disciplina
         </Button>
       </div>
@@ -202,13 +202,13 @@ function DisciplinasPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredList.map((d) => (
-            <Card key={d.id} className="shadow-card group hover:shadow-elegant transition-all duration-200 hover:-translate-y-0.5 bg-card border-border">
+            <Card key={d.id} className="premium-card-flat group hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
               <CardHeader className="flex-row items-center gap-3 space-y-0 p-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl shadow-card shrink-0" style={{ background: `color-mix(in oklab, ${d.color} 15%, transparent)` }}>
                   {d.icono}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-base font-bold text-foreground truncate">{d.nombre}</CardTitle>
+                  <CardTitle className="kpi-numbere">{d.nombre}</CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">{d.activos} jugadores activos</CardDescription>
                 </div>
               </CardHeader>
@@ -256,10 +256,10 @@ function DisciplinasPage() {
       {/* Create Modal */}
       {isOpenCreate && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-card border-border w-full max-w-md shadow-2xl">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b">
-              <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <Plus className="h-5 w-5 text-primary" /> Registrar Nueva Disciplina
+          <Card className="premium-card w-full max-w-md">
+            <CardHeader className="p-0 pb-4 flex flex-row items-center justify-between border-b border-[#E2E8F0]">
+              <CardTitle className="page-header-title flex items-center gap-2">
+                <Plus className="h-5 w-5 text-[#2563EB]" /> Registrar Nueva Disciplina
               </CardTitle>
               <button 
                 onClick={() => setIsOpenCreate(false)} 
@@ -344,16 +344,16 @@ function DisciplinasPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
+                  className="flex-1 btn-primary"
                   onClick={handleCreate}
                 >
                   Guardar Disciplina
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-border text-muted-foreground text-xs" 
+                  className="btn-secondary" 
                   onClick={() => setIsOpenCreate(false)}
                 >
                   Cancelar
@@ -367,10 +367,10 @@ function DisciplinasPage() {
       {/* Edit Modal */}
       {editingItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-card border-border w-full max-w-md shadow-2xl">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b">
-              <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <Edit2 className="h-5 w-5 text-primary" /> Editar Disciplina
+          <Card className="premium-card w-full max-w-md">
+            <CardHeader className="p-0 pb-4 flex flex-row items-center justify-between border-b border-[#E2E8F0]">
+              <CardTitle className="page-header-title flex items-center gap-2">
+                <Edit2 className="h-5 w-5 text-[#2563EB]" /> Editar Disciplina
               </CardTitle>
               <button 
                 onClick={() => setEditingItem(null)} 
@@ -454,16 +454,16 @@ function DisciplinasPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
+                  className="flex-1 btn-primary"
                   onClick={handleUpdate}
                 >
                   Guardar Cambios
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-border text-muted-foreground text-xs" 
+                  className="btn-secondary" 
                   onClick={() => setEditingItem(null)}
                 >
                   Cancelar

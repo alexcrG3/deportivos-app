@@ -157,14 +157,14 @@ function SoporteAcademiaPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <h1 className="page-header-title flex items-center gap-2">
             <LifeBuoy className="h-6 w-6 text-primary" /> Soporte
           </h1>
-          <p className="text-xs text-muted-foreground">Crea y consulta tickets de ayuda, sugerencias o necesidades para tu academia.</p>
+          <p className="page-header-subtitle">Crea y consulta tickets de ayuda, sugerencias o necesidades para tu academia.</p>
         </div>
         <Button 
           onClick={() => setOpenNewTicketModal(true)} 
-          className="bg-gradient-primary hover:opacity-90 shadow-elegant gap-2 self-start sm:self-auto"
+          className="btn-primary gap-2 self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" /> Nuevo ticket
         </Button>
@@ -209,7 +209,7 @@ function SoporteAcademiaPage() {
       {/* Tickets List */}
       <div className="space-y-3">
         {filteredTickets.length === 0 ? (
-          <Card className="shadow-elegant border/80 bg-card p-12 text-center">
+          <Card className="premium-card p-12 text-center">
             <HelpCircle className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
             <h3 className="text-sm font-bold text-foreground">No hay tickets registrados</h3>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
@@ -225,7 +225,7 @@ function SoporteAcademiaPage() {
             return (
               <Card 
                 key={t.id} 
-                className="shadow-sm hover:shadow-md transition cursor-pointer border/80 bg-card group"
+                className="premium-card hover:shadow-sm transition cursor-pointer group"
                 onClick={() => setSelectedTicket(t)}
               >
                 <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

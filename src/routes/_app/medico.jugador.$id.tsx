@@ -408,45 +408,45 @@ function MedicoJugadorDetailPage() {
       </div>
 
       {/* ATHLETE HERO HEADER */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-5 sm:p-6 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
+      <div className="page-header flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
-          <Avatar className="h-16 w-16 sm:h-20 sm:w-20 ring-4 ring-indigo-500/30 border-2 border-white shadow-lg shrink-0">
+          <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-2 border-white shadow-sm shrink-0">
             <AvatarImage src={jugador.avatar} />
             <AvatarFallback className="bg-indigo-600 text-white font-black text-2xl">{jugador.nombre[0]}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-black text-white flex flex-wrap justify-center sm:justify-start items-center gap-2">
+            <h1 className="page-header-title flex flex-wrap justify-center sm:justify-start items-center gap-2">
               {jugador.nombre}
             </h1>
-            <p className="text-xs text-slate-300 flex flex-wrap justify-center sm:justify-start items-center gap-2">
-              <span>ID: <strong className="text-white font-mono">{jugador.identificacion || "DOC-20004"}</strong></span>
+            <p className="page-header-subtitle flex flex-wrap justify-center sm:justify-start items-center gap-2">
+              <span>ID: <strong className="font-mono">{jugador.identificacion || "DOC-20004"}</strong></span>
               <span>·</span>
-              <span>Categoría: <strong className="text-white">{jugador.categoria}</strong></span>
+              <span>Categoría: <strong>{jugador.categoria}</strong></span>
               <span>·</span>
-              <span>Edad: <strong className="text-white">{jugador.edad} años</strong></span>
+              <span>Edad: <strong>{jugador.edad} años</strong></span>
             </p>
-            <p className="text-xs text-slate-400">
-              Médico Tratante: <span className="text-indigo-300 font-bold">{historial.medicoAsignado || "Dr. Roberto Solano"}</span> · Fisioterapeuta: <span className="text-indigo-300 font-bold">{historial.fisioterapeutaAsignado || "Licda. Mariela Castro"}</span>
+            <p className="page-header-subtitle">
+              Médico Tratante: <span className="font-bold">{historial.medicoAsignado || "Dr. Roberto Solano"}</span> · Fisioterapeuta: <span className="font-bold">{historial.fisioterapeutaAsignado || "Licda. Mariela Castro"}</span>
             </p>
           </div>
         </div>
 
-        <div className="bg-slate-950/80 p-3 sm:p-4 rounded-2xl border border-slate-800 text-center space-y-1 w-full sm:w-auto min-w-[180px]">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estado Médico Deportivo</p>
+        <div className="premium-card p-3 sm:p-4 text-center space-y-1 w-full sm:w-auto min-w-[180px]">
+          <p className="kpi-label text-center">Estado Médico Deportivo</p>
           <Badge
-            className={`font-black text-xs sm:text-sm px-4 py-1 rounded-full uppercase tracking-wider ${
+            className={`badge-pill uppercase tracking-wider ${
               estadoMedico === "alta"
-                ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                ? "badge-success"
                 : estadoMedico === "rehabilitacion"
-                ? "bg-amber-500 text-white shadow-amber-500/20"
+                ? "badge-warning"
                 : estadoMedico === "precaucion"
-                ? "bg-purple-500 text-white shadow-purple-500/20"
-                : "bg-rose-600 text-white shadow-rose-600/20"
+                ? "badge-info"
+                : "badge-danger"
             }`}
           >
             {estadoMedico === "alta" ? "✓ ALTA DEPORTIVA" : estadoMedico.toUpperCase()}
           </Badge>
-          <p className="text-[10px] text-slate-400 pt-0.5">Última valoración: {historial.fechaUltimaValoracion}</p>
+          <p className="kpi-subtext pt-0.5">Última valoración: {historial.fechaUltimaValoracion}</p>
         </div>
       </div>
 

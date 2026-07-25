@@ -183,7 +183,7 @@ function DiarioPage() {
       <CoachOsBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Minutas de Lección</h1>
+          <h1 className="page-header-title">Minutas de Lección</h1>
           <p className="text-sm text-muted-foreground">
             {role === "admin" && selectedCoachName
               ? `Minutas de ${selectedCoachName}`
@@ -193,7 +193,7 @@ function DiarioPage() {
       </div>
 
       {/* Formulario de Nueva Minuta */}
-      <Card className="shadow-card border-primary/20 bg-card">
+      <Card className="premium-card border-primary/20">
         <CardHeader className="p-4 pb-2 border-b border-border bg-muted/10">
           <CardTitle className="flex items-center gap-2 text-base text-foreground">
             <NotebookPen className="h-5 w-5 text-primary" /> Registrar Minuta de Clase
@@ -256,7 +256,7 @@ function DiarioPage() {
           </div>
 
           <div className="flex justify-end pt-1">
-            <Button onClick={handleSaveEntry} className="bg-primary text-white text-xs font-bold px-6">
+            <Button onClick={handleSaveEntry} className="btn-primary">
               Guardar Minuta
             </Button>
           </div>
@@ -274,7 +274,7 @@ function DiarioPage() {
           </div>
         ) : (
           entries.map((d) => (
-            <Card key={d.id} className="shadow-card bg-card border-border hover:shadow-elegant transition-all">
+            <Card key={d.id} className="premium-card hover:shadow-sm transition-all">
               <CardHeader className="flex-row items-start justify-between space-y-0 p-4 pb-2">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 border border-primary/20">

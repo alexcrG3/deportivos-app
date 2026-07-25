@@ -19,16 +19,16 @@ const iconos = {
 } as const;
 
 const priorityColors = {
-  critica: "bg-red-500/10 text-red-500 border-red-500/20",
-  alta: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-  media: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  baja: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+  critica: "bg-red-500/10 text-red-700",
+  alta: "bg-orange-500/10 text-orange-700",
+  media: "bg-amber-500/10 text-amber-700",
+  baja: "bg-emerald-500/10 text-emerald-700"
 };
 
 const confidenceColors = {
-  Alta: "text-emerald-400 bg-emerald-500/10",
-  Media: "text-amber-400 bg-amber-500/10",
-  Baja: "text-red-400 bg-red-500/10"
+  Alta: "bg-emerald-500/10 text-emerald-700",
+  Media: "bg-amber-500/10 text-amber-700",
+  Baja: "bg-red-500/10 text-red-700"
 };
 
 function RecomendacionesIA() {
@@ -58,34 +58,34 @@ function RecomendacionesIA() {
         {recs.map((r) => {
           const Icon = iconos[r.tipo] || Sparkles;
           return (
-            <Card key={r.id} className={`border ${r.completada ? "opacity-60 bg-muted/20" : "bg-card"}`}>
+            <Card key={r.id} className={`border border-[#E2E8F0] rounded-[12px] shadow-sm ${r.completada ? "opacity-60 bg-slate-50" : "bg-white"}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-[#0F172A]">
                     <Icon className="h-4.5 w-4.5 text-primary shrink-0" />
                     {r.jugador}
                   </CardTitle>
                   <div className="flex gap-1">
-                    <Badge variant="outline" className={`text-[9px] font-bold ${priorityColors[r.prioridad]}`}>
+                    <Badge variant="outline" className={`text-[12px] font-medium rounded-full px-[10px] py-[4px] ${priorityColors[r.prioridad]}`}>
                       {r.prioridad.toUpperCase()}
                     </Badge>
-                    <Badge className={`text-[9px] font-bold ${confidenceColors[r.confianza]}`}>
+                    <Badge className={`text-[12px] font-medium rounded-full px-[10px] py-[4px] ${confidenceColors[r.confianza]}`}>
                       Confianza: {r.confianza}
                     </Badge>
                   </div>
                 </div>
-                <CardDescription className="text-xs text-white/80 font-medium pt-1">
+                <CardDescription className="text-xs text-[#64748B] font-medium pt-1">
                   {r.texto}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {/* Explanation and variables */}
-                <div className="text-[11px] bg-white/5 border border-white/5 p-3 rounded-xl space-y-1.5">
-                  <p className="text-muted-foreground"><span className="font-bold text-white">Explicación:</span> {r.explicacion}</p>
+                <div className="text-[11px] bg-slate-50 border border-[#E2E8F0] p-3 rounded-[12px] space-y-1.5">
+                  <p className="text-[#475569]"><span className="font-bold text-[#0F172A]">Explicación:</span> {r.explicacion}</p>
                   <div className="flex flex-wrap gap-1 items-center pt-1">
-                    <span className="text-[10px] text-muted-foreground mr-1">Variables utilizadas:</span>
+                    <span className="text-[10px] text-[#475569] mr-1">Variables utilizadas:</span>
                     {r.variables.map((v, i) => (
-                      <Badge key={i} variant="secondary" className="text-[9px] font-medium bg-white/5 border border-white/10 text-white/90">
+                      <Badge key={i} variant="secondary" className="text-[12px] font-medium bg-white border border-[#E2E8F0] text-[#475569] rounded-full px-[10px] py-[4px]">
                         {v}
                       </Badge>
                     ))}
@@ -100,8 +100,8 @@ function RecomendacionesIA() {
                     onClick={() => handleExecute(r.id, r.accionText)}
                     className={`text-xs gap-1 ${
                       r.completada 
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-primary hover:opacity-90 text-white font-bold"
+                        ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
+                        : "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium"
                     }`}
                   >
                     {r.completada ? (

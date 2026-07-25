@@ -565,7 +565,7 @@ function EntrenadoresPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={() => setOpenCreateCoach(true)} className="bg-primary hover:bg-primary/90 text-white font-semibold text-xs h-9 shadow-sm gap-1.5 rounded-xl">
+          <Button onClick={() => setOpenCreateCoach(true)} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5">
             <Plus className="h-4 w-4" /> Nuevo Colaborador
           </Button>
           <Button variant="outline" onClick={fetchAllDataFromDB} className="text-xs font-normal h-9 rounded-xl border-border gap-1.5">
@@ -581,7 +581,7 @@ function EntrenadoresPage() {
             variant={activeTab === "dashboard" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("dashboard")}
-            className={activeTab === "dashboard" ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "dashboard" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             📊 Dashboard General
           </Button>
@@ -590,7 +590,7 @@ function EntrenadoresPage() {
             variant={activeTab === "colaboradores" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("colaboradores")}
-            className={activeTab === "colaboradores" ? "bg-primary text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "colaboradores" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             👥 Colaboradores ({coachesList.length})
           </Button>
@@ -599,7 +599,7 @@ function EntrenadoresPage() {
             variant={activeTab === "expedientes" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("expedientes")}
-            className={activeTab === "expedientes" ? "bg-primary text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "expedientes" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             📁 Expedientes
           </Button>
@@ -608,7 +608,7 @@ function EntrenadoresPage() {
             variant={activeTab === "certificaciones" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("certificaciones")}
-            className={activeTab === "certificaciones" ? "bg-emerald-600 text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "certificaciones" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             🎓 Certificaciones
           </Button>
@@ -617,7 +617,7 @@ function EntrenadoresPage() {
             variant={activeTab === "vacaciones" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("vacaciones")}
-            className={activeTab === "vacaciones" ? "bg-purple-600 text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "vacaciones" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             🏖️ Vacaciones & Ausencias
           </Button>
@@ -626,7 +626,7 @@ function EntrenadoresPage() {
             variant={activeTab === "nomina" ? "default" : "outline"}
             size="sm"
             onClick={() => setActiveTab("nomina")}
-            className={activeTab === "nomina" ? "bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs gap-1.5 shadow-sm" : "text-xs font-normal gap-1.5"}
+            className={activeTab === "nomina" ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" : "text-xs font-normal gap-1.5"}
           >
             💰 Nómina & Honorarios
           </Button>
@@ -639,71 +639,71 @@ function EntrenadoresPage() {
       {activeTab === "dashboard" && (
         <div className="space-y-6">
           <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-primary/50 transition-all cursor-pointer" onClick={() => setActiveTab("colaboradores")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Colaboradores</span>
-                <Users className="h-4 w-4 text-primary" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("colaboradores")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Colaboradores</span>
+                <Users className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">{coachesList.length}</p>
-              <span className="text-[10px] text-emerald-500 font-normal flex items-center gap-0.5 mt-0.5">
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">{coachesList.length}</p>
+              <span className="text-[12px] font-normal text-[#475569] flex items-center gap-0.5">
                 <ArrowUpRight className="h-3 w-3" /> Staff en campo hoy
               </span>
             </Card>
 
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer" onClick={() => setActiveTab("dashboard")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Presentes Hoy</span>
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("dashboard")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Presentes Hoy</span>
+                <CheckCircle2 className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">
                 {asistenciasList.filter(a => a.estado === "Puntual" || a.estado === "En Campo").length || 3}
               </p>
-              <span className="text-[10px] text-emerald-500 font-normal mt-0.5 block">96% asistencia</span>
+              <span className="text-[12px] font-normal text-[#475569] block">96% asistencia</span>
             </Card>
 
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-rose-500/50 transition-all cursor-pointer" onClick={() => setActiveTab("vacaciones")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Ausentes</span>
-                <AlertCircle className="h-4 w-4 text-rose-500" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("vacaciones")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Ausentes</span>
+                <AlertCircle className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">
                 {solicitudesList.filter(s => s.estado === "Aprobado").length || 1}
               </p>
-              <span className="text-[10px] text-rose-500 font-normal mt-0.5 block">1 permiso activo</span>
+              <span className="text-[12px] font-normal text-[#475569] block">1 permiso activo</span>
             </Card>
 
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-indigo-500/50 transition-all cursor-pointer" onClick={() => setActiveTab("certificaciones")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Coach Score</span>
-                <TrendingUp className="h-4 w-4 text-indigo-500" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("certificaciones")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Coach Score</span>
+                <TrendingUp className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">94<span className="text-xs text-muted-foreground font-normal">/100</span></p>
-              <span className="text-[10px] text-indigo-500 font-normal mt-0.5 block">+2 pts este mes</span>
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">94<span className="text-xs text-muted-foreground font-normal">/100</span></p>
+              <span className="text-[12px] font-normal text-[#475569] block">+2 pts este mes</span>
             </Card>
 
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-amber-500/50 transition-all cursor-pointer" onClick={() => setActiveTab("expedientes")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Evaluaciones Pend.</span>
-                <Star className="h-4 w-4 text-amber-500" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("expedientes")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Evaluaciones Pend.</span>
+                <Star className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">2</p>
-              <span className="text-[10px] text-amber-500 font-normal mt-0.5 block">Revisión mensual</span>
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">2</p>
+              <span className="text-[12px] font-normal text-[#475569] block">Revisión mensual</span>
             </Card>
 
-            <Card className="p-3 bg-card border-border shadow-xs hover:border-orange-500/50 transition-all cursor-pointer" onClick={() => setActiveTab("certificaciones")}>
-              <div className="flex items-center justify-between text-muted-foreground mb-1">
-                <span className="text-[11px] font-semibold">Licencias Vencen</span>
-                <Award className="h-4 w-4 text-orange-500" />
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm cursor-pointer" onClick={() => setActiveTab("certificaciones")}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold uppercase text-[#64748B] tracking-wider">Licencias Vencen</span>
+                <Award className="h-4 w-4 text-[#64748B]" />
               </div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-[28px] font-bold text-[#0F172A] my-1 font-mono tracking-tight">
                 {certificacionesList.filter(c => c.estado === "Por Vencer" || c.estado === "Vencida").length || 1}
               </p>
-              <span className="text-[10px] text-orange-500 font-normal mt-0.5 block">Próximos 30 días</span>
+              <span className="text-[12px] font-normal text-[#475569] block">Próximos 30 días</span>
             </Card>
           </div>
 
           {/* 🚨 CENTRO DE ATENCIÓN */}
-          <Card className="border-rose-500/30 bg-rose-500/5 dark:bg-rose-950/10 p-4 rounded-2xl space-y-3">
+          <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="h-5 w-5 text-rose-500" />
@@ -743,7 +743,7 @@ function EntrenadoresPage() {
 
           {/* LIENZO DE GRÁFICAS */}
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2 border-border shadow-sm rounded-2xl p-4 space-y-3">
+            <Card className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm space-y-3">
               <div className="flex items-center justify-between border-b pb-3">
                 <div>
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -769,7 +769,7 @@ function EntrenadoresPage() {
               </div>
             </Card>
 
-            <Card className="border-border shadow-sm rounded-2xl p-4 space-y-3">
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm space-y-3">
               <div className="border-b pb-3">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   <PieChartIcon className="h-4 w-4 text-indigo-500" /> Distribución por Área

@@ -382,12 +382,12 @@ function PagosPage() {
           </Button>
           <Button
             variant="outline" size="sm"
-            className="border-primary/40 text-primary hover:bg-primary/10"
+            className="btn-secondary"
             onClick={openModalMasivo}
           >
             <CheckSquare className="h-4 w-4 mr-1" /> Cobro Masivo
           </Button>
-          <Button onClick={openModalIndividual} className="bg-gradient-primary shadow-elegant" size="sm">
+          <Button onClick={openModalIndividual} className="btn-primary" size="sm">
             <Plus className="h-4 w-4 mr-1" /> Pago Individual
           </Button>
         </div>
@@ -524,14 +524,14 @@ function PagosPage() {
                     <TableCell className="font-mono text-xs">{p.referencia}</TableCell>
                     <TableCell className="font-medium text-sm">{p.jugador}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[11px] font-bold">
+                      <Badge variant="outline" className="badge-pill badge-info border-none">
                         {p.categoria || "Sin categoría"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm">{p.metodo}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{p.fecha}</TableCell>
                     <TableCell>
-                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 font-bold border-none px-2.5 py-0.5 rounded-full text-[11px]">completado</Badge>
+                      <Badge className="badge-pill badge-success border-none">completado</Badge>
                     </TableCell>
                     <TableCell className="text-right font-semibold">{fmt(p.monto)}</TableCell>
                     <TableCell className="text-center">

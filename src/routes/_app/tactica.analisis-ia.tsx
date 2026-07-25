@@ -157,28 +157,28 @@ function AnalisisIATactica() {
       `}</style>
 
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4 no-print">
+      <div className="page-header mb-6 no-print">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 text-white shadow-elegant">
-            <Brain className="h-5 w-5" />
+          <div className="icon-box icon-box-primary">
+            <Brain className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">Análisis Táctico IA</h1>
-            <p className="text-xs text-muted-foreground">Recomendaciones del modelo LLM orquestado con Sports Science</p>
+            <h1 className="page-header-title">Análisis Táctico IA</h1>
+            <p className="page-header-subtitle">Recomendaciones del modelo LLM orquestado con Sports Science</p>
           </div>
         </div>
         <div className="flex gap-2">
           {report && (
-            <Button size="sm" variant="outline" className="text-xs border-border text-foreground gap-1.5" onClick={() => { window.print(); toast.info("Generando PDF..."); }}>
-              <Printer className="h-3.5 w-3.5" /> Exportar Reporte
+            <Button size="sm" variant="outline" className="btn-secondary gap-1.5" onClick={() => { window.print(); toast.info("Generando PDF..."); }}>
+              <Printer className="h-4 w-4" /> Exportar Reporte
             </Button>
           )}
           <Button
             size="sm"
-            className="text-xs bg-gradient-to-r from-violet-600 to-indigo-700 text-white font-bold gap-1.5 shadow-elegant"
+            className="btn-primary gap-1.5"
             onClick={handleGenerateReport}
           >
-            <Sparkles className="h-3.5 w-3.5 text-yellow-300 animate-pulse" /> Analizar Partido con IA
+            <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" /> Analizar Partido con IA
           </Button>
         </div>
       </div>
@@ -190,73 +190,73 @@ function AnalisisIATactica() {
         <div className="lg:col-span-2 space-y-4">
           {/* Detailed IA Report Card */}
           {report && (
-            <Card className="bg-card border-violet-500/20 bg-gradient-to-br from-card to-violet-500/5 print-report-card print:border-none print:shadow-none">
-              <CardHeader className="pb-3 border-b border-border">
-                <CardTitle className="text-sm text-foreground flex items-center gap-1.5 font-bold">
-                  <Brain className="h-4.5 w-4.5 text-violet-600 dark:text-violet-400" /> Informe Táctico e Insights de IA
+            <Card className="premium-card print-report-card">
+              <CardHeader className="pb-3 border-b border-[#E2E8F0] bg-slate-50/50">
+                <CardTitle className="text-base text-[#0F172A] flex items-center gap-2 font-bold">
+                  <Brain className="h-5 w-5 text-[#2563EB]" /> Informe Táctico e Insights de IA
                 </CardTitle>
-                <CardDescription className="text-xs">Generado automáticamente analizando el plantel y el rival</CardDescription>
+                <CardDescription className="text-sm">Generado automáticamente analizando el plantel y el rival</CardDescription>
               </CardHeader>
-              <CardContent className="p-4 space-y-4 text-xs">
+              <CardContent className="p-6 space-y-6 text-sm">
                 {/* 2 column lists */}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" /> Fortalezas</p>
-                    {report.fortalezas.map((f, i) => <p key={i} className="text-foreground pl-2 border-l border-emerald-500/30 font-medium">{f}</p>)}
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p className="font-bold text-emerald-700 flex items-center gap-1.5"><CheckCircle className="h-4 w-4" /> Fortalezas</p>
+                    {report.fortalezas.map((f, i) => <p key={i} className="text-[#0F172A] pl-3 border-l-2 border-emerald-500 font-medium">{f}</p>)}
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="font-bold text-red-700 dark:text-red-400 flex items-center gap-1"><ShieldAlert className="h-3.5 w-3.5" /> Debilidades</p>
-                    {report.debilidades.map((d, i) => <p key={i} className="text-foreground pl-2 border-l border-red-500/30 font-medium">{d}</p>)}
-                  </div>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2 border-t border-border pt-3">
-                  <div className="space-y-1.5">
-                    <p className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" /> Errores Críticos Detectados</p>
-                    {report.errores.map((e, i) => <p key={i} className="text-foreground pl-2 border-l border-amber-500/30 font-medium">{e}</p>)}
-                  </div>
-                  <div className="space-y-1.5">
-                    <p className="font-bold text-blue-700 dark:text-blue-400 flex items-center gap-1"><Sparkles className="h-3.5 w-3.5" /> Aspectos Positivos / Por Mejorar</p>
-                    {report.positivos.map((p, i) => <p key={i} className="text-foreground pl-2 border-l border-blue-500/30 font-medium">{p}</p>)}
-                    {report.mejorar.map((p, i) => <p key={i} className="text-foreground pl-2 border-l border-indigo-500/30 font-medium">🔧 {p}</p>)}
+                  <div className="space-y-2">
+                    <p className="font-bold text-red-700 flex items-center gap-1.5"><ShieldAlert className="h-4 w-4" /> Debilidades</p>
+                    {report.debilidades.map((d, i) => <p key={i} className="text-[#0F172A] pl-3 border-l-2 border-red-500 font-medium">{d}</p>)}
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-3 space-y-2 bg-muted/30 p-3 rounded-xl border border-border">
-                  <p className="font-bold text-foreground flex items-center gap-1"><Lightbulb className="h-3.5 w-3.5 text-amber-500" /> Plan de Acción Recomendado</p>
-                  <div className="space-y-1">
+                <div className="grid gap-6 sm:grid-cols-2 border-t border-[#E2E8F0] pt-6">
+                  <div className="space-y-2">
+                    <p className="font-bold text-amber-700 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" /> Errores Críticos Detectados</p>
+                    {report.errores.map((e, i) => <p key={i} className="text-[#0F172A] pl-3 border-l-2 border-amber-500 font-medium">{e}</p>)}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-bold text-[#2563EB] flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> Aspectos Positivos / Por Mejorar</p>
+                    {report.positivos.map((p, i) => <p key={i} className="text-[#0F172A] pl-3 border-l-2 border-blue-400 font-medium">{p}</p>)}
+                    {report.mejorar.map((p, i) => <p key={i} className="text-[#0F172A] pl-3 border-l-2 border-indigo-400 font-medium">🔧 {p}</p>)}
+                  </div>
+                </div>
+
+                <div className="border-t border-[#E2E8F0] pt-6 space-y-3 bg-slate-50 p-4 rounded-[12px]">
+                  <p className="font-bold text-[#0F172A] flex items-center gap-1.5 text-base"><Lightbulb className="h-5 w-5 text-amber-500" /> Plan de Acción Recomendado</p>
+                  <div className="space-y-2">
                     {report.recomendaciones.map((r, i) => (
-                      <p key={i} className="text-foreground pl-2 border-l border-amber-500/40 font-medium">💡 {r}</p>
+                      <p key={i} className="text-[#0F172A] pl-3 border-l-[3px] border-amber-400 font-medium bg-white p-2 rounded-r-[8px]">💡 {r}</p>
                     ))}
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-3 space-y-2">
-                  <p className="font-bold text-foreground flex items-center gap-1"><FileText className="h-3.5 w-3.5 text-primary" /> Siguientes Pasos de Entrenamiento</p>
-                  <div className="space-y-1">
+                <div className="border-t border-[#E2E8F0] pt-6 space-y-3">
+                  <p className="font-bold text-[#0F172A] flex items-center gap-1.5 text-base"><FileText className="h-5 w-5 text-[#2563EB]" /> Siguientes Pasos de Entrenamiento</p>
+                  <div className="space-y-2">
                     {report.pasos.map((s, i) => (
-                      <p key={i} className="text-foreground pl-2 border-l border-primary/40 font-medium">• {s}</p>
+                      <p key={i} className="text-[#0F172A] pl-3 border-l-[3px] border-[#2563EB] font-medium bg-slate-50 p-2 rounded-r-[8px]">• {s}</p>
                     ))}
                   </div>
                 </div>
 
-                <div className="border-t border-border pt-2 flex justify-between items-center text-[10px] text-muted-foreground">
+                <div className="border-t border-[#E2E8F0] pt-4 flex justify-between items-center text-xs text-[#64748B]">
                   <span>Generado por: DeportivOS AI Core</span>
-                  <span>Confianza del Modelo: <strong className="text-emerald-600 dark:text-emerald-400">{report.confianza}</strong></span>
+                  <span>Confianza del Modelo: <strong className="text-emerald-600">{report.confianza}</strong></span>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          <Card className="bg-card shadow-card flex flex-col h-[480px] border-border no-print">
-            <CardHeader className="pb-3 border-b border-border shrink-0">
-              <CardTitle className="text-sm flex items-center gap-2 text-foreground font-bold">
-                <Terminal className="h-4.5 w-4.5 text-primary" />
+          <Card className="premium-card flex flex-col h-[480px] no-print">
+            <CardHeader className="pb-3 border-b border-[#E2E8F0] shrink-0">
+              <CardTitle className="text-base flex items-center gap-2 text-[#0F172A] font-bold">
+                <Terminal className="h-5 w-5 text-[#2563EB]" />
                 Copiloto Táctico Interactivo
               </CardTitle>
-              <CardDescription className="text-xs">Consulta automatizada y simulación de escenarios de juego</CardDescription>
+              <CardDescription className="text-sm">Consulta automatizada y simulación de escenarios de juego</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-slate-50/30">
               {messages.map((m, i) => (
                 <div
                   key={i}
@@ -264,38 +264,38 @@ function AnalisisIATactica() {
                     m.sender === "user" ? "ml-auto flex-row-reverse" : ""
                   }`}
                 >
-                  <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs shrink-0 font-bold ${
-                    m.sender === "user" ? "bg-primary text-white" : "bg-violet-600 text-white"
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs shrink-0 font-bold ${
+                    m.sender === "user" ? "bg-[#2563EB] text-white" : "bg-violet-600 text-white"
                   }`}>
                     {m.sender === "user" ? "U" : "🤖"}
                   </div>
-                  <div className={`p-3 rounded-2xl text-xs leading-relaxed border font-medium ${
+                  <div className={`p-4 rounded-[12px] text-sm leading-relaxed border font-medium ${
                     m.sender === "user"
-                      ? "bg-primary/10 border-primary/20 text-foreground rounded-tr-none"
-                      : "bg-muted/40 border-border text-foreground rounded-tl-none"
+                      ? "bg-[#2563EB] border-[#2563EB] text-white rounded-tr-none"
+                      : "bg-white border-[#E2E8F0] text-[#0F172A] rounded-tl-none shadow-sm"
                   }`}>
                     {m.text}
                   </div>
                 </div>
               ))}
               {loading && (
-                <div className="flex gap-3 items-center text-xs text-muted-foreground">
-                  <div className="h-7 w-7 rounded-full bg-violet-600 text-white flex items-center justify-center animate-pulse">🤖</div>
+                <div className="flex gap-3 items-center text-sm text-[#64748B]">
+                  <div className="h-8 w-8 rounded-full bg-violet-600 text-white flex items-center justify-center animate-pulse">🤖</div>
                   <span className="animate-pulse">Procesando tácticas y analizando rival...</span>
                 </div>
               )}
             </CardContent>
             {/* Input row */}
-            <div className="p-3 border-t border-border flex gap-2 shrink-0 bg-muted/20">
+            <div className="p-4 border-t border-[#E2E8F0] flex gap-2 shrink-0 bg-white rounded-b-[12px]">
               <input
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleSend()}
                 placeholder="Pregunta a la IA táctica (ej. ¿Qué formación me recomiendas?)..."
-                className="flex-1 bg-background border border-input rounded-xl px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+                className="flex-1 bg-white border border-[#E2E8F0] rounded-[8px] px-4 py-2 text-sm text-[#0F172A] outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent placeholder:text-[#94A3B8]"
               />
-              <Button size="icon" onClick={handleSend} className="bg-primary text-white h-9 w-9 shrink-0 hover:bg-primary/95">
+              <Button size="icon" onClick={handleSend} className="bg-[#2563EB] text-white h-10 w-10 shrink-0 hover:bg-[#1D4ED8] rounded-[8px]">
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -306,29 +306,29 @@ function AnalisisIATactica() {
         <div className="space-y-4 no-print">
 
           {/* Plantel Status Card */}
-          <Card className="bg-card shadow-card border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs text-muted-foreground uppercase font-bold flex items-center gap-1.5">
-                <Lightbulb className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <Card className="premium-card">
+            <CardHeader className="pb-3 border-b border-[#E2E8F0]">
+              <CardTitle className="kpi-label flex items-center gap-1.5 text-xs">
+                <Lightbulb className="h-4 w-4 text-emerald-600" />
                 Disponibilidad Táctica
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
-              <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-bold">
-                <div className="border border-emerald-500/25 bg-emerald-500/10 p-1.5 rounded-lg text-emerald-700 dark:text-emerald-400">
+            <CardContent className="space-y-4 pt-4">
+              <div className="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+                <div className="border border-emerald-200 bg-emerald-50 p-2 rounded-[8px] text-emerald-700">
                   <p>🟢 Aptos</p>
-                  <p className="text-sm font-black mt-0.5">{summary.jugadoresDisponibles}</p>
+                  <p className="text-xl font-black mt-1">{summary.jugadoresDisponibles}</p>
                 </div>
-                <div className="border border-amber-500/25 bg-amber-500/10 p-1.5 rounded-lg text-amber-700 dark:text-amber-400">
+                <div className="border border-amber-200 bg-amber-50 p-2 rounded-[8px] text-amber-700">
                   <p>🟡 Alerta</p>
-                  <p className="text-sm font-black mt-0.5">{summary.jugadoresPrecaucion}</p>
+                  <p className="text-xl font-black mt-1">{summary.jugadoresPrecaucion}</p>
                 </div>
-                <div className="border border-red-500/25 bg-red-500/10 p-1.5 rounded-lg text-red-700 dark:text-red-400">
+                <div className="border border-red-200 bg-red-50 p-2 rounded-[8px] text-red-700">
                   <p>🔴 Riesgo</p>
-                  <p className="text-sm font-black mt-0.5">{summary.jugadoresNoRecomendados}</p>
+                  <p className="text-xl font-black mt-1">{summary.jugadoresNoRecomendados}</p>
                 </div>
               </div>
-              <p className="text-muted-foreground leading-relaxed text-[11px] font-medium">
+              <p className="text-[#64748B] leading-relaxed text-xs font-medium">
                 {summary.jugadoresNoRecomendados > 0
                   ? `⚠️ Atención: ${summary.jugadoresNoRecomendados} jugadores clave presentan fatiga. Evita cargarlos físicamente en el esquema táctico.`
                   : "✅ Todo el plantel se encuentra en condiciones óptimas para el partido."}
@@ -337,23 +337,23 @@ function AnalisisIATactica() {
           </Card>
 
           {/* AI Insights & Recs */}
-          <Card className="bg-card shadow-card border-violet-500/10">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs text-muted-foreground uppercase font-bold flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+          <Card className="premium-card">
+            <CardHeader className="pb-3 border-b border-[#E2E8F0]">
+              <CardTitle className="kpi-label flex items-center gap-1.5 text-xs">
+                <Sparkles className="h-4 w-4 text-violet-600" />
                 Alertas y Sugerencias
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-xs">
+            <CardContent className="space-y-3 pt-4">
               {recs.map(r => (
-                <div key={r.id} className="p-2.5 rounded-xl border border-violet-500/10 bg-violet-500/5">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-bold text-foreground">{r.jugador}</p>
-                    <Badge variant="outline" className={`text-[8px] font-bold ${
-                      r.prioridad === "critica" ? "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20" : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                <div key={r.id} className="p-3 rounded-[8px] border border-violet-100 bg-violet-50">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="font-bold text-[#0F172A] text-sm">{r.jugador}</p>
+                    <Badge variant="outline" className={`badge-pill text-[10px] ${
+                      r.prioridad === "critica" ? "badge-danger" : "badge-warning"
                     }`}>{r.prioridad}</Badge>
                   </div>
-                  <p className="text-muted-foreground text-[10px] leading-relaxed font-medium">{r.texto}</p>
+                  <p className="text-[#475569] text-xs leading-relaxed font-medium">{r.texto}</p>
                 </div>
               ))}
             </CardContent>
@@ -361,22 +361,22 @@ function AnalisisIATactica() {
 
           {/* Opponent analysis summary */}
           {nextRival && (
-            <Card className="bg-card shadow-card border-orange-500/10">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs text-muted-foreground uppercase font-bold flex items-center gap-1.5">
+            <Card className="premium-card">
+              <CardHeader className="pb-3 border-b border-[#E2E8F0]">
+                <CardTitle className="kpi-label flex items-center gap-1.5 text-xs">
                   <Swords className="h-4 w-4 text-orange-500" />
                   Rival: Inteligencia IA
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{nextRival.escudo}</span>
+              <CardContent className="space-y-3 pt-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{nextRival.escudo}</span>
                   <div>
-                    <p className="font-bold text-foreground text-sm">{nextRival.nombre}</p>
-                    <p className="text-muted-foreground text-[10px] font-medium">DT: {nextRival.entrenador}</p>
+                    <p className="font-bold text-[#0F172A] text-base">{nextRival.nombre}</p>
+                    <p className="text-[#64748B] text-xs font-medium">DT: {nextRival.entrenador}</p>
                   </div>
                 </div>
-                <p className="text-[11px] text-amber-700 dark:text-amber-300 italic bg-amber-500/5 p-2 rounded-lg border border-amber-500/10 mt-1 font-medium">
+                <p className="text-xs text-amber-800 italic bg-amber-50 p-3 rounded-[8px] border border-amber-200 mt-2 font-medium">
                   💡 Recomendación IA: {nextRival.nombre} usa esquema {nextRival.sistemaBase}. Se aconseja presionar la salida de sus defensas lentos.
                 </p>
               </CardContent>

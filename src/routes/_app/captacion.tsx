@@ -70,23 +70,23 @@ function EmbudoCaptacionView() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="page-header border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="page-header-title flex items-center gap-2">
             <Filter className="h-6 w-6 text-primary" /> Embudo de Captación Deportivo
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="page-header-subtitle">
             Pipeline de conversión de nuevos prospectos, pruebas y admisiones de atletas.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/crm">
-            <Button variant="outline" className="text-xs">
+            <Button variant="outline" className="btn-secondary">
               Ver CRM Completo
             </Button>
           </Link>
           <Link to="/inscripcion" target="_blank">
-            <Button className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button className="btn-primary gap-1.5">
               <ExternalLink className="h-3.5 w-3.5" /> Abrir Formulario Público
             </Button>
           </Link>
@@ -100,7 +100,7 @@ function EmbudoCaptacionView() {
         <StatCard icon={TrendingUp} label="Tasa de Conversión" value={`${tasaConv}%`} hint="Efectividad de captación" />
       </div>
 
-      <Card>
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle>Etapas del Pipeline de Captación</CardTitle>
           <CardDescription>Visualización del embudo interactivo de prospectos</CardDescription>
@@ -113,7 +113,7 @@ function EmbudoCaptacionView() {
                   <span className="h-3 w-3 rounded-full" style={{ background: stage.color }} />
                   {stage.nombre}
                 </span>
-                <span className="font-bold text-xs bg-muted px-2 py-0.5 rounded-full">{stage.count} prospectos</span>
+                <span className="badge-pill badge-neutral">{stage.count} prospectos</span>
               </div>
               <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
                 <div

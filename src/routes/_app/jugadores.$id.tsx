@@ -41,9 +41,9 @@ import RendimientoStore, {
 } from "@/lib/rendimiento-store";
 
 const estadoPagoLabel = {
-  al_dia: { label: "Al día", cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold" },
-  pendiente: { label: "Pendiente", cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 font-bold" },
-  moroso: { label: "Moroso", cls: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 font-bold" },
+  al_dia: { label: "Al día", cls: "badge-pill badge-success" },
+  pendiente: { label: "Pendiente", cls: "badge-pill badge-warning" },
+  moroso: { label: "Moroso", cls: "badge-pill badge-danger" },
 };
 
 function FirmaInitializer({ base64 }: { base64: string }) {
@@ -380,7 +380,7 @@ function PlayerOS() {
         {/* COLUMNA 1 (IZQUIERDA): FICHA TÉCNICA PRO COMPLETA (SCOUTING CARD CON FOTO) */}
         {/* ========================================================= */}
         <div className="lg:col-span-5 space-y-4 sticky top-4">
-          <div className="rounded-3xl bg-slate-950 text-white shadow-2xl p-6 space-y-5 border border-slate-800 relative overflow-hidden">
+          <div className="premium-card space-y-5 relative overflow-hidden">
             <div className="absolute top-0 right-0 h-48 w-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
             {/* Encabezado Ficha */}
@@ -388,7 +388,7 @@ function PlayerOS() {
               <div className="flex items-center gap-2 text-xs font-black uppercase text-amber-400 tracking-wider">
                 <Star className="h-4 w-4 fill-amber-400" /> FICHA TÉCNICA PRO (SCOUTING)
               </div>
-              <Button size="sm" onClick={() => window.print()} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] h-7 px-3 rounded-lg gap-1.5 shadow-md">
+              <Button size="sm" onClick={() => window.print()} className="btn-primary font-black text-[11px] h-7 px-3 rounded-lg gap-1.5 shadow-md">
                 <Printer className="h-3.5 w-3.5" /> PDF
               </Button>
             </div>
@@ -409,7 +409,7 @@ function PlayerOS() {
                 <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                   {j.categoria} · {j.disciplina}
                 </span>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-white pt-1">{j.nombre}</h2>
+                <h2 className="page-header-title pt-1">{j.nombre}</h2>
                 <p className="text-xs text-slate-400 font-medium">
                   Posición: <span className="text-amber-400 font-bold">{posicionPrincipal}</span> {secundarias?.length ? `(${secundarias.join(", ")})` : ""}
                 </p>
@@ -418,26 +418,26 @@ function PlayerOS() {
 
             {/* Badges de Medidas */}
             <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                <p className="text-[9px] font-bold uppercase text-slate-400">Edad</p>
-                <p className="text-sm font-black text-white">{j.edad} a</p>
+              <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                <p className="kpi-label">Edad</p>
+                <p className="kpi-number">{j.edad} a</p>
               </div>
-              <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                <p className="text-[9px] font-bold uppercase text-slate-400">Altura</p>
-                <p className="text-sm font-black text-white">{altura ? `${altura}m` : "1.74m"}</p>
+              <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                <p className="kpi-label">Altura</p>
+                <p className="kpi-number">{altura ? `${altura}m` : "1.74m"}</p>
               </div>
-              <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                <p className="text-[9px] font-bold uppercase text-slate-400">Peso</p>
-                <p className="text-sm font-black text-white">{peso ? `${peso}kg` : "68kg"}</p>
+              <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                <p className="kpi-label">Peso</p>
+                <p className="kpi-number">{peso ? `${peso}kg` : "68kg"}</p>
               </div>
-              <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                <p className="text-[9px] font-bold uppercase text-slate-400">Perfil</p>
+              <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                <p className="kpi-label">Perfil</p>
                 <p className="text-sm font-black text-amber-400">{perfil || "Hábil"}</p>
               </div>
             </div>
 
             {/* Radar Evaluativo */}
-            <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
               <p className="text-[11px] font-extrabold uppercase text-blue-400 tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1.5">
                 <span className="h-2 w-2 rounded-full bg-blue-400" /> ATRIBUTOS DE SCOUTING
               </p>
@@ -464,20 +464,20 @@ function PlayerOS() {
             </div>
 
             {/* Características por Deporte */}
-            <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
               <p className="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1.5">
                 <span className="h-2 w-2 rounded-full bg-amber-400" /> CARACTERÍSTICAS TÁCTICAS ({j.disciplina.toUpperCase()})
               </p>
               <div className="grid grid-cols-2 gap-1.5 text-[11px] font-semibold">
-                <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">⚡ Veloz & Explosivo</div>
-                <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">🎯 Visión de Juego</div>
-                <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">💪 Fuerte en 1vs1</div>
-                <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">🔥 Pase Filoso</div>
+                <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">⚡ Veloz & Explosivo</div>
+                <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🎯 Visión de Juego</div>
+                <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">💪 Fuerte en 1vs1</div>
+                <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🔥 Pase Filoso</div>
               </div>
             </div>
 
             {/* Palmarés */}
-            <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
               <p className="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider border-b border-slate-800 pb-1.5">
                 🏆 LOGROS DESTACADOS
               </p>
@@ -512,7 +512,7 @@ function PlayerOS() {
 
           {/* Resumen Operativo y Alertas */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <BadgeCheck className="h-4 w-4 text-primary" /> Resumen Operativo
@@ -526,7 +526,7 @@ function PlayerOS() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <Heart className="h-4 w-4 text-emerald-500" /> State Wellness
@@ -578,7 +578,7 @@ function PlayerOS() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             {/* COLUMNA 1: FICHA TÉCNICA PRO / SCOUTING CARD (COMPACTA Y ALTA, SIN FOTO REPETIDA) */}
-            <div className="lg:col-span-5 rounded-3xl bg-slate-950 text-white shadow-2xl p-6 space-y-5 border border-slate-800 relative overflow-hidden">
+            <div className="lg:col-span-5 premium-card space-y-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 h-48 w-48 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
               
               {/* Header Card */}
@@ -586,7 +586,7 @@ function PlayerOS() {
                 <div className="flex items-center gap-2 text-xs font-black uppercase text-amber-400 tracking-wider">
                   <Star className="h-4 w-4 fill-amber-400" /> FICHA DE SCOUTING & EVALUACIÓN
                 </div>
-                <Button size="sm" onClick={() => window.print()} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[11px] h-7 px-2.5 rounded-lg gap-1">
+                <Button size="sm" onClick={() => window.print()} className="btn-primary font-black text-[11px] h-7 px-2.5 rounded-lg gap-1">
                   <Printer className="h-3 w-3" /> PDF
                 </Button>
               </div>
@@ -597,7 +597,7 @@ function PlayerOS() {
                   <Badge className="bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5">#{numero}</Badge>
                   <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{j.categoria} · {j.disciplina}</span>
                 </div>
-                <h3 className="text-2xl font-black uppercase tracking-tight text-white">{j.nombre}</h3>
+                <h3 className="text-[28px] font-bold text-[#0F172A]">{j.nombre}</h3>
                 <p className="text-xs text-slate-400 font-medium">
                   Posición: <span className="text-amber-400 font-bold">{posicionPrincipal}</span> {secundarias?.length ? `(${secundarias.join(", ")})` : ""}
                 </p>
@@ -605,26 +605,26 @@ function PlayerOS() {
 
               {/* Metrics Grid */}
               <div className="grid grid-cols-4 gap-2 text-center pt-1">
-                <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                  <p className="text-[9px] font-bold uppercase text-slate-400">Edad</p>
-                  <p className="text-sm font-black text-white">{j.edad} a</p>
+                <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                  <p className="kpi-label">Edad</p>
+                  <p className="kpi-number">{j.edad} a</p>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                  <p className="text-[9px] font-bold uppercase text-slate-400">Altura</p>
-                  <p className="text-sm font-black text-white">{altura ? `${altura}m` : "1.74m"}</p>
+                <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                  <p className="kpi-label">Altura</p>
+                  <p className="kpi-number">{altura ? `${altura}m` : "1.74m"}</p>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                  <p className="text-[9px] font-bold uppercase text-slate-400">Peso</p>
-                  <p className="text-sm font-black text-white">{peso ? `${peso}kg` : "68kg"}</p>
+                <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                  <p className="kpi-label">Peso</p>
+                  <p className="kpi-number">{peso ? `${peso}kg` : "68kg"}</p>
                 </div>
-                <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                  <p className="text-[9px] font-bold uppercase text-slate-400">Perfil</p>
+                <div className="p-2 rounded-xl bg-white border border-[#E2E8F0] shadow-sm">
+                  <p className="kpi-label">Perfil</p>
                   <p className="text-sm font-black text-amber-400">{perfil || "Hábil"}</p>
                 </div>
               </div>
 
               {/* Radar Chart */}
-              <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+              <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
                 <p className="text-[11px] font-extrabold uppercase text-blue-400 tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1.5">
                   <span className="h-2 w-2 rounded-full bg-blue-400" /> ATRIBUTOS DE RENDIMIENTO
                 </p>
@@ -652,33 +652,33 @@ function PlayerOS() {
 
               {/* Característica & Aptitudes */}
               <div className="space-y-3">
-                <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+                <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
                   <p className="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1.5">
                     <span className="h-2 w-2 rounded-full bg-amber-400" /> CARACTERÍSTICAS TÁCTICAS ({j.disciplina.toUpperCase()})
                   </p>
                   <div className="grid grid-cols-2 gap-1.5 text-[11px] font-semibold">
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">⚡ Veloz & Explosivo</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">🎯 Visión de Juego</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">💪 Fuerte en 1vs1</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-200">🔥 Pase Filoso</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">⚡ Veloz & Explosivo</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🎯 Visión de Juego</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">💪 Fuerte en 1vs1</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🔥 Pase Filoso</div>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+                <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
                   <p className="text-[11px] font-extrabold uppercase text-emerald-400 tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-1.5">
                     <span className="h-2 w-2 rounded-full bg-emerald-400" /> VALORES Y APTITUDES
                   </p>
                   <div className="grid grid-cols-2 gap-1.5 text-[11px] font-semibold">
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-300">🤝 Compañerismo</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-300">🏆 Liderazgo</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-300">🧠 Inteligencia Táctica</div>
-                    <div className="p-1.5 rounded-lg bg-slate-950 border border-slate-800/80 text-slate-300">⭐ Disciplinado</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🤝 Compañerismo</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🏆 Liderazgo</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">🧠 Inteligencia Táctica</div>
+                    <div className="p-1.5 rounded-lg bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">⭐ Disciplinado</div>
                   </div>
                 </div>
               </div>
 
               {/* Palmarés */}
-              <div className="p-3 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+              <div className="p-3 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-2">
                 <p className="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider border-b border-slate-800 pb-1.5">
                   🏆 LOGROS Y PALMARÉS
                 </p>
@@ -699,7 +699,7 @@ function PlayerOS() {
             <div className="lg:col-span-7 space-y-4">
               
               {/* Bloque 1: Información Personal y Adscripción */}
-              <Card className="shadow-card border border-border/60">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <User className="h-4 w-4 text-primary" /> Expediente General y Adscripción
@@ -719,7 +719,7 @@ function PlayerOS() {
               </Card>
 
               {/* Bloque 2: Apoderado y Contacto de Emergencia */}
-              <Card className="shadow-card border border-border/60">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" /> Apoderado Legal y Emergencia
@@ -734,7 +734,7 @@ function PlayerOS() {
               </Card>
 
               {/* Bloque 3: Datos Médicos y Seguro */}
-              <Card className="shadow-card border border-border/60">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm font-bold flex items-center gap-2 text-rose-500">
                     <ShieldAlert className="h-4 w-4" /> Ficha Médica y Seguro Deportivo
@@ -751,7 +751,7 @@ function PlayerOS() {
               </Card>
 
               {/* Bloque 4: Estatus Financiero y Matrícula */}
-              <Card className="shadow-card border border-border/60">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm font-bold flex items-center gap-2 text-emerald-600">
                     <DollarSign className="h-4 w-4" /> Historial Financiero y Mensualidad
@@ -771,7 +771,7 @@ function PlayerOS() {
         {/* GENERAL */}
         <TabsContent value="general" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card">
+            <Card className="lg:col-span-2 premium-card-flat">
               <CardHeader><CardTitle className="text-base">Datos personales</CardTitle></CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 <Field label="Nombre completo" value={j.nombre} />
@@ -792,7 +792,7 @@ function PlayerOS() {
                 <Field label="Seguro Médico / EPS" value={j.seguroEps || "—"} />
               </CardContent>
             </Card>
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base">Adscripción</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <KV k="Sede" v={j.sede} />
@@ -805,7 +805,7 @@ function PlayerOS() {
             </Card>
           </div>
 
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader>
               <CardTitle className="text-base">Información de los Padres / Encargados</CardTitle>
             </CardHeader>
@@ -868,7 +868,7 @@ function PlayerOS() {
         {/* DEPORTIVO */}
         <TabsContent value="deportivo" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card">
+            <Card className="lg:col-span-2 premium-card-flat">
               <CardHeader><CardTitle className="text-base">Perfil técnico</CardTitle><CardDescription>Radar de habilidades</CardDescription></CardHeader>
               <CardContent className="h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -881,7 +881,7 @@ function PlayerOS() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base">Atributos</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <KV k="Posición principal" v={<Badge className="bg-primary/15 text-primary" variant="secondary">{posicionPrincipal}</Badge>} />
@@ -900,7 +900,7 @@ function PlayerOS() {
           </div>
 
           {/* MAPA POSICIONAL */}
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Mapa posicional</CardTitle>
               <CardDescription>Posición principal y alternativas en cancha</CardDescription>
@@ -920,7 +920,7 @@ function PlayerOS() {
             <KpiCard label="Minutos" value={stats.minutos} sub="Total jugados" />
             <KpiCard label="Rendimiento" value={`${stats.promRend}/100`} sub="Promedio" />
           </div>
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader><CardTitle className="text-base">Evolución mensual</CardTitle></CardHeader>
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -955,7 +955,7 @@ function PlayerOS() {
         {/* ENTRENADOR */}
         <TabsContent value="entrenador" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card">
+            <Card className="lg:col-span-2 premium-card-flat">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Observaciones del entrenador</CardTitle>
                 <CardDescription>Notas privadas y públicas</CardDescription>
@@ -987,7 +987,7 @@ function PlayerOS() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base">Objetivos activos</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 {objetivos.map((o) => (
@@ -1004,7 +1004,7 @@ function PlayerOS() {
             </Card>
           </div>
 
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader><CardTitle className="text-base">Historial de evaluaciones</CardTitle></CardHeader>
             <CardContent>
               <Table>
@@ -1037,14 +1037,14 @@ function PlayerOS() {
                 <p className="mt-1 text-xs text-muted-foreground">{j.saldo > 0 ? "Saldo pendiente" : "Sin deudas"}</p>
               </CardContent>
             </Card>
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardContent className="p-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">Pagado este año</p>
                 <p className="mt-2 text-2xl font-bold">{formatCRC(pagosJugador.filter(p => p.estado === "pagado").reduce((a, p) => a + p.monto, 0))}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{pagosJugador.length} transacciones</p>
               </CardContent>
             </Card>
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardContent className="p-5 flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground">Estado operativo</p>
@@ -1066,7 +1066,7 @@ function PlayerOS() {
             </Card>
           </div>
 
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Historial de pagos</CardTitle>
               <Button variant="outline" size="sm"><Plus className="h-4 w-4" /> Registrar pago</Button>
@@ -1100,7 +1100,7 @@ function PlayerOS() {
         {/* MÉDICO */}
         <TabsContent value="medico" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><Stethoscope className="h-4 w-4 text-primary" /> Lesiones</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {lesiones.map((l) => (
@@ -1122,17 +1122,17 @@ function PlayerOS() {
             </Card>
 
             <div className="space-y-4">
-              <Card className="shadow-card">
+              <Card className="premium-card-flat">
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><Heart className="h-4 w-4 text-destructive" /> Alergias</CardTitle></CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
                   {alergias.length ? alergias.map((a) => <Badge key={a} variant="outline" className="bg-destructive/5 border-destructive/30 text-destructive">{a}</Badge>) : <EmptyState text="Sin alergias registradas" />}
                 </CardContent>
               </Card>
-              <Card className="shadow-card">
+              <Card className="premium-card-flat">
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><Pill className="h-4 w-4 text-warning" /> Medicamentos</CardTitle></CardHeader>
                 <CardContent className="text-sm">{medicamentos.length ? medicamentos.join(", ") : <EmptyState text="Sin medicamentos" />}</CardContent>
               </Card>
-              <Card className="shadow-card">
+              <Card className="premium-card-flat">
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldAlert className="h-4 w-4 text-warning" /> Restricciones y condiciones</CardTitle></CardHeader>
                 <CardContent className="space-y-2 text-sm">
                   {restriccionesMed.length > 0 && restriccionesMed.map((r) => <p key={r} className="text-destructive">• {r}</p>)}
@@ -1145,7 +1145,7 @@ function PlayerOS() {
 
           {/* Contactos emergencia + Seguro */}
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> Contactos de emergencia</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {contactosEmergencia.map((c) => (
@@ -1161,7 +1161,7 @@ function PlayerOS() {
                 ))}
               </CardContent>
             </Card>
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-success" /> Seguro médico</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <KV k="Aseguradora" v={seguro.aseguradora} />
@@ -1177,7 +1177,7 @@ function PlayerOS() {
 
         {/* DOCUMENTOS */}
         <TabsContent value="documentos" className="space-y-4">
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Centro de documentos</CardTitle>
               <Button variant="outline" size="sm"><Plus className="h-4 w-4" /> Subir documento</Button>
@@ -1394,7 +1394,7 @@ function PlayerOS() {
           </div>
 
           {/* Historial de Comunicaciones */}
-          <Card className="shadow-card">
+          <Card className="premium-card-flat">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-base font-bold flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" /> Historial de Comunicaciones
@@ -1472,7 +1472,7 @@ function PlayerOS() {
           <div className="grid gap-4 lg:grid-cols-3">
             {/* Left Column: Tactical Profile & Stats */}
             <div className="space-y-4">
-              <Card className="bg-card shadow-card border-white/5">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm text-white">Perfil Táctico</CardTitle>
                   <CardDescription className="text-[10px]">Posiciones y roles preferidos en el campo</CardDescription>
@@ -1480,17 +1480,17 @@ function PlayerOS() {
                 <CardContent className="p-4 pt-0 space-y-3 text-xs text-muted-foreground">
                   <div className="grid grid-cols-2 gap-2 text-center">
                     <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                      <p className="text-[9px] uppercase font-bold text-muted-foreground">Principal</p>
+                      <p className="kpi-label">Principal</p>
                       <p className="text-white font-bold text-xs mt-0.5">{posicionPrincipal || "Mediocampista"}</p>
                     </div>
                     <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                      <p className="text-[9px] uppercase font-bold text-muted-foreground">Secundarias</p>
+                      <p className="kpi-label">Secundarias</p>
                       <p className="text-white font-bold text-xs mt-0.5">{secundarias?.join(", ") || "Lateral"}</p>
                     </div>
                   </div>
 
                   <div className="border-t border-white/5 pt-2.5 space-y-1">
-                    <p className="text-[9px] uppercase font-bold text-muted-foreground">Roles Tácticos Sugeridos</p>
+                    <p className="kpi-label">Roles Tácticos Sugeridos</p>
                     <div className="flex flex-wrap gap-1">
                       <Badge variant="outline" className="text-[9px] border-white/10 text-white">Titular Habitual</Badge>
                       <Badge variant="outline" className="text-[9px] border-white/10 text-white">Especialista Balón Parado</Badge>
@@ -1500,26 +1500,26 @@ function PlayerOS() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-card shadow-card border-white/5">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm text-white">Métricas de Temporada</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-2 text-center">
                   <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                    <p className="text-[9px] uppercase font-bold text-muted-foreground">Partidos Jugados</p>
-                    <p className="text-base font-black text-white mt-0.5">14</p>
+                    <p className="kpi-label">Partidos Jugados</p>
+                    <p className="kpi-number">14</p>
                   </div>
                   <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                    <p className="text-[9px] uppercase font-bold text-muted-foreground">Minutos Totales</p>
-                    <p className="text-base font-black text-white mt-0.5">1,120'</p>
+                    <p className="kpi-label">Minutos Totales</p>
+                    <p className="kpi-number">1,120'</p>
                   </div>
                   <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                    <p className="text-[9px] uppercase font-bold text-muted-foreground">Titularidades</p>
-                    <p className="text-base font-black text-emerald-400 mt-0.5">12</p>
+                    <p className="kpi-label">Titularidades</p>
+                    <p className="kpi-number">12</p>
                   </div>
                   <div className="border border-white/5 bg-white/[0.01] p-2.5 rounded-xl">
-                    <p className="text-[9px] uppercase font-bold text-muted-foreground">Efectividad Pases</p>
-                    <p className="text-base font-black text-blue-400 mt-0.5">88.5%</p>
+                    <p className="kpi-label">Efectividad Pases</p>
+                    <p className="kpi-number">88.5%</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1527,7 +1527,7 @@ function PlayerOS() {
 
             {/* Center Column: Heatmap (SVG mock) */}
             <div className="space-y-4">
-              <Card className="bg-card shadow-card border-white/5">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm text-white">Mapa de Calor Táctico</CardTitle>
                   <CardDescription className="text-[10px]">Zonas de mayor influencia en la temporada</CardDescription>
@@ -1595,7 +1595,7 @@ function PlayerOS() {
 
             {/* Right Column: Technical Staff Observations */}
             <div className="space-y-4">
-              <Card className="bg-card shadow-card border-white/5">
+              <Card className="premium-card-flat">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-sm text-white">Observaciones del Staff</CardTitle>
                   <CardDescription className="text-[10px]">Indicaciones y evaluaciones tácticas recientes</CardDescription>
@@ -1623,7 +1623,7 @@ function PlayerOS() {
           </div>
 
           {/* Bottom row: Match History & Formations */}
-          <Card className="bg-card shadow-card border-white/5">
+          <Card className="premium-card-flat">
             <CardHeader className="p-4 pb-2">
               <CardTitle className="text-sm text-white">Historial de Convocatorias y Formaciones</CardTitle>
               <CardDescription className="text-[10px]">Desglose de la participación táctica en los últimos encuentros</CardDescription>
@@ -1632,13 +1632,13 @@ function PlayerOS() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/5">
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Fecha</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Rival</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Formación</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Posición</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Minutos</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold">Rol</TableHead>
-                    <TableHead className="text-[10px] text-muted-foreground uppercase font-bold text-right">Nota</TableHead>
+                    <TableHead className="kpi-label">Fecha</TableHead>
+                    <TableHead className="kpi-label">Rival</TableHead>
+                    <TableHead className="kpi-label">Formación</TableHead>
+                    <TableHead className="kpi-label">Posición</TableHead>
+                    <TableHead className="kpi-label">Minutos</TableHead>
+                    <TableHead className="kpi-label">Rol</TableHead>
+                    <TableHead className="kpi-label text-right">Nota</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -2708,7 +2708,7 @@ function TimelineCard({ historial }: { historial: any[] }) {
   ];
   const items = useMemo(() => filter === "todos" ? historial : historial.filter((h) => h.categoria === filter), [filter, historial]);
   return (
-    <Card className="shadow-card">
+    <Card className="premium-card-flat">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2"><History className="h-4 w-4 text-primary" /> Línea de tiempo del atleta</CardTitle>
         <CardDescription>Eventos cronológicos · {items.length} registros</CardDescription>
@@ -2847,7 +2847,7 @@ function QuickStat({ icon: Icon, label, value, tone }: { icon: typeof Activity; 
 
 function KpiCard({ label, value, sub }: { label: string; value: React.ReactNode; sub: string }) {
   return (
-    <Card className="shadow-card">
+    <Card className="premium-card-flat">
       <CardContent className="p-5">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
         <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
@@ -2883,11 +2883,11 @@ function QrDialog({ qrUrl, carnetUrl, token, jugador, estadoOp, numero, equipo }
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5 font-bold border-amber-400/40 text-amber-500 hover:bg-amber-500/10">
+        <Button variant="outline" size="sm" className="btn-secondary gap-1.5 font-bold">
           <QrCode className="h-4 w-4" /> Carnet Pro
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-slate-950 text-white border-slate-800 p-6">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-white text-[#0F172A] border-slate-800 p-6">
         <DialogHeader className="text-left mb-2">
           <DialogTitle className="flex items-center gap-2 text-xl font-black text-amber-400 uppercase tracking-wide">
             <Sparkles className="h-5 w-5 text-amber-400" /> Acreditación Pro Atleta
@@ -3421,7 +3421,7 @@ function AltoRendimientoTab({ jugador, equipo }: { jugador: any; equipo: string 
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card">
+            <Card className="lg:col-span-2 premium-card-flat">
               <CardHeader className="pb-3"><CardTitle className="text-sm">Histórico de Carga del Jugador</CardTitle></CardHeader>
               <CardContent className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
@@ -3442,7 +3442,7 @@ function AltoRendimientoTab({ jugador, equipo }: { jugador: any; equipo: string 
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-sm flex items-center gap-1.5">
                   <Activity className="h-4 w-4 text-primary" /> Semáforo de Riesgo
@@ -3618,7 +3618,7 @@ function AltoRendimientoTab({ jugador, equipo }: { jugador: any; equipo: string 
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card">
+            <Card className="lg:col-span-2 premium-card-flat">
               <CardHeader><CardTitle className="text-sm">Cronograma y Sesiones del Equipo</CardTitle></CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
@@ -3679,7 +3679,7 @@ function AltoRendimientoTab({ jugador, equipo }: { jugador: any; equipo: string 
               </CardContent>
             </Card>
 
-            <Card className="shadow-card">
+            <Card className="premium-card-flat">
               <CardHeader><CardTitle className="text-sm">Ciclos activos y objetivos</CardTitle></CardHeader>
               <CardContent className="space-y-4 text-xs">
                 {ciclos.map((c) => (

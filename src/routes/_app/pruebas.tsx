@@ -24,8 +24,8 @@ function PruebasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Pruebas Deportivas</h1>
-          <p className="text-sm text-muted-foreground">Pruebas individuales, grupales, visorías y captaciones</p>
+          <h1 className="page-header-title">Pruebas Deportivas</h1>
+          <p className="page-header-subtitle">Pruebas individuales, grupales, visorías y captaciones</p>
         </div>
         <NewPruebaDialog onCreate={(p) => setPruebas((prev) => [p, ...prev])} />
       </div>

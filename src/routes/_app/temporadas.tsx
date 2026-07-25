@@ -154,11 +154,11 @@ function TemporadasPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Temporadas</h1>
-          <p className="text-sm text-muted-foreground">Gestión completa de temporadas deportivas.</p>
+          <h1 className="page-header-title">Temporadas</h1>
+          <p className="text-[#64748B] text-sm">Gestión completa de temporadas deportivas.</p>
         </div>
         {role !== "padres" && (
-          <Button onClick={() => setIsOpenCreate(true)}>
+          <Button onClick={() => setIsOpenCreate(true)} className="btn-primary">
             <Plus className="mr-1 h-4 w-4" />Nueva temporada
           </Button>
         )}
@@ -177,7 +177,7 @@ function TemporadasPage() {
             <button key={t.id} onClick={() => setSel(t)}
               className={`w-full text-left rounded-lg border p-3 transition-colors ${sel?.id === t.id ? "border-primary bg-primary/5" : "hover:bg-muted/40"}`}>
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground">{t.nombre}</p>
+                <p className="kpi-subtextforeground">{t.nombre}</p>
                 <Badge variant="secondary" className={estadoMeta[t.estado]?.className || "bg-muted text-muted-foreground"}>
                   {estadoMeta[t.estado]?.label || t.estado}
                 </Badge>
@@ -196,7 +196,7 @@ function TemporadasPage() {
         </div>
 
         {sel ? (
-          <Card className="shadow-card bg-card border-border">
+          <Card className="premium-card">
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -260,8 +260,8 @@ function TemporadasPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="shadow-card flex items-center justify-center p-8 bg-card border-border border-2 border-dashed">
-            <p className="text-sm text-muted-foreground">No hay ninguna temporada seleccionada o creada.</p>
+          <Card className="premium-card flex items-center justify-center border-dashed">
+            <p className="text-[#64748B] text-sm">No hay ninguna temporada seleccionada o creada.</p>
           </Card>
         )}
       </div>
@@ -269,10 +269,10 @@ function TemporadasPage() {
       {/* Modal Nueva Temporada */}
       {isOpenCreate && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-card border-border w-full max-w-md shadow-2xl">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b border-border">
-              <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <CalendarRange className="h-5 w-5 text-primary" /> Nueva Temporada
+          <Card className="premium-card w-full max-w-md">
+            <CardHeader className="p-0 pb-4 flex flex-row items-center justify-between border-b border-[#E2E8F0]">
+              <CardTitle className="page-header-title flex items-center gap-2">
+                <CalendarRange className="h-5 w-5 text-[#2563EB]" /> Nueva Temporada
               </CardTitle>
               <button 
                 onClick={() => setIsOpenCreate(false)} 
@@ -356,16 +356,16 @@ function TemporadasPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold h-9"
+                  className="flex-1 btn-primary"
                   onClick={handleCreateTemporada}
                 >
                   Registrar Temporada
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-border text-muted-foreground text-xs h-9" 
+                  className="btn-secondary" 
                   onClick={() => setIsOpenCreate(false)}
                 >
                   Cancelar
@@ -379,10 +379,10 @@ function TemporadasPage() {
       {/* Modal Editar Temporada */}
       {isOpenEdit && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-card border-border w-full max-w-md shadow-2xl">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b border-border">
-              <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <CalendarRange className="h-5 w-5 text-primary" /> Editar Temporada
+          <Card className="premium-card w-full max-w-md">
+            <CardHeader className="p-0 pb-4 flex flex-row items-center justify-between border-b border-[#E2E8F0]">
+              <CardTitle className="page-header-title flex items-center gap-2">
+                <CalendarRange className="h-5 w-5 text-[#2563EB]" /> Editar Temporada
               </CardTitle>
               <button 
                 onClick={() => setIsOpenEdit(false)} 
@@ -466,16 +466,16 @@ function TemporadasPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-4">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold h-9"
+                  className="flex-1 btn-primary"
                   onClick={handleUpdateTemporada}
                 >
                   Guardar Cambios
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-border text-muted-foreground text-xs h-9" 
+                  className="btn-secondary" 
                   onClick={() => setIsOpenEdit(false)}
                 >
                   Cancelar

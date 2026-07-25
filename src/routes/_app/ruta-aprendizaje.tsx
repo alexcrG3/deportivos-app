@@ -58,8 +58,8 @@ function RutaAprendizajePage() {
   return (
     <div className="space-y-8 pb-12">
       {/* Top Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-blue-950 to-indigo-950 p-6 md:p-8 border border-blue-500/30 text-white shadow-2xl">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+      <div className="relative overflow-hidden rounded-[12px] bg-white p-6 md:p-8 border border-[#E2E8F0] shadow-sm">
+        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <Rocket className="h-64 w-64 text-blue-400" />
         </div>
 
@@ -72,10 +72,10 @@ function RutaAprendizajePage() {
                 </Badge>
                 <span className="text-xs text-slate-300">Aprende haciendo tareas reales</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="page-header-title">
                 {currentRoadmap.title}
               </h1>
-              <p className="text-xs md:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              <p className="page-header-subtitle">
                 {currentRoadmap.description}
               </p>
             </div>
@@ -137,7 +137,7 @@ function RutaAprendizajePage() {
               </div>
             </div>
 
-            <Progress value={percentage} className="h-2.5 bg-slate-800" />
+            <Progress value={percentage} className="h-2.5 bg-slate-200" />
           </div>
         </div>
       </div>
@@ -232,7 +232,7 @@ function RutaAprendizajePage() {
                           isCompleted
                             ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25"
                             : isActive
-                            ? "bg-gradient-primary text-white shadow-elegant"
+                            ? "bg-[#2563EB] text-white shadow-sm"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
@@ -335,7 +335,7 @@ function RutaAprendizajePage() {
                   navigate({ to: selectedLesson.lesson.actionUrl as any });
                   setSelectedLesson(null);
                 }}
-                className="w-full sm:w-auto bg-gradient-primary text-white font-extrabold text-xs gap-1.5 px-6 shadow-elegant rounded-xl"
+                className="btn-primary"
               >
                 <span>{selectedLesson.lesson.actionLabel}</span>
                 <ArrowRight className="h-4 w-4" />

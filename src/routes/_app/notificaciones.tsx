@@ -51,8 +51,8 @@ function NotifPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Centro de Notificaciones & Eventos Push</h1>
-          <p className="text-sm text-muted-foreground">{noLeidas} sin leer · Notificaciones Push y payloads JSON para backend.</p>
+          <h1 className="page-header-title">Centro de Notificaciones & Eventos Push</h1>
+          <p className="page-header-subtitle">{noLeidas} sin leer · Notificaciones Push y payloads JSON para backend.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleMarkAllRead} className="gap-1.5 text-xs font-semibold">
@@ -62,7 +62,7 @@ function NotifPage() {
       </div>
 
       {/* Main Container */}
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader className="pb-3 border-b">
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="flex flex-wrap gap-1 bg-transparent p-0 h-auto">

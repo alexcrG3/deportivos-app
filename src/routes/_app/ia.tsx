@@ -439,20 +439,19 @@ ${learning}
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="page-header border-b pb-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-amber-500 text-white shadow-elegant">
+          <div className="icon-box icon-box-primary text-white">
             <Brain className="h-5.5 w-5.5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">IA & Automatización</h1>
-            <p className="text-sm text-muted-foreground">Monitoreo predictivo y análisis analítico de DeportivOS AI.</p>
+            <h1 className="page-header-title">IA & Automatización</h1>
+            <p className="page-header-subtitle">Monitoreo predictivo y análisis analítico de DeportivOS AI.</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link to="/ia/asistente">
-            <Button size="sm" className="bg-gradient-to-r from-violet-600 to-amber-500 text-white font-bold gap-1 text-xs">
+            <Button size="sm" className="btn-primary gap-1">
               <Sparkles className="h-4.5 w-4.5 animate-pulse" /> Abrir Chat DeportivOS AI
             </Button>
           </Link>
@@ -498,7 +497,7 @@ ${learning}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card bg-card">
+            <Card className="lg:col-span-2 premium-card">
               <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2"><Target className="h-4.5 w-4.5 text-primary" /> Top atletas en riesgo</CardTitle>
@@ -523,7 +522,7 @@ ${learning}
               </CardContent>
             </Card>
 
-            <Card className="shadow-card bg-card">
+            <Card className="premium-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2"><Zap className="h-4.5 w-4.5 text-amber-500 animate-pulse" /> Actividad IA</CardTitle>
                 <CardDescription>Últimos eventos del motor analítico</CardDescription>
@@ -543,7 +542,7 @@ ${learning}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="shadow-card bg-card">
+            <Card className="premium-card">
               <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4.5 w-4.5 text-primary" /> Insights automáticos</CardTitle>
@@ -564,7 +563,7 @@ ${learning}
               </CardContent>
             </Card>
 
-            <Card className="shadow-card bg-card">
+            <Card className="premium-card">
               <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <div>
                   <CardTitle className="text-base flex items-center gap-2"><Activity className="h-4.5 w-4.5 text-primary" /> Predicciones activas</CardTitle>
@@ -591,8 +590,8 @@ ${learning}
       {activeTab === "generadores-ia" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Card 1: Generador de Entrenamientos */}
-          <Card className="bg-card border-white/5 flex flex-col shadow-elegant">
-            <CardHeader className="border-b border-white/5 pb-3">
+          <Card className="premium-card flex flex-col">
+            <CardHeader className="border-b border-[#E2E8F0] pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Brain className="h-4.5 w-4.5 text-primary" /> Generador de Sesiones de Entrenamiento
               </CardTitle>
@@ -605,7 +604,7 @@ ${learning}
                   <select 
                     value={wgEdad} 
                     onChange={e => setWgEdad(e.target.value)}
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-2.5 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs text-[#0F172A] outline-none focus:ring-1 focus:ring-primary"
                   >
                     {availableCategories.map(cat => (
                       <option key={cat.id || cat.nombre} value={cat.nombre}>{cat.nombre}</option>
@@ -693,8 +692,8 @@ ${learning}
           </Card>
 
           {/* Card 2: Redactor de Crónicas */}
-          <Card className="bg-card border-white/5 flex flex-col shadow-elegant">
-            <CardHeader className="border-b border-white/5 pb-3">
+          <Card className="premium-card flex flex-col">
+            <CardHeader className="border-b border-[#E2E8F0] pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <FileText className="h-4.5 w-4.5 text-primary" /> Redactor Automático de Crónicas
               </CardTitle>

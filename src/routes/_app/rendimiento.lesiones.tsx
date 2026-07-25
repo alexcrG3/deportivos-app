@@ -142,8 +142,8 @@ function LesionesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Expediente Médico & Lesiones</h1>
-          <p className="text-sm text-muted-foreground">Control médico de lesiones, rehabilitación, tratamientos de fisioterapia y retorno al deporte (RTP).</p>
+          <h1 className="page-header-title">Expediente Médico & Lesiones</h1>
+          <p className="page-header-subtitle">Control médico de lesiones, rehabilitación, tratamientos de fisioterapia y retorno al deporte (RTP).</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Equipo:</span>
@@ -161,7 +161,7 @@ function LesionesPage() {
           </select>
           <Sheet open={openNewLesion} onOpenChange={setOpenNewLesion}>
           <SheetTrigger asChild>
-            <Button className="bg-gradient-primary shadow-elegant"><Plus className="mr-1 h-4 w-4" />Registrar Lesión</Button>
+            <Button className="btn-primary"><Plus className="mr-1 h-4 w-4" />Registrar Lesión</Button>
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-md overflow-y-auto">
             <SheetHeader>

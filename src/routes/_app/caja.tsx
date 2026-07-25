@@ -77,10 +77,10 @@ function CajaPage() {
           <p className="text-sm text-slate-500">Ingresos del día en tiempo real desde los pagos registrados.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="border-indigo-200 text-indigo-700 dark:border-indigo-900 dark:text-indigo-300 hover:bg-indigo-50 font-bold rounded-2xl gap-1.5 h-9 text-xs">
+          <Button variant="outline" className="btn-secondary gap-1.5">
             <Unlock className="h-4 w-4" /> Apertura de Caja
           </Button>
-          <Button className="bg-gradient-primary shadow-elegant font-bold rounded-2xl gap-1.5 h-9 text-xs">
+          <Button className="btn-primary gap-1.5">
             <Lock className="h-4 w-4" /> Cerrar Caja
           </Button>
         </div>
@@ -119,9 +119,9 @@ function CajaPage() {
       </div>
 
       {/* TABS CONTAINER */}
-      <Card className="shadow-card border border-slate-200/80 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 p-6">
+      <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm dark:bg-slate-900">
         <Tabs defaultValue="hoy">
-          <TabsList className="bg-slate-100 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800/80">
+          <TabsList className="bg-slate-100 dark:bg-slate-950 p-1 rounded-[12px] border border-[#E2E8F0] dark:border-slate-800/80">
             <TabsTrigger value="hoy" className="font-bold text-xs rounded-xl">
               Movimientos de hoy ({pagosHoy.length})
             </TabsTrigger>
@@ -145,7 +145,7 @@ function CajaPage() {
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-200">No hay pagos registrados hoy</p>
                     <p className="text-xs text-slate-400 mt-0.5">Los cobros registrados desde Pagos aparecerán en tiempo real aquí.</p>
                   </div>
-                  <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl gap-1.5 shadow-sm mt-2">
+                  <Button asChild className="btn-primary gap-1.5 mt-2">
                     <Link to="/pagos">
                       Ir a Registrar Pagos <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -255,33 +255,33 @@ function CajaPage() {
       </Card>
 
       {/* ARQUEO RÁPIDO HIGH-TECH CARD */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 rounded-3xl p-6 shadow-xl text-white space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <div className="premium-card space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="space-y-0.5">
-            <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Banknote className="h-5 w-5 text-indigo-400" /> Arqueo Rápido y Validación de Cierre
+            <h3 className="text-[28px] font-bold text-[#0F172A] flex items-center gap-2">
+              <Banknote className="h-5 w-5 text-[#2563EB]" /> Arqueo Rápido y Validación de Cierre
             </h3>
-            <p className="text-xs text-slate-400">Conteo físico de efectivo e igualación del saldo en caja.</p>
+            <p className="text-[#64748B] text-sm">Conteo físico de efectivo e igualación del saldo en caja.</p>
           </div>
-          <Badge className="bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 text-[10px] px-3 py-1 uppercase tracking-wider">
+          <Badge className="badge-pill badge-success tracking-wider">
             <ShieldCheck className="h-3.5 w-3.5 mr-1" /> AUDITORÍA OK
           </Badge>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-slate-950 p-4 border border-slate-800 space-y-1">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Efectivo Contado</p>
-            <p className="text-xl font-black text-emerald-400">{formatCRC(ingresos)}</p>
+          <div className="premium-card p-4 space-y-1">
+            <p className="kpi-label">Efectivo Contado</p>
+            <p className="kpi-number-lg">{formatCRC(ingresos)}</p>
           </div>
 
-          <div className="rounded-2xl bg-slate-950 p-4 border border-slate-800 space-y-1">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sistema (Ingresos)</p>
-            <p className="text-xl font-black text-slate-100">{formatCRC(ingresos)}</p>
+          <div className="premium-card p-4 space-y-1">
+            <p className="kpi-label">Sistema (Ingresos)</p>
+            <p className="kpi-number-lg">{formatCRC(ingresos)}</p>
           </div>
 
-          <div className="rounded-2xl bg-slate-950 p-4 border border-slate-800 space-y-1">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Diferencia Final</p>
-            <p className="text-xl font-black text-purple-400">{formatCRC(0)}</p>
+          <div className="premium-card p-4 space-y-1">
+            <p className="kpi-label">Diferencia Final</p>
+            <p className="kpi-number-lg">{formatCRC(0)}</p>
           </div>
         </div>
       </div>

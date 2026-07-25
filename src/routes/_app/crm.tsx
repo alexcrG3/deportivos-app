@@ -354,23 +354,23 @@ function CRMMasterPage() {
       {/* ========================================================================= */}
       {mainCoreTab === "dashboard" && (
         <div className="space-y-6 animate-in fade-in-50 duration-200">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="page-header border-b border-[#E2E8F0] pb-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              <h1 className="page-header-title">
                 Dashboard Comercial & Analítica del Embudo
               </h1>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="page-header-subtitle">
                 Monitoreo maestro de métricas de ventas, cohortes de conversión y alertas de deserción en tiempo real.
               </p>
             </div>
-            <Button onClick={() => setOpenNewLead(true)} className="bg-gradient-primary shadow-elegant text-xs font-semibold gap-1.5">
+            <Button onClick={() => setOpenNewLead(true)} className="btn-primary gap-1.5">
               <Plus className="h-4 w-4" /> Registrar Nuevo Lead DB
             </Button>
           </div>
 
           {/* 🔝 1. KPIs Comerciales del Mes */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Leads Nuevos</p>
@@ -388,7 +388,7 @@ function CRMMasterPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Tasa de Conversión</p>
@@ -404,7 +404,7 @@ function CRMMasterPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card border-border bg-card border-l-4 border-l-amber-500">
+            <Card className="premium-card border-l-4 border-l-amber-500">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 tracking-wide uppercase">Alumnos en Riesgo</p>
@@ -422,7 +422,7 @@ function CRMMasterPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-muted-foreground tracking-wide uppercase">Valor del Embudo</p>
@@ -442,7 +442,7 @@ function CRMMasterPage() {
 
           {/* 📈 El Lienzo Central (Funnel & Alertas) */}
           <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2 shadow-card border-border bg-card">
+            <Card className="premium-card lg:col-span-2">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -493,7 +493,7 @@ function CRMMasterPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-card border-border bg-card flex flex-col justify-between">
+            <Card className="premium-card flex flex-col justify-between">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold flex items-center gap-2 text-amber-600 dark:text-amber-400">
@@ -620,7 +620,7 @@ function CRMMasterPage() {
 
           {/* SUB-TAB 2: 👥 LISTA DE PROSPECTOS (Datatable con Buscador DB) */}
           {prospeccionSubTab === "prospectos" && (
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardHeader className="pb-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -685,7 +685,7 @@ function CRMMasterPage() {
 
           {/* SUB-TAB 3: 📅 AGENDA DE PRUEBAS (Calendario de Clases de Muestra) */}
           {prospeccionSubTab === "pruebas" && (
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardHeader>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" /> Agenda de Clases de Muestra & Evaluación
@@ -860,7 +860,7 @@ function CRMMasterPage() {
 
           {/* SUB-TAB 3: 🛡️ ALERTAS DE RETENCIÓN IA */}
           {marketingSubTab === "retencion" && (
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardHeader>
                 <CardTitle className="text-base font-bold flex items-center gap-2 text-amber-600">
                   <ShieldAlert className="h-4 w-4" /> Escudo de Retención e Inteligencia de Bajas
@@ -887,7 +887,7 @@ function CRMMasterPage() {
 
           {/* SUB-TAB 4: 📝 BITÁCORA DE SEGUIMIENTO COMERCIAL */}
           {marketingSubTab === "seguimiento" && (
-            <Card className="shadow-card border-border bg-card">
+            <Card className="premium-card">
               <CardHeader>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
                   <History className="h-4 w-4 text-primary" /> Bitácora Comercial Cronológica (DB Logs)

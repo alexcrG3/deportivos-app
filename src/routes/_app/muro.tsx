@@ -693,7 +693,7 @@ function MuroPage() {
 
           {/* ─── Create Post Box ─── */}
           {canPublish ? (
-            <Card className="shadow-card overflow-hidden">
+            <Card className="premium-card overflow-hidden">
               <form onSubmit={handleCreatePost}>
                 <div className="p-4 space-y-3">
                   <div className="flex gap-3 items-start">
@@ -763,7 +763,7 @@ function MuroPage() {
               </form>
             </Card>
           ) : (
-            <Card className="shadow-card p-5 text-center bg-muted/20 border border-dashed text-muted-foreground flex flex-col items-center justify-center gap-2 rounded-2xl">
+            <Card className="premium-card p-5 text-center bg-muted/20 border border-dashed text-muted-foreground flex flex-col items-center justify-center gap-2 rounded-2xl">
               <Lock className="h-5 w-5 text-muted-foreground/75" />
               <p className="text-xs font-semibold">🔒 Publicaciones restringidas</p>
               <p className="text-[10px] text-muted-foreground">No tienes permisos para publicar en este Muro. Comunícate con tu administrador.</p>
@@ -786,7 +786,7 @@ function MuroPage() {
           ) : (
             <div className="space-y-5">
               {filteredPosts.map(post => (
-                <Card key={post.id} className="shadow-card overflow-hidden rounded-2xl border border-border/60">
+                <Card key={post.id} className="premium-card overflow-hidden rounded-2xl border border-border/60">
 
                   {/* ── Post Header ── */}
                   <div className="flex items-center justify-between px-4 pt-4 pb-3">

@@ -316,13 +316,13 @@ export function FinanzasPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-primary/10 text-primary border-primary/20 font-semibold text-[11px] uppercase tracking-wider">
+            <Badge className="badge-pill badge-info border-none tracking-wider">
               Gobernanza Financiera & Tesorería BD
             </Badge>
-            <span className="text-xs text-muted-foreground font-normal">| {activePlayers.length} Atletas Registrados</span>
+            <span className="text-sm text-[#64748B] font-normal">| {activePlayers.length} Atletas Registrados</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5 mt-1">
-            <Wallet className="h-7 w-7 text-primary" /> Finanzas y Libro de Caja
+          <h1 className="text-[28px] font-bold text-[#0F172A] flex items-center gap-2.5 mt-1">
+            <Wallet className="h-7 w-7 text-[#2563EB]" /> Finanzas y Libro de Caja
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground font-normal">
             Navegación limpia de 3 pestañas principales: Gráficas de Evolución, Control de Mensualidades y Balance General.
@@ -620,11 +620,11 @@ export function FinanzasPage() {
                             </td>
                             <td className="p-3.5 text-right space-x-1.5">
                               {/* 1 SOLO BOTÓN VERDE DE WHATSAPP CON TELÉFONO REAL */}
-                              <Button size="xs" onClick={() => handleSendWhatsApp(j)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-7 text-[10px] gap-1 shadow-xs">
+                              <Button size="xs" onClick={() => handleSendWhatsApp(j)} className="btn-primary gap-1 shadow-sm">
                                 <MessageSquare className="h-3 w-3" /> WhatsApp
                               </Button>
                               {/* 1 SOLO BOTÓN MORADO DE COBRAR POR FILA */}
-                              <Button size="xs" onClick={() => handleOpenPayment(j)} className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-7 text-[10px] gap-1 shadow-xs">
+                              <Button size="xs" onClick={() => handleOpenPayment(j)} className="btn-primary gap-1 shadow-sm">
                                 <CreditCard className="h-3 w-3" /> 💵 Cobrar
                               </Button>
                             </td>

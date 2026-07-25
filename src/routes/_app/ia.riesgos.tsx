@@ -54,7 +54,7 @@ function RiesgosIA() {
       </div>
 
       {/* Intelligent Search Input */}
-      <Card className="border border-violet-500/20 bg-gradient-to-r from-violet-950/5 to-card">
+      <Card className="bg-white border border-[#E2E8F0] rounded-[12px] shadow-sm">
         <CardContent className="p-4 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -65,7 +65,7 @@ function RiesgosIA() {
                 setNaturalQuery(e.target.value);
                 setIsSearchingIntelligent(e.target.value.length > 0);
               }}
-              className="pl-9 pr-10 bg-background border-input text-foreground rounded-xl focus-visible:ring-violet-500"
+              className="pl-9 pr-10 bg-white border border-[#E2E8F0] text-[#0F172A] rounded-[12px] focus-visible:ring-blue-500"
             />
             {naturalQuery && (
               <button
@@ -100,7 +100,7 @@ function RiesgosIA() {
 
       {/* DISPLAY RESULTS */}
       {isSearchingIntelligent ? (
-        <Card className="border-violet-500/20 bg-card">
+        <Card className="bg-white border border-[#E2E8F0] rounded-[12px] shadow-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -109,7 +109,7 @@ function RiesgosIA() {
                 </CardTitle>
                 <CardDescription>Consulta construida dinámicamente para: &quot;{naturalQuery}&quot;</CardDescription>
               </div>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+              <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 rounded-full px-[10px] py-[4px] font-medium">
                 {intelligentResults.length} coincidencias
               </Badge>
             </div>
@@ -124,16 +124,16 @@ function RiesgosIA() {
                   to="/jugadores/$id"
                   params={{ id: jugadorId }}
                   key={jugadorId}
-                  className="flex items-center gap-3 rounded-lg border p-3.5 hover:bg-muted/50 transition bg-white/[0.02]"
+                  className="flex items-center gap-3 rounded-[12px] border border-[#E2E8F0] p-3.5 hover:bg-slate-50 transition bg-white"
                 >
                   <div className="w-6 text-center text-xs font-mono text-muted-foreground">{i + 1}</div>
                   <img src={r.avatar || "https://i.pravatar.cc/100?img=1"} alt="" className="h-10 w-10 rounded-full border border-white/10" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-xs truncate text-white">{r.jugador ?? r.nombre}</p>
+                      <p className="font-bold text-xs truncate text-[#0F172A]">{r.jugador ?? r.nombre}</p>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs">Score: {score}</span>
-                        <Badge variant={semaforo === "rojo" ? "destructive" : "secondary"}>
+                        <Badge className={`rounded-full px-[10px] py-[4px] text-[12px] font-medium ${semaforo === 'rojo' ? 'bg-red-500/10 text-red-700' : 'bg-emerald-500/10 text-emerald-700'}`}>
                           {semaforo.toUpperCase()}
                         </Badge>
                       </div>
@@ -180,16 +180,16 @@ function RiesgosIA() {
                           to="/jugadores/$id"
                           params={{ id: r.jugadorId }}
                           key={r.jugadorId}
-                          className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition bg-white/[0.02]"
+                          className="flex items-center gap-3 rounded-[12px] border border-[#E2E8F0] p-3 hover:bg-slate-50 transition bg-white"
                         >
                           <div className="w-6 text-center text-xs font-mono text-muted-foreground">{i + 1}</div>
                           <img src={r.avatar} alt="" className="h-9 w-9 rounded-full border border-white/10" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="font-bold text-xs truncate text-white">{r.jugador}</p>
+                              <p className="font-bold text-xs truncate text-[#0F172A]">{r.jugador}</p>
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs">{score}</span>
-                                <Badge variant={levelVariant(nivel)}>{nivel}</Badge>
+                                <Badge className={`rounded-full px-[10px] py-[4px] text-[12px] font-medium ${nivel === 'critico' || nivel === 'alto' ? 'bg-red-500/10 text-red-700' : nivel === 'medio' ? 'bg-amber-500/10 text-amber-700' : 'bg-emerald-500/10 text-emerald-700'}`}>{nivel}</Badge>
                               </div>
                             </div>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{r.categoria} · {r.sede}</p>
@@ -197,7 +197,7 @@ function RiesgosIA() {
                             {r.factores.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-2">
                                 {r.factores.slice(0, 3).map((f, idx) => (
-                                  <Badge key={idx} variant="outline" className="text-[9px] border-white/10 text-muted-foreground bg-white/5">
+                                  <Badge key={idx} variant="outline" className="text-[12px] font-medium border-[#E2E8F0] text-[#475569] bg-white rounded-full px-[10px] py-[4px]">
                                     {f}
                                   </Badge>
                                 ))}

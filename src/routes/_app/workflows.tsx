@@ -29,10 +29,10 @@ function WorkflowsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Workflows · Automatizaciones</h1>
-          <p className="text-sm text-muted-foreground">Reglas con triggers, condiciones y acciones automáticas.</p>
+          <h1 className="page-header-title">Workflows · Automatizaciones</h1>
+          <p className="page-header-subtitle">Reglas con triggers, condiciones y acciones automáticas.</p>
         </div>
-        <Button className="bg-gradient-primary shadow-elegant"><Plus className="h-4 w-4" /> Nuevo workflow</Button>
+        <Button className="btn-primary"><Plus className="h-4 w-4" /> Nuevo workflow</Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -42,7 +42,7 @@ function WorkflowsPage() {
         <StatCard label="Errores recientes" value={hasPlayers ? "3" : "0"} hint="requieren revisión" icon={AlertTriangle} accent="destructive" />
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle>Reglas configuradas</CardTitle>
           <CardDescription>Activa, pausa o edita tus automatizaciones.</CardDescription>
@@ -51,9 +51,9 @@ function WorkflowsPage() {
           <div className="space-y-3">
             {activeWorkflows.length > 0 ? (
               activeWorkflows.map((w) => (
-                <div key={w.id} className="rounded-lg border bg-card p-4 hover:shadow-elegant transition group">
+                <div key={w.id} className="premium-card p-4 hover:shadow-sm transition group">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
+                    <div className="icon-box icon-box-primary shrink-0">
                       <Workflow className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ function WorkflowsPage() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle>Historial de ejecución</CardTitle>
           <CardDescription>Eventos recientes de los workflows.</CardDescription>

@@ -33,7 +33,7 @@ function TodayCard({
   icon: Icon, label, count, hint, to, prio,
 }: { icon: React.ComponentType<{ className?: string }>; label: string; count: number; hint: string; to: string; prio: Prio }) {
   return (
-    <Link to={to} className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
+    <Link to={to} className="group rounded-[12px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md transition-all">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <span className={`h-2 w-2 rounded-full ${dotColor[prio]}`} />
@@ -309,15 +309,15 @@ function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
             Centro de Operaciones Enterprise 2.0
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold uppercase tracking-wider">Executive UI</Badge>
+            <Badge className="badge-pill badge-info tracking-wider">Executive UI</Badge>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Visión 360° del club: IA, Finanzas, Deporte, Staff y Operaciones Diarias.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <Button variant="outline" className="btn-secondary">
             <Bell className="h-4 w-4" /> Alertas
           </Button>
-          <Button className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 font-semibold">
+          <Button className="btn-primary">
             <Plus className="h-4 w-4" /> Nuevo jugador
           </Button>
         </div>
@@ -344,7 +344,7 @@ function Dashboard() {
                 </p>
               </div>
               <Button
-                className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 font-bold flex gap-2 shrink-0"
+                className="btn-primary flex gap-2 shrink-0"
                 onClick={handleCloudMigration}
               >
                 <TrendingUp className="h-4 w-4" /> Sincronizar con Supabase
@@ -500,7 +500,7 @@ function Dashboard() {
         
         <div className="grid gap-3 md:grid-cols-3">
           {/* Tarjeta 1: Copilot Status Monocromático */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between col-span-1">
+          <Card className="p-4 shadow-sm border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] flex flex-col justify-between col-span-1">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 font-bold text-[9px] uppercase tracking-wider">
@@ -537,14 +537,14 @@ function Dashboard() {
               </div>
             </div>
             <Link to="/ia/asistente" className="w-full mt-2">
-              <Button size="sm" className="w-full bg-primary text-primary-foreground text-xs font-bold gap-1.5 shadow-sm hover:bg-primary/90">
+              <Button size="sm" className="w-full btn-primary gap-1.5">
                 <Brain className="h-3.5 w-3.5" /> Consultar Asistente IA <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </Card>
 
           {/* Tarjeta 2: Panel de Detecciones Monocromático con Dots */}
-          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl col-span-1 md:col-span-2">
+          <Card className="p-4 shadow-sm border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] col-span-1 md:col-span-2">
             <div className="flex items-center justify-between mb-2 border-b border-slate-100 dark:border-slate-800 pb-2">
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="h-3.5 w-3.5 text-slate-500" /> Detecciones Prioritarias de Negocio & Deporte
@@ -667,7 +667,7 @@ function Dashboard() {
       {/* ================================================================================= */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Bloque Inferior Izquierdo: Actividad Reciente */}
-        <Card className="lg:col-span-2 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+        <Card className="lg:col-span-2 shadow-sm border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px]">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
               <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -707,7 +707,7 @@ function Dashboard() {
         </Card>
 
         {/* Bloque Inferior Derecho: Agenda del Día & Centro de Atención Dinámico */}
-        <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between">
+        <Card className="shadow-sm border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] flex flex-col justify-between">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
               <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">

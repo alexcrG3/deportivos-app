@@ -194,8 +194,8 @@ function ReportesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Reportes deportivos</h1>
-          <p className="text-sm text-muted-foreground">Genera reportes operativos y exporta en PDF o Excel.</p>
+          <h1 className="page-header-title">Reportes deportivos</h1>
+          <p className="page-header-subtitle">Genera reportes operativos y exporta en PDF o Excel.</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -214,7 +214,7 @@ function ReportesPage() {
           <Button 
             onClick={handleExportPdfAll} 
             disabled={exportingExcel || exportingPdf}
-            className="bg-gradient-primary text-white shadow-elegant"
+            className="btn-primary"
           >
             {exportingPdf ? (
               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -233,7 +233,7 @@ function ReportesPage() {
             <Card 
               key={r.label} 
               onClick={() => !activeReportDownload && handleDownloadSingleReport(r.label)}
-              className="shadow-card hover:shadow-elegant transition cursor-pointer group bg-card border-border relative overflow-hidden"
+              className="premium-card hover:shadow-elegant transition cursor-pointer group bg-card border-border relative overflow-hidden"
             >
               <CardContent className="p-5 flex items-start gap-4">
                 <div 
@@ -263,7 +263,7 @@ function ReportesPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="shadow-card lg:col-span-2 bg-card border-border">
+        <Card className="premium-card lg:col-span-2 bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground font-bold">Crecimiento de jugadores</CardTitle>
             <CardDescription className="text-muted-foreground">Tendencia de los últimos 7 meses</CardDescription>
@@ -281,7 +281,7 @@ function ReportesPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card bg-card border-border">
+        <Card className="premium-card bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground font-bold">Distribución por disciplina</CardTitle>
             <CardDescription className="text-muted-foreground">Top 5 disciplinas</CardDescription>

@@ -313,9 +313,9 @@ function EntrenamientosPage() {
   // ─────────────────────────────────────────────
   if (modoSesion === "activa") {
     return (
-      <div className="min-h-screen bg-slate-950 text-white p-3 sm:p-6 space-y-5 -m-6 relative">
+      <div className="min-h-screen bg-[#F8F9FA] text-[#0F172A] p-3 sm:p-6 space-y-5 -m-6 relative">
         {/* TOP BAR ACTIVE SESSION HEADER */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 p-4 rounded-3xl backdrop-blur-md sticky top-2 z-40 shadow-2xl">
+        <div className="premium-card flex flex-wrap items-center justify-between gap-3 sticky top-2 z-40">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -491,7 +491,7 @@ function EntrenamientosPage() {
                     setTimerRunning(true);
                     toast.success("Asistencia registrada. ¡Iniciando tiempo de cancha!");
                   }}
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm py-4 h-auto rounded-2xl shadow-xl gap-2 tracking-wider uppercase"
+                  className="w-full btn-primary gap-2"
                 >
                   <CheckCircle2 className="h-5 w-5" /> ✓ GUARDAR ASISTENCIA E INICIAR CALENTAMIENTO
                 </Button>
@@ -549,7 +549,7 @@ function EntrenamientosPage() {
                     <h3 className="font-bold text-sm text-indigo-400 flex items-center gap-2">
                       <Flame className="h-5 w-5 text-amber-400" /> ACTIVACIÓN: EL RONDO DE PERSECUCIÓN (U9)
                     </h3>
-                    <Badge className="bg-emerald-600 text-white font-bold text-xs">15 MINUTOS</Badge>
+                    <Badge className="badge-pill badge-success">15 MINUTOS</Badge>
                   </div>
 
                   {/* 2D PITCH GRAPHIC MAP OF CONE SETUP */}
@@ -587,7 +587,7 @@ function EntrenamientosPage() {
                       <span className="text-[10px] font-mono text-indigo-400 uppercase font-bold block">OBJETIVO CENTRAL SEMANAL</span>
                       <h3 className="font-black text-sm text-slate-100">{sesionData.objetivo}</h3>
                     </div>
-                    <Badge className="bg-indigo-600 text-white font-bold text-xs">60 MINUTOS</Badge>
+                    <Badge className="badge-pill badge-info">60 MINUTOS</Badge>
                   </div>
 
                   {/* SECCIÓN INTEGRADA DE PRUEBAS FÍSICAS (SOLO SI TOCA HOY) */}
@@ -624,7 +624,7 @@ function EntrenamientosPage() {
                     <h3 className="font-bold text-sm text-indigo-400 flex items-center gap-2">
                       <HelpCircle className="h-5 w-5 text-indigo-400" /> FEEDBACK PEDAGÓGICO & VUELTA A LA CALMA
                     </h3>
-                    <Badge className="bg-teal-600 text-white font-bold text-xs">15 MINUTOS</Badge>
+                    <Badge className="badge-pill badge-info">15 MINUTOS</Badge>
                   </div>
 
                   <div className="space-y-3 text-xs">
@@ -649,7 +649,7 @@ function EntrenamientosPage() {
               <div className="max-w-4xl mx-auto">
                 <Button
                   onClick={() => setModalCierreSesion(true)}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-sm py-4 h-auto rounded-2xl shadow-xl gap-2 tracking-wider uppercase"
+                  className="w-full btn-primary gap-2"
                 >
                   ⚽ FINALIZAR ENTRENAMIENTO Y CREAR REPORTE
                 </Button>
@@ -765,7 +765,7 @@ function EntrenamientosPage() {
               {/* BOTÓN FINAL DE GUARDADO DIRECTO A LA BASE DE DATOS SUPABASE */}
               <Button
                 onClick={handleGuardarSesionFinal}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs py-3.5 h-auto rounded-2xl shadow-xl gap-2 uppercase tracking-wider"
+                className="w-full btn-primary gap-2"
               >
                 <CheckCircle2 className="h-4 w-4" /> 💾 GUARDAR 100% EN BASE DE DATOS SUPABASE
               </Button>

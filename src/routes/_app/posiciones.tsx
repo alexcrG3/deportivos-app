@@ -16,8 +16,8 @@ function PosicionesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Tablas de Posiciones</h1>
-        <p className="text-sm text-muted-foreground">Standings automáticos de todas las competiciones.</p>
+        <h1 className="page-header-title">Tablas de Posiciones</h1>
+        <p className="page-header-subtitle">Standings automáticos de todas las competiciones.</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -29,7 +29,7 @@ function PosicionesPage() {
         ))}
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5" />{sel.nombre}</CardTitle>
           <CardDescription>{sel.tipo} · {sel.categoria} · Jornada {sel.jornadaActual} de {sel.jornadas}</CardDescription>
@@ -38,24 +38,24 @@ function PosicionesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-xs uppercase text-muted-foreground">
-                  <th className="p-2 text-left">Pos</th>
-                  <th className="p-2 text-left">Equipo</th>
-                  <th className="p-2 text-center">PJ</th>
-                  <th className="p-2 text-center">PG</th>
-                  <th className="p-2 text-center">PE</th>
-                  <th className="p-2 text-center">PP</th>
-                  <th className="p-2 text-center">GF</th>
-                  <th className="p-2 text-center">GC</th>
-                  <th className="p-2 text-center">DG</th>
-                  <th className="p-2 text-center font-semibold">PTS</th>
+                <tr className="table-header-row">
+                  <th className="table-header-cell">Pos</th>
+                  <th className="table-header-cell text-left">Equipo</th>
+                  <th className="table-header-cell text-center">PJ</th>
+                  <th className="table-header-cell text-center">PG</th>
+                  <th className="table-header-cell text-center">PE</th>
+                  <th className="table-header-cell text-center">PP</th>
+                  <th className="table-header-cell text-center">GF</th>
+                  <th className="table-header-cell text-center">GC</th>
+                  <th className="table-header-cell text-center">DG</th>
+                  <th className="table-header-cell text-center">PTS</th>
                 </tr>
               </thead>
               <tbody>
                 {tabla.map((s, i) => {
                   const highlight = i === 0 ? "bg-success/5" : i < 3 ? "bg-primary/5" : "";
                   return (
-                    <tr key={s.equipo} className={`border-b last:border-0 ${highlight}`}>
+                    <tr key={s.equipo} className={`table-row hover-row ${highlight}`}>
                       <td className="p-2 font-medium">
                         <div className="flex items-center gap-2">
                           {i === 0 && <Medal className="h-3 w-3 text-warning" />}

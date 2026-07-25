@@ -433,7 +433,7 @@ function CoachProfile360() {
       </div>
 
       {/* 🔝 1. CABECERA DE LA FICHA (IDENTIDAD PROFESIONAL 360 GRADOS) */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-6 rounded-3xl text-white shadow-xl flex flex-wrap items-center justify-between gap-6">
+      <div className="bg-white border border-[#E2E8F0] p-6 rounded-[12px] shadow-sm flex flex-wrap items-center justify-between gap-6">
         
         {/* Identidad Nítida Circular */}
         <div className="flex items-center gap-5">
@@ -451,51 +451,51 @@ function CoachProfile360() {
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">{coach.nombre}</h1>
-              <Badge className={`text-[10px] font-semibold uppercase tracking-wider ${
+              <h1 className="text-xl sm:text-[28px] font-bold tracking-tight text-[#0F172A]">{coach.nombre}</h1>
+              <Badge className={`rounded-full px-[10px] py-[4px] text-[12px] font-medium ${
                 coach.estado === "activo"
-                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                  : "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                  ? "bg-emerald-500/10 text-emerald-700"
+                  : "bg-rose-500/10 text-rose-700"
               }`}>
-                🟢 {coach.estado === "activo" ? "Activo Contractual" : "Inactivo / Baja"}
+                {coach.estado === "activo" ? "Activo Contractual" : "Inactivo / Baja"}
               </Badge>
             </div>
-            <p className="text-xs text-indigo-300 font-semibold">{coach.especialidad}</p>
-            <div className="flex items-center gap-3 text-[11px] text-slate-300 font-normal pt-0.5">
-              <span className="flex items-center gap-1"><Mail className="h-3 w-3 text-indigo-400" /> {coach.correo}</span>
+            <p className="text-sm text-[#64748B] font-semibold">{coach.especialidad}</p>
+            <div className="flex items-center gap-3 text-[12px] text-[#475569] font-normal pt-0.5">
+              <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {coach.correo}</span>
               <span>•</span>
-              <span className="flex items-center gap-1"><Phone className="h-3 w-3 text-indigo-400" /> {coach.telefono}</span>
+              <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {coach.telefono}</span>
             </div>
           </div>
         </div>
 
         {/* Métricas Core en Miniatura */}
-        <div className="flex items-center gap-3 sm:gap-4 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
-          <div className="text-center px-3 border-r border-slate-800">
-            <p className="text-[10px] text-slate-400 font-semibold uppercase">Coach Score IA</p>
-            <p className="text-xl font-bold text-cyan-400">{coachScore} <span className="text-[10px] text-slate-400 font-normal">/ 100</span></p>
+        <div className="flex items-center gap-3 sm:gap-4 bg-slate-50 p-3 rounded-[12px] border border-[#E2E8F0]">
+          <div className="text-center px-3 border-r border-[#E2E8F0]">
+            <p className="text-[11px] text-[#64748B] font-semibold uppercase">Coach Score IA</p>
+            <p className="text-xl font-bold text-[#0F172A]">{coachScore} <span className="text-[10px] text-[#475569] font-normal">/ 100</span></p>
           </div>
 
-          <div className="text-center px-3 border-r border-slate-800">
-            <p className="text-[10px] text-slate-400 font-semibold uppercase">Asistencia Mes</p>
-            <p className="text-xl font-bold text-emerald-400">98%</p>
+          <div className="text-center px-3 border-r border-[#E2E8F0]">
+            <p className="text-[11px] text-[#64748B] font-semibold uppercase">Asistencia Mes</p>
+            <p className="text-xl font-bold text-emerald-600">98%</p>
           </div>
 
           <div className="text-center px-3">
-            <p className="text-[10px] text-slate-400 font-semibold uppercase">Equipos Asignados</p>
-            <p className="text-xl font-bold text-indigo-400">{coach.categorias || 2} Cat.</p>
+            <p className="text-[11px] text-[#64748B] font-semibold uppercase">Equipos Asignados</p>
+            <p className="text-xl font-bold text-[#0F172A]">{coach.categorias || 2} Cat.</p>
           </div>
         </div>
       </div>
 
       {/* 📐 2. EL CUERPO DEL EXPEDIENTE EN 4 SUB-PESTAÑAS HORIZONTALES (SEGOE UI SEMIBOLD) */}
-      <div className="bg-card border border-border rounded-2xl p-1.5 shadow-sm">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-1.5 shadow-sm">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
           <button
             onClick={() => setActiveTab("personal")}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === "personal"
-                ? "bg-primary text-white shadow-sm"
+                ? "bg-[#2563EB] text-white shadow-sm"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-normal"
             }`}
           >
@@ -507,7 +507,7 @@ function CoachProfile360() {
             onClick={() => setActiveTab("tecnico")}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === "tecnico"
-                ? "bg-emerald-600 text-white shadow-sm"
+                ? "bg-[#2563EB] text-white shadow-sm"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-normal"
             }`}
           >
@@ -519,7 +519,7 @@ function CoachProfile360() {
             onClick={() => setActiveTab("laboral")}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === "laboral"
-                ? "bg-purple-600 text-white shadow-sm"
+                ? "bg-[#2563EB] text-white shadow-sm"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-normal"
             }`}
           >
@@ -531,7 +531,7 @@ function CoachProfile360() {
             onClick={() => setActiveTab("nomina")}
             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm transition-all ${
               activeTab === "nomina"
-                ? "bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+                ? "bg-[#2563EB] text-white shadow-sm"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-normal"
             }`}
           >
@@ -546,7 +546,7 @@ function CoachProfile360() {
       {/* ========================================================================= */}
       {activeTab === "personal" && (
         <div className="space-y-6">
-          <Card className="border-border shadow-sm rounded-2xl p-5 space-y-4">
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[12px] p-6 space-y-4">
             <h3 className="text-sm font-bold text-foreground border-b pb-2 flex items-center gap-2">
               <UserCheck className="h-4 w-4 text-primary" /> Datos de Identidad & Contacto Oficial
             </h3>
@@ -612,7 +612,7 @@ function CoachProfile360() {
       {/* ========================================================================= */}
       {activeTab === "tecnico" && (
         <div className="space-y-6">
-          <Card className="border-border shadow-sm rounded-2xl p-5 space-y-4">
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[12px] p-6 space-y-4">
             <h3 className="text-sm font-bold text-foreground border-b pb-2 flex items-center gap-2">
               <Award className="h-4 w-4 text-emerald-600" /> Licencias Federativas & Control de Calidad Táctica
             </h3>
@@ -689,7 +689,7 @@ function CoachProfile360() {
       {/* ========================================================================= */}
       {activeTab === "laboral" && (
         <div className="space-y-6">
-          <Card className="border-border shadow-sm rounded-2xl p-5 space-y-4">
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[12px] p-6 space-y-4">
             <h3 className="text-sm font-bold text-foreground border-b pb-2 flex items-center gap-2">
               <Clock3 className="h-4 w-4 text-purple-600" /> Registro de Contratación & Reloj Checador
             </h3>
@@ -783,7 +783,7 @@ function CoachProfile360() {
             </Badge>
           </div>
 
-          <Card className="border-border shadow-sm rounded-2xl p-5 space-y-4">
+          <Card className="bg-white border border-[#E2E8F0] shadow-sm rounded-[12px] p-6 space-y-4">
             <h3 className="text-sm font-bold text-foreground border-b pb-2 flex items-center gap-2">
               <Banknote className="h-4 w-4 text-amber-600" /> Detalles de Honorarios & Cuenta Bancaria
             </h3>

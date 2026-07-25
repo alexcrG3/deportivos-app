@@ -69,10 +69,10 @@ function SedesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Sedes & Instalaciones</h1>
-          <p className="text-sm text-muted-foreground">Gestiona las sedes principales y las canchas o instalaciones asociadas a tu academia.</p>
+          <h1 className="page-header-title">Sedes & Instalaciones</h1>
+          <p className="page-header-subtitle">Gestiona las sedes principales y las canchas o instalaciones asociadas a tu academia.</p>
         </div>
-        <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setOpenCreate(true)} className="btn-primary">
           <Plus className="h-4 w-4" /> {activeTab === "sedes" ? "Nueva sede" : "Nueva instalación"}
         </Button>
       </div>
@@ -101,7 +101,7 @@ function SedesPage() {
         sedesList.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sedesList.map((s) => (
-            <Card key={s.id} className="shadow-card transition-all hover:shadow-elegant hover:-translate-y-0.5">
+            <Card key={s.id} className="premium-card transition-all hover:shadow-elegant hover:-translate-y-0.5">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ function SedesPage() {
       ) : (
         /* Vista de Instalaciones y Canchas */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="shadow-card p-5 space-y-3">
+          <Card className="premium-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <Badge className="bg-primary/15 text-primary border-primary/30">Cancha Sintética 1</Badge>
               <Badge variant="outline" className="bg-success/15 text-success">Disponible</Badge>
@@ -168,7 +168,7 @@ function SedesPage() {
             </div>
           </Card>
 
-          <Card className="shadow-card p-5 space-y-3">
+          <Card className="premium-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <Badge className="bg-primary/15 text-primary border-primary/30">Cancha Sintética 2</Badge>
               <Badge variant="outline" className="bg-success/15 text-success">Disponible</Badge>
@@ -183,7 +183,7 @@ function SedesPage() {
             </div>
           </Card>
 
-          <Card className="shadow-card p-5 space-y-3">
+          <Card className="premium-card p-5 space-y-3">
             <div className="flex items-center justify-between">
               <Badge className="bg-primary/15 text-primary border-primary/30">Gimnasio & Readaptación</Badge>
               <Badge variant="outline" className="bg-amber-500/15 text-amber-600">Mantenimiento</Badge>

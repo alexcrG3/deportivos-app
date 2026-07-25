@@ -204,19 +204,19 @@ function VideoAnalisisTactico() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      <div className="page-header mb-6 no-print">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 text-white shadow-elegant">
-            <Video className="h-5 w-5" />
+          <div className="icon-box icon-box-warning">
+            <Video className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">Videoanálisis Táctico</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Registra videos · Crea marcas · Genera clips · Analiza con IA</p>
+            <h1 className="page-header-title">Videoanálisis Táctico</h1>
+            <p className="page-header-subtitle">Registra videos · Crea marcas · Genera clips · Analiza con IA</p>
           </div>
         </div>
         <div className="flex gap-2 ml-auto">
-          <Button size="sm" variant="outline" className="text-xs border-slate-350 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 dark:border-slate-800 dark:hover:bg-slate-700 dark:bg-slate-900 dark:text-slate-200 gap-1.5 rounded-xl shadow-elegant" onClick={() => setShowAddVideo(true)}>
-            <Plus className="h-3.5 w-3.5" /> Registrar Video
+          <Button size="sm" variant="outline" className="btn-secondary gap-1.5" onClick={() => setShowAddVideo(true)}>
+            <Plus className="h-4 w-4" /> Registrar Video
           </Button>
         </div>
       </div>
@@ -225,9 +225,9 @@ function VideoAnalisisTactico() {
         {/* Left: video list */}
         <div className="w-full lg:w-72 shrink-0 space-y-3">
           {/* Filter */}
-          <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-slate-950/80 rounded-xl border border-slate-200 dark:border-slate-800/80 w-fit">
+          <div className="flex gap-1.5 p-1 bg-[#F8F9FA] rounded-[12px] border border-[#E2E8F0] w-fit">
             {(["todos", "partido", "entrenamiento", "rival"] as const).map(f => (
-              <button key={f} onClick={() => setFilterTipo(f)} className={`text-[10px] font-extrabold px-3 py-1.5 rounded-lg capitalize transition-all ${filterTipo === f ? "bg-gradient-primary text-white shadow-sm" : "text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"}`}>
+              <button key={f} onClick={() => setFilterTipo(f)} className={`text-[10px] font-extrabold px-3 py-1.5 rounded-[8px] capitalize transition-colors ${filterTipo === f ? "bg-[#2563EB] text-white shadow-sm" : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"}`}>
                 {f}
               </button>
             ))}
@@ -239,18 +239,18 @@ function VideoAnalisisTactico() {
               <button
                 key={v.id}
                 onClick={() => setSelectedId(v.id)}
-                className={`w-full text-left p-3.5 rounded-xl border transition-all ${activeSelectedId === v.id ? "border-amber-400 dark:border-amber-500/50 bg-amber-50/60 dark:bg-slate-900/60 shadow-elegant" : "border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-950/40 hover:bg-slate-50 dark:hover:bg-slate-900"}`}
+                className={`w-full text-left p-3.5 rounded-[12px] border transition-colors ${activeSelectedId === v.id ? "border-[#2563EB] bg-blue-50/50 shadow-sm" : "border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]"}`}
               >
                 <div className="flex items-start gap-2">
-                  <div className="shrink-0 h-8 w-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <div className="shrink-0 h-8 w-8 rounded-[8px] bg-blue-50 flex items-center justify-center text-[#2563EB]">
                     <Play className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-extrabold text-slate-900 dark:text-white text-xs truncate">{v.titulo}</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-semibold">{v.fecha} · {fmtTime(v.duracion)}</p>
+                    <p className="font-bold text-[#0F172A] text-xs truncate">{v.titulo}</p>
+                    <p className="text-[10px] text-[#64748B] mt-0.5 font-medium">{v.fecha} · {fmtTime(v.duracion)}</p>
                     <div className="flex gap-1 mt-1 flex-wrap">
-                      <span className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${tipoCfg.color}`}>{tipoCfg.label}</span>
-                      <span className="text-[8px] text-slate-500 dark:text-slate-450 font-bold">{v.marcas.length} marcas · {v.clips.length} clips</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-[4px] font-bold ${tipoCfg.color}`}>{tipoCfg.label}</span>
+                      <span className="text-[9px] text-[#64748B] font-bold">{v.marcas.length} marcas · {v.clips.length} clips</span>
                     </div>
                   </div>
                 </div>
@@ -270,8 +270,8 @@ function VideoAnalisisTactico() {
         {selected ? (
           <div className="flex-1 space-y-4">
             {/* Video embed */}
-            <Card className="bg-white dark:bg-card border-slate-200 dark:border-slate-800 shadow-card">
-              <CardContent className="p-0 overflow-hidden rounded-xl">
+            <Card className="premium-card p-0">
+              <CardContent className="p-0 overflow-hidden rounded-[12px]">
                 <div className="relative aspect-video bg-black">
                   <iframe
                     src={selected.url}
@@ -285,33 +285,33 @@ function VideoAnalisisTactico() {
             </Card>
 
             {/* Video info */}
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start justify-between gap-4 flex-wrap bg-white p-4 rounded-[12px] border border-[#E2E8F0]">
               <div>
-                <h2 className="font-extrabold text-slate-900 dark:text-white text-base leading-snug">{selected.titulo}</h2>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed font-semibold">{selected.descripcion}</p>
-                <div className="flex gap-2 mt-1.5 flex-wrap">
+                <h2 className="font-bold text-[#0F172A] text-base leading-snug">{selected.titulo}</h2>
+                <p className="text-sm text-[#475569] mt-1 leading-relaxed">{selected.descripcion}</p>
+                <div className="flex gap-2 mt-2 flex-wrap">
                   {selected.etiquetas.map(e => (
-                    <span key={e} className="text-[9px] bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2 py-0.5 rounded text-slate-600 dark:text-slate-400 font-semibold">{e}</span>
+                    <span key={e} className="text-[10px] bg-slate-100 border border-[#E2E8F0] px-2 py-0.5 rounded-[4px] text-[#64748B] font-semibold">{e}</span>
                   ))}
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="outline" className="text-xs border-slate-300 hover:border-slate-400 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-200 gap-1.5 rounded-lg font-bold" onClick={() => setShowAddMarker(true)}>
-                  <Flag className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" /> + Marca
+                <Button size="sm" variant="outline" className="btn-secondary text-xs gap-1.5" onClick={() => setShowAddMarker(true)}>
+                  <Flag className="h-4 w-4 text-[#2563EB]" /> + Marca
                 </Button>
-                <Button size="sm" variant="outline" className="text-xs border-slate-300 hover:border-slate-400 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-200 gap-1.5 rounded-lg font-bold" onClick={() => setShowAddClip(true)}>
-                  <Scissors className="h-3.5 w-3.5 text-violet-650 dark:text-violet-450" /> + Clip
+                <Button size="sm" variant="outline" className="btn-secondary text-xs gap-1.5" onClick={() => setShowAddClip(true)}>
+                  <Scissors className="h-4 w-4 text-violet-500" /> + Clip
                 </Button>
               </div>
             </div>
 
             {/* Tabs: Marcas / Clips */}
-            <div className="flex gap-1 p-1 bg-muted/50 rounded-xl border border-border w-fit">
-              <button onClick={() => setActiveTab("marcas")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === "marcas" ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
-                <Flag className="h-3.5 w-3.5" /> Marcas ({selected.marcas.length})
+            <div className="flex gap-1 p-1 bg-[#F8F9FA] rounded-[12px] border border-[#E2E8F0] w-fit">
+              <button onClick={() => setActiveTab("marcas")} className={`flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-sm font-semibold transition-colors ${activeTab === "marcas" ? "bg-[#2563EB] text-white shadow-sm" : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"}`}>
+                <Flag className="h-4 w-4" /> Marcas ({selected.marcas.length})
               </button>
-              <button onClick={() => setActiveTab("clips")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === "clips" ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
-                <Scissors className="h-3.5 w-3.5" /> Clips ({selected.clips.length})
+              <button onClick={() => setActiveTab("clips")} className={`flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-sm font-semibold transition-colors ${activeTab === "clips" ? "bg-[#2563EB] text-white shadow-sm" : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"}`}>
+                <Scissors className="h-4 w-4" /> Clips ({selected.clips.length})
               </button>
             </div>
 
@@ -344,32 +344,32 @@ function VideoAnalisisTactico() {
 
                 {/* Add Marker form */}
                 {showAddMarker && (
-                  <Card className="bg-card border-amber-500/20">
-                    <CardHeader className="p-3 pb-2">
-                      <CardTitle className="text-xs text-white flex items-center gap-1.5"><Flag className="h-3.5 w-3.5 text-amber-400" /> Nueva Marca</CardTitle>
+                  <Card className="premium-card">
+                    <CardHeader className="p-4 pb-2 border-b border-[#E2E8F0]">
+                      <CardTitle className="text-sm text-[#0F172A] font-bold flex items-center gap-1.5"><Flag className="h-4 w-4 text-[#2563EB]" /> Nueva Marca</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 pt-0 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
+                    <CardContent className="p-4 pt-4 space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Tiempo (min:seg)</label>
+                          <label className="text-xs text-[#64748B] font-bold block mb-1">Tiempo (min:seg o seg)</label>
                           <input type="number" placeholder="Segundos" value={markerForm.tiempo} onChange={e => setMarkerForm(f => ({ ...f, tiempo: Number(e.target.value) }))}
-                            className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                            className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Categoría</label>
+                          <label className="text-xs text-[#64748B] font-bold block mb-1">Categoría</label>
                           <select value={markerForm.categoria} onChange={e => setMarkerForm(f => ({ ...f, categoria: e.target.value as VideoMarkerCategory }))}
-                            className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none">
+                            className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none">
                             {Object.entries(MARKER_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
                           </select>
                         </div>
                       </div>
                       <input placeholder="Descripción *" value={markerForm.descripcion} onChange={e => setMarkerForm(f => ({ ...f, descripcion: e.target.value }))}
-                        className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                        className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                       <input placeholder="Notas adicionales (opcional)" value={markerForm.notas} onChange={e => setMarkerForm(f => ({ ...f, notas: e.target.value }))}
-                        className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                        className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                       <div className="flex gap-2">
-                        <Button size="sm" className="text-xs flex-1 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleAddMarker}>Guardar Marca</Button>
-                        <Button size="sm" variant="outline" className="text-xs border-white/10 text-muted-foreground" onClick={() => setShowAddMarker(false)}>Cancelar</Button>
+                        <Button size="sm" className="btn-primary flex-1" onClick={handleAddMarker}>Guardar Marca</Button>
+                        <Button size="sm" variant="outline" className="btn-secondary" onClick={() => setShowAddMarker(false)}>Cancelar</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -400,30 +400,30 @@ function VideoAnalisisTactico() {
                 )}
 
                 {showAddClip && (
-                  <Card className="bg-card border-violet-500/20">
-                    <CardHeader className="p-3 pb-2">
-                      <CardTitle className="text-xs text-white flex items-center gap-1.5"><Scissors className="h-3.5 w-3.5 text-violet-400" /> Nuevo Clip</CardTitle>
+                  <Card className="premium-card">
+                    <CardHeader className="p-4 pb-2 border-b border-[#E2E8F0]">
+                      <CardTitle className="text-sm text-[#0F172A] font-bold flex items-center gap-1.5"><Scissors className="h-4 w-4 text-violet-500" /> Nuevo Clip</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-3 pt-0 space-y-2">
+                    <CardContent className="p-4 pt-4 space-y-3">
                       <input placeholder="Título del clip *" value={clipForm.titulo} onChange={e => setClipForm(f => ({ ...f, titulo: e.target.value }))}
-                        className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
-                      <div className="grid grid-cols-2 gap-2">
+                        className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Inicio (seg)</label>
+                          <label className="text-xs text-[#64748B] font-bold block mb-1">Inicio (seg)</label>
                           <input type="number" value={clipForm.inicio} onChange={e => setClipForm(f => ({ ...f, inicio: Number(e.target.value) }))}
-                            className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                            className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                         </div>
                         <div>
-                          <label className="text-[10px] text-muted-foreground">Fin (seg)</label>
+                          <label className="text-xs text-[#64748B] font-bold block mb-1">Fin (seg)</label>
                           <input type="number" value={clipForm.fin} onChange={e => setClipForm(f => ({ ...f, fin: Number(e.target.value) }))}
-                            className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                            className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                         </div>
                       </div>
                       <input placeholder="Comentario (opcional)" value={clipForm.comentario} onChange={e => setClipForm(f => ({ ...f, comentario: e.target.value }))}
-                        className="w-full h-8 rounded-lg border border-white/10 bg-white/5 px-2 text-xs text-white outline-none" />
+                        className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none" />
                       <div className="flex gap-2">
-                        <Button size="sm" className="text-xs flex-1 bg-violet-600 hover:bg-violet-700 text-white" onClick={handleAddClip}>Crear Clip</Button>
-                        <Button size="sm" variant="outline" className="text-xs border-white/10 text-muted-foreground" onClick={() => setShowAddClip(false)}>Cancelar</Button>
+                        <Button size="sm" className="btn-primary flex-1 bg-violet-600 hover:bg-violet-700" onClick={handleAddClip}>Crear Clip</Button>
+                        <Button size="sm" variant="outline" className="btn-secondary" onClick={() => setShowAddClip(false)}>Cancelar</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -444,33 +444,33 @@ function VideoAnalisisTactico() {
       {/* Add Video modal */}
       {showAddVideo && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="bg-card border-border w-full max-w-md shadow-2xl">
-            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm text-foreground flex items-center gap-2"><Video className="h-4 w-4 text-amber-500" /> Registrar Video</CardTitle>
-              <button className="text-muted-foreground hover:text-foreground text-xs" onClick={() => setShowAddVideo(false)}>✕ Cerrar</button>
+          <Card className="premium-card w-full max-w-md shadow-2xl p-0">
+            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b border-[#E2E8F0]">
+              <CardTitle className="text-sm text-[#0F172A] font-bold flex items-center gap-2"><Video className="h-4 w-4 text-[#2563EB]" /> Registrar Video</CardTitle>
+              <button className="text-[#64748B] hover:text-[#0F172A] text-xs font-bold" onClick={() => setShowAddVideo(false)}>✕ Cerrar</button>
             </CardHeader>
-            <CardContent className="p-4 pt-0 space-y-2">
+            <CardContent className="p-4 pt-4 space-y-3">
               <input placeholder="Título *" value={videoForm.titulo} onChange={e => setVideoForm(f => ({ ...f, titulo: e.target.value }))}
-                className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none" />
+                className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
               <input placeholder="URL (YouTube embed o video URL) *" value={videoForm.url} onChange={e => setVideoForm(f => ({ ...f, url: e.target.value }))}
-                className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none" />
+                className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
               <textarea placeholder="Descripción" value={videoForm.descripcion} onChange={e => setVideoForm(f => ({ ...f, descripcion: e.target.value }))}
-                className="w-full h-16 rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none resize-none" />
-              <div className="grid grid-cols-2 gap-2">
+                className="w-full h-20 rounded-[8px] border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A] outline-none resize-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
+              <div className="grid grid-cols-2 gap-3">
                 <input placeholder="Fecha (YYYY-MM-DD)" value={videoForm.fecha} onChange={e => setVideoForm(f => ({ ...f, fecha: e.target.value }))}
-                  className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none" />
+                  className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
                 <select value={videoForm.tipo} onChange={e => setVideoForm(f => ({ ...f, tipo: e.target.value as VideoAnalysis["tipo"] }))}
-                  className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none">
-                  <option value="partido" className="text-foreground bg-background">Partido</option>
-                  <option value="entrenamiento" className="text-foreground bg-background">Entrenamiento</option>
-                  <option value="rival" className="text-foreground bg-background">Rival</option>
+                  className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]">
+                  <option value="partido">Partido</option>
+                  <option value="entrenamiento">Entrenamiento</option>
+                  <option value="rival">Rival</option>
                 </select>
               </div>
               <input placeholder="Etiquetas (separadas por coma)" value={videoForm.etiquetas} onChange={e => setVideoForm(f => ({ ...f, etiquetas: e.target.value }))}
-                className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none" />
-              <div className="flex gap-2 pt-1">
-                <Button size="sm" className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs" onClick={handleAddVideo}>Registrar Video</Button>
-                <Button size="sm" variant="outline" className="border-border text-muted-foreground text-xs" onClick={() => setShowAddVideo(false)}>Cancelar</Button>
+                className="w-full h-10 rounded-[8px] border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]" />
+              <div className="flex gap-2 pt-2">
+                <Button size="sm" className="btn-primary flex-1" onClick={handleAddVideo}>Registrar Video</Button>
+                <Button size="sm" variant="outline" className="btn-secondary" onClick={() => setShowAddVideo(false)}>Cancelar</Button>
               </div>
             </CardContent>
           </Card>

@@ -22,24 +22,24 @@ function CargaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Control de carga</h1>
-        <p className="text-sm text-muted-foreground">Monitoreo diario de intensidad, esfuerzo, fatiga y recuperación.</p>
+        <h1 className="page-header-title">Control de carga</h1>
+        <p className="page-header-subtitle">Monitoreo diario de intensidad, esfuerzo, fatiga y recuperación.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardContent className="p-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Activity className="h-5 w-5" /></div>
             <div><p className="text-xs text-muted-foreground">Carga promedio</p><p className="text-2xl font-semibold">{promedio}%</p></div>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardContent className="p-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-destructive/10 text-destructive"><HeartPulse className="h-5 w-5" /></div>
             <div><p className="text-xs text-muted-foreground">Fatiga alta</p><p className="text-2xl font-semibold">{fatigaAlta}</p></div>
           </CardContent>
         </Card>
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardContent className="p-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-warning/15 text-warning"><TrendingUp className="h-5 w-5" /></div>
             <div><p className="text-xs text-muted-foreground">Con molestias</p><p className="text-2xl font-semibold">{playerLoads.filter((p) => p.molestias).length}</p></div>
@@ -47,7 +47,7 @@ function CargaPage() {
         </Card>
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader>
           <CardTitle>Cargas individuales (hoy)</CardTitle>
           <CardDescription>Escalas 1-10 · La IA usa estos datos para generar alertas.</CardDescription>

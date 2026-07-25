@@ -89,22 +89,22 @@ function FormacionesTacticas() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-elegant">
-            <Layers className="h-5 w-5" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">
+            <Layers className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">Formaciones</h1>
-            <p className="text-xs text-muted-foreground">Biblioteca de formaciones y sistemas de juego</p>
+            <h1 className="text-[28px] font-bold text-[#0F172A] tracking-tight">Formaciones</h1>
+            <p className="text-[#64748B] text-sm">Biblioteca de formaciones y sistemas de juego</p>
           </div>
         </div>
         <Button
           size="sm"
-          className="gap-1.5 text-xs bg-gradient-to-r from-violet-600 to-purple-700 text-white font-bold"
+          className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5"
           onClick={() => toast.info("Editor de formaciones — Próximamente en Parte 2/3")}
         >
-          <Plus className="h-3.5 w-3.5" /> Nueva Formación
+          <Plus className="h-4 w-4" /> Nueva Formación
         </Button>
       </div>
 
@@ -114,10 +114,10 @@ function FormacionesTacticas() {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition border ${
+            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition border ${
               filter === f
-                ? "bg-primary text-white border-primary"
-                : "bg-muted text-muted-foreground hover:bg-muted/85 hover:text-foreground border-transparent"
+                ? "bg-[#2563EB] text-white border-[#2563EB]"
+                : "bg-white text-[#475569] hover:bg-slate-50 border-[#E2E8F0]"
             }`}
           >
             {f}
@@ -137,30 +137,30 @@ function FormacionesTacticas() {
               <Card
                 key={f.id}
                 onClick={() => setSelectedId(f.id)}
-                className={`bg-card shadow-card cursor-pointer transition-all border ${
-                  isActive ? "border-primary/50 bg-primary/5 shadow-elegant" :
-                  selectedId === f.id ? "border-violet-500/40 bg-violet-500/5" :
-                  "border-border hover:border-border/80"
+                className={`bg-white shadow-sm cursor-pointer transition-all border rounded-[12px] overflow-hidden ${
+                  isActive ? "border-[#2563EB] ring-1 ring-[#2563EB]" :
+                  selectedId === f.id ? "border-blue-300 bg-blue-50/50" :
+                  "border-[#E2E8F0] hover:border-slate-300"
                 }`}
               >
                 <CardHeader className="pb-2 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Crosshair className="h-4 w-4 text-primary shrink-0" />
-                      <CardTitle className="text-base font-bold text-foreground truncate">{f.nombre}</CardTitle>
+                      <Crosshair className="h-4 w-4 text-[#2563EB] shrink-0" />
+                      <CardTitle className="text-base font-bold text-[#0F172A] truncate">{f.nombre}</CardTitle>
                     </div>
                     {isActive && (
-                      <Badge variant="outline" className="text-[9px] font-bold bg-primary/10 text-primary border-primary/20 shrink-0">
-                        <Check className="h-2.5 w-2.5 mr-0.5" /> Activa
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium shrink-0">
+                        <Check className="h-3 w-3 mr-1" /> Activa
                       </Badge>
                     )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 p-4 pt-0">
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="text-[9px] border-border text-foreground font-semibold bg-muted/40">{f.disciplina}</Badge>
-                    {f.predefinida && <Badge variant="outline" className="text-[9px] bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20 font-semibold">Predefinida</Badge>}
-                    <Badge variant="outline" className="text-[9px] border-border text-foreground font-semibold bg-muted/40">{f.slots.length} pos.</Badge>
+                    <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{f.disciplina}</Badge>
+                    {f.predefinida && <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">Predefinida</Badge>}
+                    <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{f.slots.length} pos.</Badge>
                   </div>
 
                   {/* Mini field preview */}
@@ -168,14 +168,14 @@ function FormacionesTacticas() {
 
                   <Button
                     size="sm"
-                    className={`w-full text-xs gap-1.5 font-bold ${
+                    className={`w-full rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5 ${
                       isActive
-                        ? "bg-primary/15 text-primary border border-primary/20 hover:bg-primary/20"
-                        : "bg-gradient-to-r from-violet-600 to-purple-700 text-white"
+                        ? "bg-slate-100 text-[#0F172A] hover:bg-slate-200"
+                        : "bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
                     }`}
                     onClick={e => { e.stopPropagation(); handleUse(f); }}
                   >
-                    {isActive ? (<><Check className="h-3.5 w-3.5" /> En uso</>) : (<><ShieldHalf className="h-3.5 w-3.5" /> Usar esta formación</>)}
+                    {isActive ? (<><Check className="h-4 w-4" /> En uso</>) : (<><ShieldHalf className="h-4 w-4" /> Usar esta formación</>)}
                   </Button>
                 </CardContent>
               </Card>
@@ -186,32 +186,32 @@ function FormacionesTacticas() {
         {/* Sidebar: selected formation detail */}
         <div className="space-y-4">
           {selectedFormation ? (
-            <Card className="bg-card shadow-card border-border sticky top-4">
-              <CardHeader className="pb-3 p-4">
-                <CardTitle className="text-base text-foreground font-bold">{selectedFormation.nombre}</CardTitle>
-                <CardDescription className="text-muted-foreground text-xs">Posiciones y roles</CardDescription>
+            <Card className="bg-white shadow-sm border border-[#E2E8F0] rounded-[12px] sticky top-4">
+              <CardHeader className="pb-3 p-4 border-b border-[#E2E8F0]">
+                <CardTitle className="text-base text-[#0F172A] font-bold">{selectedFormation.nombre}</CardTitle>
+                <CardDescription className="text-[#64748B] text-sm">Posiciones y roles</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 p-4 pt-0">
+              <CardContent className="space-y-3 p-4 pt-4">
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  <Badge variant="outline" className="text-[9px] border-border text-foreground font-semibold bg-muted/40">{selectedFormation.disciplina}</Badge>
-                  {selectedFormation.predefinida && <Badge variant="outline" className="text-[9px] bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20 font-semibold">Predefinida</Badge>}
+                  <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{selectedFormation.disciplina}</Badge>
+                  {selectedFormation.predefinida && <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">Predefinida</Badge>}
                 </div>
 
                 {/* Slot list */}
                 <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                   {selectedFormation.slots.map(slot => (
-                    <div key={slot.slotId} className="flex items-center gap-2 text-xs p-1.5 rounded-lg bg-muted/30 border border-border">
+                    <div key={slot.slotId} className="flex items-center gap-2 text-sm p-2 rounded-lg bg-slate-50 border border-[#E2E8F0]">
                       <div
-                        className="h-5 w-5 rounded-full flex items-center justify-center text-[8px] font-black text-white shrink-0"
+                        className="h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-bold text-white shrink-0"
                         style={{ backgroundColor: getSlotColor(slot.slotId) }}
                       >
                         {slot.slotId.slice(0, 2)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-foreground font-bold leading-none truncate">{slot.slotId}</p>
-                        <p className="text-muted-foreground text-[9px] mt-0.5 truncate">{slot.label}</p>
+                        <p className="text-[#0F172A] font-bold leading-none truncate">{slot.slotId}</p>
+                        <p className="text-[#64748B] text-[11px] mt-0.5 truncate">{slot.label}</p>
                       </div>
-                      <span className="text-[9px] text-muted-foreground font-medium shrink-0">
+                      <span className="text-[11px] text-[#64748B] font-medium shrink-0">
                         {slot.x.toFixed(0)}%/{slot.y.toFixed(0)}%
                       </span>
                     </div>
@@ -220,16 +220,16 @@ function FormacionesTacticas() {
 
                 <Button 
                   onClick={() => handleUse(selectedFormation)} 
-                  className="w-full text-xs gap-1.5 bg-gradient-to-r from-violet-600 to-purple-700 text-white mt-2 font-bold"
+                  className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5 mt-2"
                 >
-                  <Layers className="h-3.5 w-3.5" /> Abrir en Pizarra
+                  <Layers className="h-4 w-4" /> Abrir en Pizarra
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <Card className="bg-card shadow-card border-border">
-              <CardContent className="p-6 text-center text-muted-foreground text-xs">
-                <Layers className="h-8 w-8 mx-auto mb-2 text-primary/30" />
+            <Card className="bg-white shadow-sm border border-[#E2E8F0] rounded-[12px]">
+              <CardContent className="p-6 text-center text-[#64748B] text-sm flex flex-col items-center">
+                <Layers className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                 Selecciona una formación para ver sus detalles
               </CardContent>
             </Card>

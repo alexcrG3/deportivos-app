@@ -118,7 +118,7 @@ function EvaluacionesPage() {
       <CoachOsBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Evaluaciones rápidas</h1>
+          <h1 className="page-header-title">Evaluaciones rápidas</h1>
           <p className="text-sm text-muted-foreground">
             {role === "admin" && selectedCoachName
               ? `Evaluaciones de jugadores de ${selectedCoachName}`
@@ -142,7 +142,7 @@ function EvaluacionesPage() {
             : "No hay jugadores para evaluar."}
         </div>
       ) : (
-        <Card className="shadow-card">
+        <Card className="premium-card">
           <CardHeader>
             <CardTitle>Evaluación de jugadores</CardTitle>
             <CardDescription>
@@ -153,14 +153,14 @@ function EvaluacionesPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="p-2 text-left">Jugador</th>
-                    {criterios.map((c) => <th key={c.key} className="p-2 text-center">{c.label}</th>)}
+                  <tr className="table-header-row">
+                    <th className="table-header-cell text-left">Jugador</th>
+                    {criterios.map((c) => <th key={c.key} className="table-header-cell text-center">{c.label}</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {evals.map((e) => (
-                    <tr key={e.jugadorId} className="border-b hover:bg-muted/40">
+                    <tr key={e.jugadorId} className="table-row hover-row">
                       <td className="p-2">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">

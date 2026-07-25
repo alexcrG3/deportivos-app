@@ -33,10 +33,10 @@ function ComunicacionesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Comunicaciones</h1>
-          <p className="text-sm text-muted-foreground">WhatsApp Business y emails transaccionales automatizados.</p>
+          <h1 className="page-header-title">Comunicaciones</h1>
+          <p className="page-header-subtitle">WhatsApp Business y emails transaccionales automatizados.</p>
         </div>
-        <Button className="bg-gradient-primary shadow-elegant"><Send className="h-4 w-4" /> Nueva campaña</Button>
+        <Button className="btn-primary"><Send className="h-4 w-4" /> Nueva campaña</Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -46,7 +46,7 @@ function ComunicacionesPage() {
         <StatCard label="Errores recientes" value={hasPlayers ? "6" : "0"} hint="últimas 24 h" icon={AlertCircle} accent="destructive" />
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardContent className="p-4">
           <Tabs defaultValue="whatsapp">
             <TabsList>
@@ -137,7 +137,7 @@ function ComunicacionesPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {whatsappTemplates.map((t) => (
-                  <Card key={t.id} className="shadow-card">
+                  <Card key={t.id} className="premium-card">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline">{t.categoria}</Badge>

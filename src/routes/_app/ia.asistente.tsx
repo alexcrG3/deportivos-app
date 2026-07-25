@@ -248,8 +248,8 @@ function AsistenteIA() {
   return (
     <div className="flex h-[calc(100vh-140px)] gap-6 overflow-hidden">
       {/* LEFT SIDEBAR: History list */}
-      <div className="w-[280px] shrink-0 border rounded-2xl bg-card flex flex-col overflow-hidden shadow-card">
-        <div className="p-4 border-b flex items-center justify-between">
+      <div className="w-[280px] shrink-0 premium-card p-0 flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between">
           <span className="font-bold text-sm tracking-tight text-foreground flex items-center gap-1.5">
             <MessageSquare className="h-4 w-4 text-primary" /> Historial de Chats
           </span>
@@ -282,12 +282,12 @@ function AsistenteIA() {
       </div>
 
       {/* MAIN CONTAINER */}
-      <div className="flex-1 flex flex-col overflow-hidden border rounded-2xl bg-[#090b11] shadow-card">
+      <div className="flex-1 flex flex-col overflow-hidden premium-card p-0">
         
         {/* Welcome / Quick reports header */}
-        <div className="p-4 border-b bg-gradient-to-r from-violet-950/20 to-amber-950/10 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="page-header border-b border-[#E2E8F0] flex flex-col md:flex-row md:items-center justify-between gap-3 p-4">
           <div>
-            <h2 className="font-bold text-white flex items-center gap-1.5">
+            <h2 className="page-header-title flex items-center gap-1.5">
               <Sparkles className="h-5 w-5 text-primary animate-pulse" /> Asistente DeportivOS AI
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -452,7 +452,7 @@ function AsistenteIA() {
         </div>
 
         {/* Input box */}
-        <div className="p-4 border-t bg-[#07090d]">
+        <div className="p-4 border-t border-[#E2E8F0] bg-[#F8FAFC]">
           {messages.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-3">
               {currentSuggestions.map((s) => (

@@ -54,10 +54,8 @@ function EncargadosPage() {
     <div className="space-y-6 pb-12">
       
       {/* HEADER DE LA SECCIÓN DE CARNETS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 p-6 rounded-3xl text-white shadow-2xl border border-white/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(245,158,11,0.15),transparent_70%)] pointer-events-none" />
-        
-        <div className="relative z-10 space-y-1">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Badge className="bg-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider">
               <Sparkles className="h-3 w-3 mr-1" /> Carnet Digital Atleta Pro Pass 2026
@@ -66,10 +64,10 @@ function EncargadosPage() {
               Verificación Cancha 24/7
             </Badge>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase mt-1">
+          <h1 className="text-[28px] font-bold tracking-tight text-[#0F172A] uppercase mt-1">
             Carnet Digital & Licencia de Competencia
           </h1>
-          <p className="text-xs text-slate-300">
+          <p className="text-sm text-[#64748B]">
             Acreditación oficial holográfica 3D, código de escaneo rápido y ficha médica de tus hijos a cargo.
           </p>
         </div>
@@ -77,7 +75,7 @@ function EncargadosPage() {
 
       {/* SELECTOR DE HIJOS (SI TIENE MÁS DE 1 HIJO) */}
       {misHijos.length > 1 && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-card flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <UserCheck className="h-5 w-5 text-amber-500" />
             <div>
@@ -148,7 +146,7 @@ function EncargadosPage() {
           <div className="lg:col-span-5 space-y-4">
             
             {/* Card de Estado Oficial */}
-            <Card className="shadow-card border-slate-200 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 p-5 space-y-4">
+            <Card className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-12 w-12 ring-2 ring-amber-400">
@@ -219,7 +217,7 @@ function EncargadosPage() {
 
       {/* MODO ADMINISTRADOR: BUSCADOR DE CARNETS GENERAL DE LA ACADEMIA */}
       {isAdmin && (
-        <Card className="shadow-card border-slate-200 dark:border-slate-800 rounded-3xl mt-8">
+        <Card className="bg-white border border-[#E2E8F0] rounded-[12px] shadow-sm mt-8">
           <CardHeader>
             <CardTitle className="text-base font-bold flex items-center gap-2">
               <Search className="h-4 w-4 text-indigo-500" /> Búsqueda General de Carnets (Modo Administrador)

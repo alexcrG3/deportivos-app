@@ -138,19 +138,19 @@ function CentroTacticaDashboard() {
   return (
     <div className="space-y-6">
       {/* Header con Botones Gigantes de Acción Rápida */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary text-white shadow-elegant">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">
             <ShieldHalf className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+            <h1 className="text-[28px] font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
               📐 Dashboard Táctico & Historial
-              <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase">
+              <Badge className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase">
                 Enterprise 2.0
               </Badge>
             </h1>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-[#64748B] text-sm">
               Control de pizarras guardadas, estrategias de balón parado y videoanálisis de la academia.
             </p>
           </div>
@@ -160,7 +160,7 @@ function CentroTacticaDashboard() {
         <div className="flex flex-wrap gap-2">
           <Button
             asChild
-            className="bg-gradient-primary text-white font-extrabold text-xs h-11 px-4 shadow-elegant rounded-xl gap-2"
+            className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-2 h-11"
           >
             <Link to="/tactica/pizarra">
               <Plus className="h-4 w-4 stroke-[3]" /> ➕ NUEVA PIZARRA TÁCTICA
@@ -170,7 +170,7 @@ function CentroTacticaDashboard() {
           <Button
             asChild
             variant="outline"
-            className="font-extrabold text-xs h-11 px-4 border-slate-300 dark:border-slate-800 hover:border-primary gap-2"
+            className="border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-2 h-11"
           >
             <Link to="/tactica/video">
               <Upload className="h-4 w-4 text-teal-500" /> ➕ SUBIR / ANALIZAR VIDEO
@@ -217,17 +217,17 @@ function CentroTacticaDashboard() {
       {/* 📐 2. Bloque Central: Mesa de Trabajo */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Columna Izquierda: Últimas Pizarras */}
-        <Card className="lg:col-span-2 shadow-card flex flex-col justify-between">
-          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b">
+        <Card className="lg:col-span-2 shadow-sm flex flex-col justify-between border border-[#E2E8F0]">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-[#E2E8F0]">
             <div>
-              <CardTitle className="text-base font-extrabold flex items-center gap-2">
-                <Layers className="h-4 w-4 text-violet-500" /> 🎨 Últimas Pizarras y Sistemas Editados
+              <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
+                <Layers className="h-4 w-4 text-blue-500" /> 🎨 Últimas Pizarras y Sistemas Editados
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs text-[#64748B]">
                 Acceso directo con vista previa para dar clic e ir al lienzo interactivo
               </CardDescription>
             </div>
-            <Link to="/tactica/pizarra" className="text-xs text-primary font-bold hover:underline">
+            <Link to="/tactica/pizarra" className="text-sm text-[#2563EB] font-medium hover:underline">
               Ir a Pizarra →
             </Link>
           </CardHeader>
@@ -237,36 +237,36 @@ function CentroTacticaDashboard() {
               {filteredPizarras.map((piz) => (
                 <div
                   key={piz.id}
-                  className="group rounded-xl border bg-card hover:bg-muted/40 transition overflow-hidden flex flex-col justify-between p-3 space-y-3"
+                  className="group rounded-[12px] border border-[#E2E8F0] bg-white hover:bg-slate-50 transition overflow-hidden flex flex-col justify-between p-3 space-y-3"
                 >
                   <div
-                    className={`h-28 rounded-lg bg-gradient-to-br ${piz.aspectoColor} border flex flex-col items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform`}
+                    className={`h-28 rounded-lg bg-slate-100 flex flex-col items-center justify-center relative overflow-hidden group-hover:scale-[1.02] transition-transform`}
                   >
-                    <div className="absolute inset-2 border border-white/20 rounded-md flex items-center justify-center">
-                      <div className="h-12 w-12 rounded-full border border-white/20 flex items-center justify-center">
-                        <div className="h-1.5 w-1.5 rounded-full bg-white/40" />
+                    <div className="absolute inset-2 border border-slate-300 rounded-md flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-full border border-slate-300 flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-slate-400" />
                       </div>
                     </div>
-                    <p className="text-[10px] font-black text-white uppercase tracking-wider relative z-10 bg-black/40 px-2 py-0.5 rounded backdrop-blur">
+                    <p className="text-[12px] font-bold text-[#0F172A] uppercase tracking-wider relative z-10 bg-white/80 px-2 py-0.5 rounded backdrop-blur">
                       {piz.sistema}
                     </p>
                   </div>
 
                   <div className="space-y-1">
-                    <p className="font-extrabold text-xs text-foreground group-hover:text-primary transition line-clamp-1">
+                    <p className="font-bold text-sm text-[#0F172A] group-hover:text-[#2563EB] transition line-clamp-1">
                       {piz.titulo}
                     </p>
-                    <p className="text-[10px] text-muted-foreground font-medium">
-                      Modificado {piz.modificado} por <span className="text-foreground font-bold">{piz.autor}</span>
+                    <p className="text-[12px] text-[#64748B]">
+                      Modificado {piz.modificado} por <span className="text-[#0F172A] font-medium">{piz.autor}</span>
                     </p>
-                    <Badge variant="outline" className="text-[9px] font-semibold bg-primary/5">
+                    <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">
                       {piz.equipo}
                     </Badge>
                   </div>
 
-                  <Button size="sm" variant="outline" className="w-full text-xs font-bold gap-1 mt-1" asChild>
+                  <Button size="sm" variant="outline" className="w-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-1 mt-1" asChild>
                     <Link to="/tactica/pizarra">
-                      <ShieldHalf className="h-3 w-3 text-primary" /> Editar Pizarra
+                      <ShieldHalf className="h-4 w-4 text-[#2563EB]" /> Editar Pizarra
                     </Link>
                   </Button>
                 </div>
@@ -276,37 +276,37 @@ function CentroTacticaDashboard() {
         </Card>
 
         {/* Columna Derecha: Videoteca */}
-        <Card className="shadow-card flex flex-col justify-between">
-          <CardHeader className="pb-3 border-b flex flex-row items-center justify-between">
+        <Card className="shadow-sm flex flex-col justify-between border border-[#E2E8F0]">
+          <CardHeader className="pb-3 border-b border-[#E2E8F0] flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-extrabold flex items-center gap-2">
-                <Video className="h-4 w-4 text-teal-500" /> 📺 Videoteca & Clips Recortados
+              <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
+                <Video className="h-4 w-4 text-blue-500" /> 📺 Videoteca & Clips Recortados
               </CardTitle>
-              <CardDescription className="text-xs">Feed vertical de scouting</CardDescription>
+              <CardDescription className="text-xs text-[#64748B]">Feed vertical de scouting</CardDescription>
             </div>
-            <Link to="/tactica/video" className="text-xs text-primary font-semibold hover:underline">
+            <Link to="/tactica/video" className="text-sm text-[#2563EB] font-medium hover:underline">
               Ver todos →
             </Link>
           </CardHeader>
 
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-0">
             {filteredVideos.map((v) => (
-              <div key={v.id} className="p-3 rounded-xl border bg-muted/30 hover:bg-muted transition space-y-2">
+              <div key={v.id} className="p-4 border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors space-y-2 last:border-0">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="font-bold text-xs text-foreground leading-snug">{v.titulo}</p>
-                  <Badge variant="outline" className="text-[9px] uppercase font-bold shrink-0">
+                  <p className="font-bold text-sm text-[#0F172A] leading-snug">{v.titulo}</p>
+                  <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase shrink-0">
                     {v.tipo}
                   </Badge>
                 </div>
 
-                <Badge className={`text-[10px] font-bold ${v.statusColor}`}>
+                <Badge className={`border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium ${v.statusColor}`}>
                   {v.statusLabel}
                 </Badge>
 
-                <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/30">
+                <div className="flex items-center justify-between text-[12px] text-[#64748B] pt-2">
                   <span>Procesado: {v.fecha}</span>
-                  <Link to="/tactica/video" className="font-bold text-primary hover:underline flex items-center gap-0.5">
-                    Ver clips <ArrowRight className="h-2.5 w-2.5" />
+                  <Link to="/tactica/video" className="font-medium text-[#2563EB] hover:underline flex items-center gap-1">
+                    Ver clips <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -316,36 +316,36 @@ function CentroTacticaDashboard() {
       </div>
 
       {/* 🚨 3. Bloque Inferior: Biblioteca Rápida y Buscador IA */}
-      <Card className="shadow-card border bg-card">
-        <CardHeader className="pb-3 border-b">
-          <CardTitle className="text-sm font-extrabold flex items-center gap-2">
-            <Tag className="h-4 w-4 text-primary" /> 🚨 Biblioteca Rápida por Concepto Táctico & Buscador IA
+      <Card className="shadow-sm border border-[#E2E8F0] bg-white rounded-[12px]">
+        <CardHeader className="pb-3 border-b border-[#E2E8F0]">
+          <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
+            <Tag className="h-4 w-4 text-[#2563EB]" /> 🚨 Biblioteca Rápida por Concepto Táctico & Buscador IA
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-sm text-[#64748B]">
             Filtra de inmediato pizarras, jugadas y videoanálisis sin navegar por carpetas
           </CardDescription>
         </CardHeader>
 
         <CardContent className="p-6 space-y-5">
           <div className="relative">
-            <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-[#64748B]" />
             <Input
               type="text"
               placeholder="🔍 Buscador IA: Ej. 'Pizarras de la Sub-15 que usen sistema 3-5-2'..."
-              className="pl-10 h-11 text-xs font-medium bg-muted/30 rounded-xl"
+              className="pl-10 h-11 text-sm bg-slate-50 border border-[#E2E8F0] rounded-[8px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-bold text-muted-foreground">Filtros Rápidos por Concepto:</p>
+            <p className="text-sm font-bold text-[#0F172A]">Filtros Rápidos por Concepto:</p>
             <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant={activeTag === null ? "default" : "outline"}
                 onClick={() => setActiveTag(null)}
-                className="text-xs font-extrabold rounded-lg h-8"
+                className={`text-sm rounded-[8px] h-9 px-4 ${activeTag === null ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white" : "border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50"}`}
               >
                 Todos
               </Button>
@@ -356,9 +356,9 @@ function CentroTacticaDashboard() {
                   size="sm"
                   variant={activeTag === t ? "default" : "outline"}
                   onClick={() => setActiveTag(activeTag === t ? null : t)}
-                  className="text-xs font-bold rounded-lg h-8 border-slate-300 dark:border-slate-800"
+                  className={`text-sm rounded-[8px] h-9 px-4 ${activeTag === t ? "bg-[#2563EB] hover:bg-[#1D4ED8] text-white" : "border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50"}`}
                 >
-                  [ {t} ]
+                  {t}
                 </Button>
               ))}
             </div>

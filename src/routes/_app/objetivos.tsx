@@ -215,8 +215,8 @@ function ObjetivosPage() {
       <CoachOsBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Objetivos individuales</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="page-header-title">Objetivos individuales</h1>
+          <p className="page-header-subtitle">
             {role === "admin" && selectedCoachName
               ? `Objetivos asignados por ${selectedCoachName}`
               : "Seguimiento de metas por atleta — visible en su Player OS."}
@@ -229,7 +229,7 @@ function ObjetivosPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((o) => (
-          <Card key={o.id} className="shadow-card transition-all hover:shadow-elegant bg-card border-border flex flex-col justify-between">
+          <Card key={o.id} className="premium-card hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
               <CardHeader className="flex-row items-start justify-between space-y-0 p-4">
                 <div className="flex items-center gap-2.5 min-w-0">

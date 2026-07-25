@@ -15,11 +15,11 @@ import { supabase } from "@/lib/supabase";
 export const Route = createFileRoute("/_app/calendario")({ component: CalendarioPage });
 
 const tipoColor: Record<string, string> = {
-  partido: "bg-primary/15 text-primary border-primary/20",
-  torneo: "bg-destructive/15 text-destructive border-destructive/20",
-  reunion: "bg-warning/20 text-warning-foreground border-warning/30",
-  actividad: "bg-success/15 text-success border-success/20",
-  entrenamiento: "bg-secondary text-secondary-foreground border-transparent",
+  partido: "badge-pill badge-info",
+  torneo: "badge-pill badge-danger",
+  reunion: "badge-pill badge-warning",
+  actividad: "badge-pill badge-success",
+  entrenamiento: "badge-pill badge-neutral",
 };
 
 interface Event {
@@ -411,7 +411,7 @@ function CalendarioPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Horarios & Calendario</h1>
           <p className="text-sm text-muted-foreground">Vista global mensual de eventos, entrenamientos y agenda del club.</p>
         </div>
-        <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setIsOpenCreate(true)} className="btn-primary shadow-sm">
           <Plus className="h-4 w-4 mr-1" /> Nuevo evento
         </Button>
       </div>

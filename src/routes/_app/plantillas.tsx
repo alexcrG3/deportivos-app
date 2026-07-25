@@ -182,7 +182,7 @@ function PlantillasPage() {
       <CoachOsBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Plantillas</h1>
+          <h1 className="page-header-title">Plantillas</h1>
           <p className="text-sm text-muted-foreground">
             {role === "admin" && selectedCoachName
               ? `Plantillas de ${selectedCoachName}`
@@ -196,7 +196,7 @@ function PlantillasPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {templates.map((t) => (
-          <Card key={t.id} className="shadow-card transition-all hover:shadow-elegant hover:-translate-y-0.5 bg-card border-border">
+          <Card key={t.id} className="premium-card transition-all hover:shadow-sm hover:-translate-y-0.5">
             <CardHeader className="flex-row items-start justify-between space-y-0 p-4 pb-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <LayoutTemplate className="h-5 w-5" />
@@ -237,7 +237,7 @@ function PlantillasPage() {
               <div className="flex gap-1 pt-1">
                 <Button 
                   size="sm" 
-                  className="flex-1 bg-primary text-white hover:bg-primary/95 text-xs font-bold"
+                  className="flex-1 btn-primary"
                   onClick={() => handleUseTemplate(t)}
                 >
                   Usar plantilla
@@ -352,7 +352,7 @@ function PlantillasPage() {
 
               <div className="flex gap-2 pt-2">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
+                  className="flex-1 btn-primary"
                   onClick={handleCreateTemplate}
                 >
                   Guardar Plantilla
@@ -454,7 +454,7 @@ function PlantillasPage() {
 
               <div className="flex gap-2 pt-2">
                 <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
+                  className="flex-1 btn-primary"
                   onClick={handleUpdateTemplate}
                 >
                   Guardar Cambios

@@ -67,13 +67,13 @@ function ProspectosPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Prospectos</h1>
-        <p className="text-sm text-muted-foreground">Leads avanzados con evaluaciones y pruebas en curso</p>
+      <div className="page-header border-b pb-4">
+        <h1 className="page-header-title">Prospectos</h1>
+        <p className="page-header-subtitle">Leads avanzados con evaluaciones y pruebas en curso</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-        <Card className="lg:max-h-[calc(100vh-12rem)] overflow-hidden flex flex-col">
+        <Card className="premium-card lg:max-h-[calc(100vh-12rem)] p-0 overflow-hidden flex flex-col">
           <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -99,7 +99,7 @@ function ProspectosPage() {
         </Card>
 
         {current && (
-          <Card>
+          <Card className="premium-card">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16"><AvatarImage src={current.avatar} /><AvatarFallback>{current.nombre[0]}</AvatarFallback></Avatar>
@@ -107,8 +107,8 @@ function ProspectosPage() {
                   <h2 className="text-xl font-bold">{current.nombre}</h2>
                   <p className="text-sm text-muted-foreground">{current.edad} años · {current.disciplina} · {current.sede}</p>
                   <div className="flex gap-2 mt-1">
-                    <Badge>{current.stage}</Badge>
-                    <Badge variant="outline">{current.fuente}</Badge>
+                    <Badge className="badge-pill badge-info">{current.stage}</Badge>
+                    <Badge className="badge-pill badge-neutral">{current.fuente}</Badge>
                   </div>
                 </div>
                 <div className="text-right">
@@ -162,7 +162,7 @@ function ProspectosPage() {
                           <p className="text-xs text-muted-foreground">Potencial proyectado</p>
                           <p className="text-xl font-bold">{scouting.potencial}<span className="text-sm text-muted-foreground">/100</span></p>
                         </div>
-                        <Badge className="text-base px-3 py-1">{scouting.recomendacion}</Badge>
+                        <Badge className="badge-pill badge-success">{scouting.recomendacion}</Badge>
                       </div>
                     </>
                   )}
@@ -175,7 +175,7 @@ function ProspectosPage() {
                         <p className="text-sm font-medium">{p.tipo} · {p.disciplina}</p>
                         <p className="text-xs text-muted-foreground">{p.fecha} {p.hora} · {p.entrenador}</p>
                       </div>
-                      <Badge variant={p.estado === "completada" ? "default" : "secondary"}>{p.estado}</Badge>
+                      <Badge className="badge-pill badge-info">{p.estado}</Badge>
                     </div>
                   ))}
                 </TabsContent>

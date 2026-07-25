@@ -498,8 +498,8 @@ Soporte: soporte@asoderive.com`;
       <CoachOsBanner />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Convocatorias</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="page-header-title">Convocatorias</h1>
+          <p className="page-header-subtitle">
             {role === "admin" && selectedCoachName
               ? `Convocatorias de ${selectedCoachName}`
               : "Gestión de convocados y disponibilidad en tiempo real."}
@@ -542,7 +542,7 @@ Soporte: soporte@asoderive.com`;
 
           {/* Right panel: Details */}
           {sel && (
-            <Card className="md:col-span-8 lg:col-span-9 shadow-card bg-card border-border">
+            <Card className="md:col-span-8 lg:col-span-9 premium-card bg-card border-border">
               <CardHeader className="p-4 pb-3">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-3">
                   <div>

@@ -27,8 +27,8 @@ function BibliotecaPage() {
     <div className="space-y-6">
       <CoachOsBanner />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Biblioteca de ejercicios</h1>
-        <p className="text-sm text-muted-foreground">Recursos reutilizables clasificados por objetivo y nivel.</p>
+        <h1 className="page-header-title">Biblioteca de ejercicios</h1>
+        <p className="page-header-subtitle">Recursos reutilizables clasificados por objetivo y nivel.</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -57,7 +57,7 @@ function BibliotecaPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {list.map((e) => (
-          <Card key={e.id} className="overflow-hidden shadow-card transition-all hover:shadow-elegant hover:-translate-y-0.5">
+          <Card key={e.id} className="premium-card overflow-hidden transition-all hover:shadow-sm hover:-translate-y-0.5">
             <div className="relative aspect-video bg-muted">
               <img src={e.thumb} alt={e.titulo} className="h-full w-full object-cover" loading="lazy" />
               <button className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 backdrop-blur hover:bg-background">

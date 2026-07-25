@@ -27,13 +27,13 @@ function AuditoriaPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Auditoría global</h1>
-          <p className="text-sm text-muted-foreground">Registro inmutable de cambios, pagos, cierres, workflows y mensajes.</p>
+          <h1 className="page-header-title">Auditoría global</h1>
+          <p className="page-header-subtitle">Registro inmutable de cambios, pagos, cierres, workflows y mensajes.</p>
         </div>
         <Button variant="outline"><Download className="h-4 w-4" /> Exportar</Button>
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-3">
             <CardTitle className="flex items-center gap-2"><ScrollText className="h-5 w-5 text-primary" /> Activity log</CardTitle>

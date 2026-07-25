@@ -89,15 +89,15 @@ function EvaluacionesStaffPage() {
   return (
     <div className="space-y-6">
       {/* HEADER DE MÓDULO */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="page-header flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase mb-1">
+          <Badge className="badge-pill badge-info uppercase mb-1">
             Gobernanza de Recursos Humanos & Staff
           </Badge>
-          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+          <h1 className="page-header-title flex items-center gap-2">
             👔 Evaluación de Desempeño del Staff
           </h1>
-          <p className="text-sm text-muted-foreground font-medium">
+          <p className="page-header-subtitle">
             Matriz de auditoría cualitativa y desempeño profesional para entrenadores y preparadores físicos.
           </p>
         </div>
@@ -105,7 +105,7 @@ function EvaluacionesStaffPage() {
         <Button
           onClick={handleSaveStaffEvals}
           disabled={saving}
-          className="bg-gradient-primary text-white font-extrabold gap-2 shadow-elegant rounded-xl"
+          className="btn-primary gap-2"
         >
           <Save className="h-4 w-4" /> {saving ? "Guardando..." : "✓ GUARDAR EVALUACIONES DE STAFF"}
         </Button>
@@ -119,7 +119,7 @@ function EvaluacionesStaffPage() {
           const avgScore = (totalScore / (criteriosStaff.length || 1)).toFixed(1);
 
           return (
-            <Card key={coach.id} className="shadow-card border bg-card">
+            <Card key={coach.id} className="premium-card">
               <CardHeader className="pb-3 border-b">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-11 w-11 border-2 border-primary/20">

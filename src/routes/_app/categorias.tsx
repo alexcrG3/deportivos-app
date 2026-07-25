@@ -141,22 +141,22 @@ function CategoriasPage() {
   return (
     <div className="space-y-6">
       {/* Pestañas Dashboard Estructura */}
-      <div className="flex items-center gap-1.5 border-b pb-3">
+      <div className="flex items-center table-header-row3">
         <Link
           to="/equipos"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           👥 Equipos
         </Link>
         <Link
           to="/categorias"
-          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+          className="px-4 py-2 rounded-[8px] text-sm font-semibold bg-[#2563EB] text-white shadow-sm"
         >
           🏷️ Categorías
         </Link>
         <Link
           to="/disciplinas"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           ⚽ Disciplinas
         </Link>
@@ -164,15 +164,15 @@ function CategoriasPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Estructura Deportiva</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} categorías deportivas registradas.</p>
+          <h1 className="page-header-title">Estructura Deportiva</h1>
+          <p className="text-[#64748B] text-sm">{filtered.length} categorías deportivas registradas.</p>
         </div>
-        <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setOpenCreate(true)} className="btn-primary">
           <Plus className="h-4 w-4 mr-1.5" /> Nueva categoría
         </Button>
       </div>
 
-      <Card className="shadow-card">
+      <Card className="premium-card mb-4">
         <CardContent className="p-4 flex flex-wrap gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -201,20 +201,20 @@ function CategoriasPage() {
           const pct = Math.round((dynamicJugadores / c.capacidad) * 100);
           const full = pct >= 95;
           return (
-            <Card key={c.id} className="shadow-card hover:shadow-elegant transition group">
+            <Card key={c.id} className="premium-card-flat hover:shadow-md transition group">
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.disciplina}</p>
+                    <p className="kpi-label text-muted-foreground">{c.disciplina}</p>
                     <h3 className="font-semibold leading-tight">{c.nombre}</h3>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <Badge variant={full ? "destructive" : "secondary"}>{full ? "Lleno" : "Disponible"}</Badge>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => handleOpenEdit(c)} title="Editar categoría">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50" onClick={() => handleOpenEdit(c)} title="Editar categoría">
                         <Edit className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" onClick={() => handleDeleteCategory(c.id, c.nombre)} title="Eliminar categoría">
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-[#64748B] hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteCategory(c.id, c.nombre)} title="Eliminar categoría">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -242,12 +242,12 @@ function CategoriasPage() {
 
       {/* Dialog para Nueva Categoría */}
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent className="sm:max-w-[480px] bg-background border shadow-elegant">
+        <DialogContent className="sm:max-w-[480px] premium-card">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <FolderKanban className="h-5 w-5 text-primary" /> Crear Nueva Categoría
+            <DialogTitle className="flex items-center gap-2 page-header-title">
+              <FolderKanban className="h-5 w-5 text-[#2563EB]" /> Crear Nueva Categoría
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-[#64748B] text-sm">
               Define los parámetros deportivos y asigna un entrenador a la nueva categoría.
             </DialogDescription>
           </DialogHeader>
@@ -360,7 +360,7 @@ function CategoriasPage() {
                   </option>
                 ))}
               </select>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="kpi-subtextforeground">
                 Selecciona al entrenador responsable de planificar las sesiones y dirigir este grupo.
               </p>
             </div>
@@ -377,8 +377,8 @@ function CategoriasPage() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpenCreate(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary">Crear Categoría</Button>
+              <Button type="button" variant="outline" className="btn-secondary" onClick={() => setOpenCreate(false)}>Cancelar</Button>
+              <Button type="submit" className="btn-primary">Crear Categoría</Button>
             </div>
           </form>
         </DialogContent>
@@ -386,12 +386,12 @@ function CategoriasPage() {
 
       {/* Dialog para Editar Categoría */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="sm:max-w-[480px] bg-background border shadow-elegant">
+        <DialogContent className="sm:max-w-[480px] premium-card">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <FolderKanban className="h-5 w-5 text-primary" /> Editar Categoría
+            <DialogTitle className="flex items-center gap-2 page-header-title">
+              <FolderKanban className="h-5 w-5 text-[#2563EB]" /> Editar Categoría
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-[#64748B] text-sm">
               Modifica los parámetros de la categoría seleccionada.
             </DialogDescription>
           </DialogHeader>
@@ -517,8 +517,8 @@ function CategoriasPage() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpenEdit(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary">Guardar Cambios</Button>
+              <Button type="button" variant="outline" className="btn-secondary" onClick={() => setOpenEdit(false)}>Cancelar</Button>
+              <Button type="submit" className="btn-primary">Guardar Cambios</Button>
             </div>
           </form>
         </DialogContent>

@@ -263,7 +263,7 @@ function FacturacionPage() {
           <p className="text-sm text-muted-foreground">Comprobantes generados automáticamente desde los pagos registrados.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExport}><Download className="h-4 w-4" /> Exportar</Button>
+          <Button variant="outline" className="btn-secondary"><Download className="h-4 w-4 mr-2" /> Exportar</Button>
         </div>
       </div>
 
@@ -327,14 +327,14 @@ function FacturacionPage() {
                         <div className="font-medium text-sm">{f.receptor}</div>
                       </TableCell>
                       <TableCell onClick={() => setSel(f)}>
-                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[11px] font-bold">
+                        <Badge variant="outline" className="badge-pill badge-info border-none">
                           {f.categoria || "—"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground" onClick={() => setSel(f)}>{f.metodo}</TableCell>
                       <TableCell className="text-sm text-muted-foreground" onClick={() => setSel(f)}>{f.fecha}</TableCell>
                       <TableCell onClick={() => setSel(f)}>
-                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 font-bold border-none px-2.5 py-0.5 rounded-full text-[11px]">
+                        <Badge className="badge-pill badge-success border-none">
                           aceptada
                         </Badge>
                       </TableCell>

@@ -110,116 +110,116 @@ function BibliotecaTactica() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-elegant animate-pulse-slow">
+      <div className="page-header mb-6 no-print">
+        <div className="flex items-center gap-3">
+          <div className="icon-box icon-box-primary">
             <BookOpen className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+            <h1 className="page-header-title">
               Biblioteca Táctica Institucional
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+            <p className="page-header-subtitle">
               Repositorio premium de recursos tácticos para el cuerpo técnico y metodológico.
             </p>
           </div>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex gap-2.5 ml-auto">
           <Button
             variant="outline"
             size="sm"
-            className="text-xs border-slate-300 hover:border-slate-400 dark:border-slate-700/80 dark:hover:border-slate-600 bg-white hover:bg-slate-50 dark:bg-slate-900/60 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 gap-1.5 rounded-xl shadow-elegant"
+            className="btn-secondary gap-1.5"
             onClick={() => { window.print(); toast.info("Preparando exportación..."); }}
           >
-            <Printer className="h-3.5 w-3.5" /> Exportar Biblioteca
+            <Printer className="h-4 w-4" /> Exportar Biblioteca
           </Button>
           <Button
             size="sm"
-            className="text-xs bg-gradient-primary text-white gap-1.5 shadow-elegant rounded-xl hover:opacity-90 font-bold"
+            className="btn-primary gap-1.5"
             onClick={() => setShowAdd(true)}
           >
-            <Plus className="h-3.5 w-3.5" /> Agregar Recurso
+            <Plus className="h-4 w-4" /> Agregar Recurso
           </Button>
         </div>
       </div>
 
-      <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-slate-950/80 rounded-2xl border border-slate-200 dark:border-slate-800/80 w-fit shadow-elegant">
+      <div className="flex gap-1.5 p-1 bg-[#F8F9FA] rounded-[12px] border border-[#E2E8F0] w-fit no-print">
         <button
           onClick={() => setActiveTab("contenido")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-sm font-semibold transition-colors ${
             activeTab === "contenido"
-              ? "bg-gradient-primary text-white shadow-elegant"
-              : "text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+              ? "bg-[#2563EB] text-white shadow-sm"
+              : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
           }`}
         >
-          <Layers className="h-3.5 w-3.5" /> Recursos de Campo ({items.length})
+          <Layers className="h-4 w-4" /> Recursos de Campo ({items.length})
         </button>
         <button
           onClick={() => setActiveTab("plantillas")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-sm font-semibold transition-colors ${
             activeTab === "plantillas"
-              ? "bg-gradient-primary text-white shadow-elegant"
-              : "text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+              ? "bg-[#2563EB] text-white shadow-sm"
+              : "text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]"
           }`}
         >
-          <Layout className="h-3.5 w-3.5" /> Plantillas Organizacionales ({templates.length})
+          <Layout className="h-4 w-4" /> Plantillas Organizacionales ({templates.length})
         </button>
       </div>
 
       {activeTab === "contenido" && (
         <div className="space-y-6">
-          <div className="p-4 bg-slate-100/70 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-slate-800/60 rounded-2xl shadow-elegant flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="p-4 bg-white border border-[#E2E8F0] rounded-[12px] shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="relative w-full md:max-w-xs">
-              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-500" />
+              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-[#64748B]" />
               <input
                 placeholder="Buscar recursos en la biblioteca..."
                 value={searchQ}
                 onChange={e => setSearchQ(e.target.value)}
-                className="w-full h-9 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/60 pl-10 pr-4 text-xs text-slate-800 dark:text-slate-200 outline-none focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all duration-150"
+                className="w-full h-9 rounded-[8px] border border-[#E2E8F0] bg-[#F8F9FA] pl-10 pr-4 text-sm text-[#0F172A] outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
             </div>
             
-            <div className="flex flex-wrap gap-2 w-full md:w-auto md:justify-end">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Categoría:</span>
+            <div className="flex flex-wrap gap-4 w-full md:w-auto md:justify-end">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#64748B] font-bold uppercase">Categoría:</span>
                 <select
                   value={filterCat}
                   onChange={e => setFilterCat(e.target.value as typeof filterCat)}
-                  className="h-9 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 text-xs text-slate-800 dark:text-slate-300 outline-none focus:ring-1 focus:ring-violet-500/40"
+                  className="h-9 rounded-[8px] border border-[#E2E8F0] bg-[#F8F9FA] px-3 text-sm text-[#0F172A] outline-none"
                 >
-                  <option value="todos" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">Todas</option>
+                  <option value="todos">Todas</option>
                   {Object.entries(CATEGORY_CONFIG).map(([k, v]) => (
-                    <option key={k} value={k} className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">
+                    <option key={k} value={k}>
                       {v.icon} {v.label}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Complejidad:</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#64748B] font-bold uppercase">Complejidad:</span>
                 <select
                   value={filterNivel}
                   onChange={e => setFilterNivel(e.target.value as typeof filterNivel)}
-                  className="h-9 rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 text-xs text-slate-800 dark:text-slate-300 outline-none focus:ring-1 focus:ring-violet-500/40"
+                  className="h-9 rounded-[8px] border border-[#E2E8F0] bg-[#F8F9FA] px-3 text-sm text-[#0F172A] outline-none"
                 >
-                  <option value="todos" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">Todos los niveles</option>
-                  <option value="basico" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">🟢 Básico</option>
-                  <option value="intermedio" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">💡 Intermedio</option>
-                  <option value="avanzado" className="bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200">🔥 Avanzado</option>
+                  <option value="todos">Todos los niveles</option>
+                  <option value="basico">🟢 Básico</option>
+                  <option value="intermedio">💡 Intermedio</option>
+                  <option value="avanzado">🔥 Avanzado</option>
                 </select>
               </div>
             </div>
           </div>
 
           <div className="flex gap-2 flex-wrap items-center">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mr-1">Filtros Rápidos:</span>
+            <span className="text-xs text-[#64748B] font-bold uppercase mr-1">Filtros Rápidos:</span>
             <button
               onClick={() => setFilterCat("todos")}
-              className={`text-[10px] px-3.5 py-1.5 rounded-xl border font-bold transition-all duration-200 ${
+              className={`text-xs px-3.5 py-1.5 rounded-[8px] border font-bold transition-colors ${
                 filterCat === "todos"
-                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950 border-slate-900 dark:border-slate-100 shadow"
-                  : "text-slate-600 border-slate-200 dark:text-slate-400 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900"
+                  ? "bg-[#0F172A] text-white border-[#0F172A]"
+                  : "text-[#64748B] border-[#E2E8F0] hover:bg-slate-50 hover:text-[#0F172A]"
               }`}
             >
               Ver Todo
@@ -228,10 +228,10 @@ function BibliotecaTactica() {
               <button
                 key={k}
                 onClick={() => setFilterCat(k as LibraryCategory)}
-                className={`text-[10px] px-3.5 py-1.5 rounded-xl border font-bold transition-all duration-200 flex items-center gap-1.5 ${
+                className={`text-xs px-3.5 py-1.5 rounded-[8px] border font-bold transition-colors flex items-center gap-1.5 ${
                   filterCat === k
-                    ? "bg-gradient-primary text-white border-violet-500 shadow-elegant"
-                    : "text-slate-600 border-slate-200 dark:text-slate-400 dark:border-slate-800 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900"
+                    ? "bg-[#2563EB] text-white border-[#2563EB]"
+                    : "text-[#64748B] border-[#E2E8F0] hover:bg-slate-50 hover:text-[#0F172A]"
                 }`}
               >
                 <span>{v.icon}</span>
@@ -241,14 +241,14 @@ function BibliotecaTactica() {
           </div>
 
           {filteredItems.length === 0 ? (
-            <Card className="border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 py-16 text-center shadow-inner">
+            <Card className="premium-card py-16 text-center">
               <CardContent className="space-y-3">
-                <div className="h-12 w-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center justify-center mx-auto text-slate-400 dark:text-slate-500 shadow">
+                <div className="h-12 w-12 bg-slate-50 border border-[#E2E8F0] rounded-[12px] flex items-center justify-center mx-auto text-slate-300">
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 dark:text-slate-300">No se encontraron recursos</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                  <h3 className="font-bold text-[#0F172A]">No se encontraron recursos</h3>
+                  <p className="text-sm text-[#64748B] mt-1 max-w-xs mx-auto">
                     Prueba cambiando los términos de búsqueda o removiendo los filtros seleccionados.
                   </p>
                 </div>
@@ -272,9 +272,9 @@ function BibliotecaTactica() {
                 return (
                   <Card
                     key={item.id}
-                    className="bg-white dark:bg-[#0b0e14] border border-slate-200 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden flex flex-col justify-between shadow-card hover:shadow-elegant"
+                    className="premium-card p-0 hover:shadow-md transition-shadow group relative overflow-hidden flex flex-col justify-between"
                   >
-                    <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-violet-600 via-indigo-600 to-emerald-500 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 left-0 w-full h-[3px] bg-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <CardContent className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -286,26 +286,26 @@ function BibliotecaTactica() {
                           </span>
                         </div>
                         <div className="space-y-1">
-                          <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors leading-snug line-clamp-2">
+                          <h3 className="font-bold text-[#0F172A] text-sm group-hover:text-[#2563EB] transition-colors leading-snug line-clamp-2">
                             {item.titulo}
                           </h3>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+                          <p className="text-xs text-[#64748B] leading-relaxed line-clamp-3">
                             {item.descripcion}
                           </p>
                         </div>
                       </div>
                       <div className="pt-2 space-y-3">
                         <div className="flex flex-wrap gap-1">
-                          <span className={`text-[8px] font-bold px-2 py-0.5 rounded-lg border ${permCfg.color} flex items-center gap-1`}>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-[6px] border ${permCfg.color} flex items-center gap-1`}>
                             {permCfg.icon} {permCfg.label}
                           </span>
                           {item.compartido && (
-                            <span className="text-[8px] font-bold px-2 py-0.5 rounded-lg border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-0.5">
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-[6px] border bg-emerald-500/10 text-emerald-700 border-emerald-200 flex items-center gap-0.5">
                               🌐 Red Club
                             </span>
                           )}
                           {item.objetivo && (
-                            <span className="text-[8px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-[6px] bg-slate-100 border border-[#E2E8F0] text-[#64748B]">
                               🎯 {item.objetivo}
                             </span>
                           )}
@@ -313,7 +313,7 @@ function BibliotecaTactica() {
                         {item.etiquetas.length > 0 && (
                           <div className="flex gap-1 flex-wrap">
                             {item.etiquetas.map(e => (
-                              <span key={e} className="text-[8px] bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 px-2 py-0.5 rounded-md text-slate-500 dark:text-slate-400 font-semibold">
+                              <span key={e} className="text-[9px] bg-slate-100 border border-[#E2E8F0] px-2 py-0.5 rounded-[4px] text-[#475569] font-semibold">
                                 #{e}
                               </span>
                             ))}
@@ -321,22 +321,22 @@ function BibliotecaTactica() {
                         )}
                       </div>
                     </CardContent>
-                    <div className="bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-900 p-4 space-y-3">
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                    <div className="bg-[#F8FAFC] border-t border-[#E2E8F0] p-4 space-y-3">
+                      <div className="flex items-center justify-between text-[11px] text-[#64748B]">
                         <span className="font-semibold">{item.disciplina} · {item.categoriaEdad}</span>
                         <span>Por: {getDisplayAuthor(item.autor)}</span>
                       </div>
                       <div className="grid grid-cols-5 gap-1.5 pt-1">
                         <Button
                           variant="outline"
-                          className="col-span-4 text-[10px] font-extrabold h-7 border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg gap-1"
+                          className="col-span-4 btn-secondary h-8 text-[11px] gap-1"
                           onClick={() => { setActivePreviewItem(item); setCurrentSlideIndex(0); }}
                         >
-                          <Eye className="h-3 w-3 text-slate-400" /> {getActionButtonText()}
+                          <Eye className="h-3 w-3 text-[#64748B]" /> {getActionButtonText()}
                         </Button>
                         <Button
                           variant="outline"
-                          className="col-span-1 h-7 px-0 border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg flex items-center justify-center"
+                          className="col-span-1 btn-secondary h-8 px-0 flex items-center justify-center"
                           onClick={() => handleShare(item.id)}
                           title="Compartir recurso"
                         >
@@ -354,47 +354,47 @@ function BibliotecaTactica() {
 
       {activeTab === "plantillas" && (
         <div className="space-y-4">
-          <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200 dark:border-slate-800/40 w-fit font-medium">
+          <p className="text-sm text-[#475569] bg-white p-3 rounded-[12px] border border-[#E2E8F0] w-fit font-medium">
             📋 Formatos estandarizados para la unificación de criterios técnicos y análisis del club.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {templates.map(tpl => (
               <Card
                 key={tpl.id}
-                className="bg-white dark:bg-[#0b0e14] border border-slate-200 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-300 hover:-translate-y-0.5 group relative flex flex-col justify-between shadow-card hover:shadow-elegant"
+                className="premium-card p-0 hover:shadow-md transition-shadow group relative flex flex-col justify-between"
               >
-                <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-teal-600 to-emerald-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 w-full h-[3px] bg-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <CardContent className="p-5 space-y-4 flex-1">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-600 dark:text-teal-400 shadow-inner">
-                      <Layout className="h-4.5 w-4.5" />
+                    <div className="h-10 w-10 rounded-[8px] bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 shadow-sm">
+                      <Layout className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-sm truncate group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                      <h3 className="font-bold text-[#0F172A] text-sm truncate group-hover:text-teal-600 transition-colors">
                         {tpl.nombre}
                       </h3>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                      <p className="text-[11px] text-[#64748B] mt-0.5 font-medium">
                         {tpl.tipo} · {getDisplayAuthor(tpl.autor)}
                       </p>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+                  <p className="text-xs text-[#475569] leading-relaxed line-clamp-3">
                     {tpl.descripcion}
                   </p>
                 </CardContent>
-                <div className="bg-slate-50 dark:bg-slate-950/60 p-4 border-t border-slate-100 dark:border-slate-900/80 flex gap-2">
+                <div className="bg-[#F8FAFC] p-4 border-t border-[#E2E8F0] flex gap-2">
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-[10px] font-bold h-8 border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 gap-1.5 flex-1 rounded-lg"
+                    className="btn-secondary h-8 text-[11px] gap-1.5 flex-1"
                     onClick={() => toast.info("Generando documento desde plantilla...")}
                   >
-                    <Copy className="h-3.5 w-3.5 text-slate-400" /> Usar Formato
+                    <Copy className="h-3.5 w-3.5 text-[#64748B]" /> Usar Formato
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-[10px] h-8 px-2 border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg flex items-center justify-center"
+                    className="btn-secondary h-8 px-2 flex items-center justify-center"
                     onClick={() => toast.info("Descargando plantilla de impresión...")}
                     title="Descargar plantilla"
                   >

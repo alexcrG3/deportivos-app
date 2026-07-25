@@ -108,8 +108,8 @@ function RendimientoHub() {
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Centro de Alto Rendimiento</h1>
-            <p className="text-sm text-muted-foreground">Planificación, monitoreo y analítica integral del atleta.</p>
+            <h1 className="page-header-title">Centro de Alto Rendimiento</h1>
+            <p className="page-header-subtitle">Planificación, monitoreo y analítica integral del atleta.</p>
           </div>
         </div>
         <Badge variant="outline" className="gap-1"><Zap className="h-3 w-3" /> Motor activo</Badge>
@@ -144,7 +144,7 @@ function RendimientoHub() {
               <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Top riesgo de lesión</CardTitle>
               <CardDescription>Predicción IA basada en carga y wellness</CardDescription>
             </div>
-            <Badge variant="outline" className="gap-1"><Sparkles className="h-3 w-3" /> IA</Badge>
+            <Badge className="badge-pill badge-neutral gap-1"><Sparkles className="h-3 w-3" /> IA</Badge>
           </CardHeader>
           <CardContent className="space-y-3">
             {topRiesgo.map((r) => {

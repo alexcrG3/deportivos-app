@@ -28,12 +28,12 @@ function InsightsIA() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="page-header border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <h1 className="page-header-title flex items-center gap-2">
             <Lightbulb className="h-6 w-6 text-primary animate-pulse" /> Centro de Insights
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="page-header-subtitle">
             Patrones y anomalías detectados automáticamente por el motor analítico de DeportivOS AI.
           </p>
         </div>
@@ -45,13 +45,13 @@ function InsightsIA() {
       {/* Featured Grid Section */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Insight del Día */}
-        <Card className="shadow-card border-violet-500/20 bg-gradient-to-br from-violet-950/10 to-card relative overflow-hidden">
+        <Card className="premium-card relative overflow-hidden">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-violet-400 uppercase tracking-widest">Alerta Crítica</span>
-              <ShieldAlert className="h-4 w-4 text-violet-400" />
+              <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest">Alerta Crítica</span>
+              <ShieldAlert className="h-4 w-4 text-violet-600" />
             </div>
-            <CardTitle className="text-base font-bold mt-1 text-white">{insightDelDia.titulo}</CardTitle>
+            <CardTitle className="text-base font-bold mt-1 text-[#0F172A]">{insightDelDia.titulo}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-xs text-muted-foreground leading-relaxed">{insightDelDia.detalle}</p>
@@ -66,13 +66,13 @@ function InsightsIA() {
 
         {/* Jugador Destacado */}
         {jugadorDestacado && (
-          <Card className="shadow-card border-emerald-500/20 bg-gradient-to-br from-emerald-950/10 to-card relative overflow-hidden">
+          <Card className="premium-card relative overflow-hidden">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Jugador Destacado</span>
-                <Award className="h-4 w-4 text-emerald-400" />
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Jugador Destacado</span>
+                <Award className="h-4 w-4 text-emerald-600" />
               </div>
-              <CardTitle className="text-base font-bold mt-1 text-white">{jugadorDestacado.entidadNombre}</CardTitle>
+              <CardTitle className="text-base font-bold mt-1 text-[#0F172A]">{jugadorDestacado.entidadNombre}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-xs text-muted-foreground leading-relaxed">{jugadorDestacado.detalle}</p>
@@ -88,13 +88,13 @@ function InsightsIA() {
 
         {/* Equipo Destacado */}
         {equipoDestacado && (
-          <Card className="shadow-card border-amber-500/20 bg-gradient-to-br from-amber-950/10 to-card relative overflow-hidden">
+          <Card className="premium-card relative overflow-hidden">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Alerta de Carga</span>
-                <BarChart3 className="h-4 w-4 text-amber-400" />
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Alerta de Carga</span>
+                <BarChart3 className="h-4 w-4 text-amber-600" />
               </div>
-              <CardTitle className="text-base font-bold mt-1 text-white">Categoría {equipoDestacado.entidadNombre}</CardTitle>
+              <CardTitle className="text-base font-bold mt-1 text-[#0F172A]">Categoría {equipoDestacado.entidadNombre}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-xs text-muted-foreground leading-relaxed">{equipoDestacado.detalle}</p>
@@ -117,7 +117,7 @@ function InsightsIA() {
             const Icon = i.impacto === "positivo" ? TrendingUp : TrendingDown;
             const borderCol = i.impacto === "positivo" ? "border-l-emerald-500" : "border-l-red-500";
             return (
-              <Card key={i.id} className={`border-l-4 ${borderCol} shadow-card bg-card`}>
+              <Card key={i.id} className={`border-l-4 ${borderCol} premium-card`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-sm font-bold flex items-center gap-2 text-white">

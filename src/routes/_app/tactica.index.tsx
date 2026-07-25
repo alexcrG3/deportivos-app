@@ -180,29 +180,29 @@ function TacticaDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
+      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary text-white shadow-elegant">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">
             <ShieldHalf className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+            <h1 className="text-[28px] font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
               Área Técnica & Gobierno Deportivo
-              <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase">Enterprise 2.0</Badge>
+              <Badge className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase">Enterprise 2.0</Badge>
             </h1>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-[#64748B] text-sm">
               Auditoría metodológica en tiempo real, flujo IA y control de rendimiento.
             </p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link to="/tactica/planificacion">
-            <Button size="sm" variant="outline" className="gap-1.5 font-bold">
-              <BookOpen className="h-4 w-4 text-primary" /> Planificación Metodológica
+            <Button size="sm" variant="outline" className="border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-1.5">
+              <BookOpen className="h-4 w-4" /> Planificación Metodológica
             </Button>
           </Link>
           <Link to="/tactica/pizarra">
-            <Button size="sm" className="bg-gradient-primary text-white font-extrabold gap-1.5 shadow-elegant rounded-xl">
+            <Button size="sm" className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5">
               <ShieldHalf className="h-4 w-4" /> Centro Táctico
             </Button>
           </Link>
@@ -251,7 +251,7 @@ function TacticaDashboard() {
       {/* 📐 2. Bloque Central: El Flujo Metodológico en Acción (2 Columnas) */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* ⬅️ Columna Izquierda (Ancha): Bandeja de Revisión y Flujo IA */}
-        <Card className="lg:col-span-2 shadow-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 shadow-sm flex flex-col justify-between">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b">
             <div>
               <CardTitle className="text-base flex items-center gap-2 font-extrabold">
@@ -270,30 +270,30 @@ function TacticaDashboard() {
             {planesAprobacion.map((plan) => (
               <div
                 key={plan.id}
-                className="p-4 rounded-xl border bg-card hover:bg-muted/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="px-4 py-3 border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 last:border-0"
               >
                 <div className="space-y-1.5 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-extrabold text-sm text-foreground">{plan.equipo}</p>
-                    <Badge variant="outline" className="text-[10px]">{plan.categoria}</Badge>
+                    <p className="font-bold text-[#0F172A]">{plan.equipo}</p>
+                    <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">{plan.categoria}</Badge>
 
                     {plan.estado === "ia_analizando" && (
-                      <Badge className="bg-violet-500/10 text-violet-600 border-violet-500/30 text-[10px] font-bold animate-pulse">
+                      <Badge className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium animate-pulse">
                         🤖 IA Analizando...
                       </Badge>
                     )}
                     {plan.estado === "pendiente_coordinador" && (
-                      <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30 text-[10px] font-bold">
+                      <Badge className="bg-amber-500/10 text-amber-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">
                         ⏳ Pendiente de Coordinador
                       </Badge>
                     )}
                     {plan.estado === "devuelta" && (
-                      <Badge variant="destructive" className="text-[10px] font-bold">
+                      <Badge className="bg-red-500/10 text-red-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">
                         ❌ Devuelta con Observaciones
                       </Badge>
                     )}
                     {plan.estado === "aprobada" && (
-                      <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-[10px] font-bold">
+                      <Badge className="bg-emerald-500/10 text-emerald-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">
                         ✅ Aprobada & Inyectada a Coach OS
                       </Badge>
                     )}
@@ -313,14 +313,14 @@ function TacticaDashboard() {
                     <Button
                       size="sm"
                       onClick={() => handleAprobarPlan(plan.id, plan.equipo)}
-                      className="bg-gradient-primary text-white font-extrabold text-xs shadow-elegant gap-1.5"
+                      className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5"
                     >
-                      <Check className="h-3.5 w-3.5" /> Revisar y Aprobar
+                      <Check className="h-4 w-4" /> Revisar y Aprobar
                     </Button>
                   )}
 
                   {plan.estado === "aprobada" && (
-                    <Button size="sm" variant="outline" className="text-xs font-bold text-emerald-600 border-emerald-500/30" asChild>
+                    <Button size="sm" variant="outline" className="border border-[#E2E8F0] bg-white text-emerald-700 hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5" asChild>
                       <Link to="/coach">
                         <CheckCircle2 className="h-3.5 w-3.5" /> Ver en Coach OS
                       </Link>
@@ -347,21 +347,21 @@ function TacticaDashboard() {
         {/* ➡️ Columna Derecha (Estrecha): Centro de Control Táctico y Competición */}
         <div className="space-y-4">
           {/* Próxima Jornada & Pizarra */}
-          <Card className="shadow-card">
+          <Card className="shadow-sm">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-sm font-extrabold flex items-center gap-2">
-                  <Swords className="h-4 w-4 text-violet-500" /> Próxima Jornada & Pizarra
+                <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
+                  <Swords className="h-4 w-4 text-blue-500" /> Próxima Jornada & Pizarra
                 </CardTitle>
                 <CardDescription className="text-xs">Partidos clave del fin de semana</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               {nextMatch ? (
-                <div className="p-3.5 rounded-xl border bg-muted/40 space-y-3">
+                <div className="p-3.5 border border-[#E2E8F0] rounded-[12px] bg-white space-y-3 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-sm text-foreground">{nextMatch.rival || "Rival por confirmar"}</p>
-                    <Badge variant="outline" className="text-[9px] uppercase font-bold">
+                    <p className="font-bold text-[#0F172A]">{nextMatch.rival || "Rival por confirmar"}</p>
+                    <Badge variant="outline" className="bg-slate-100 text-[#475569] border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase">
                       {nextMatch.tipo || "Liga Oficial"}
                     </Badge>
                   </div>
@@ -370,13 +370,13 @@ function TacticaDashboard() {
                   </p>
                   <div className="flex gap-2 pt-1">
                     <Link to="/tactica/rivales" className="w-1/2">
-                      <Button size="sm" variant="outline" className="w-full text-xs font-bold gap-1">
-                        <Swords className="h-3.5 w-3.5" /> Scouting
+                      <Button size="sm" variant="outline" className="w-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-1">
+                        <Swords className="h-4 w-4" /> Scouting
                       </Button>
                     </Link>
                     <Link to="/tactica/pizarra" className="w-1/2">
-                      <Button size="sm" className="w-full text-xs font-extrabold bg-gradient-primary text-white gap-1">
-                        <Play className="h-3.5 w-3.5" /> Pizarra
+                      <Button size="sm" className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1">
+                        <Play className="h-4 w-4" /> Pizarra
                       </Button>
                     </Link>
                   </div>
@@ -390,25 +390,25 @@ function TacticaDashboard() {
           </Card>
 
           {/* Últimos Videos Etiquetados */}
-          <Card className="shadow-card">
+          <Card className="shadow-sm">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-extrabold flex items-center gap-2">
-                <Film className="h-4 w-4 text-teal-500" /> Últimos Videos Etiquetados
+              <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
+                <Film className="h-4 w-4 text-blue-500" /> Últimos Videos Etiquetados
               </CardTitle>
-              <Link to="/tactica/video" className="text-xs text-primary font-semibold hover:underline">
+              <Link to="/tactica/video" className="text-sm text-[#2563EB] font-medium hover:underline">
                 Ver todos →
               </Link>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-0">
               {videosRecientes.map((v) => (
-                <div key={v.id} className="p-2.5 rounded-xl border bg-muted/40 hover:bg-muted transition flex items-center justify-between text-xs">
+                <div key={v.id} className="px-4 py-3 border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors flex items-center justify-between last:border-0">
                   <div>
-                    <p className="font-bold text-foreground truncate">{v.titulo}</p>
-                    <p className="text-[10px] text-muted-foreground">{v.categoria} · {v.duracion || "03:45"}</p>
+                    <p className="font-bold text-[#0F172A] truncate">{v.titulo}</p>
+                    <p className="text-[12px] text-[#64748B]">{v.categoria} · {v.duracion || "03:45"}</p>
                   </div>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" asChild>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100" asChild>
                     <Link to="/tactica/video">
-                      <Play className="h-3.5 w-3.5 text-primary" />
+                      <Play className="h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -421,43 +421,43 @@ function TacticaDashboard() {
       {/* 🚨 3. Bloque Inferior: Alertas del Entrenador y Monitoreo Físico */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Alertas Wellness */}
-        <Card className="shadow-card">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+            <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
               <HeartPulse className="h-4 w-4 text-red-500" /> Alertas Wellness ({alertasWellness.length})
             </CardTitle>
-            <Link to="/rendimiento/wellness" className="text-xs text-primary font-semibold hover:underline">
+            <Link to="/rendimiento/wellness" className="text-sm text-[#2563EB] font-medium hover:underline">
               Ir a Wellness →
             </Link>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-0">
             {alertasWellness.map((w) => (
-              <div key={w.id} className="p-2.5 rounded-xl border bg-red-500/5 border-red-500/20 flex items-center justify-between text-xs">
+              <div key={w.id} className="px-4 py-3 border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors flex items-center justify-between last:border-0">
                 <div>
-                  <p className="font-bold text-foreground">{w.nombre}</p>
-                  <p className="text-[10px] text-muted-foreground">{w.categoria} · {w.motivo}</p>
+                  <p className="font-bold text-[#0F172A]">{w.nombre}</p>
+                  <p className="text-[12px] text-[#64748B]">{w.categoria} · {w.motivo}</p>
                 </div>
-                <Badge variant="destructive" className="text-[9px]">Fatiga: {w.fatiga}/10</Badge>
+                <Badge className="bg-red-500/10 text-red-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium">Fatiga: {w.fatiga}/10</Badge>
               </div>
             ))}
           </CardContent>
         </Card>
 
         {/* Diarios de Entrenamiento Pendientes */}
-        <Card className="shadow-card">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+            <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
               <NotebookPen className="h-4 w-4 text-amber-500" /> Diarios Pendientes ({diariosPendientesCount})
             </CardTitle>
-            <Link to="/coach" className="text-xs text-primary font-semibold hover:underline">
+            <Link to="/coach" className="text-sm text-[#2563EB] font-medium hover:underline">
               Ir a Coach OS →
             </Link>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="p-3 rounded-xl border bg-amber-500/5 border-amber-500/20 text-xs space-y-1">
-              <p className="font-bold text-foreground">Sesión Sub-15 Masculino (Ayer)</p>
-              <p className="text-[11px] text-muted-foreground">Falta ingresar notas cualitativas de intensidad y conducta.</p>
-              <Button size="sm" variant="outline" className="w-full text-xs font-bold mt-2" asChild>
+            <div className="p-4 border border-[#E2E8F0] rounded-[12px] bg-white space-y-1">
+              <p className="font-bold text-[#0F172A]">Sesión Sub-15 Masculino (Ayer)</p>
+              <p className="text-[12px] text-[#64748B]">Falta ingresar notas cualitativas de intensidad y conducta.</p>
+              <Button size="sm" variant="outline" className="w-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm mt-2" asChild>
                 <Link to="/coach">Completar Diario</Link>
               </Button>
             </div>
@@ -465,27 +465,27 @@ function TacticaDashboard() {
         </Card>
 
         {/* Evaluaciones Técnicas del Mes */}
-        <Card className="shadow-card">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-extrabold flex items-center gap-2">
+            <CardTitle className="text-[#0F172A] font-bold text-base flex items-center gap-2">
               <Award className="h-4 w-4 text-emerald-500" /> Evaluaciones del Mes
             </CardTitle>
-            <Link to="/evaluaciones" className="text-xs text-primary font-semibold hover:underline">
+            <Link to="/evaluaciones" className="text-sm text-[#2563EB] font-medium hover:underline">
               Ver Rúbricas →
             </Link>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-foreground">Avance Global de Rúbricas</span>
-                <span className="font-extrabold text-emerald-600">{evaluacionesAvancePct}%</span>
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-[#0F172A]">Avance Global de Rúbricas</span>
+                <span className="font-bold text-emerald-600">{evaluacionesAvancePct}%</span>
               </div>
               <Progress value={evaluacionesAvancePct} />
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[12px] text-[#64748B]">
               Evaluaciones de desarrollo técnico individual completadas este mes por el staff técnico.
             </p>
-            <Button size="sm" variant="outline" className="w-full text-xs font-bold" asChild>
+            <Button size="sm" variant="outline" className="w-full border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm" asChild>
               <Link to="/evaluaciones">Gestionar Evaluaciones</Link>
             </Button>
           </CardContent>

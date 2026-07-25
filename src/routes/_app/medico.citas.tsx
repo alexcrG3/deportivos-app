@@ -516,20 +516,20 @@ export function MedicoCitasPage() {
       </div>
 
       {/* HEADER BANNER CON CONMUTADOR DE ROLES DE SEGURIDAD (RESPONSIVO PWA 100%) */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/20 p-4 sm:p-6 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full max-w-full overflow-hidden box-border">
+      <div className="page-header flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full max-w-full overflow-hidden box-border">
         <div className="space-y-1.5 w-full md:w-auto min-w-0 max-w-full">
           <div className="flex flex-wrap items-center gap-2 max-w-full">
-            <Badge className="bg-indigo-500/20 text-indigo-300 font-bold text-[9px] sm:text-[10px] uppercase tracking-wider border border-indigo-500/30 truncate max-w-full">
+            <Badge className="badge-pill badge-neutral truncate max-w-full">
               PORTAL MÉDICO & MARKETPLACE ESTILO HULIHEALTH
             </Badge>
-            <Badge className="bg-purple-500/20 text-purple-300 font-bold text-[9px] sm:text-[10px] uppercase tracking-wider border border-purple-500/30 truncate max-w-full">
+            <Badge className="badge-pill badge-neutral truncate max-w-full">
               {userRole === "admin" ? "🏢 ROL ADMINISTRADOR (ACCESO COMPLETO)" : userRole === "entrenador" ? "📋 ROL ENTRENADOR (COACH OS)" : "👨‍👩‍👦 ROL PADRE DE FAMILIA / ATLETA"}
             </Badge>
           </div>
-          <h1 className="text-lg sm:text-2xl font-black flex items-center gap-2 text-white truncate max-w-full">
+          <h1 className="page-header-title flex items-center gap-2 truncate max-w-full">
             <Stethoscope className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-400 shrink-0" /> <span className="truncate">Fisioterapia, Tratamientos & Directorio</span>
           </h1>
-          <p className="text-[11px] sm:text-xs text-slate-300 max-w-xl">
+          <p className="page-header-subtitle max-w-xl">
             {userRole === "admin"
               ? "Gobernanza completa, agenda de citas, bitácora clínica, escala EVA y panel de comisiones BD hacia Finanzas."
               : userRole === "entrenador"
@@ -559,13 +559,13 @@ export function MedicoCitasPage() {
           </div>
 
           {activeTab === "agenda" && userRole !== "padre" && (
-            <Button onClick={() => setOpenCreate(!openCreate)} className="bg-indigo-600 hover:bg-indigo-700 font-bold rounded-2xl text-xs h-9 gap-1.5 shadow-md w-full sm:w-auto shrink-0">
+            <Button onClick={() => setOpenCreate(!openCreate)} className="btn-primary gap-1.5 w-full sm:w-auto shrink-0">
               <Plus className="h-4 w-4" /> ➕ Agendar Nueva Cita
             </Button>
           )}
 
           {activeTab === "tratamientos" && userRole !== "padre" && (
-            <Button onClick={() => setOpenCreateTratamiento(!openCreateTratamiento)} className="bg-emerald-600 hover:bg-emerald-700 font-bold rounded-2xl text-xs h-9 gap-1.5 shadow-md w-full sm:w-auto shrink-0">
+            <Button onClick={() => setOpenCreateTratamiento(!openCreateTratamiento)} className="btn-primary gap-1.5 w-full sm:w-auto shrink-0">
               <Plus className="h-4 w-4" /> ➕ Registrar Tratamiento
             </Button>
           )}
@@ -573,9 +573,9 @@ export function MedicoCitasPage() {
           {activeTab === "directorio" && userRole === "admin" && (
             <Button
               onClick={() => setActiveTab("configuracion")}
-              className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-extrabold border border-amber-500/40 rounded-2xl text-xs h-9 px-3 gap-1.5 w-full sm:w-auto shrink-0 shadow-md"
+              className="btn-secondary gap-1.5 w-full sm:w-auto shrink-0"
             >
-              <Settings className="h-4 w-4 text-amber-400 shrink-0" />
+              <Settings className="h-4 w-4 shrink-0" />
               <span className="truncate">Configurar Proveedores & Comisiones</span>
             </Button>
           )}

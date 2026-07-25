@@ -226,19 +226,19 @@ function EquiposPage() {
       <div className="flex items-center gap-1.5 border-b pb-3">
         <Link
           to="/equipos"
-          className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-sm"
+          className="px-4 py-2 rounded-[8px] text-sm font-semibold bg-[#2563EB] text-white shadow-sm"
         >
           👥 Equipos
         </Link>
         <Link
           to="/categorias"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           🏷️ Categorías
         </Link>
         <Link
           to="/disciplinas"
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+          className="px-4 py-2 rounded-[8px] text-sm font-medium transition-colors text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50"
         >
           ⚽ Disciplinas
         </Link>
@@ -246,10 +246,10 @@ function EquiposPage() {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Estructura — Equipos</h1>
-          <p className="text-sm text-muted-foreground">{visibleTeams.length} equipos registrados.</p>
+          <h1 className="page-header-title">Estructura — Equipos</h1>
+          <p className="text-[#64748B] text-sm">{visibleTeams.length} equipos registrados.</p>
         </div>
-        <Button onClick={() => setOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setOpenCreate(true)} className="btn-primary">
           <Plus className="h-4 w-4 mr-1.5" /> Nuevo equipo
         </Button>
       </div>
@@ -259,16 +259,16 @@ function EquiposPage() {
           <Card
             key={e.id}
             onClick={() => navigate({ to: "/equipos", search: { teamId: e.id } })}
-            className="shadow-card overflow-hidden hover:shadow-elegant transition cursor-pointer group"
+            className="premium-card-flat overflow-hidden hover:shadow-md transition cursor-pointer group"
           >
-            <div className="h-20 bg-gradient-primary relative flex justify-end p-2 items-start gap-1">
+            <div className="h-20 table-header-row relative flex justify-end p-2 items-start gap-1">
               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(white 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
               
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-7 w-7 text-white/80 hover:text-white hover:bg-white/20" 
+                  className="h-7 w-7 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-200/50" 
                   onClick={(event) => {
                     event.stopPropagation();
                     handleOpenEdit(e);
@@ -280,7 +280,7 @@ function EquiposPage() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-7 w-7 text-white/80 hover:text-red-300 hover:bg-red-900/20" 
+                  className="h-7 w-7 text-[#64748B] hover:text-red-700 hover:bg-red-50" 
                   onClick={(event) => {
                     event.stopPropagation();
                     handleDeleteTeam(e.id, e.nombre);
@@ -291,13 +291,13 @@ function EquiposPage() {
                 </Button>
               </div>
 
-              <div className="absolute -bottom-6 left-5 flex h-14 w-14 items-center justify-center rounded-xl bg-card border-4 border-card shadow-elegant group-hover:scale-105 transition-transform">
+              <div className="absolute -bottom-6 left-5 flex h-14 w-14 items-center justify-center rounded-[12px] bg-background border-4 border-background shadow-sm group-hover:scale-105 transition-transform">
                 <ShieldHalf className="h-6 w-6 text-primary" />
               </div>
             </div>
             <CardHeader className="pt-8">
               <CardTitle className="text-base group-hover:text-primary transition-colors">{e.nombre}</CardTitle>
-              <CardDescription>{e.disciplina} · {e.categoria || e.nombre}</CardDescription>
+              <CardDescription className="kpi-subtext">{e.disciplina} · {e.categoria || e.nombre}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between text-sm">
@@ -332,7 +332,7 @@ function EquiposPage() {
                     search: { autostart: "true", teamName: e.nombre, category: e.categoria || e.nombre } as any,
                   });
                 }}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-[11px] sm:text-xs min-h-[40px] h-auto py-2.5 px-3 rounded-xl gap-1.5 shadow-md uppercase tracking-wider mt-2 leading-tight whitespace-normal text-center flex items-center justify-center"
+                className="w-full btn-primary min-h-[40px] h-auto gap-1.5 shadow-sm mt-2 flex items-center justify-center"
               >
                 <Play className="h-4 w-4 shrink-0" />
                 <span>⚽ Iniciar Entrenamiento en Cancha</span>
@@ -344,12 +344,12 @@ function EquiposPage() {
 
       {/* Dialog para Nuevo Equipo */}
       <Dialog open={openCreate} onOpenChange={setOpenCreate}>
-        <DialogContent className="sm:max-w-[460px] bg-background border shadow-elegant">
+        <DialogContent className="sm:max-w-[460px] premium-card">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <ShieldHalf className="h-5 w-5 text-primary" /> Registrar Nuevo Equipo
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-muted-foreground text-sm">
               Define el nombre del equipo, asígnale una categoría y vincula a su entrenador.
             </DialogDescription>
           </DialogHeader>
@@ -426,8 +426,8 @@ function EquiposPage() {
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpenCreate(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary">Guardar Equipo</Button>
+              <Button type="button" variant="outline" className="btn-secondary" onClick={() => setOpenCreate(false)}>Cancelar</Button>
+              <Button type="submit" className="btn-primary">Guardar Equipo</Button>
             </div>
           </form>
         </DialogContent>
@@ -435,12 +435,12 @@ function EquiposPage() {
 
       {/* Dialog para Editar Equipo */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="sm:max-w-[460px] bg-background border shadow-elegant">
+        <DialogContent className="sm:max-w-[460px] premium-card">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
               <ShieldHalf className="h-5 w-5 text-primary" /> Editar Equipo
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-muted-foreground text-sm">
               Modifica los detalles del equipo seleccionado.
             </DialogDescription>
           </DialogHeader>
@@ -549,8 +549,8 @@ function EquiposPage() {
               <p className="text-[10px] text-muted-foreground">El sistema mostrará un aviso si toman asistencia en un día no programado.</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpenEdit(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary">Guardar Cambios</Button>
+              <Button type="button" variant="outline" className="btn-secondary" onClick={() => setOpenEdit(false)}>Cancelar</Button>
+              <Button type="submit" className="btn-primary">Guardar Cambios</Button>
             </div>
           </form>
         </DialogContent>
@@ -1902,7 +1902,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                       Editar asistencia
                     </Button>
                   ) : (
-                    <Button size="sm" onClick={() => handleSaveAttendance(false)} className="bg-gradient-primary text-xs h-9 font-semibold">
+                    <Button size="sm" onClick={() => handleSaveAttendance(false)} className="bg-primary text-primary-foreground text-xs h-9 font-semibold hover:bg-primary/95">
                       Guardar Asistencia
                     </Button>
                   )}
@@ -1956,9 +1956,9 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                               {(["P", "T", "A", "J"] as const).map((opt) => {
                                 const isSel = attendance[p.id] === opt;
                                 const colors: Record<string, string> = {
-                                  P: "bg-success text-success-foreground",
-                                  T: "bg-warning text-warning-foreground",
-                                  A: "bg-destructive text-destructive-foreground",
+                                  P: "bg-emerald-500 text-white",
+                                  T: "bg-amber-500 text-white",
+                                  A: "bg-rose-500 text-white",
                                   J: "bg-blue-500 text-white",
                                 };
                                 const isDisabled = hasSavedAttendance && !isEditingHistory;
@@ -2132,7 +2132,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                                 {p.nombre}
                                 {(() => {
                                   const sem = playerLoadsMap.get(p.id);
-                                  if (sem === "rojo") return <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" title="Riesgo Alto" />;
+                                  if (sem === "rojo") return <span className="inline-block h-2 w-2 rounded-full bg-rose-500 animate-pulse" title="Riesgo Alto" />;
                                   if (sem === "amarillo") return <span className="inline-block h-2 w-2 rounded-full bg-amber-500" title="Sobrecarga" />;
                                   if (sem === "verde") return <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" title="Óptimo" />;
                                   return null;
@@ -2193,7 +2193,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   </Badge>
                 )}
                 {!isTrainingDay && (
-                  <Badge variant="outline" className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 text-[10px] font-bold">
+                  <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/20 text-[10px] font-bold">
                     ⚠️ Fuera de Horario (Miércoles y Jueves)
                   </Badge>
                 )}
@@ -2222,7 +2222,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
               ) : (
                 <Button 
                   onClick={() => handleSaveAttendance(false)} 
-                  className={`${isEditingHistory ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-gradient-primary"} shadow-elegant text-xs h-9 font-medium`}
+                  className={`${isEditingHistory ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-primary"} shadow-elegant text-xs h-9 font-medium text-primary-foreground`}
                 >
                   {isEditingHistory ? "Guardar cambios" : "Guardar"}
                 </Button>
@@ -2246,7 +2246,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                               size="xs" 
                               variant="outline" 
                               onClick={handleClearAllWellness}
-                              className="h-5 px-1.5 text-[9px] font-bold border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/5 hover:bg-red-500/10"
+                              className="h-5 px-1.5 text-[9px] font-bold border-rose-500/30 text-rose-600 bg-rose-500/5 hover:bg-rose-500/10"
                             >
                               Quitar
                             </Button>
@@ -2255,7 +2255,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             size="xs" 
                             variant="outline" 
                             onClick={handleMarkAllWellness}
-                            className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10"
+                            className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-600 bg-emerald-500/5 hover:bg-emerald-500/10"
                           >
                             Marcar Todos
                           </Button>
@@ -2271,7 +2271,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                               size="xs" 
                               variant="outline" 
                               onClick={handleClearAllTests}
-                              className="h-5 px-1.5 text-[9px] font-bold border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/5 hover:bg-red-500/10"
+                              className="h-5 px-1.5 text-[9px] font-bold border-rose-500/30 text-rose-600 bg-rose-500/5 hover:bg-rose-500/10"
                             >
                               Quitar
                             </Button>
@@ -2280,7 +2280,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             size="xs" 
                             variant="outline" 
                             onClick={handleMarkAllTests}
-                            className="h-5 px-1.5 text-[9px] font-bold border-violet-500/30 text-violet-600 dark:text-violet-400 bg-violet-500/5 hover:bg-violet-500/10"
+                            className="h-5 px-1.5 text-[9px] font-bold border-violet-500/30 text-violet-600 bg-violet-500/5 hover:bg-violet-500/10"
                           >
                             Marcar Todos
                           </Button>
@@ -2317,9 +2317,9 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                           {(["P", "T", "A", "J"] as const).map((opt) => {
                             const isSel = attendance[p.id] === opt;
                             const colors: Record<string, string> = {
-                              P: "bg-success text-success-foreground hover:bg-success/90",
-                              T: "bg-warning text-warning-foreground hover:bg-warning/90",
-                              A: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+                              P: "bg-emerald-500 text-white hover:bg-emerald-600",
+                              T: "bg-amber-500 text-white hover:bg-amber-600",
+                              A: "bg-rose-500 text-white hover:bg-rose-600",
                               J: "bg-blue-500 text-white hover:bg-blue-600",
                             };
                             const isDisabled = hasSavedAttendance && !isEditingHistory;
@@ -2353,7 +2353,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             let colorBadge = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
                             let label = "🟢";
                             if (sc < 50) {
-                              colorBadge = "bg-red-500/10 text-red-500 border-red-500/20";
+                              colorBadge = "bg-rose-500/10 text-rose-500 border-rose-500/20";
                               label = "🔴";
                             } else if (sc < 75) {
                               colorBadge = "bg-amber-500/10 text-amber-500 border-amber-500/20";
@@ -2393,7 +2393,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             if (name.includes("Velocidad")) {
                               // Velocidad 30m: menor tiempo es mejor
                               if (resVal > 5.5) {
-                                colorBadge = "bg-red-500/10 text-red-500 border-red-500/20";
+                                colorBadge = "bg-rose-500/10 text-rose-500 border-rose-500/20";
                                 label = "🔴";
                               } else if (resVal >= 4.6) {
                                 colorBadge = "bg-amber-500/10 text-amber-500 border-amber-500/20";
@@ -2402,7 +2402,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             } else if (name.includes("Yo-Yo") || name.includes("Resistencia")) {
                               // Yo-Yo Test: mayor nivel es mejor
                               if (resVal < 11.0) {
-                                colorBadge = "bg-red-500/10 text-red-500 border-red-500/20";
+                                colorBadge = "bg-rose-500/10 text-rose-500 border-rose-500/20";
                                 label = "🔴";
                               } else if (resVal <= 14.5) {
                                 colorBadge = "bg-amber-500/10 text-amber-500 border-amber-500/20";
@@ -2411,7 +2411,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             } else {
                               // Default para tests personalizados genéricos
                               if (resVal < 6.0) {
-                                colorBadge = "bg-red-500/10 text-red-500 border-red-500/20";
+                                colorBadge = "bg-rose-500/10 text-rose-500 border-rose-500/20";
                                 label = "🔴";
                               } else if (resVal < 12.0) {
                                 colorBadge = "bg-amber-500/10 text-amber-500 border-amber-500/20";
@@ -2510,7 +2510,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   value={qrCode}
                   onChange={(e) => setQrCode(e.target.value)}
                 />
-                <Button type="submit" className="bg-gradient-primary shadow-elegant">Escanear</Button>
+                <Button type="submit" className="bg-primary text-white shadow-elegant">Escanear</Button>
               </form>
 
               {scannedPlayer && (
@@ -2522,7 +2522,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   <div>
                     <h4 className="text-sm font-semibold text-foreground">{scannedPlayer.nombre}</h4>
                     <p className="text-xs text-muted-foreground">Check-in exitoso en {team.nombre}</p>
-                    <Badge variant="success" className="text-[9px] mt-1">Registrado hoy</Badge>
+                    <Badge className="bg-emerald-500 text-white text-[9px] mt-1">Registrado hoy</Badge>
                   </div>
                 </div>
               )}
@@ -2681,7 +2681,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                     Guía metodológica, objetivos de rendimiento y sesiones planificadas para la semana.
                   </p>
                 </div>
-                <Button onClick={() => { setPlanTipo("microciclo"); setEditingPlanId(null); setPlanName(""); setPlanStart(""); setPlanEnd(""); setPlanObjectives(""); setPlanExercises([{ id: "ex_1", nombre: "", duracion: 15 }]); setOpenCreatePlan(true); }} className="bg-gradient-primary shadow-elegant text-xs h-9">
+                <Button onClick={() => { setPlanTipo("microciclo"); setEditingPlanId(null); setPlanName(""); setPlanStart(""); setPlanEnd(""); setPlanObjectives(""); setPlanExercises([{ id: "ex_1", nombre: "", duracion: 15 }]); setOpenCreatePlan(true); }} className="bg-primary text-white shadow-elegant text-xs h-9">
                   <Plus className="h-4 w-4 mr-2" /> Nuevo Ciclo
                 </Button>
               </div>
@@ -2750,7 +2750,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-muted"
+                              className="h-7 w-7 text-muted-foreground hover:text-rose-500 hover:bg-muted"
                               onClick={() => {
                                 RendimientoStore.deletePlanificacion(plan.id);
                                 toast.success("Planificación eliminada");
@@ -2808,7 +2808,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 <CardHeader className="pb-3 px-0 pt-0">
                   <div className="flex items-center gap-2 text-primary">
                     <Layers className="h-5 w-5" />
-                    <CardTitle className="text-sm font-bold text-white">Plan Metodológico de Mesociclo</CardTitle>
+                    <CardTitle className="text-sm font-bold text-foreground">Plan Metodológico de Mesociclo</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="px-0 pb-0 space-y-4">
@@ -2821,17 +2821,17 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   <div className="pt-2">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Bloques de Trabajo</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div className="p-4 rounded-xl border bg-amber-500/5 border-amber-500/20 text-amber-500/80">
+                      <div className="p-4 rounded-xl border bg-amber-500/5 border-amber-500/20 text-amber-600">
                         <p className="text-xs font-black">Base Competitiva</p>
                         <p className="text-[9px] font-semibold opacity-80 mt-0.5">Julio</p>
                         <p className="text-[10px] mt-2 font-medium opacity-90">- Construir base física sólida</p>
                       </div>
-                      <div className="p-4 rounded-xl border bg-purple-500/5 border-purple-500/20 text-purple-400">
+                      <div className="p-4 rounded-xl border bg-purple-500/5 border-purple-500/20 text-purple-600">
                         <p className="text-xs font-black">Carga Máxima</p>
                         <p className="text-[9px] font-semibold opacity-80 mt-0.5">Agosto</p>
                         <p className="text-[10px] mt-2 font-medium opacity-90">- 4 partidos de liga + Copa</p>
                       </div>
-                      <div className="p-4 rounded-xl border bg-blue-500/5 border-blue-500/20 text-blue-400">
+                      <div className="p-4 rounded-xl border bg-blue-500/5 border-blue-500/20 text-blue-600">
                         <p className="text-xs font-black">Descarga</p>
                         <p className="text-[9px] font-semibold opacity-80 mt-0.5">Septiembre</p>
                         <p className="text-[10px] mt-2 font-medium opacity-90">- Recuperación antes de playoffs</p>
@@ -2870,10 +2870,10 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
           {/* 4. TEMPORADA SUB-TAB */}
           {planSubTab === "temporada" && (
             <div className="space-y-6">
-              <Card className="shadow-elegant border bg-card/60 p-6 rounded-2xl">
+              <Card className="shadow-elegant border bg-card p-6 rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-6 px-0 pt-0 border-b border-border/40">
                   <div>
-                    <CardTitle className="text-base font-black text-white">Temporada 2026</CardTitle>
+                    <CardTitle className="text-base font-black text-foreground">Temporada 2026</CardTitle>
                     <CardDescription className="text-xs text-muted-foreground mt-0.5">Vista anual de fases y periodos clave</CardDescription>
                   </div>
                   <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleExportSeasonPdf(); }} size="sm" variant="outline" className="text-xs gap-1.5 h-8 border-border bg-background hover:bg-muted text-foreground">
@@ -2885,15 +2885,15 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   {/* Color Categories Legend */}
                   <div className="flex flex-wrap gap-2 select-none justify-start pb-4 border-b border-border/30">
                     {annualPhases.map((phase: any, idx: number) => {
-                      let colorClass = "bg-slate-500/10 border-slate-500/20 text-slate-400";
-                      if (phase.nombre.includes("Pretemporada")) colorClass = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400";
-                      else if (phase.nombre.includes("Baja")) colorClass = "bg-blue-500/10 border-blue-500/20 text-blue-400";
-                      else if (phase.nombre.includes("Liga")) colorClass = "bg-purple-500/10 border-purple-500/20 text-purple-400";
-                      else if (phase.nombre.includes("Vacaciones")) colorClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-                      else if (phase.nombre.includes("Campamento")) colorClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
-                      else if (phase.nombre.includes("Copa")) colorClass = "bg-rose-500/10 border-rose-500/20 text-rose-400";
-                      else if (phase.nombre.includes("Evaluaciones")) colorClass = "bg-cyan-500/10 border-cyan-500/20 text-cyan-400";
-                      else if (phase.nombre.includes("Tests")) colorClass = "bg-lime-500/10 border-lime-500/20 text-lime-400";
+                      let colorClass = "bg-slate-500/10 border-slate-500/20 text-slate-700";
+                      if (phase.nombre.includes("Pretemporada")) colorClass = "bg-indigo-500/10 border-indigo-500/20 text-indigo-700";
+                      else if (phase.nombre.includes("Baja")) colorClass = "bg-blue-500/10 border-blue-500/20 text-blue-700";
+                      else if (phase.nombre.includes("Liga")) colorClass = "bg-purple-500/10 border-purple-500/20 text-purple-700";
+                      else if (phase.nombre.includes("Vacaciones")) colorClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-700";
+                      else if (phase.nombre.includes("Campamento")) colorClass = "bg-amber-500/10 border-amber-500/20 text-amber-700";
+                      else if (phase.nombre.includes("Copa")) colorClass = "bg-rose-500/10 border-rose-500/20 text-rose-700";
+                      else if (phase.nombre.includes("Evaluaciones")) colorClass = "bg-cyan-500/10 border-cyan-500/20 text-cyan-700";
+                      else if (phase.nombre.includes("Tests")) colorClass = "bg-lime-500/10 border-lime-500/20 text-lime-700";
                       return (
                         <span key={idx} className={`text-[10px] font-bold px-2 py-1 rounded border ${colorClass}`}>
                           {phase.nombre}
@@ -2921,7 +2921,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                     </div>
 
                     {/* Timeline Bar Chart */}
-                    <div className="grid grid-cols-12 gap-2 text-[10px] font-black text-center text-white select-none">
+                    <div className="grid grid-cols-12 gap-2 text-[10px] font-black text-center select-none">
                       {annualPhases.map((phase: any, idx: number) => {
                         let colSpan = "col-span-1";
                         if (idx === 0) colSpan = "col-span-1"; // Pretemporada (Jan)
@@ -2934,15 +2934,15 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                         else if (idx === 7) return null;
                         else if (idx === 8) colSpan = "col-span-1"; // Fin (Dec)
 
-                        let colorBg = "bg-slate-500/20 text-slate-300 border-slate-500/30";
-                        if (phase.nombre.includes("Pretemporada")) colorBg = "bg-indigo-500/20 text-indigo-300 border-indigo-500/30";
-                        else if (phase.nombre.includes("Baja")) colorBg = "bg-blue-500/20 text-blue-300 border-blue-500/30";
-                        else if (phase.nombre.includes("Liga")) colorBg = "bg-purple-500/20 text-purple-300 border-purple-500/30";
-                        else if (phase.nombre.includes("Vacaciones")) colorBg = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
-                        else if (phase.nombre.includes("Campamento")) colorBg = "bg-amber-500/20 text-amber-300 border-amber-500/30";
-                        else if (phase.nombre.includes("Copa")) colorBg = "bg-rose-500/20 text-rose-300 border-rose-500/30";
-                        else if (phase.nombre.includes("Evaluaciones")) colorBg = "bg-cyan-500/20 text-cyan-300 border-cyan-500/30";
-                        else if (phase.nombre.includes("Fin")) colorBg = "bg-slate-500/20 text-slate-300 border-slate-500/30";
+                        let colorBg = "bg-slate-500/10 text-slate-700 border-slate-500/30";
+                        if (phase.nombre.includes("Pretemporada")) colorBg = "bg-indigo-500/10 text-indigo-700 border-indigo-500/30";
+                        else if (phase.nombre.includes("Baja")) colorBg = "bg-blue-500/10 text-blue-700 border-blue-500/30";
+                        else if (phase.nombre.includes("Liga")) colorBg = "bg-purple-500/10 text-purple-700 border-purple-500/30";
+                        else if (phase.nombre.includes("Vacaciones")) colorBg = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
+                        else if (phase.nombre.includes("Campamento")) colorBg = "bg-amber-500/10 text-amber-700 border-amber-500/30";
+                        else if (phase.nombre.includes("Copa")) colorBg = "bg-rose-500/10 text-rose-700 border-rose-500/30";
+                        else if (phase.nombre.includes("Evaluaciones")) colorBg = "bg-cyan-500/10 text-cyan-700 border-cyan-500/30";
+                        else if (phase.nombre.includes("Fin")) colorBg = "bg-slate-500/10 text-slate-700 border-slate-500/30";
 
                         return (
                           <div
@@ -2961,15 +2961,15 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   {/* Vertical Phases List with Date Ranges */}
                   <div className="pt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {annualPhases.map((phase: any, idx: number) => {
-                      let colorClass = "border-slate-500/20 bg-slate-500/5 text-slate-400";
-                      if (phase.nombre.includes("Pretemporada")) colorClass = "border-indigo-500/20 bg-indigo-500/5 text-indigo-400";
-                      else if (phase.nombre.includes("Baja")) colorClass = "border-blue-500/20 bg-blue-500/5 text-blue-400";
-                      else if (phase.nombre.includes("Liga")) colorClass = "border-purple-500/20 bg-purple-500/5 text-purple-400";
-                      else if (phase.nombre.includes("Vacaciones")) colorClass = "border-emerald-500/20 bg-emerald-500/5 text-emerald-400";
-                      else if (phase.nombre.includes("Campamento")) colorClass = "border-amber-500/20 bg-amber-500/5 text-amber-400";
-                      else if (phase.nombre.includes("Copa")) colorClass = "border-rose-500/20 bg-rose-500/5 text-rose-400";
-                      else if (phase.nombre.includes("Evaluaciones")) colorClass = "border-cyan-500/20 bg-cyan-500/5 text-cyan-400";
-                      else if (phase.nombre.includes("Tests")) colorClass = "border-lime-500/20 bg-lime-500/5 text-lime-400";
+                      let colorClass = "border-slate-500/20 bg-slate-500/5 text-slate-700";
+                      if (phase.nombre.includes("Pretemporada")) colorClass = "border-indigo-500/20 bg-indigo-500/5 text-indigo-700";
+                      else if (phase.nombre.includes("Baja")) colorClass = "border-blue-500/20 bg-blue-500/5 text-blue-700";
+                      else if (phase.nombre.includes("Liga")) colorClass = "border-purple-500/20 bg-purple-500/5 text-purple-700";
+                      else if (phase.nombre.includes("Vacaciones")) colorClass = "border-emerald-500/20 bg-emerald-500/5 text-emerald-700";
+                      else if (phase.nombre.includes("Campamento")) colorClass = "border-amber-500/20 bg-amber-500/5 text-amber-700";
+                      else if (phase.nombre.includes("Copa")) colorClass = "border-rose-500/20 bg-rose-500/5 text-rose-700";
+                      else if (phase.nombre.includes("Evaluaciones")) colorClass = "border-cyan-500/20 bg-cyan-500/5 text-cyan-700";
+                      else if (phase.nombre.includes("Tests")) colorClass = "border-lime-500/20 bg-lime-500/5 text-lime-700";
 
                       return (
                         <div
@@ -3120,7 +3120,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                         size="icon"
                         onClick={() => handleRemoveExerciseField(ex.id)}
                         disabled={planExercises.length <= 1}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 shrink-0"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -3131,7 +3131,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
 
               <div className="flex justify-end gap-2 border-t pt-3">
                 <Button type="button" variant="outline" onClick={() => setOpenCreatePlan(false)} className="text-xs h-9">Cancelar</Button>
-                <Button type="submit" className="bg-gradient-primary shadow-elegant text-xs h-9">Guardar Ciclo</Button>
+                <Button type="submit" className="bg-primary text-primary-foreground shadow-elegant text-xs h-9 hover:bg-primary/95">Guardar Ciclo</Button>
               </div>
             </form>
           </DialogContent>
@@ -3209,7 +3209,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
 
                 <div className="flex justify-end gap-2 border-t pt-3">
                   <Button type="button" variant="outline" onClick={() => setOpenEditWeekly(false)} className="text-xs h-9">Cancelar</Button>
-                  <Button type="submit" className="bg-gradient-primary shadow-elegant text-xs h-9">Guardar Semana</Button>
+                  <Button type="submit" className="bg-primary text-primary-foreground shadow-elegant text-xs h-9 hover:bg-primary/95">Guardar Semana</Button>
                 </div>
               </form>
             )}
@@ -3224,7 +3224,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 <CardTitle className="text-sm">Sesiones Planificadas</CardTitle>
                 <CardDescription>Entrenamientos programados para la semana actual.</CardDescription>
               </div>
-              <Button asChild size="sm" className="bg-gradient-primary shadow-elegant text-xs h-8">
+              <Button asChild size="sm" className="bg-primary text-white shadow-elegant text-xs h-8">
                 <Link to="/entrenamientos">Planificar sesión</Link>
               </Button>
             </CardHeader>
@@ -3322,7 +3322,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                       <option value="normal">Normal (Alto es mejor)</option>
                       <option value="inverso">Inversa (Bajo es mejor)</option>
                     </select>
-                    <Button type="submit" size="sm" className="bg-gradient-primary text-xs h-9 shadow-elegant">
+                    <Button type="submit" size="sm" className="bg-primary text-white text-xs h-9 shadow-elegant">
                       + Añadir Métrica
                     </Button>
                   </div>
@@ -3467,7 +3467,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                   <CardTitle className="text-sm flex items-center gap-2">📋 Convocatorias Oficiales</CardTitle>
                   <CardDescription className="text-xs">Cita a los jugadores para los partidos del fin de semana.</CardDescription>
                 </div>
-                <Button size="sm" className="bg-gradient-primary shadow-elegant text-xs h-8 gap-1.5" onClick={handleOpenConvoc}>
+                <Button size="sm" className="bg-primary text-white shadow-elegant text-xs h-8 gap-1.5" onClick={handleOpenConvoc}>
                   <Plus className="h-3.5 w-3.5" /> Crear convocatoria
                 </Button>
               </CardHeader>
@@ -3477,7 +3477,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                     <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl">📋</div>
                     <p className="text-sm font-semibold text-foreground">Sin convocatorias registradas</p>
                     <p className="text-xs text-muted-foreground max-w-xs">Crea la primera convocatoria para citar a tus jugadores al próximo partido.</p>
-                    <Button size="sm" className="bg-gradient-primary text-xs h-8 gap-1.5 mt-1" onClick={handleOpenConvoc}>
+                    <Button size="sm" className="bg-primary text-white text-xs h-8 gap-1.5 mt-1" onClick={handleOpenConvoc}>
                       <Plus className="h-3.5 w-3.5" /> Nueva convocatoria
                     </Button>
                   </div>
@@ -3744,7 +3744,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
 
             <DialogFooter className="pt-2 gap-2">
               <Button type="button" variant="outline" onClick={() => setOpenConvoc(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-gradient-primary gap-1.5" disabled={convocLoading}>
+              <Button type="submit" className="bg-primary hover:bg-primary/95 text-white gap-1.5" disabled={convocLoading}>
                 {convocLoading ? "Guardando..." : "✓ Publicar convocatoria"}
               </Button>
             </DialogFooter>
@@ -3829,7 +3829,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                             variant={currentValue === opt.v ? (question.tipo === "inverso" ? "destructive" : "default") : "outline"}
                             className={`h-9 text-[10px] font-bold transition-all px-1 ${
                               currentValue === opt.v 
-                                ? (question.tipo === "inverso" ? "bg-red-500 text-white border-red-600 hover:bg-red-600" : "bg-primary text-primary-foreground")
+                                ? (question.tipo === "inverso" ? "bg-rose-500 text-white border-rose-600 hover:bg-rose-600" : "bg-primary text-primary-foreground")
                                 : "hover:bg-primary/5 border-border/80"
                             }`}
                             onClick={() => setValue(opt.v)}
@@ -3856,7 +3856,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 let textClass = "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
                 let textLabel = "🟢 Óptimo (Listo para entrenar al máximo)";
                 if (tempScore < 50) {
-                  textClass = "text-red-500 bg-red-500/10 border-red-500/20";
+                  textClass = "text-rose-500 bg-rose-500/10 border-rose-500/20";
                   textLabel = "🔴 Riesgo (Bajar intensidad / Carga diferenciada)";
                 } else if (tempScore < 75) {
                   textClass = "text-amber-500 bg-amber-500/10 border-amber-500/20";
@@ -3874,7 +3874,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 <Button type="button" variant="outline" onClick={() => setOpenWellnessModal(false)} className="text-xs h-9">
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-gradient-primary shadow-elegant text-xs h-9">
+                <Button type="submit" className="bg-primary text-white shadow-elegant text-xs h-9 hover:bg-primary/95">
                   Guardar Bienestar
                 </Button>
               </div>
@@ -4175,9 +4175,9 @@ function PlanCard({ plan, onEdit, onDelete }: { plan: any; onEdit: () => void; o
   const [expanded, setExpanded] = useState(true);
 
   const cols = [
-    { label: "Trabajo de Técnica aplicado", items: plan.contenidos.tecnica, icon: Award, color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20" },
-    { label: "Táctica individual y colectiva", items: plan.contenidos.tactica, icon: Shield, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-    { label: "Conceptos básicos parte física", items: plan.contenidos.fisica, icon: Zap, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+    { label: "Trabajo de Técnica aplicado", items: plan.contenidos.tecnica, icon: Award, color: "text-indigo-600 bg-indigo-50 border-indigo-100" },
+    { label: "Táctica individual y colectiva", items: plan.contenidos.tactica, icon: Shield, color: "text-blue-600 bg-blue-50 border-blue-100" },
+    { label: "Conceptos básicos parte física", items: plan.contenidos.fisica, icon: Zap, color: "text-amber-600 bg-amber-50 border-amber-100" },
   ];
 
   return (
@@ -4186,7 +4186,7 @@ function PlanCard({ plan, onEdit, onDelete }: { plan: any; onEdit: () => void; o
       <CardHeader className="pb-4 bg-muted/20 border-b border-border/50">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-primary text-white shadow-elegant">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-elegant">
               <CalendarRange className="h-5 w-5" />
             </div>
             <div>
@@ -4203,7 +4203,7 @@ function PlanCard({ plan, onEdit, onDelete }: { plan: any; onEdit: () => void; o
             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-all" onClick={onEdit}>
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-muted transition-all" onClick={onDelete}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-muted transition-all" onClick={onDelete}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -4276,7 +4276,7 @@ function PlanCard({ plan, onEdit, onDelete }: { plan: any; onEdit: () => void; o
                   </div>
 
                   {mes.nota && (
-                    <div className="flex items-start gap-2.5 text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-xs leading-relaxed font-bold">
+                    <div className="flex items-start gap-2.5 text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 text-xs leading-relaxed font-bold">
                       <AlertTriangle className="h-4.5 w-4.5 shrink-0 mt-0.5" />
                       <div>{mes.nota}</div>
                     </div>

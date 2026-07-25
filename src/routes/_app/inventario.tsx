@@ -577,10 +577,10 @@ export function InventarioPage() {
             </Badge>
             <span className="text-xs text-muted-foreground font-normal">| {totalArticulosDiferentes} Ítems Registrados</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5 mt-1">
+          <h1 className="page-header-title flex items-center gap-2.5 mt-1">
             <Boxes className="h-7 w-7 text-primary" /> Gestión de Inventario & Activos
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground font-normal">
+          <p className="page-header-subtitle">
             Control de stock, alertas de reorden, mantenimiento de categorías en BD y bitácora de préstamos.
           </p>
         </div>
@@ -677,7 +677,7 @@ export function InventarioPage() {
           </div>
 
           {/* Gráfico de Barras: Stock Total por Categoría */}
-          <Card className="border-border shadow-sm rounded-2xl p-4 space-y-3">
+          <Card className="border-border shadow-sm rounded-[12px] p-4 space-y-3">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
@@ -702,7 +702,7 @@ export function InventarioPage() {
 
           {/* Alert List for Low Stock */}
           {articulosStockBajo.length > 0 && (
-            <Card className="border-amber-500/30 bg-amber-500/5 p-4 rounded-2xl space-y-3">
+            <Card className="border-amber-500/30 bg-amber-500/5 p-4 rounded-[12px] space-y-3">
               <h3 className="text-sm font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600" /> Alertas de Reorden Automático ({articulosStockBajo.length} Ítems con Stock Bajo)
               </h3>
@@ -731,7 +731,7 @@ export function InventarioPage() {
         {/* 📦 PESTAÑA 2: TABLA MAESTRA DE ARTÍCULOS (SE OCULTA EL GRÁFICO Y LISTA DATATABLE) */}
         {/* ========================================================================= */}
         <TabsContent value="articulos" className="mt-0 space-y-4">
-          <Card className="border-border shadow-sm rounded-2xl overflow-hidden">
+          <Card className="border-border shadow-sm rounded-[12px] overflow-hidden">
             {/* Header & Filtros */}
             <div className="p-4 bg-card border-b border-border flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -878,7 +878,7 @@ export function InventarioPage() {
         {/* 📁 PESTAÑA 3: CATEGORÍAS & AGRUPACIONES (MANTENIMIENTO DE FILTROS) */}
         {/* ========================================================================= */}
         <TabsContent value="categorias" className="mt-0 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-2xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-[12px]">
             <div>
               <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
                 <FolderPlus className="h-4 w-4 text-indigo-600" /> Mantenimiento de Categorías Oficiales Supabase BD ({categorias.length})
@@ -920,7 +920,7 @@ export function InventarioPage() {
         {/* 🔄 PESTAÑA 4: PRÉSTAMOS & PÉRDIDAS (BITÁCORA DE CAMPO DE ENTRENADORES) */}
         {/* ========================================================================= */}
         <TabsContent value="prestamos" className="mt-0 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-[12px]">
             <div>
               <h3 className="text-sm font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
                 <RotateCcw className="h-4 w-4 text-emerald-600" /> Bitácora de Préstamos a Entrenadores & Pérdidas
@@ -931,7 +931,7 @@ export function InventarioPage() {
             </div>
           </div>
 
-          <Card className="border-border shadow-sm rounded-2xl overflow-hidden">
+          <Card className="border-border shadow-sm rounded-[12px] overflow-hidden">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-normal">
@@ -999,7 +999,7 @@ export function InventarioPage() {
 
       {/* MODAL 1: AGREGAR NUEVO ARTÍCULO (CON SKU AUTOMÁTICO BD Y CATEGORÍAS REALES DE BD) */}
       <Dialog open={modalNuevoArticulo} onOpenChange={setModalNuevoArticulo}>
-        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
+        <DialogContent className="max-w-md bg-card border-border rounded-[12px] font-['Segoe_UI',sans-serif]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Plus className="h-5 w-5 text-purple-600" /> ➕ Agregar Nuevo Artículo a Inventario BD
@@ -1111,7 +1111,7 @@ export function InventarioPage() {
 
       {/* MODAL 2: AGREGAR NUEVA CATEGORÍA */}
       <Dialog open={modalNuevaCategoria} onOpenChange={setModalNuevaCategoria}>
-        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
+        <DialogContent className="max-w-md bg-card border-border rounded-[12px] font-['Segoe_UI',sans-serif]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <FolderPlus className="h-5 w-5 text-indigo-600" /> ➕ Crear Nueva Categoría de Insumos BD
@@ -1165,7 +1165,7 @@ export function InventarioPage() {
 
       {/* MODAL 3: REGISTRAR PRÉSTAMO A ENTRENADOR */}
       <Dialog open={modalNuevoPrestamo} onOpenChange={setModalNuevoPrestamo}>
-        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
+        <DialogContent className="max-w-md bg-card border-border rounded-[12px] font-['Segoe_UI',sans-serif]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Plus className="h-5 w-5 text-emerald-600" /> ➕ Registrar Préstamo de Material BD
@@ -1262,7 +1262,7 @@ export function InventarioPage() {
 
       {/* MODAL 4: ASENTAR DEVOLUCIÓN DE PRÉSTAMO (RECALCULA STOCK) */}
       <Dialog open={!!modalDevolucion} onOpenChange={(open) => !open && setModalDevolucion(null)}>
-        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
+        <DialogContent className="max-w-md bg-card border-border rounded-[12px] font-['Segoe_UI',sans-serif]">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <RotateCcw className="h-5 w-5 text-emerald-600" /> Asentar Devolución de Campo

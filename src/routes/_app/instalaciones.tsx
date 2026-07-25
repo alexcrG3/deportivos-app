@@ -146,10 +146,10 @@ function InstalacionesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Instalaciones</h1>
-          <p className="text-sm text-muted-foreground">Canchas, gimnasios, piscinas y áreas deportivas.</p>
+          <h1 className="page-header-title">Instalaciones</h1>
+          <p className="page-header-subtitle">Canchas, gimnasios, piscinas y áreas deportivas.</p>
         </div>
-        <Button onClick={() => setIsOpenCreate(true)} className="bg-gradient-primary shadow-elegant">
+        <Button onClick={() => setIsOpenCreate(true)} className="btn-primary">
           <Plus className="h-4 w-4 mr-1" /> Nueva instalación
         </Button>
       </div>
@@ -158,7 +158,7 @@ function InstalacionesPage() {
         {list.map((f) => {
           const disponible = f.estado === "Disponible";
           return (
-            <Card key={f.id} className="shadow-card hover:shadow-elegant transition bg-card border-border">
+            <Card key={f.id} className="premium-card hover:shadow-sm transition bg-card border-border">
               <CardHeader className="flex-row items-start justify-between space-y-0 p-4">
                 <div>
                   <CardTitle className="text-base text-foreground font-semibold">{f.nombre}</CardTitle>

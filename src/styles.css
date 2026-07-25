@@ -92,60 +92,355 @@
   --radius: 0.5rem;
 }
 
+/* ============================================================
+   SISTEMA DE CLASES SEMÁNTICAS GLOBALES — DeportivoOS Premium
+   Todas las páginas, componentes y vistas deben usar estas
+   clases. NUNCA colores hexadecimales hardcodeados en los TSX.
+   Para cambiar el diseño global: editar solo las variables en :root
+   ============================================================ */
+
+/* ── BASE ─────────────────────────────────────────────────── */
 body, .app-layout {
   background-color: var(--bg-main) !important;
   color: var(--text-main);
 }
 
+/* ── PAGE WRAPPER ─────────────────────────────────────────── */
+/* Clase para el div raíz de cada página */
+.page-wrapper {
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── PREMIUM CARD (contenedor de sección) ─────────────────── */
+/* Reemplaza cualquier div de sección o panel */
 .premium-card {
   background-color: var(--bg-card) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: 12px !important; /* Esquinas de 12px obligatorias */
-  padding: 24px !important;        /* Margen interno para que todo respire */
+  border-radius: 12px !important;
+  padding: 24px !important;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06) !important;
+}
+.premium-card-sm {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06);
+}
+.premium-card-flat {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
 }
 
+/* ── PAGE HEADER ──────────────────────────────────────────── */
+/* Encabezado superior de cada página */
+.page-header {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06);
+}
+.page-header-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+.page-header-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── SECTION TITLE ────────────────────────────────────────── */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.section-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ── KPI / METRIC BLOCK (Jerarquía de 3 niveles) ─────────── */
+/* Nivel 1: etiqueta superior */
+.kpi-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--text-muted) !important;
+}
+/* Nivel 2: número hero */
 .kpi-number {
   font-size: 28px !important;
-  font-weight: 700 !important; /* Forzar el Bold */
+  font-weight: 700 !important;
   color: var(--text-main) !important;
+  line-height: 1 !important;
+  margin: 4px 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.kpi-number-lg {
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  line-height: 1 !important;
+  margin: 4px 0 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+/* Nivel 3: subtexto inferior */
+.kpi-subtext {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: #475569 !important;
 }
 
+/* ── BADGE PILLS (cápsulas de estado) ────────────────────── */
+/* Base de todas las cápsulas */
 .badge-pill {
-  border-radius: 9999px !important; /* Forma de cápsula */
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  border-radius: 9999px !important;
   padding: 4px 10px !important;
   font-size: 12px !important;
   font-weight: 500 !important;
+  line-height: 1 !important;
+  border: 1px solid transparent !important;
+  white-space: nowrap !important;
+}
+/* Variantes semánticas */
+.badge-success {
+  background-color: rgba(16,185,129,0.1) !important;
+  color: #059669 !important;
+  border-color: rgba(16,185,129,0.2) !important;
+}
+.badge-warning {
+  background-color: rgba(245,158,11,0.1) !important;
+  color: #d97706 !important;
+  border-color: rgba(245,158,11,0.2) !important;
+}
+.badge-danger {
+  background-color: rgba(239,68,68,0.1) !important;
+  color: #dc2626 !important;
+  border-color: rgba(239,68,68,0.2) !important;
+}
+.badge-info {
+  background-color: rgba(37,99,235,0.1) !important;
+  color: var(--color-primary) !important;
+  border-color: rgba(37,99,235,0.2) !important;
+}
+.badge-neutral {
+  background-color: #F1F5F9 !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-subtle) !important;
+}
+.badge-live {
+  background-color: rgba(16,185,129,0.12) !important;
+  color: #059669 !important;
+  border-color: rgba(16,185,129,0.25) !important;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .7; }
 }
 
+/* ── BOTONES ──────────────────────────────────────────────── */
+/* Botón principal — Azul corporativo sólido */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.btn-primary:hover {
+  background-color: #1D4ED8 !important;
+}
+/* Botón secundario / outline */
+.btn-secondary {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.btn-secondary:hover {
+  background-color: #F8FAFC !important;
+}
+/* Botón de peligro */
+.btn-danger {
+  background-color: rgba(239,68,68,0.1) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239,68,68,0.2) !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.btn-danger:hover {
+  background-color: rgba(239,68,68,0.18) !important;
+}
+
+/* ── TABLAS ───────────────────────────────────────────────── */
+.table-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06);
+}
+.table-header-row {
+  background-color: #F8FAFC !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+.table-header-cell {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: var(--text-muted) !important;
+  padding: 10px 16px !important;
+}
+.table-row {
+  border-bottom: 1px solid var(--border-subtle) !important;
+  transition: background-color 0.1s ease !important;
+}
+.table-row:hover {
+  background-color: #F8FAFC !important;
+}
+.table-cell {
+  font-size: 13px !important;
+  color: var(--text-main) !important;
+  padding: 12px 16px !important;
+}
+
+/* ── LISTAS Y FEEDS DE ACTIVIDAD ─────────────────────────── */
+.feed-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.feed-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.1s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.feed-item:last-child {
+  border-bottom: none;
+}
+.feed-item:hover {
+  background-color: #F8FAFC;
+}
+
+/* ── BARRAS DE PROGRESO ───────────────────────────────────── */
+.progress-track {
+  height: 6px;
+  background-color: var(--border-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background-color: var(--color-primary);
+  transition: width 0.4s ease;
+}
+.progress-fill-success {
+  background-color: #10B981;
+}
+.progress-fill-warning {
+  background-color: #F59E0B;
+}
+.progress-fill-danger {
+  background-color: #EF4444;
+}
+
+/* ── DIVIDERS ─────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background-color: var(--border-subtle);
+  margin: 0;
+}
+
+/* ── TEXT HELPERS ─────────────────────────────────────────── */
+.text-primary-color { color: var(--color-primary) !important; }
+.text-main-color { color: var(--text-main) !important; }
+.text-muted-color { color: var(--text-muted) !important; }
+
+/* ── ICON CONTAINER ───────────────────────────────────────── */
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon-box-primary { background-color: rgba(37,99,235,0.1); color: var(--color-primary); }
+.icon-box-success { background-color: rgba(16,185,129,0.1); color: #059669; }
+.icon-box-warning { background-color: rgba(245,158,11,0.1); color: #d97706; }
+.icon-box-danger  { background-color: rgba(239,68,68,0.1);  color: #dc2626; }
+.icon-box-neutral { background-color: #F1F5F9; color: var(--text-muted); }
+
+/* ── SOMBRAS ESTÁNDAR ─────────────────────────────────────── */
+.shadow-card   { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06) !important; }
+.shadow-card-md { box-shadow: 0 4px 12px 0 rgba(0,0,0,0.08) !important; }
+.shadow-elegant { box-shadow: 0 10px 25px -5px rgba(37,99,235,0.25), 0 8px 10px -6px rgba(37,99,235,0.15) !important; }
+
+/* ── HOVER ROW ────────────────────────────────────────────── */
+.hover-row { transition: background-color 0.1s ease; }
+.hover-row:hover { background-color: #F8FAFC !important; }
+
+/* ── LEGACY COMPAT ────────────────────────────────────────── */
+/* Clases de compatibilidad para que gradientes viejos no rompan el build */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  background-color: var(--color-primary) !important;
   color: #ffffff !important;
 }
-.bg-gradient-primary:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
-}
-
 .bg-gradient-secondary {
-  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%) !important;
+  background-color: var(--color-primary) !important;
   color: #ffffff !important;
 }
-
-.shadow-elegant {
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3), 0 8px 10px -6px rgba(37, 99, 235, 0.2) !important;
-}
-
-.shadow-card {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
-}
-
 .bg-primary {
-  background-color: #2563eb !important;
+  background-color: var(--color-primary) !important;
   color: #ffffff !important;
 }
-
 .bg-destructive {
-  background-color: #ef4444 !important;
-  color: #ffffff !important;
+  background-color: rgba(239,68,68,0.1) !important;
+  color: #dc2626 !important;
 }
 
 .perspective-1000 {

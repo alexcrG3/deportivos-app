@@ -270,7 +270,7 @@ function AsistenciaPage() {
 
           <Button 
             onClick={() => window.print()} 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 text-xs rounded-xl gap-1.5 shadow-sm"
+            className="btn-primary h-9 gap-1.5"
           >
             <Printer className="h-4 w-4" /> Generar Reporte / PDF
           </Button>
@@ -312,11 +312,11 @@ function AsistenciaPage() {
                       <td className="p-4 text-center font-mono text-xs">{stat.totalPlayers}</td>
                       <td className="p-4">
                         {stat.status === "registrado" ? (
-                          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-0.5 px-2 font-semibold">
+                          <Badge className="badge-pill badge-success border-none">
                             ✓ Completado
                           </Badge>
                         ) : (
-                          <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 py-0.5 px-2 font-semibold">
+                          <Badge className="badge-pill badge-warning border-none">
                             ⚠️ Pendiente
                           </Badge>
                         )}
@@ -458,7 +458,7 @@ function AsistenciaPage() {
               <Button variant="outline" onClick={() => setSelectedTeamForDetail(null)} size="sm" className="text-xs font-medium">
                 Cancelar
               </Button>
-              <Button onClick={handleSaveDetail} size="sm" className="bg-gradient-primary text-xs font-medium">
+              <Button onClick={handleSaveDetail} size="sm" className="btn-primary">
                 Guardar Asistencia
               </Button>
             </div>
