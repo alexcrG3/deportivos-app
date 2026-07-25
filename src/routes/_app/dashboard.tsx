@@ -175,14 +175,14 @@ function Dashboard() {
     { icon: UserPlus, label: "Solicitudes de inscripción", count: inscripciones.length, hint: "en el embudo", to: "/leads", prio: "bajo" as Prio },
   ];
   const actividad = hasPlayers ? [
-    { icon: Wallet, text: "Juan Pérez realizó un pago de ₡45 000", tiempo: "hace 5 min", color: "text-emerald-500" },
-    { icon: AlertCircle, text: "María Gómez faltó al entrenamiento", tiempo: "hace 20 min", color: "text-red-500" },
-    { icon: FileWarning, text: "Carlos Rojas subió un certificado médico", tiempo: "hace 45 min", color: "text-sky-500" },
-    { icon: Star, text: "Diego Soto registró una evaluación técnica", tiempo: "hace 1 h", color: "text-amber-500" },
-    { icon: Megaphone, text: "Se creó una nueva convocatoria — Sub-16", tiempo: "hace 1 h", color: "text-primary" },
-    { icon: UserPlus, text: "Nuevo jugador confirmado: Antonella Núñez", tiempo: "hace 2 h", color: "text-emerald-500" },
-    { icon: Stethoscope, text: "Se registró una lesión menor — Sub-14", tiempo: "hace 3 h", color: "text-red-500" },
-    { icon: Wallet, text: "Se aprobó un arreglo de pago", tiempo: "hace 4 h", color: "text-sky-500" },
+    { icon: Wallet, actor: "Juan Pérez", text: "realizó un pago de", highlight: "₡45 000", tiempo: "hace 5 min", color: "text-emerald-500" },
+    { icon: AlertCircle, actor: "María Gómez", text: "faltó al entrenamiento", highlight: "Sub-18", tiempo: "hace 20 min", color: "text-red-500" },
+    { icon: FileWarning, actor: "Carlos Rojas", text: "subió un certificado médico", highlight: "Válido", tiempo: "hace 45 min", color: "text-sky-500" },
+    { icon: Star, actor: "Diego Soto", text: "registró una evaluación técnica", highlight: "9.2/10", tiempo: "hace 1 h", color: "text-amber-500" },
+    { icon: Megaphone, actor: "Nueva convocatoria", text: "publicada —", highlight: "Sub-16", tiempo: "hace 1 h", color: "text-primary" },
+    { icon: UserPlus, actor: "Nuevo jugador:", text: "inscrito oficialmente", highlight: "Antonella Núñez", tiempo: "hace 2 h", color: "text-emerald-500" },
+    { icon: Stethoscope, actor: "Lesión registrada:", text: "esguince leve —", highlight: "Sub-14", tiempo: "hace 3 h", color: "text-red-500" },
+    { icon: Wallet, actor: "Arreglo de pago:", text: "aprobado para mensualidad", highlight: "Sub-12", tiempo: "hace 4 h", color: "text-sky-500" },
   ] : [];
 
   const proximos = eventos.slice(0, 6);
@@ -679,19 +679,25 @@ function Dashboard() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> En Vivo
             </span>
           </CardHeader>
-          <CardContent className="space-y-1.5 pt-3">
+          <CardContent className="pt-1 pb-3">
             {actividad.length > 0 ? (
-              actividad.map((a, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/60">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                    <a.icon className="h-3.5 w-3.5" />
+              <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+                {actividad.map((a, i) => (
+                  <div key={i} className="flex items-center gap-4 py-3 px-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                      <a.icon className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                        {a.actor && <span className="font-bold text-slate-900 dark:text-slate-100 mr-1">{a.actor}</span>}
+                        {a.text && <span className="mr-1">{a.text}</span>}
+                        {a.highlight && <span className="font-bold text-slate-900 dark:text-slate-100">{a.highlight}</span>}
+                      </p>
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px] font-semibold shrink-0 border border-slate-200/60 dark:border-slate-700/60">{a.tiempo}</span>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">{a.text}</p>
-                    <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[10px] font-semibold shrink-0 border border-slate-200/60 dark:border-slate-700/60">{a.tiempo}</span>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="text-center py-8 text-xs text-slate-400">
                 No hay actividad reciente registrada.
