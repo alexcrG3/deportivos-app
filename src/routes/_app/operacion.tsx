@@ -162,7 +162,9 @@ function OperacionDashboard() {
     return list.filter((c) => c.jugadores.some((j: any) => j.estado === "pendiente")).length;
   }, [updateTrigger]);
 
-  const conflictosHorariosCount = 0; // Sin empal  return (
+  const conflictosHorariosCount = 0;
+
+  return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
