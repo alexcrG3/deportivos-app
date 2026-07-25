@@ -162,26 +162,29 @@ function OperacionDashboard() {
     return list.filter((c) => c.jugadores.some((j: any) => j.estado === "pendiente")).length;
   }, [updateTrigger]);
 
-  const conflictosHorariosCount = 0; // Sin empalmes detectados
-
-  return (
+  const conflictosHorariosCount = 0; // Sin empal  return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase mb-1">
+            Operaciones · Control de Campo
+          </Badge>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
             Dashboard Operativo
-            <Badge className="bg-primary/10 text-primary border-primary/20 font-bold text-[10px] uppercase">En Tiempo Real</Badge>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">
+              EN TIEMPO REAL
+            </span>
           </h1>
-          <p className="text-sm text-muted-foreground">Monitoreo de sedes, minutero de canchas y control de campo.</p>
+          <p className="text-xs text-slate-500 font-medium mt-1">Monitoreo de sedes, minutero de canchas y control de campo.</p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline" asChild>
+          <Button size="sm" variant="outline" className="border-slate-200 dark:border-slate-800 font-bold text-xs rounded-xl" asChild>
             <Link to="/checkin">
-              <QrCode className="h-4 w-4" /> Escáner Check-in QR
+              <QrCode className="h-4 w-4 text-primary" /> Escáner Check-in QR
             </Link>
           </Button>
-          <Button size="sm" className="gap-1.5 bg-gradient-primary shadow-elegant font-bold" asChild>
+          <Button size="sm" className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-sm text-xs rounded-xl" asChild>
             <Link to="/convocatorias">
               <ClipboardList className="h-4 w-4" /> Convocatorias
             </Link>
@@ -189,127 +192,140 @@ function OperacionDashboard() {
         </div>
       </div>
 
-      {/* 🔝 1. Fila de KPIs Operativos (El estado de las sedes hoy) */}
+      {/* 🔝 1. Fila de KPIs Operativos (Regla 3: Estructura de 3 Niveles Verticales) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* KPI 1: Asistencia Diaria */}
-        <StatCard
-          label="% Asistencia Diaria"
-          value={`${asistenciaPorcentaje}%`}
-          hint="Promedio de check-ins esperados hoy"
-          icon={CalendarCheck}
-          accent="success"
-        />
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            % ASISTENCIA DIARIA
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight my-1">
+            {asistenciaPorcentaje}%
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Promedio de check-ins esperados hoy
+          </p>
+        </div>
 
-        {/* KPI 2: Ocupación de Instalaciones */}
-        <StatCard
-          label="Ocupación Instalaciones"
-          value={`${ocupacionPorcentaje}%`}
-          hint="Bloques de canchas ocupados hoy"
-          icon={MapPinned}
-          accent="primary"
-        />
+        {/* KPI 2: Ocupación Instalaciones */}
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            OCUPACIÓN INSTALACIONES
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight my-1">
+            {ocupacionPorcentaje}%
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            Bloques de canchas ocupados hoy
+          </p>
+        </div>
 
-        {/* KPI 3: Total Jugadores Activos (Con link a /jugadores) */}
+        {/* KPI 3: Total Jugadores Activos */}
         <Link to="/jugadores" className="group block">
-          <Card className="p-4 shadow-card hover:shadow-elegant transition border bg-card relative overflow-hidden group-hover:border-primary/40">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Jugadores Activos</span>
-              <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                <Users className="h-4 w-4" />
-              </div>
+          <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1 hover:border-slate-300 transition">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              TOTAL JUGADORES ACTIVOS
+            </p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight my-1">
+              {activosCount}
+            </p>
+            <div className="flex items-center justify-between text-xs text-slate-500 font-normal">
+              <span>Fichas registradas en sistema</span>
+              <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-1 transition-transform" />
             </div>
-            <p className="text-2xl font-black mt-2 text-foreground">{activosCount}</p>
-            <div className="flex items-center justify-between mt-1 text-xs">
-              <span className="text-muted-foreground">Fichas registradas en sistema</span>
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Card>
+          </div>
         </Link>
 
         {/* KPI 4: Ausencias de Staff */}
-        <StatCard
-          label="Ausencias de Staff"
-          value={staffAusenteCount > 0 ? `${staffAusenteCount} alertas` : "0 sin novedad"}
-          hint="Entrenadores sin asistencia registrada"
-          icon={UserX}
-          accent={staffAusenteCount > 0 ? "warning" : "primary"}
-        />
+        <div className="p-5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-1">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            AUSENCIAS DE STAFF
+          </p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 font-mono tracking-tight my-1">
+            {staffAusenteCount}
+          </p>
+          <p className="text-xs text-slate-500 font-normal">
+            {staffAusenteCount > 0 ? "Alertas activas" : "Sin novedad"} • Entrenadores sin asistencia
+          </p>
+        </div>
       </div>
 
       {/* 📈 2. Bloque Central: El "Minutero" y Control de Campo */}
       <div className="grid gap-4 lg:grid-cols-3">
         {/* ⬅️ Columna Izquierda (Ancha): Monitoreo de Horarios y Canchas en Tiempo Real */}
-        <Card className="lg:col-span-2 shadow-card flex flex-col justify-between">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b">
+        <Card className="lg:col-span-2 shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between">
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <CardTitle className="flex items-center gap-2 text-base">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
                 <Clock className="h-4 w-4 text-primary" /> Minutero de Canchas & Clases Hoy
               </CardTitle>
-              <CardDescription>Parrilla en tiempo real por sede, entrenador y check-ins</CardDescription>
+              <CardDescription className="text-xs text-slate-500">Parrilla en tiempo real por sede, entrenador y check-ins</CardDescription>
             </div>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">
               ● Transmitiendo
-            </Badge>
+            </span>
           </CardHeader>
 
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-5 space-y-3">
             {minuteroCanchas.length > 0 ? (
-              minuteroCanchas.map((c) => (
-                <div
-                  key={c.id}
-                  className="p-3.5 rounded-xl border bg-card hover:bg-muted/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-14 flex-col items-center justify-center rounded-lg bg-primary/10 text-primary font-bold shrink-0">
-                      <span className="text-[10px] uppercase opacity-70">Hora</span>
-                      <span className="text-xs leading-none">{c.hora}</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-foreground">{c.cancha}</p>
-                        {c.status === "en_progreso" && (
-                          <Badge className="bg-emerald-500 text-white font-bold text-[9px] uppercase tracking-wider animate-pulse">
-                            🟢 En Progreso
-                          </Badge>
-                        )}
-                        {c.status === "proximo" && (
-                          <Badge className="bg-amber-500 text-white font-bold text-[9px] uppercase tracking-wider">
-                            🟡 Próximo (Calentando)
-                          </Badge>
-                        )}
-                        {c.status === "programado" && (
-                          <Badge variant="secondary" className="text-[9px] uppercase tracking-wider">
-                            ⚪ Programado
-                          </Badge>
-                        )}
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {minuteroCanchas.map((c) => (
+                  <div
+                    key={c.id}
+                    className="py-3 first:pt-0 last:pb-0 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 rounded-lg"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-14 flex-col items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold shrink-0">
+                        <span className="text-[9px] uppercase text-slate-400">Hora</span>
+                        <span className="text-xs font-mono">{c.hora}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        <span className="font-semibold text-foreground">{c.equipo}</span> · Entrenador: {c.entrenador}
-                      </p>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{c.cancha}</p>
+                          {c.status === "en_progreso" && (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[9px] font-bold">
+                              En Progreso
+                            </span>
+                          )}
+                          {c.status === "proximo" && (
+                            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[9px] font-bold">
+                              Próximo
+                            </span>
+                          )}
+                          {c.status === "programado" && (
+                            <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-[9px] font-medium">
+                              Programado
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{c.equipo}</span> • Entrenador: {c.entrenador}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">
-                        {c.checkins} Check-ins
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">asistencia confirmada</span>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
+                      <div className="text-right">
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">
+                          {c.checkins} Check-ins
+                        </span>
+                        <span className="text-[10px] text-slate-400">asistencia confirmada</span>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700" asChild>
+                        <Link to="/asistencia">
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" asChild>
-                      <Link to="/asistencia">
-                        <ChevronRight className="h-4 w-4" />
-                      </Link>
-                    </Button>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="text-center py-10 text-xs text-muted-foreground space-y-2 border border-dashed rounded-xl p-4">
-                <Clock className="h-6 w-6 text-muted-foreground/50 mx-auto" />
-                <p className="font-medium text-foreground">No hay clases registradas hoy</p>
-                <p className="text-[11px]">Las clases o entrenamientos programados para hoy aparecerán en esta parrilla en tiempo real.</p>
-                <Button size="sm" variant="outline" className="mt-2 text-xs" asChild>
+              <div className="text-center py-10 text-xs text-slate-500 space-y-2 border border-slate-200/60 dark:border-slate-800 rounded-xl p-6 bg-slate-50/40">
+                <Clock className="h-6 w-6 text-slate-400 mx-auto" />
+                <p className="font-semibold text-slate-700 dark:text-slate-300">No hay clases registradas hoy</p>
+                <p className="text-[11px] text-slate-500">Las clases o entrenamientos programados para hoy aparecerán en esta parrilla en tiempo real.</p>
+                <Button size="sm" variant="outline" className="mt-2 text-xs font-semibold border-slate-200 dark:border-slate-800" asChild>
                   <Link to="/horarios">Programar Horario →</Link>
                 </Button>
               </div>
@@ -318,49 +334,55 @@ function OperacionDashboard() {
         </Card>
 
         {/* ➡️ Columna Derecha (Estrecha): Accesos y Check-in Rápido en Tiempo Real */}
-        <Card className="shadow-card flex flex-col justify-between">
-          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b">
+        <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl flex flex-col justify-between">
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <QrCode className="h-4 w-4 text-sky-500" /> Últimos Check-ins QR
+              <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+                <QrCode className="h-4 w-4 text-primary" /> Últimos Check-ins QR
               </CardTitle>
-              <CardDescription>Ingresos de alumnos en tiempo real</CardDescription>
+              <CardDescription className="text-xs text-slate-500">Ingresos de alumnos en tiempo real</CardDescription>
             </div>
             <Link to="/checkin" className="text-xs text-primary hover:underline font-semibold">
               Escanear →
             </Link>
           </CardHeader>
 
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-5 space-y-3">
             {ultimosCheckinsReales.length > 0 ? (
-              ultimosCheckinsReales.map((chk) => (
-                <div key={chk.id} className="flex items-center justify-between p-2.5 rounded-xl border bg-muted/40 hover:bg-muted transition">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                      {chk.nombre[0]}
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {ultimosCheckinsReales.map((chk) => (
+                  <div key={chk.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
+                        {chk.nombre[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold truncate text-slate-900 dark:text-slate-100">{chk.nombre}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{chk.categoria} • {chk.sede}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold truncate text-foreground">{chk.nombre}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{chk.categoria} · {chk.sede}</p>
-                    </div>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-[10px] text-muted-foreground block">{chk.tiempo}</span>
-                    {chk.estadoPago === "moroso" ? (
-                      <Badge variant="destructive" className="text-[8px] py-0 px-1">⚠️ Pend. Pago</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[8px] text-emerald-600 border-emerald-500/20 py-0 px-1">✓ OK</Badge>
-                    )}
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] text-slate-400 block">{chk.tiempo}</span>
+                      {chk.estadoPago === "moroso" ? (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[9px] font-bold">
+                          Pend. Pago
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[9px] font-bold">
+                          ✓ OK
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="text-center py-10 text-xs text-muted-foreground space-y-2 border border-dashed rounded-xl p-4">
-                <QrCode className="h-6 w-6 text-muted-foreground/50 mx-auto" />
-                <p className="font-medium text-foreground">Sin check-ins hoy</p>
-                <p className="text-[11px]">No se ha registrado ningún ingreso QR o toma de lista el día de hoy.</p>
-                <Button size="sm" variant="outline" className="mt-2 text-xs" asChild>
+              <div className="text-center py-10 text-xs text-slate-500 space-y-2 border border-slate-200/60 dark:border-slate-800 rounded-xl p-6 bg-slate-50/40">
+                <QrCode className="h-6 w-6 text-slate-400 mx-auto" />
+                <p className="font-semibold text-slate-700 dark:text-slate-300">Sin check-ins hoy</p>
+                <p className="text-[11px] text-slate-500">No se ha registrado ningún ingreso QR o toma de lista el día de hoy.</p>
+                <Button size="sm" variant="outline" className="mt-2 text-xs font-semibold border-slate-200 dark:border-slate-800" asChild>
                   <Link to="/checkin">Abrir Tótem QR →</Link>
                 </Button>
               </div>
@@ -370,62 +392,70 @@ function OperacionDashboard() {
       </div>
 
       {/* 🚨 3. Bloque Inferior: Centro de Tareas y Alertas Operativas */}
-      <Card className="shadow-card">
-        <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b">
+      <Card className="shadow-sm border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
               <AlertCircle className="h-4 w-4 text-amber-500" /> Centro de Tareas & Alertas Operativas
             </CardTitle>
-            <CardDescription>Acciones prioritarias requeridas antes de finalizar la jornada</CardDescription>
+            <CardDescription className="text-xs text-slate-500">Acciones prioritarias requeridas antes de finalizar la jornada</CardDescription>
           </div>
-          <Badge variant="secondary" className="font-bold text-xs">Acción Rápida</Badge>
+          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px] border border-slate-200/60">
+            Acción Rápida
+          </span>
         </CardHeader>
 
-        <CardContent className="p-4 grid gap-3 md:grid-cols-3">
+        <CardContent className="p-5 grid gap-4 md:grid-cols-3">
           {/* Tarea 1: Conflictos de Horarios */}
-          <div className="p-3.5 rounded-xl border bg-emerald-500/5 border-emerald-500/20 flex flex-col justify-between space-y-2">
+          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">Conflictos de Horarios</span>
-                <Badge className="bg-emerald-500 text-white font-bold text-[10px]">0 Empalmes</Badge>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Conflictos de Horarios</span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">
+                  0 Empalmes
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Todas las canchas y entrenadores están sin sobreposiciones de horarios hoy.
               </p>
             </div>
-            <Button size="sm" variant="outline" className="w-full text-xs font-semibold" asChild>
+            <Button size="sm" variant="outline" className="w-full text-xs font-bold border-slate-200 dark:border-slate-800 rounded-xl" asChild>
               <Link to="/horarios">Ver Matriz de Horarios</Link>
             </Button>
           </div>
 
-          {/* Tarea 2: Convocatorias Pendientes (Con link directo a /convocatorias) */}
-          <div className="p-3.5 rounded-xl border bg-amber-500/5 border-amber-500/20 flex flex-col justify-between space-y-2">
+          {/* Tarea 2: Convocatorias Pendientes */}
+          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">Convocatorias Pendientes</span>
-                <Badge className="bg-amber-500 text-white font-bold text-[10px]">{convocatoriasPendientesCount} por enviar</Badge>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Convocatorias Pendientes</span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold">
+                  {convocatoriasPendientesCount} por enviar
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Listas de partidos creadas que faltan por notificar a la App de padres.
               </p>
             </div>
-            <Button size="sm" className="w-full text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white" asChild>
+            <Button size="sm" className="w-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm rounded-xl" asChild>
               <Link to="/convocatorias">Revisar Convocatorias ({convocatoriasPendientesCount})</Link>
             </Button>
           </div>
 
-          {/* Tarea 3: Fichas Incompletas (Con link directo a /jugadores) */}
-          <div className="p-3.5 rounded-xl border bg-red-500/5 border-red-500/20 flex flex-col justify-between space-y-2">
+          {/* Tarea 3: Fichas Incompletas */}
+          <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">Fichas Incompletas</span>
-                <Badge variant="destructive" className="font-bold text-[10px]">{fichasIncompletasCount} Atletas</Badge>
+                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Fichas Incompletas</span>
+                <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 text-[10px] font-bold">
+                  {fichasIncompletasCount} Atletas
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Alumnos sin foto de perfil o sin la firma del deslinde médico cargado.
               </p>
             </div>
-            <Button size="sm" variant="outline" className="w-full text-xs font-bold border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10" asChild>
+            <Button size="sm" variant="outline" className="w-full text-xs font-bold border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl" asChild>
               <Link to="/jugadores">Filtrar Jugadores Incompletos ({fichasIncompletasCount})</Link>
             </Button>
           </div>
