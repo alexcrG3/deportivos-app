@@ -105,7 +105,7 @@ function AppLayout() {
         <AppSidebar />
         <SidebarInset className="flex flex-1 flex-col min-w-0 max-w-full overflow-x-hidden">
           <AppTopbar />
-          <main className="flex-1 p-4 md:p-6 lg:p-8 min-w-0 max-w-full overflow-x-hidden bg-slate-50/80 dark:bg-slate-950">
+          <main className="flex-1 p-4 md:p-6 lg:p-8 min-w-0 max-w-full overflow-x-hidden app-layout">
             <Outlet />
           </main>
         </SidebarInset>

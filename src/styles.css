@@ -44,6 +44,13 @@
 }
 
 :root {
+  --bg-main: #F8F9FA;         /* Fondo gris ultra claro para TODAS las páginas */
+  --bg-card: #FFFFFF;         /* Fondo blanco puro para TODOS los bloques */
+  --border-subtle: #E2E8F0;    /* Color único para líneas y bordes divisorios */
+  --color-primary: #2563EB;    /* El azul corporativo para botones principales */
+  --text-main: #0F172A;        /* Negro carbón para títulos y números Bold */
+  --text-muted: #64748B;       /* Gris medio para subtítulos y etiquetas */
+
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
 
@@ -53,8 +60,8 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  /* Executive Deep Corporate Blue #1d4ed8 */
-  --primary: 224 76% 48%;
+  /* Executive Deep Corporate Blue #1d4ed8 / #2563eb */
+  --primary: 221.2 83.2% 53.3%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96.1%;
@@ -85,52 +92,29 @@
   --radius: 0.5rem;
 }
 
-.dark {
-  --background: 224 71% 4%;
-  --foreground: 213 31% 91%;
-
-  --card: 224 71% 4%;
-  --card-foreground: 213 31% 91%;
-
-  --popover: 224 71% 4%;
-  --popover-foreground: 215 20.2% 65.1%;
-
-  /* Athletic Royal Blue #2563eb */
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 222.2 47.4% 11.2%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 223 47% 11%;
-  --muted-foreground: 215.4 16.3% 56.9%;
-
-  --accent: 216 34% 17%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 216 34% 17%;
-  --input: 216 34% 17%;
-  --ring: 221.2 83.2% 53.3%;
-
-  --sidebar-background: 222.2 84% 9.8%;
-  --sidebar-foreground: 220 30% 90%;
-  --sidebar-primary: 221.2 83.2% 53.3%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 221.2 83.2% 53.3%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 217.2 32.6% 17.5%;
-  --sidebar-ring: 221.2 83.2% 53.3%;
+body, .app-layout {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main);
 }
 
-* {
-  border-color: hsl(var(--border));
+.premium-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 12px !important; /* Esquinas de 12px obligatorias */
+  padding: 24px !important;        /* Margen interno para que todo respire */
 }
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+
+.kpi-number {
+  font-size: 28px !important;
+  font-weight: 700 !important; /* Forzar el Bold */
+  color: var(--text-main) !important;
+}
+
+.badge-pill {
+  border-radius: 9999px !important; /* Forma de cápsula */
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
 }
 
 .bg-gradient-primary {
