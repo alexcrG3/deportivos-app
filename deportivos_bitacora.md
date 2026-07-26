@@ -3,6 +3,25 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
+## [25/07/2026 - Sesión Nocturna: Corrección de Menú y Privilegios de Coach]
+
+- **Ordenamiento Dinámico del Menú Lateral (`src/components/app-sidebar.tsx`):**
+  - Se modificó la lógica de generación del menú de navegación para asegurar que el bloque del **Área Técnica / Coach OS** se priorice y aparezca siempre arriba (antes de Operación Deportiva) cuando el usuario inicie sesión con el rol de `coach`.
+  - El usuario de tipo `admin` sigue conservando su estructura de menú completa (SAAS ADMIN, GESTIÓN DE ACADEMIA, etc.) sin alteraciones ni bloqueos, asegurando su capacidad operativa en todo momento.
+
+- **Corrección y Filtrado Estricto de Permisos de Rol (`src/components/app-sidebar.tsx`):**
+  - Se emparejaron con precisión milimétrica los IDs de la Configuración de Roles con los sub-enlaces de la barra de navegación (ej. `op_jugadores`, `op_asistencia`, `coord_planificacion`, `coach_sesiones`, `tactico_pizarra`).
+  - La lectura de permisos ahora es estricta: si en el panel de configuración se apaga (pone en falso) el permiso para acceder a "Jugadores" o "Coordinación General", el ítem desaparece completamente de la barra de navegación del Coach.
+  - La herramienta para Administradores de "Ver como entrenador" (`selectedCoachId`) ya no altera los accesos del menú lateral del admin, evitando que pierda el acceso al módulo de configuración cuando simula ser un coach.
+
+- **Persistencia y Guardado de Sesiones de Entrenamiento (`src/routes/_app/entrenamientos.tsx`):**
+  - Mejorado el motor de inserción de sesiones de entrenamiento en Supabase (`sesiones_entrenamiento`).
+  - Corregido el mapeo y alineación del ID/Nombre del entrenador.
+  - Integrado el campo de observaciones en el guardado (`notas_entrenador`), asegurando que todos los campos del nuevo formulario se guarden exitosamente en la base de datos de la nube.
+  - Mitigados los errores visuales de las Cards de equipos. Ahora los botones de acción como Plantilla y Asistencia cuentan con paradas de propagación (`stopPropagation`) para evitar solapamientos con la navegación general de la tarjeta.
+
+---
+
 ## [24/07/2026 - Módulo de Finanzas v2.0, Persistencia 100% Supabase BD, Edición Directa & Formato UTC-6]
 
 - **Desconexión Absoluta de LocalStorage & Mock Data en Finanzas (`src/routes/_app/finanzas.tsx`, `src/components/finanzas-balance.tsx`):**
