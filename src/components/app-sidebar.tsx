@@ -68,9 +68,9 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
             icon: CheckSquare,
             url: "/asistencia",
             subLinks: [
-              { title: "Asistencia", url: "/asistencia" },
-              { title: "Check QR", url: "/checkin" },
-              { title: "Convocatorias", url: "/convocatorias" },
+              { id: "op_asistencia", title: "Asistencia", url: "/asistencia" },
+              { id: "op_checkin", title: "Check QR", url: "/checkin" },
+              { id: "op_convocatorias", title: "Convocatorias", url: "/convocatorias" },
             ],
           },
           {
@@ -101,13 +101,13 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: Laptop,
         url: "/coach",
         subLinks: [
-          { title: "Sesiones", url: "/entrenamientos" },
-          { title: "Entrenamientos", url: "/plantillas" },
-          { title: "Convocatorias", url: "/convocatorias" },
-          { title: "Objetivos", url: "/objetivos" },
-          { title: "Evaluación de Jugadores", url: "/evaluaciones" },
-          { title: "Planeamiento del Entrenador", url: "/planeamiento" },
-          { title: "Bitácora", url: "/diario" },
+          { id: "coach_sesiones", title: "Sesiones", url: "/entrenamientos" },
+          { id: "coach_plantillas", title: "Entrenamientos", url: "/plantillas" },
+          { id: "coach_convocatorias", title: "Convocatorias", url: "/convocatorias" },
+          { id: "coach_objetivos", title: "Objetivos", url: "/objetivos" },
+          { id: "coach_evaluaciones", title: "Evaluación de Jugadores", url: "/evaluaciones" },
+          { id: "coach_planeamiento", title: "Planeamiento del Entrenador", url: "/planeamiento" },
+          { id: "coach_diario", title: "Bitácora", url: "/diario" },
         ],
       },
       {
@@ -116,10 +116,10 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: Presentation,
         url: "/tactica/dashboard",
         subLinks: [
-          { title: "Pizarra", url: "/tactica/pizarra" },
-          { title: "Sistemas y Jugadas", url: "/tactica/jugadas" },
-          { title: "Videoanálisis", url: "/tactica/video" },
-          { title: "Biblioteca", url: "/biblioteca" },
+          { id: "tactico_pizarra", title: "Pizarra", url: "/tactica/pizarra" },
+          { id: "tactico_jugadas", title: "Sistemas y Jugadas", url: "/tactica/jugadas" },
+          { id: "tactico_video", title: "Videoanálisis", url: "/tactica/video" },
+          { id: "tactico_biblioteca", title: "Biblioteca", url: "/biblioteca" },
         ],
       },
       {
@@ -128,8 +128,8 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: Trophy,
         url: "/partidos",
         subLinks: [
-          { title: "Torneos", url: "/competiciones" },
-          { title: "Rivales", url: "/tactica/rivales" },
+          { id: "comp_torneos", title: "Torneos", url: "/competiciones" },
+          { id: "comp_rivales", title: "Rivales", url: "/tactica/rivales" },
         ],
       },
       {
@@ -138,12 +138,12 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: Gauge,
         url: "",
         subLinks: [
-          { title: "Wellness", url: "/rendimiento/wellness" },
-          { title: "Control de Cargas", url: "/rendimiento/cargas" },
-          { title: "Test Físicos", url: "/rendimiento/tests" },
-          { title: "Sport Science", url: "/rendimiento/sports-science" },
-          { title: "GPS y Wearables", url: "/rendimiento/gps" },
-          { title: "Evolución Física", url: "/rendimiento/evolucion" },
+          { id: "rend_wellness", title: "Wellness", url: "/rendimiento/wellness" },
+          { id: "rend_cargas", title: "Control de Cargas", url: "/rendimiento/cargas" },
+          { id: "rend_tests", title: "Test Físicos", url: "/rendimiento/tests" },
+          { id: "rend_ss", title: "Sport Science", url: "/rendimiento/sports-science" },
+          { id: "rend_gps", title: "GPS y Wearables", url: "/rendimiento/gps" },
+          { id: "rend_evolucion", title: "Evolución Física", url: "/rendimiento/evolucion" },
         ],
       },
     ],
@@ -314,18 +314,32 @@ export function AppSidebar() {
   };
 
   const navSections = useMemo(() => {
-    let sections = ADMIN_NAV_SECTIONS;
-    if (isSuperAdmin) {
+    let sections = [...ADMIN_NAV_SECTIONS];
+    
+    // Si el rol activo es coach (o admin simulando ser coach), poner Área Técnica arriba
+    const isCoachView = role === "coach" || (role === "admin" && selectedCoachId);
+    if (isCoachView) {
+      const techIdx = sections.findIndex(s => s.header === "ÁREA TÉCNICA");
+      const opIdx = sections.findIndex(s => s.header === "GESTIÓN DE ACADEMIA");
+      if (techIdx !== -1 && opIdx !== -1) {
+        const techSection = sections[techIdx];
+        const opSection = sections[opIdx];
+        const rest = sections.filter((_, i) => i !== techIdx && i !== opIdx);
+        sections = [techSection, opSection, ...rest];
+      }
+    }
+
+    if (isSuperAdmin && role === "admin" && !selectedCoachId) {
       sections = [
         {
           header: "SAAS ADMIN",
           items: [{ id: "saas-admin", title: "Centro de Mando", icon: Building2, url: "/saas-admin" }],
         },
-        ...ADMIN_NAV_SECTIONS,
+        ...sections,
       ];
     }
     return sections;
-  }, [role, isSuperAdmin]);
+  }, [role, isSuperAdmin, selectedCoachId]);
 
   return (
     <Sidebar collapsible="icon" key={`${role}-${coachName}-${activeOrgId}`}>
@@ -439,13 +453,23 @@ export function AppSidebar() {
       >
         {navSections.map((section, sIdx) => {
           const renderItem = (item: SidebarItem, level: number = 0) => {
-            const roleKey = role === "coach" ? "coach" : role;
+            const isSimulatingCoach = role === "admin" && selectedCoachId;
+            const roleKey = isSimulatingCoach ? "coach" : (role === "coach" ? "coach" : role);
             const rolePerms = permissions[roleKey] || INITIAL_PERMISSIONS[roleKey as keyof typeof INITIAL_PERMISSIONS] || {};
+            
             const checkAllowed = (it: SidebarItem): boolean => {
-              if (roleKey === "admin") return true;
+              // Si el usuario real es admin y NO está simulando ser coach, puede ver todo.
+              if (role === "admin" && !isSimulatingCoach) return true;
+              
+              // Si el módulo principal o la pestaña está explícitamente apagada, ocultarla.
               if (rolePerms[it.id] === false) return false;
               if (rolePerms[it.id] === true) return true;
+              
+              // Si el módulo padre no está apagado, verificar si al menos un hijo está habilitado.
               if (it.childrenItems && it.childrenItems.some(c => checkAllowed(c))) return true;
+              if (it.subLinks && it.subLinks.some(s => s.id && rolePerms[s.id] !== false)) return true;
+              
+              // Si es un item sin estado explícito, se permite por defecto (a menos que un padre haya retornado false).
               return true;
             };
 
@@ -540,18 +564,15 @@ export function AppSidebar() {
                       {item.subLinks && item.subLinks.length > 0 && (
                         <div className="space-y-0.5 ml-4 border-l border-sidebar-border/30 pl-2">
                           {item.subLinks.map((sub: any, idx) => {
-                            const roleKey = role === "coach" ? "coach" : role;
-                            const subKeyById = sub.id ? `${item.id}_${sub.id}` : null;
-                            const subIdMatch = sub.title.toLowerCase().replace(/ /g, "_").replace(/&/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                            const subKeyByTitle = `${item.id}_${subIdMatch}`;
-
-                            const valById = subKeyById ? permissions[roleKey]?.[subKeyById] : undefined;
-                            const valByTitle = permissions[roleKey]?.[subKeyByTitle];
-
-                            // Si se apagó explícitamente (false) o la tarjeta padre no tiene permiso
+                            const isSimulatingCoach = role === "admin" && selectedCoachId;
+                            const roleKey = isSimulatingCoach ? "coach" : (role === "coach" ? "coach" : role);
+                            
+                            // Verificar permisos por ID de sub-link
+                            const valById = sub.id ? permissions[roleKey]?.[sub.id] : undefined;
                             const parentAllowed = permissions[roleKey]?.[item.id] !== false;
-                            const isDenied = valById === false || valByTitle === false || !parentAllowed;
-                            if (isDenied && roleKey !== "admin") return null;
+                            
+                            const isDenied = valById === false || !parentAllowed;
+                            if (isDenied && !(role === "admin" && !isSimulatingCoach)) return null;
 
                             const isSamePath = pathname === sub.url || (sub.url !== "/" && pathname.startsWith(sub.url + "/"));
                             const hasSearch = sub.search && Object.keys(sub.search).length > 0;
