@@ -316,8 +316,8 @@ export function AppSidebar() {
   const navSections = useMemo(() => {
     let sections = [...ADMIN_NAV_SECTIONS];
     
-    // Si el rol activo es coach (o admin simulando ser coach), poner Área Técnica arriba
-    const isCoachView = role === "coach" || (role === "admin" && selectedCoachId);
+    // Poner Área Técnica arriba SOLO para el rol 'coach'
+    const isCoachView = role === "coach";
     if (isCoachView) {
       const techIdx = sections.findIndex(s => s.header === "ÁREA TÉCNICA");
       const opIdx = sections.findIndex(s => s.header === "GESTIÓN DE ACADEMIA");
@@ -453,13 +453,12 @@ export function AppSidebar() {
       >
         {navSections.map((section, sIdx) => {
           const renderItem = (item: SidebarItem, level: number = 0) => {
-            const isSimulatingCoach = role === "admin" && selectedCoachId;
-            const roleKey = isSimulatingCoach ? "coach" : (role === "coach" ? "coach" : role);
+            const roleKey = role === "coach" ? "coach" : role;
             const rolePerms = permissions[roleKey] || INITIAL_PERMISSIONS[roleKey as keyof typeof INITIAL_PERMISSIONS] || {};
             
             const checkAllowed = (it: SidebarItem): boolean => {
-              // Si el usuario real es admin y NO está simulando ser coach, puede ver todo.
-              if (role === "admin" && !isSimulatingCoach) return true;
+              // Admin siempre ve todo
+              if (role === "admin") return true;
               
               // Si el módulo principal o la pestaña está explícitamente apagada, ocultarla.
               if (rolePerms[it.id] === false) return false;
@@ -469,7 +468,7 @@ export function AppSidebar() {
               if (it.childrenItems && it.childrenItems.some(c => checkAllowed(c))) return true;
               if (it.subLinks && it.subLinks.some(s => s.id && rolePerms[s.id] !== false)) return true;
               
-              // Si es un item sin estado explícito, se permite por defecto (a menos que un padre haya retornado false).
+              // Si es un item sin estado explícito, se permite por defecto
               return true;
             };
 
@@ -564,15 +563,14 @@ export function AppSidebar() {
                       {item.subLinks && item.subLinks.length > 0 && (
                         <div className="space-y-0.5 ml-4 border-l border-sidebar-border/30 pl-2">
                           {item.subLinks.map((sub: any, idx) => {
-                            const isSimulatingCoach = role === "admin" && selectedCoachId;
-                            const roleKey = isSimulatingCoach ? "coach" : (role === "coach" ? "coach" : role);
+                            const roleKey = role === "coach" ? "coach" : role;
                             
                             // Verificar permisos por ID de sub-link
                             const valById = sub.id ? permissions[roleKey]?.[sub.id] : undefined;
                             const parentAllowed = permissions[roleKey]?.[item.id] !== false;
                             
                             const isDenied = valById === false || !parentAllowed;
-                            if (isDenied && !(role === "admin" && !isSimulatingCoach)) return null;
+                            if (isDenied && role !== "admin") return null;
 
                             const isSamePath = pathname === sub.url || (sub.url !== "/" && pathname.startsWith(sub.url + "/"));
                             const hasSearch = sub.search && Object.keys(sub.search).length > 0;
