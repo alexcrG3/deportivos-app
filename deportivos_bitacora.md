@@ -20,6 +20,9 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
   - Integrado el campo de observaciones en el guardado (`notas_entrenador`), asegurando que todos los campos del nuevo formulario se guarden exitosamente en la base de datos de la nube.
   - Mitigados los errores visuales de las Cards de equipos. Ahora los botones de acción como Plantilla y Asistencia cuentan con paradas de propagación (`stopPropagation`) para evitar solapamientos con la navegación general de la tarjeta.
 
+**📌 Pendientes para la próxima sesión (Mañana):**
+- Revisar la pizarra táctica (lado derecho) junto con las convocatorias para el manejo de jugadores lesionados.
+
 ---
 
 ## [24/07/2026 - Módulo de Finanzas v2.0, Persistencia 100% Supabase BD, Edición Directa & Formato UTC-6]
