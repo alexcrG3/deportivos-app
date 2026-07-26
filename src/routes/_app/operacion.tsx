@@ -23,27 +23,31 @@ function OperacionDashboard() {
     return () => window.removeEventListener("organizacionChanged", handleSync);
   }, []);
 
-  const hoyStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const hoyDefault = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const [selectedDate, setSelectedDate] = useState<string>(hoyDefault);
+
+  const isSelectedToday = selectedDate === hoyDefault;
 
   // 1. Datos Reales de Jugadores
   const jugadores = useMemo(() => RendimientoStore.getJugadores(), [updateTrigger]);
   const activosCount = useMemo(() => jugadores.filter((j) => j.estadoPago !== "moroso" || j.estadoPago === "al_dia").length, [jugadores]);
   const nuevosEstaSemana = 0;
 
-  // 2. Datos Reales de Asistencia Diaria (Sin datos simulados: si no hay registros hoy, es 0%)
+  // 2. Datos Reales de Asistencia Diaria (filtrados por fecha seleccionada)
   const asistencias = useMemo(() => RendimientoStore.getAsistencias(), [updateTrigger]);
-  const asistenciasHoy = useMemo(() => asistencias.filter((a) => a.fecha === hoyStr), [asistencias, hoyStr]);
+  const asistenciasHoy = useMemo(() => asistencias.filter((a) => a.fecha === selectedDate), [asistencias, selectedDate]);
   const asistenciaPorcentaje = useMemo(() => {
     if (asistenciasHoy.length === 0) return 0;
     const presentes = asistenciasHoy.filter((a) => a.estado === "presente" || a.estado === "tarde").length;
     return Math.round((presentes / asistenciasHoy.length) * 100);
   }, [asistenciasHoy]);
 
-  // Día de la semana actual (0: Domingo, 1: Lunes, 2: Martes, 3: Miércoles, 4: Jueves, 5: Viernes, 6: Sábado)
-  const dayOfWeekIndex = useMemo(() => new Date().getDay(), []); // 4 = Jueves
+  // Día de la semana seleccionado (0: Domingo, 1: Lunes, 2: Martes, 3: Miércoles, 4: Jueves, 5: Viernes, 6: Sábado)
+  const dateObj = useMemo(() => new Date(selectedDate + "T12:00:00"), [selectedDate]);
+  const dayOfWeekIndex = useMemo(() => dateObj.getDay(), [dateObj]);
   const dayOfWeekLetter = useMemo(() => {
     const letters = ["D", "L", "M", "X", "J", "V", "S"];
-    return letters[dayOfWeekIndex]; // "J" para Jueves
+    return letters[dayOfWeekIndex];
   }, [dayOfWeekIndex]);
 
   // 3. Ocupación Real de Instalaciones
@@ -51,7 +55,7 @@ function OperacionDashboard() {
   const entrenadores = useMemo(() => RendimientoStore.getEntrenadores(), [updateTrigger]);
   const equipos = useMemo(() => RendimientoStore.getEquipos(), [updateTrigger]);
   const sesiones = useMemo(() => RendimientoStore.getSesiones(), [updateTrigger]);
-  const sesionesHoy = useMemo(() => sesiones.filter((s) => s.fecha === hoyStr), [sesiones, hoyStr]);
+  const sesionesHoy = useMemo(() => sesiones.filter((s) => s.fecha === selectedDate), [sesiones, selectedDate]);
 
   // Obtener equipos con horario recurrente agendado para el día de hoy (ej: "J" / "Jueves")
   const equiposHoyRecurrentes = useMemo(() => {
@@ -180,7 +184,27 @@ function OperacionDashboard() {
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">Monitoreo de sedes, minutero de canchas y control de campo.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Selector de Fecha */}
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-white dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-200 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+            />
+            {!isSelectedToday && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedDate(hoyDefault)}
+                className="h-8 text-[11px] font-bold text-primary hover:bg-primary/10 px-2 rounded-lg"
+              >
+                Volver a Hoy
+              </Button>
+            )}
+          </div>
+
           <Button size="sm" variant="outline" className="border-slate-200 dark:border-slate-800 font-bold text-xs rounded-xl" asChild>
             <Link to="/checkin">
               <QrCode className="h-4 w-4 text-primary" /> Escáner Check-in QR

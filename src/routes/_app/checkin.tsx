@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { jugadores, sedes, getPlayerOS, formatCRC, type PlayerOS } from "@/lib/mock-data";
+import { jugadores, sedes, getPlayerOS, formatCRC } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_app/checkin")({ component: CheckinPage });
 
@@ -467,8 +467,8 @@ function QuickProfile({ os, onConfirm, onException, onClose }: { os: PlayerOS; o
   const resultado: AccessResult = os!.estadoOp === "restriccion" ? "restringido" : os!.estadoOp === "aviso" ? "condicionado" : "permitido";
   const r = resultMeta(resultado);
 
-  const docVencidos = os!.documentos.filter((d) => d.estado === "vencido").length;
-  const docPorVencer = os!.documentos.filter((d) => d.estado === "por vencer").length;
+  const docVencidos = os!.documentos.filter((d: any) => d.estado === "vencido").length;
+  const docPorVencer = os!.documentos.filter((d: any) => d.estado === "por vencer").length;
   const lesionActiva = os!.restriccionesMed.length > 0;
 
   return (
@@ -512,7 +512,7 @@ function QuickProfile({ os, onConfirm, onException, onClose }: { os: PlayerOS; o
         {os!.alertas.length > 0 && (
           <div className="mt-4 space-y-2">
             <div className="text-xs font-medium text-muted-foreground">Alertas activas</div>
-            {os!.alertas.slice(0, 3).map((a) => (
+            {os!.alertas.slice(0, 3).map((a: any) => (
               <div key={a.id} className="flex items-start gap-2 rounded-lg border p-2 text-xs">
                 <AlertTriangle className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${a.severidad === "critical" ? "text-rose-500" : a.severidad === "warning" ? "text-amber-500" : "text-sky-500"}`} />
                 <div className="min-w-0">

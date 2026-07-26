@@ -585,10 +585,10 @@ export function MedicoCitasPage() {
       {/* 🧭 NAVEGACIÓN SUPERIOR POR PESTAÑAS HORIZONTALES (RESTRICCIÓN POR ROLES) */}
       <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="space-y-6">
         <div className="border-b border-border pb-2 overflow-x-auto">
-          <TabsList className="bg-transparent border-0 p-0 h-auto gap-2 flex-nowrap min-w-max">
+          <TabsList className="bg-transparent border-0 p-0 h-auto gap-1 flex-nowrap min-w-max">
             <TabsTrigger
               value="directorio"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+              className="data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-[#64748B] border border-[#E2E8F0] px-4 py-2 text-[13px] font-medium rounded-[8px] transition-all shadow-sm"
             >
               🏥 Directorio Médico & Marketplace ({medicosList.length})
             </TabsTrigger>
@@ -596,7 +596,7 @@ export function MedicoCitasPage() {
             {userRole !== "padre" && (
               <TabsTrigger
                 value="agenda"
-                className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+                className="data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-[#64748B] border border-[#E2E8F0] px-4 py-2 text-[13px] font-medium rounded-[8px] transition-all shadow-sm"
               >
                 📅 Agenda de Citas Logística ({citasList.length})
               </TabsTrigger>
@@ -605,7 +605,7 @@ export function MedicoCitasPage() {
             {userRole !== "padre" && (
               <TabsTrigger
                 value="tratamientos"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+                className="data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-[#64748B] border border-[#E2E8F0] px-4 py-2 text-[13px] font-medium rounded-[8px] transition-all shadow-sm"
               >
                 🩺 Historial de Tratamientos ({tratamientosCompletados.length})
               </TabsTrigger>
@@ -614,7 +614,7 @@ export function MedicoCitasPage() {
             {userRole === "admin" && (
               <TabsTrigger
                 value="configuracion"
-                className="data-[state=active]:bg-amber-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+                className="data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-[#64748B] border border-[#E2E8F0] px-4 py-2 text-[13px] font-medium rounded-[8px] transition-all shadow-sm"
               >
                 ⚙️ Configuración & Comisiones BD
               </TabsTrigger>
@@ -629,9 +629,9 @@ export function MedicoCitasPage() {
           
           {/* FORMULARIO AGENDAR CITA */}
           {openCreate && (
-            <Card className="shadow-card border border-indigo-200 dark:border-indigo-900 rounded-3xl bg-card p-6 space-y-4">
-              <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-                <ActivitySquare className="h-5 w-5 text-indigo-600" /> Agendar Cita de Fisioterapia
+            <Card className="premium-card space-y-4">
+              <CardTitle className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+                <ActivitySquare className="h-5 w-5 text-[#2563EB]" /> Agendar Cita de Fisioterapia
               </CardTitle>
               <form onSubmit={handleCreateCita} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-3">
@@ -1124,7 +1124,7 @@ export function MedicoCitasPage() {
                           size="xs"
                           variant="outline"
                           onClick={() => setModalRecomendacionMedico(m)}
-                          className="flex-1 sm:flex-none h-8 text-[11px] font-bold rounded-xl border-purple-500/40 text-purple-700 dark:text-purple-300 hover:bg-purple-50 gap-1.5 bg-purple-500/10"
+                          className="flex-1 sm:flex-none h-8 text-[11px] font-medium rounded-[8px] badge-pill badge-info gap-1.5"
                         >
                           💬 Compartir Recomendación
                         </Button>
@@ -1134,7 +1134,7 @@ export function MedicoCitasPage() {
                     <Button
                       size="xs"
                       onClick={() => setModalReservarMedico({ medico: m, slot: m.horariosDisponibles[0] })}
-                      className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold h-8 text-[11px] rounded-xl gap-1 shadow-xs"
+                      className="w-full sm:w-auto btn-primary h-8 text-[11px] gap-1"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> {userRole === "padre" ? "🛒 Comprar & Reservar (₡" + m.precioConsulta.toLocaleString() + ")" : "Reservar Cita (₡" + m.precioConsulta.toLocaleString() + ")"}
                     </Button>
@@ -1146,21 +1146,21 @@ export function MedicoCitasPage() {
 
             {/* ➡️ BLOQUE DERECHO (COLUMNA STICKY: 5/12): MAPA INTERACTIVO DE SEDES GAM */}
             <div className="lg:col-span-5 space-y-4">
-              <Card className="p-4 bg-card border-border shadow-sm rounded-2xl space-y-3 sticky top-4">
-                <div className="flex items-center justify-between border-b pb-2">
-                  <h3 className="text-xs font-bold text-foreground flex items-center gap-2">
-                    <Map className="h-4 w-4 text-purple-600" /> Mapa de Consultorios Médicos GAM
+              <Card className="premium-card space-y-3 sticky top-4">
+                <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+                  <h3 className="text-xs font-bold text-[#0F172A] flex items-center gap-2">
+                    <Map className="h-4 w-4 text-[#2563EB]" /> Mapa de Consultorios Médicos GAM
                   </h3>
-                  <Badge variant="outline" className="text-[9px] font-mono">Pines Geolocalizados BD</Badge>
+                  <span className="badge-pill badge-neutral text-[9px] font-mono">Pines Geolocalizados BD</span>
                 </div>
 
                 {/* Simulated Google Maps Canvas (Mobile Responsive PWA) */}
-                <div className="relative w-full min-h-[300px] bg-slate-950 rounded-xl overflow-hidden border border-border p-3 flex flex-col justify-between space-y-3">
-                  <div className="absolute inset-0 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
+                <div className="relative w-full min-h-[300px] bg-slate-100 rounded-[12px] overflow-hidden border border-[#E2E8F0] p-3 flex flex-col justify-between space-y-3">
+                  <div className="absolute inset-0 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:16px_16px] opacity-60"></div>
 
-                  <div className="relative z-10 flex items-center justify-between text-[10px] text-slate-300 font-mono bg-slate-900/80 p-2 rounded-lg backdrop-blur-xs">
+                  <div className="relative z-10 flex items-center justify-between text-[10px] text-[#64748B] font-mono bg-white border border-[#E2E8F0] p-2 rounded-[8px]">
                     <span>Costa Rica - GAM (San José, Heredia, Alajuela)</span>
-                    <span className="text-purple-400 font-bold shrink-0">{medicosFiltrados.length} Consultorios</span>
+                    <span className="text-[#2563EB] font-bold shrink-0">{medicosFiltrados.length} Consultorios</span>
                   </div>
 
                   {/* Pines Interactivos de Médicos en el Mapa */}
@@ -1169,29 +1169,29 @@ export function MedicoCitasPage() {
                       <div
                         key={m.id}
                         onClick={() => setSelectedPinMedico(m)}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer text-left space-y-1 ${
+                        className={`p-2 rounded-[8px] border transition-all cursor-pointer text-left space-y-1 ${
                           selectedPinMedico?.id === m.id
-                            ? "bg-purple-600 text-white border-white shadow-lg scale-102"
-                            : "bg-slate-900/90 text-slate-200 border-purple-500/40 hover:border-purple-400"
+                            ? "bg-[#2563EB] text-white border-[#1D4ED8] shadow-md"
+                            : "bg-white text-[#0F172A] border-[#E2E8F0] hover:border-[#2563EB] hover:shadow-sm"
                         }`}
                       >
                         <div className="flex items-center gap-1 min-w-0">
-                          <MapPin className="h-3 w-3 text-purple-400 shrink-0" />
+                          <MapPin className="h-3 w-3 text-[#2563EB] shrink-0" />
                           <p className="font-bold text-[11px] truncate">{m.nombre}</p>
                         </div>
-                        <p className="text-[9px] text-slate-400 truncate">{m.ubicacion}</p>
-                        <p className="text-[10px] font-mono font-bold text-emerald-400">₡{m.precioConsulta.toLocaleString()}</p>
+                        <p className="text-[9px] text-[#64748B] truncate">{m.ubicacion}</p>
+                        <p className="text-[10px] font-mono font-bold text-emerald-600">₡{m.precioConsulta.toLocaleString()}</p>
                       </div>
                     ))}
                   </div>
 
                   {selectedPinMedico && (
-                    <div className="relative z-10 bg-purple-950/90 border border-purple-500/50 p-2 rounded-lg text-white text-[10px] flex items-center justify-between gap-2">
+                    <div className="relative z-10 bg-white border border-[#E2E8F0] p-2 rounded-[8px] text-[#0F172A] text-[10px] flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <span className="font-bold block truncate">{selectedPinMedico.nombre}</span>
-                        <p className="text-[9px] text-purple-200 truncate">{selectedPinMedico.ubicacion}</p>
+                        <p className="text-[9px] text-[#64748B] truncate">{selectedPinMedico.ubicacion}</p>
                       </div>
-                      <Button size="xs" onClick={() => setModalReservarMedico({ medico: selectedPinMedico, slot: selectedPinMedico.horariosDisponibles[0] })} className="bg-purple-600 text-white h-7 text-[10px] shrink-0 font-bold">
+                      <Button size="xs" onClick={() => setModalReservarMedico({ medico: selectedPinMedico, slot: selectedPinMedico.horariosDisponibles[0] })} className="btn-primary h-7 text-[10px] shrink-0">
                         Reservar
                       </Button>
                     </div>

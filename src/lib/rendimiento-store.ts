@@ -1288,45 +1288,7 @@ class RendimientoStore {
       const orgEquipos = currentEquipos.filter((e: any) => e.organizacion_id === org || !e.organizacion_id);
 
       if (orgEquipos.length === 0) {
-        const defaultOrgEquipos = [
-          {
-            id: `eq_u13_${org.slice(0, 8)}`,
-            nombre: "Academia U13",
-            disciplina: "Fútbol",
-            categoria: "Sub-13",
-            entrenador: "D.T. Principal",
-            sede: "Sede Central",
-            estado: "activo",
-            organizacion_id: org,
-          },
-          {
-            id: `eq_u11_${org.slice(0, 8)}`,
-            nombre: "Academia U11",
-            disciplina: "Fútbol",
-            categoria: "Sub-11",
-            entrenador: "D.T. Carlos Fonseca",
-            sede: "Sede Central",
-            estado: "activo",
-            organizacion_id: org,
-          },
-          {
-            id: `eq_u15_${org.slice(0, 8)}`,
-            nombre: "Academia Sub-15 Élite",
-            disciplina: "Fútbol",
-            categoria: "Sub-15",
-            entrenador: "D.T. Principal",
-            sede: "Sede Central",
-            estado: "activo",
-            organizacion_id: org,
-          },
-        ];
-
-        this.memoryCache["equipos_dynamics"] = defaultOrgEquipos;
-        try {
-          await supabase.from("equipos").upsert(defaultOrgEquipos);
-        } catch (err) {
-          console.warn("[Supabase] Error autoguardando equipos de organización:", err);
-        }
+        this.memoryCache["equipos_dynamics"] = [];
       }
 
       this.isSynced = true;
@@ -1744,7 +1706,7 @@ class RendimientoStore {
   // --- PLANIFICACIONES DYNAMICS ---
   public static getPlanificaciones(): any[] {
     const list = this.get<any[]>("planificaciones_dynamics", []);
-    const hasU13Plan = list.some(p => p.id === "plan_u13_seed" || p.nombre.toLowerCase().includes("transición"));
+    const hasU13Plan = list.some(p => p && p.id === "plan_u13_seed" || (p && p.nombre && p.nombre.toLowerCase().includes("transición")));
     if (!hasU13Plan) {
       list.unshift({
         id: "plan_u13_seed",
@@ -3182,25 +3144,11 @@ class RendimientoStore {
     const activeOrg = this.getActiveOrganizacionId();
     const stored = this.get<any[]>("equipos_dynamics", []);
 
-    const realAsoderiveTeams = [
-      { id: `eq_u9_${activeOrg.slice(0, 8)}`, nombre: "U9 Asoderive", disciplina: "Fútbol", categoria: "Sub-9", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
-      { id: `eq_u11_${activeOrg.slice(0, 8)}`, nombre: "U11 Asoderive", disciplina: "Fútbol", categoria: "Sub-11", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
-      { id: `eq_u13_${activeOrg.slice(0, 8)}`, nombre: "U13 Asoderive", disciplina: "Fútbol", categoria: "Sub-13", entrenador: "Eduardo Mora", sede: "Sede Central", estado: "activo", organizacion_id: activeOrg },
-    ];
-
-    if (!stored || stored.length === 0 || !stored.some(e => e.nombre?.includes("Asoderive"))) {
-      this.memoryCache["equipos_dynamics"] = realAsoderiveTeams;
-      this.set("equipos_dynamics", realAsoderiveTeams);
-      supabase.from("equipos").upsert(realAsoderiveTeams).then(() => {});
-      return realAsoderiveTeams;
-    }
-
-    const filtered = stored.filter(e => 
+    const filtered = (stored || []).filter(e => 
       (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
       !e.nombre?.includes("U5") && e.categoria !== "Sub-5"
     );
     this.memoryCache["equipos_dynamics"] = filtered;
-    this.set("equipos_dynamics", filtered);
     return filtered.sort((a, b) => this.parseCategoryAge(a.categoria || a.nombre) - this.parseCategoryAge(b.categoria || b.nombre));
   }
 
@@ -3930,6 +3878,8 @@ export interface StoreTicketResponse {
   esAdminSaaS?: boolean;
   mensaje: string;
   fecha: string;
+  type?: string;
+  read_by_client?: boolean;
 }
 
 export interface StoreSupportTicket {

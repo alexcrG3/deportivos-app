@@ -276,7 +276,7 @@ function CoachProfile360() {
         setEditCorreo(targetCoach.correo);
         setEditTelefono(targetCoach.telefono);
         setEditEspecialidad(targetCoach.especialidad);
-        setEditCuentaBancaria(targetCoach.cuentaBancaria);
+        setEditCuentaBancaria(targetCoach.cuentaBancaria || "");
         setEditTarifaSesion(targetCoach.tarifaSesion || 18500);
         setEditMoneda(targetCoach.moneda || "CRC");
         setEditEstado(targetCoach.estado || "activo");

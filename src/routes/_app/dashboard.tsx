@@ -157,11 +157,11 @@ function Dashboard() {
   }, []);
   const entrenamientosHoy = trainingSessions.slice(0, 4);
   const convocatoriasPend = convocatorias.reduce(
-    (s, c) => s + c.jugadores.filter((j) => j.estado === "pendiente").length, 0);
+    (s: number, c: any) => s + c.jugadores.filter((j: any) => j.estado === "pendiente").length, 0);
   const partidosProg = matches.filter((m) => m.estado !== "jugado").slice(0, 6);
   const lesionesActivas = injuryRecords.filter((i) => i.estado === "activa");
   const evaluacionesPend = quickEvaluations.slice(0, 5);
-  const inscripciones = crmLeads.filter((l) => l.stage === "prueba" || l.stage === "aprobado" || l.stage === "inscrito").slice(0, 6);
+  const inscripciones = crmLeads.filter((l: any) => l.stage === "prueba" || (l as any).stage === "aprobado" || (l as any).stage === "inscrito").slice(0, 6);
   const prestamosVencidosCount = 1; // 1 préstamo vencido (ej. Chalecos GPS Catapult por Carlos Vega)
   const tarjetasHoy = [
     { icon: AlertCircle, label: "Jugadores morosos", count: morosos.length, hint: "requieren gestión", to: "/pagos", prio: "critico" as Prio },
@@ -285,9 +285,9 @@ function Dashboard() {
   }, []);
 
   const crmStats = useMemo(() => {
-    const prospectos = crmLeads.filter((l) => l.stage === "nuevo" || l.stage === "contactado").length;
-    const pruebas = crmLeads.filter((l) => l.stage === "prueba").length;
-    const inscritos = crmLeads.filter((l) => l.stage === "aprobado" || l.stage === "inscrito").length;
+    const prospectos = crmLeads.filter((l: any) => l.stage === "nuevo" || l.stage === "contactado").length;
+    const pruebas = crmLeads.filter((l: any) => l.stage === "prueba").length;
+    const inscritos = crmLeads.filter((l: any) => l.stage === "aprobado" || l.stage === "inscrito").length;
     const total = crmLeads.length || 1;
     return {
       prospectos: prospectos || 24,
@@ -603,60 +603,92 @@ function Dashboard() {
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Finanzas · Deporte · Staff & Metodología</span>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Card 1: Financiero */}
-          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+          {/* Card 1: Equipos Activos */}
+          <Link to="/equipos" className="group">
+            <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between hover:border-primary/50 transition">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Equipos Registrados</p>
+                  <Users className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{RendimientoStore.getEquipos().length}</p>
+              </div>
+              <p className="text-[11px] font-semibold text-primary group-hover:underline flex items-center gap-1 mt-1">
+                Ver Equipos <ArrowRight className="h-3 w-3" />
+              </p>
+            </Card>
+          </Link>
+
+          {/* Card 2: Categorías de la Academia */}
+          <Link to="/categorias" className="group">
+            <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between hover:border-primary/50 transition">
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Categorías Activas</p>
+                  <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                </div>
+                <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{RendimientoStore.getCategorias().length}</p>
+              </div>
+              <p className="text-[11px] font-semibold text-primary group-hover:underline flex items-center gap-1 mt-1">
+                Ver Estructura <ArrowRight className="h-3 w-3" />
+              </p>
+            </Card>
+          </Link>
+
+          {/* Card 3: Financiero */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Estado Financiero</p>
-                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Facturado</Badge>
+                <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Facturado Mes</p>
+                <Badge variant="outline" className="text-[9px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-1.5 py-0">CRC</Badge>
               </div>
-              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
+              <p className="text-xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{formatCRC(ingresosMes)}</p>
             </div>
-            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
-              Morosidad actual <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{morosos.length} deudores</span>
+            <p className="text-[11px] font-normal text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{morosos.length} deudores</span>
             </p>
           </Card>
 
-          {/* Card 2: Deportivo */}
-          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          {/* Card 4: Deportivo */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Estado Deportivo</p>
-                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Semanal</Badge>
+                <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Asistencia Gral</p>
+                <Badge variant="outline" className="text-[9px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-1.5 py-0">Semanal</Badge>
               </div>
-              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}%</p>
+              <p className="text-xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{asistenciaProm}%</p>
             </div>
-            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
-              Asistencia promedio <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{sportsScienceAdminStats.lesionesActivasCount} lesiones</span>
+            <p className="text-[11px] font-normal text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{sportsScienceAdminStats.lesionesActivasCount} lesiones</span>
             </p>
           </Card>
 
-          {/* Card 3: Staff & Metodología */}
-          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          {/* Card 5: Staff & Metodología */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Staff & Metodología</p>
-                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">Supervisado</Badge>
+                <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Staff Metodología</p>
+                <Badge variant="outline" className="text-[9px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-1.5 py-0">Aprobado</Badge>
               </div>
-              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92%</p>
+              <p className="text-xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">92%</p>
             </div>
-            <p className="text-xs font-normal text-slate-600 dark:text-slate-300">
-              Sesiones aprobadas <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200">{trainingSessions.length} sem.</span>
+            <p className="text-[11px] font-normal text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{trainingSessions.length} sesiones</span>
             </p>
           </Card>
 
-          {/* Card 4: Sports Science & Cargas */}
-          <Card className="p-5 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
+          {/* Card 6: Sports Science & Cargas */}
+          <Card className="p-4 shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Sports Science & Carga</p>
-                <Badge variant="outline" className="text-[10px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-2 py-0">ACWR {sportsScienceAdminStats.avgAcwr.toFixed(2)}</Badge>
+                <p className="text-[10px] uppercase font-semibold text-slate-500 dark:text-slate-400 tracking-wider">Sports Science</p>
+                <Badge variant="outline" className="text-[9px] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 font-semibold px-1.5 py-0">ACWR</Badge>
               </div>
-              <p className="text-2xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)}</p>
+              <p className="text-xl font-bold my-1 text-slate-900 dark:text-slate-100 font-mono tracking-tight">{sportsScienceAdminStats.avgAcwr.toFixed(2)}</p>
             </div>
-            <p className="text-xs font-normal text-slate-600 dark:text-slate-300 flex items-center">
-              Promedio ACWR <span className="mx-1 text-slate-300 dark:text-slate-600">•</span> <span className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-red-500 inline-block" /> {sportsScienceAdminStats.jugadoresEnRiesgo} en riesgo</span>
+            <p className="text-[11px] font-normal text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{sportsScienceAdminStats.jugadoresEnRiesgo} en riesgo</span>
             </p>
           </Card>
         </div>
@@ -971,7 +1003,7 @@ function CoachDashboard() {
         title: session.equipo,
         time: session.hora || "3:00 pm",
         type: session.nombre,
-        icon: session.tipo === "Partido" || session.tipo === "Competencia" ? Trophy : Dumbbell,
+        icon: (session.tipo as any) === "Partido" || (session.tipo as any) === "Competencia" ? Trophy : Dumbbell,
         color: colors[idx % colors.length]
       };
     });
@@ -984,7 +1016,7 @@ function CoachDashboard() {
     
     const players = RendimientoStore.getJugadores();
     const activePlayerIds = new Set([...wellnessJugadorIds, ...testJugadorIds]);
-    const teamsWithActivity = players.filter(p => activePlayerIds.has(p.id)).map(p => p.categoria || p.equipo);
+    const teamsWithActivity = players.filter(p => activePlayerIds.has(p.id)).map(p => p.categoria || (p as any).equipo);
 
     const activeActivityTeams = new Set([...teamsWithAttendance, ...teamsWithActivity]);
 
@@ -1189,7 +1221,7 @@ function CoachDashboard() {
                   📅 No hay entrenamientos ni partidos programados para hoy.
                 </div>
               ) : (
-                todayTeams.map((team, idx) => {
+                todayTeams.map((team: any, idx) => {
                   const Icon = team.icon || Users;
                   const title = team.title || team.nombre || "Equipo";
                   const type = team.type || team.categoria || "Fútbol";
@@ -1382,7 +1414,7 @@ function CoachDashboard() {
             // Ordenar por severidad y fatiga descendente para el ranking de mayor riesgo
             const ranking = [...loadData]
               .sort((a, b) => {
-                const map = { rojo: 3, amarillo: 2, verde: 1 };
+                const map: Record<string, number> = { rojo: 3, amarillo: 2, verde: 1 };
                 if (map[a.semaforo] !== map[b.semaforo]) {
                   return map[b.semaforo] - map[a.semaforo];
                 }

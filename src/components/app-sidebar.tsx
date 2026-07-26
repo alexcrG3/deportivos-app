@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { useRole } from "@/hooks/use-role";
+import { useRole, INITIAL_PERMISSIONS } from "@/hooks/use-role";
 import { equipos as staticEquipos } from "@/lib/mock-data";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { supabase } from "@/lib/supabase";
@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-export type SubLink = { title: string; url: string; icon?: React.ComponentType<{ className?: string; strokeWidth?: number; size?: number; color?: string }>; search?: Record<string, any> };
+export type SubLink = { id?: string; title: string; url: string; icon?: React.ComponentType<{ className?: string; strokeWidth?: number; size?: number; color?: string }>; search?: Record<string, any> };
 export type SidebarItem = {
   id: string;
   title: string;
@@ -92,60 +92,58 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: GitFork,
         url: "/tactica",
         subLinks: [
-          { title: "Planificación Metodológica", url: "/tactica/planificacion" },
+          { id: "coord_planificacion", title: "Planificación Metodológica", url: "/tactica/planificacion" },
         ],
-        childrenItems: [
-          {
-            id: "coach_os",
-            title: "Coach OS",
-            icon: Laptop,
-            url: "/coach",
-            subLinks: [
-              { title: "Sesiones", url: "/entrenamientos" },
-              { title: "Entrenamientos", url: "/plantillas" },
-              { title: "Convocatorias", url: "/convocatorias" },
-              { title: "Objetivos", url: "/objetivos" },
-              { title: "Evaluación de Jugadores", url: "/evaluaciones" },
-              { title: "Planeamiento", url: "/tactica/planificacion" },
-              { title: "Bitácora", url: "/diario" },
-            ],
-          },
-          {
-            id: "centro_tactico",
-            title: "Centro Táctico",
-            icon: Presentation,
-            url: "/tactica/dashboard",
-            subLinks: [
-              { title: "Pizarra", url: "/tactica/pizarra" },
-              { title: "Sistemas y Jugadas", url: "/tactica/jugadas" },
-              { title: "Videoanálisis", url: "/tactica/video" },
-              { title: "Biblioteca", url: "/biblioteca" },
-            ],
-          },
-          {
-            id: "competiciones",
-            title: "Competiciones",
-            icon: Trophy,
-            url: "/partidos",
-            subLinks: [
-              { title: "Torneos", url: "/competiciones" },
-              { title: "Rivales", url: "/tactica/rivales" },
-            ],
-          },
-          {
-            id: "alto_rendimiento",
-            title: "Alto Rendimiento",
-            icon: Gauge,
-            url: "",
-            subLinks: [
-              { title: "Wellness", url: "/rendimiento/wellness" },
-              { title: "Control de Cargas", url: "/rendimiento/cargas" },
-              { title: "Test Físicos", url: "/rendimiento/tests" },
-              { title: "Sport Science", url: "/rendimiento/sports-science" },
-              { title: "GPS y Wearables", url: "/rendimiento/gps" },
-              { title: "Evolución Física", url: "/rendimiento/evolucion" },
-            ],
-          },
+      },
+      {
+        id: "coach_os",
+        title: "Coach OS",
+        icon: Laptop,
+        url: "/coach",
+        subLinks: [
+          { title: "Sesiones", url: "/entrenamientos" },
+          { title: "Entrenamientos", url: "/plantillas" },
+          { title: "Convocatorias", url: "/convocatorias" },
+          { title: "Objetivos", url: "/objetivos" },
+          { title: "Evaluación de Jugadores", url: "/evaluaciones" },
+          { title: "Planeamiento del Entrenador", url: "/planeamiento" },
+          { title: "Bitácora", url: "/diario" },
+        ],
+      },
+      {
+        id: "centro_tactico",
+        title: "Centro Táctico",
+        icon: Presentation,
+        url: "/tactica/dashboard",
+        subLinks: [
+          { title: "Pizarra", url: "/tactica/pizarra" },
+          { title: "Sistemas y Jugadas", url: "/tactica/jugadas" },
+          { title: "Videoanálisis", url: "/tactica/video" },
+          { title: "Biblioteca", url: "/biblioteca" },
+        ],
+      },
+      {
+        id: "competiciones",
+        title: "Competiciones",
+        icon: Trophy,
+        url: "/partidos",
+        subLinks: [
+          { title: "Torneos", url: "/competiciones" },
+          { title: "Rivales", url: "/tactica/rivales" },
+        ],
+      },
+      {
+        id: "alto_rendimiento",
+        title: "Alto Rendimiento",
+        icon: Gauge,
+        url: "",
+        subLinks: [
+          { title: "Wellness", url: "/rendimiento/wellness" },
+          { title: "Control de Cargas", url: "/rendimiento/cargas" },
+          { title: "Test Físicos", url: "/rendimiento/tests" },
+          { title: "Sport Science", url: "/rendimiento/sports-science" },
+          { title: "GPS y Wearables", url: "/rendimiento/gps" },
+          { title: "Evolución Física", url: "/rendimiento/evolucion" },
         ],
       },
     ],
@@ -182,11 +180,11 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: HeartPulse,
         url: "/medico",
         subLinks: [
-          { title: "Historial Clínico", url: "/medico", search: { tab: "historial" }, icon: User },
-          { title: "Lesiones", url: "/rendimiento/lesiones", icon: Ambulance },
-          { title: "Directorio Médico", url: "/medico/citas", icon: Stethoscope },
-          { title: "Aptitud Deportiva", url: "/medico", search: { tab: "aptitud" }, icon: ClipboardCheck },
-          { title: "Reportes", url: "/reportes", search: { tab: "medico" }, icon: LineChart },
+          { id: "med_historial", title: "Historial Clínico", url: "/medico", search: { tab: "historial" }, icon: User },
+          { id: "med_lesiones", title: "Lesiones", url: "/rendimiento/lesiones", icon: Ambulance },
+          { id: "med_directorio", title: "Directorio Médico", url: "/medico/citas", icon: Stethoscope },
+          { id: "med_aptitud", title: "Aptitud Deportiva", url: "/medico", search: { tab: "aptitud" }, icon: ClipboardCheck },
+          { id: "med_reportes", title: "Reportes", url: "/reportes", search: { tab: "medico" }, icon: LineChart },
         ],
       },
       {
@@ -195,8 +193,8 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         icon: Package,
         url: "/inventario",
         subLinks: [
-          { title: "Tienda", url: "/tienda" },
-          { title: "Inventario", url: "/inventario" },
+          { id: "log_tienda", title: "Tienda", url: "/tienda" },
+          { id: "log_inventario", title: "Inventario", url: "/inventario" },
         ],
       },
     ],
@@ -215,7 +213,7 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
 
 
 export function AppSidebar() {
-  const { role, coachName, selectedCoachId, selectedCoachName, setSelectedCoach } = useRole();
+  const { role, coachName, permissions, selectedCoachId, selectedCoachName, setSelectedCoach } = useRole();
 
   // Build dynamic "Mis Equipos" submenu filtered by the active coach's name
   const coachTeamItems = useMemo(() => {
@@ -316,40 +314,6 @@ export function AppSidebar() {
   };
 
   const navSections = useMemo(() => {
-    if (role === "coach") {
-      return [
-        {
-          header: "ÁREA TÉCNICA",
-          items: [
-            {
-              id: "coach_os",
-              title: "Coach OS",
-              icon: Laptop,
-              url: "/coach",
-              subLinks: [
-                { title: "Sesiones", url: "/entrenamientos" },
-                { title: "Biblioteca", url: "/biblioteca" },
-                { title: "Objetivos", url: "/objetivos" },
-                { title: "Evaluaciones Jugadores", url: "/evaluaciones" },
-                { title: "Bitácora", url: "/diario" },
-              ],
-            },
-            { id: "coordinacion", title: "Centro Táctico", icon: Presentation, url: "/tactica/dashboard" },
-            { id: "competiciones", title: "Competiciones", icon: Trophy, url: "/competiciones" },
-            { id: "alto_rendimiento", title: "Alto Rendimiento", icon: Gauge, url: "/rendimiento/sports-science" },
-          ],
-        },
-        {
-          header: "SISTEMA",
-          items: [
-            { id: "ia", title: "IA & Automatización", icon: Sparkles, url: "/ia" },
-            { id: "mensajes", title: "Mensajes", icon: MessageSquare, url: "/notificaciones" },
-            { id: "configuracion", title: "Configuración", icon: Settings, url: "/configuracion" },
-          ],
-        },
-      ];
-    }
-
     let sections = ADMIN_NAV_SECTIONS;
     if (isSuperAdmin) {
       sections = [
@@ -475,6 +439,18 @@ export function AppSidebar() {
       >
         {navSections.map((section, sIdx) => {
           const renderItem = (item: SidebarItem, level: number = 0) => {
+            const roleKey = role === "coach" ? "coach" : role;
+            const rolePerms = permissions[roleKey] || INITIAL_PERMISSIONS[roleKey as keyof typeof INITIAL_PERMISSIONS] || {};
+            const checkAllowed = (it: SidebarItem): boolean => {
+              if (roleKey === "admin") return true;
+              if (rolePerms[it.id] === false) return false;
+              if (rolePerms[it.id] === true) return true;
+              if (it.childrenItems && it.childrenItems.some(c => checkAllowed(c))) return true;
+              return true;
+            };
+
+            if (!checkAllowed(item)) return null;
+
             const active = isActive(item.url);
             const Icon = item.icon;
             const hasChildren = (item.childrenItems && item.childrenItems.length > 0) || (item.subLinks && item.subLinks.length > 0);
@@ -563,7 +539,20 @@ export function AppSidebar() {
                       {/* Sub-enlaces (subLinks) uno a uno en fila vertical */}
                       {item.subLinks && item.subLinks.length > 0 && (
                         <div className="space-y-0.5 ml-4 border-l border-sidebar-border/30 pl-2">
-                          {item.subLinks.map((sub, idx) => {
+                          {item.subLinks.map((sub: any, idx) => {
+                            const roleKey = role === "coach" ? "coach" : role;
+                            const subKeyById = sub.id ? `${item.id}_${sub.id}` : null;
+                            const subIdMatch = sub.title.toLowerCase().replace(/ /g, "_").replace(/&/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            const subKeyByTitle = `${item.id}_${subIdMatch}`;
+
+                            const valById = subKeyById ? permissions[roleKey]?.[subKeyById] : undefined;
+                            const valByTitle = permissions[roleKey]?.[subKeyByTitle];
+
+                            // Si se apagó explícitamente (false) o la tarjeta padre no tiene permiso
+                            const parentAllowed = permissions[roleKey]?.[item.id] !== false;
+                            const isDenied = valById === false || valByTitle === false || !parentAllowed;
+                            if (isDenied && roleKey !== "admin") return null;
+
                             const isSamePath = pathname === sub.url || (sub.url !== "/" && pathname.startsWith(sub.url + "/"));
                             const hasSearch = sub.search && Object.keys(sub.search).length > 0;
                             let activeSub = false;
@@ -627,6 +616,20 @@ export function AppSidebar() {
             );
           };
 
+          const roleKey = role === "coach" ? "coach" : role;
+          const rolePerms = permissions[roleKey] || INITIAL_PERMISSIONS[roleKey as keyof typeof INITIAL_PERMISSIONS] || {};
+          const isItemAllowed = (item: SidebarItem): boolean => {
+            if (roleKey === "admin") return true;
+            if (rolePerms[item.id] === false) return false;
+            if (rolePerms[item.id] === true) return true;
+            if (item.childrenItems && item.childrenItems.some(c => isItemAllowed(c))) return true;
+            return true;
+          };
+
+          const visibleItems = section.items.filter(item => isItemAllowed(item));
+
+          if (visibleItems.length === 0) return null;
+
           return (
             <SidebarGroup key={section.header || `sec-${sIdx}`} className="py-1">
               {!collapsed && section.header && (
@@ -636,7 +639,7 @@ export function AppSidebar() {
               )}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {section.items.map((item) => renderItem(item, 0))}
+                  {visibleItems.map((item) => renderItem(item, 0))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -644,22 +647,30 @@ export function AppSidebar() {
         })}
 
         {/* Bloque Independiente final: Muro del Club */}
-        <SidebarGroup className="py-2 pt-3 border-t border-sidebar-border/30 mt-2">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/muro")} tooltip="Muro del Club" className="py-2 h-auto cursor-pointer">
-                  <Link to="/muro" className="flex items-center gap-2.5 w-full min-w-0">
-                    <Megaphone strokeWidth={1.5} size={18} color="currentColor" className="shrink-0" />
-                    <span className="flex-1 text-left text-xs font-semibold truncate text-sidebar-foreground">
-                      Muro del Club
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {(() => {
+          const roleKey = role === "coach" ? "coach" : role;
+          const rolePerms = permissions[roleKey] || INITIAL_PERMISSIONS[roleKey as keyof typeof INITIAL_PERMISSIONS] || {};
+          if (rolePerms["muro"] === false && roleKey !== "admin") return null;
+
+          return (
+            <SidebarGroup className="py-2 pt-3 border-t border-sidebar-border/30 mt-2">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/muro")} tooltip="Muro del Club" className="py-2 h-auto cursor-pointer">
+                      <Link to="/muro" className="flex items-center gap-2.5 w-full min-w-0">
+                        <Megaphone strokeWidth={1.5} size={18} color="currentColor" className="shrink-0" />
+                        <span className="flex-1 text-left text-xs font-semibold truncate text-sidebar-foreground">
+                          Muro del Club
+                        </span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })()}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border/40 pt-2">

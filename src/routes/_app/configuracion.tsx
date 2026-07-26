@@ -16,7 +16,7 @@ import {
   TrendingUp, Brain, BookOpen, Settings, Save, RotateCcw, Building2,
   UserPlus, UserCheck, Link2, Copy, Check, Mail, Clipboard, Plus,
   MessageSquare, Key, Pencil, Trash2, AlertTriangle, Bell, Zap, CalendarCheck, Stethoscope, DollarSign, CheckCircle2, Globe,
-  MapPin, UploadCloud, Image as ImageIcon, ExternalLink, Phone, CreditCard, Receipt, Clock, ArrowRight
+  MapPin, UploadCloud, Image as ImageIcon, ExternalLink, Phone, CreditCard, Receipt, Clock, ArrowRight, Package, HelpCircle, Megaphone
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,18 +55,171 @@ const ROLES = [
   { id: "admin_staff", nombre: "PERSONAL APOYO / ADMIN", sub: "NEXUS RBAC IDENTITY", desc: "Gestión de caja, cobros y asistencia general", icon: Wallet, color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
 ];
 
-const MODULOS = [
-  { id: "dashboard", nombre: "DASHBOARD GENERAL (ADMIN)", desc: "PANEL ADMINISTRATIVO CON MÉTRICAS FINANCIERAS, KPIs DE SEDE E INGRESOS. SOLO PARA ADMINISTRADORES.", icon: LayoutDashboard },
-  { id: "crm", nombre: "CRM DEPORTIVO", desc: "EMBUDO DE VENTAS, SEGUIMIENTO DE PROSPECTOS Y CAMPAÑAS.", icon: Sparkles },
-  { id: "operacion", nombre: "OPERACIÓN DEPORTIVA", desc: "GESTIÓN DE EQUIPOS, CATEGORÍAS Y DISCIPLINAS.", icon: Activity },
-  { id: "asistencia", nombre: "ASISTENCIA", desc: "REGISTRO Y CONSULTA DE ASISTENCIA DIARIA.", icon: ScanLine },
-  { id: "coach_os", nombre: "COACH OS / ENTRENAMIENTOS", desc: "INICIO DEL COACH: PANEL OPERATIVO, ENTRENAMIENTOS, BIBLIOTECA, CONVOCATORIAS Y DIARIO.", icon: Command },
-  { id: "competiciones", nombre: "COMPETICIONES", desc: "SEGUIMIENTO DE PARTIDOS, TEMPORADAS Y CONVOCATORIAS.", icon: Trophy },
-  { id: "rendimiento", nombre: "ALTO RENDIMIENTO", desc: "CARGAS DE TRABAJO, WELLNESS Y TESTS FÍSICOS.", icon: TrendingUp },
-  { id: "finanzas", nombre: "FINANZAS Y COBROS", desc: "PAGOS RECIBIDOS, CAJA CHICA Y FACTURACIÓN.", icon: Wallet },
-  { id: "ia", nombre: "IA & PREDICCIONES", desc: "DETECCIÓN DE RIESGOS, INSIGHTS Y ALERTAS AUTOMÁTICAS.", icon: Brain },
-  { id: "biblioteca", nombre: "BIBLIOTECA DE ARCHIVOS", desc: "REPOSITORIO DE DOCUMENTOS, REGLAMENTOS Y ARCHIVOS.", icon: BookOpen },
-  { id: "configuracion", nombre: "CONFIGURACIÓN DE SEDES", desc: "ADMINISTRACIÓN DE SEDES, PARÁMETRES E INTEGRACIONES.", icon: Settings },
+export type SubModuloItem = { id: string; nombre: string; url?: string };
+export type ModuloDef = {
+  id: string;
+  nombre: string;
+  desc: string;
+  icon: any;
+  subItems?: SubModuloItem[];
+};
+
+const MODULOS: ModuloDef[] = [
+  {
+    id: "dashboard",
+    nombre: "DASHBOARD GENERAL (ADMIN)",
+    desc: "PANEL ADMINISTRATIVO CON MÉTRICAS FINANCIERAS, KPIS DE SEDE E INGRESOS.",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "operacion",
+    nombre: "OPERACIÓN DEPORTIVA",
+    desc: "GESTIÓN DE JUGADORES, ESTRUCTURA, CALENDARIO Y CONTROL DE CAMPO.",
+    icon: Activity,
+    subItems: [
+      { id: "op_jugadores", nombre: "Jugadores", url: "/jugadores" },
+      { id: "op_estructura", nombre: "Estructura (Categorías)", url: "/categorias" },
+      { id: "op_planificacion", nombre: "Horarios & Calendario", url: "/horarios" },
+      { id: "op_asistencia", nombre: "Control de Campo - Asistencia", url: "/asistencia" },
+      { id: "op_checkin", nombre: "Control de Campo - Check QR", url: "/checkin" },
+      { id: "op_convocatorias", nombre: "Control de Campo - Convocatorias", url: "/convocatorias" },
+      { id: "op_sedes", nombre: "Sedes & Instalaciones", url: "/sedes" },
+    ],
+  },
+  {
+    id: "coordinacion_general",
+    nombre: "COORDINACIÓN GENERAL",
+    desc: "PLANIFICACIÓN METODOLÓGICA Y MACROCICLOS TÁCTICOS.",
+    icon: Settings,
+    subItems: [
+      { id: "coord_planificacion", nombre: "Planificación Metodológica", url: "/tactica/planificacion" },
+    ],
+  },
+  {
+    id: "coach_os",
+    nombre: "COACH OS / ENTRENAMIENTOS",
+    desc: "HERRAMIENTAS OPERATIVAS DEL ENTRENADOR EN CAMPO Y DIARIO.",
+    icon: Command,
+    subItems: [
+      { id: "coach_sesiones", nombre: "Sesiones", url: "/entrenamientos" },
+      { id: "coach_plantillas", nombre: "Entrenamientos", url: "/plantillas" },
+      { id: "coach_convocatorias", nombre: "Convocatorias", url: "/convocatorias" },
+      { id: "coach_objetivos", nombre: "Objetivos", url: "/objetivos" },
+      { id: "coach_evaluaciones", nombre: "Evaluación de Jugadores", url: "/evaluaciones" },
+      { id: "coach_planeamiento", nombre: "Planeamiento del Entrenador", url: "/planeamiento" },
+      { id: "coach_diario", nombre: "Bitácora / Diario", url: "/diario" },
+    ],
+  },
+  {
+    id: "centro_tactico",
+    nombre: "CENTRO TÁCTICO",
+    desc: "PIZARRA INTERACTIVA, ANÁLISIS DE JUGADAS Y BIBLIOTECA.",
+    icon: BookOpen,
+    subItems: [
+      { id: "tactico_pizarra", nombre: "Pizarra Táctica", url: "/tactica/pizarra" },
+      { id: "tactico_jugadas", nombre: "Sistemas y Jugadas", url: "/tactica/jugadas" },
+      { id: "tactico_video", nombre: "Videoanálisis", url: "/tactica/video" },
+      { id: "tactico_biblioteca", nombre: "Biblioteca Digital", url: "/biblioteca" },
+    ],
+  },
+  {
+    id: "competiciones",
+    nombre: "COMPETICIONES Y TORNEOS",
+    desc: "SEGUIMIENTO DE PARTIDOS, TORNEOS OFICIALES Y RIVALES.",
+    icon: Trophy,
+    subItems: [
+      { id: "comp_torneos", nombre: "Torneos", url: "/competiciones" },
+      { id: "comp_rivales", nombre: "Rivales", url: "/tactica/rivales" },
+    ],
+  },
+  {
+    id: "rendimiento",
+    nombre: "ALTO RENDIMIENTO",
+    desc: "WELLNESS, CARGAS DE TRABAJO, TESTS Y GPS WEARABLES.",
+    icon: TrendingUp,
+    subItems: [
+      { id: "rend_wellness", nombre: "Wellness", url: "/rendimiento/wellness" },
+      { id: "rend_cargas", nombre: "Control de Cargas", url: "/rendimiento/cargas" },
+      { id: "rend_tests", nombre: "Test Físicos", url: "/rendimiento/tests" },
+      { id: "rend_sports_science", nombre: "Sport Science", url: "/rendimiento/sports-science" },
+      { id: "rend_gps", nombre: "GPS y Wearables", url: "/rendimiento/gps" },
+      { id: "rend_evolucion", nombre: "Evolución Física", url: "/rendimiento/evolucion" },
+    ],
+  },
+  {
+    id: "crm",
+    nombre: "CRM DEPORTIVO & CAPTACIÓN",
+    desc: "EMBUDO DE PROSPECTOS, SEGUIMIENTO DE CAPTACIÓN Y CAMPAÑAS.",
+    icon: Sparkles,
+  },
+  {
+    id: "personal",
+    nombre: "PERSONAL Y ENTRENADORES",
+    desc: "DIRECTORIO DE ENTRENADORES, ASIGNACIÓN DE CATEGORÍAS Y STAFF.",
+    icon: UserCheck,
+  },
+  {
+    id: "finanzas",
+    nombre: "FINANZAS, COBROS Y CAJA CHICA",
+    desc: "HISTORIAL DE PAGOS, RECIBOS, CAJA CHICA Y FACTURACIÓN ELECTRÓNICA.",
+    icon: Wallet,
+  },
+  {
+    id: "medico",
+    nombre: "ÁREA MÉDICA Y EXPEDIENTES CLÍNICOS",
+    desc: "HISTORIAL CLÍNICO, LESIONES, CITAS, APTITUD Y REPORTES.",
+    icon: Stethoscope,
+    subItems: [
+      { id: "med_historial", nombre: "Historial Clínico", url: "/medico?tab=historial" },
+      { id: "med_lesiones", nombre: "Lesiones", url: "/rendimiento/lesiones" },
+      { id: "med_directorio", nombre: "Directorio Médico", url: "/medico/citas" },
+      { id: "med_aptitud", nombre: "Aptitud Deportiva", url: "/medico?tab=aptitud" },
+      { id: "med_reportes", nombre: "Reportes Médicos", url: "/reportes?tab=medico" },
+    ],
+  },
+  {
+    id: "logistica",
+    nombre: "LOGÍSTICA, INVENTARIO Y TIENDA",
+    desc: "TIENDA VIRTUAL E INVENTARIO DE UNIFORMES Y EQUIPAMIENTO.",
+    icon: Package,
+    subItems: [
+      { id: "log_tienda", nombre: "Tienda Virtual", url: "/tienda" },
+      { id: "log_inventario", nombre: "Inventario Deportivo", url: "/inventario" },
+    ],
+  },
+  {
+    id: "ia",
+    nombre: "IA & AUTOMATIZACIÓN (PREDICCIONES)",
+    desc: "ASISTENTE TÁCTICO IA, DETECCIÓN DE RIESGOS DE DESERCIÓN E INSIGHTS AUTOMÁTICOS.",
+    icon: Sparkles,
+    subItems: [
+      { id: "ia_asistente", nombre: "Asistente Táctico IA", url: "/ia" },
+      { id: "ia_riesgos", nombre: "Detección de Riesgo de Deserción", url: "/ia?tab=riesgos" },
+      { id: "ia_lesiones", nombre: "Predicción de Lesiones & Alertas", url: "/ia?tab=lesiones" },
+    ],
+  },
+  {
+    id: "configuracion",
+    nombre: "CONFIGURACIÓN Y PARÁMETROS",
+    desc: "ADMINISTRACIÓN DE SEDES, PARÁMETROS DEL SISTEMA E INTEGRACIONES APIS.",
+    icon: Settings,
+  },
+  {
+    id: "muro",
+    nombre: "MURO DEL CLUB & COMUNIDAD",
+    desc: "PUBLICACIONES, NOTICIAS, COMUNICADOS Y INTERACCIÓN DE LA ACADEMIA.",
+    icon: Megaphone,
+    subItems: [
+      { id: "muro_publicaciones", nombre: "Publicaciones & Noticias", url: "/muro" },
+      { id: "muro_comentarios", nombre: "Comentarios & Moderación", url: "/muro" },
+    ],
+  },
+  {
+    id: "soporte",
+    nombre: "SOPORTE, AYUDA & SUGERENCIAS",
+    desc: "ACCESO AL CENTRO DE AYUDA, TICKETS Y SUGERENCIAS DEL SISTEMA.",
+    icon: HelpCircle,
+  },
 ];
 
 function ConfigPage() {
@@ -281,15 +434,16 @@ function ConfigPage() {
       </div>      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="org">Organización</TabsTrigger>
-          <TabsTrigger value="regional" className="bg-primary/10 text-primary font-bold border border-primary/20">🌐 Regional</TabsTrigger>
-          <TabsTrigger value="suscripcion" className="bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold border border-purple-500/30">💳 Suscripción & Plan</TabsTrigger>
-          <TabsTrigger value="notificaciones_push" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30">🔔 Notificaciones Push & Triggers</TabsTrigger>
+          <TabsTrigger value="regional">🌐 Regional</TabsTrigger>
+          <TabsTrigger value="suscripcion">💳 Suscripción & Plan</TabsTrigger>
+          <TabsTrigger value="notificaciones_push">🔔 Notificaciones Push & Triggers</TabsTrigger>
           <TabsTrigger value="sedes">Sedes</TabsTrigger>
           <TabsTrigger value="roles">Roles y Permisos (RBAC)</TabsTrigger>
+          <TabsTrigger value="permisos_usuario" className="bg-primary/10 text-primary font-medium">👤 Permisos por Usuario</TabsTrigger>
           <TabsTrigger value="muro_perms">Permisos de Muro</TabsTrigger>
           <TabsTrigger value="legal">Aspectos Legales</TabsTrigger>
           <TabsTrigger value="integraciones">Integraciones APIs</TabsTrigger>
-          <TabsTrigger value="whatsapp" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">💬 Servicio WhatsApp</TabsTrigger>
+          <TabsTrigger value="whatsapp">💬 Servicio WhatsApp</TabsTrigger>
         </TabsList>
         <TabsContent value="org" className="mt-4 space-y-6">
           {/* Card 1: Identidad & Perfil General */}
@@ -1241,41 +1395,98 @@ function ConfigPage() {
               </span>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
               {MODULOS.map((mod) => {
                 const isActive = permissions[storeRoleId]?.[mod.id] ?? false;
                 const ModIcon = mod.icon;
+                const hasSubItems = mod.subItems && mod.subItems.length > 0;
+
                 return (
                   <div
                     key={mod.id}
-                    className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between h-[130px] ${
+                    className={`p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${
                       isActive
                         ? "border-green-500/20 bg-green-500/[0.01] shadow-sm"
                         : "border-border bg-card opacity-80"
                     }`}
                   >
-                    <div className="flex items-start justify-between w-full">
-                      <div className={`p-2.5 rounded-xl ${
-                        isActive ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
-                      }`}>
-                        <ModIcon className="h-5 w-5" />
-                      </div>
-                      <Switch
-                        checked={isActive}
-                        onCheckedChange={() => togglePermission(selectedRole, mod.id)}
-                      />
-                    </div>
                     <div>
-                      <p className="text-xs font-bold tracking-wide uppercase text-foreground truncate">{mod.nombre}</p>
-                      <p className="text-[10px] text-muted-foreground/80 font-normal leading-normal mt-1 line-clamp-2 uppercase">
-                        {mod.desc}
-                      </p>
+                      <div className="flex items-start justify-between w-full mb-3">
+                        <div className={`p-2.5 rounded-xl ${
+                          isActive ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                        }`}>
+                          <ModIcon className="h-5 w-5" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-muted-foreground">
+                            {isActive ? "Permitido" : "Bloqueado"}
+                          </span>
+                          <Switch
+                            checked={isActive}
+                            onCheckedChange={() => togglePermission(selectedRole, mod.id)}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs font-bold tracking-wide uppercase text-foreground truncate">{mod.nombre}</p>
+                        <p className="text-[10px] text-muted-foreground/80 font-normal leading-normal mt-1 line-clamp-2 uppercase">
+                          {mod.desc}
+                        </p>
+                      </div>
                     </div>
+
+                    {/* Sub-menu item permissions toggle list */}
+                    {hasSubItems && (
+                      <div className="mt-4 pt-3 border-t border-border/60 space-y-2">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-primary flex items-center justify-between">
+                          <span>Sub-permisos por submenú:</span>
+                          <span className="text-[9px] text-muted-foreground font-normal">
+                            ({mod.subItems?.filter(s => permissions[storeRoleId]?.[mod.id + "_" + s.id] !== false).length}/{mod.subItems?.length})
+                          </span>
+                        </p>
+                        <div className="space-y-1.5 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                          {mod.subItems?.map((sub) => {
+                            const subKey = `${mod.id}_${sub.id}`;
+                            const rawVal = permissions[storeRoleId]?.[subKey];
+                            const subIsActive = (rawVal === undefined ? true : rawVal) && isActive;
+                            return (
+                              <div
+                                key={sub.id}
+                                className={`flex items-center justify-between p-1.5 rounded-lg text-xs transition-colors ${
+                                  subIsActive ? "bg-muted/40 text-foreground font-medium" : "bg-muted/10 text-muted-foreground/60"
+                                }`}
+                              >
+                                <span className="text-[11px] truncate flex items-center gap-1.5">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
+                                  {sub.nombre}
+                                </span>
+                                <Switch
+                                  checked={subIsActive}
+                                  onCheckedChange={(val) => {
+                                    const targetRoleId = selectedRole === "coaches" ? "coach" : selectedRole;
+                                    if (!isActive && val) {
+                                      updatePermission(targetRoleId, mod.id, true);
+                                    }
+                                    updatePermission(targetRoleId, subKey, val);
+                                  }}
+                                  className="scale-75 origin-right cursor-pointer"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="permisos_usuario" className="mt-4 space-y-6">
+          <UserPermissionsGranularTab />
         </TabsContent>
 
         <TabsContent value="usuarios" className="mt-4 space-y-6">
@@ -3091,6 +3302,237 @@ function WhatsAppServiceConfigTab() {
           </Button>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function UserPermissionsGranularTab() {
+  const [usuarios, setUsuarios] = useState<SistemaUsuario[]>([]);
+  const [selectedUser, setSelectedUser] = useState<SistemaUsuario | null>(null);
+  const [searchFilter, setSearchFilter] = useState("");
+  const [userPerms, setUserPerms] = useState<Record<string, boolean>>({});
+
+  const fetchUsers = async () => {
+    try {
+      const { data } = await supabase.from("usuarios").select("*");
+      if (data) {
+        const normalized = data.map((u: any) => ({
+          id: u.id,
+          nombre: u.nombre,
+          email: u.email,
+          role: u.role,
+          sedeId: u.sede_id || "s1",
+          sede: sedesMock.find((s) => s.id === (u.sede_id || "s1"))?.nombre ?? "Sede Central",
+          estado: u.estado,
+          fechaCreacion: u.fecha_creacion,
+          avatar: u.avatar || "",
+          organizacion_id: u.organizacion_id,
+        }));
+        setUsuarios(normalized);
+        if (normalized.length > 0 && !selectedUser) {
+          setSelectedUser(normalized[0]);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (selectedUser) {
+      const storageKey = `user_custom_perms_${selectedUser.id}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          setUserPerms(JSON.parse(saved));
+        } catch (e) {
+          setUserPerms({});
+        }
+      } else {
+        setUserPerms({});
+      }
+    }
+  }, [selectedUser]);
+
+  const handleToggleUserPerm = (key: string, val: boolean) => {
+    if (!selectedUser) return;
+    const updated = { ...userPerms, [key]: val };
+    setUserPerms(updated);
+    localStorage.setItem(`user_custom_perms_${selectedUser.id}`, JSON.stringify(updated));
+  };
+
+  const filteredUsers = useMemo(() => {
+    return usuarios.filter(
+      (u) =>
+        u.nombre.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchFilter.toLowerCase())
+    );
+  }, [usuarios, searchFilter]);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-card/50 border border-border/80 rounded-2xl p-6 shadow-elegant flex flex-col md:flex-row md:items-center gap-4 justify-between">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <UserCheck className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2">
+              Permisos Especiales por Usuario
+              <Badge variant="outline" className="text-[10px] font-medium border-primary/30 text-primary">Granular por Submenú</Badge>
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Asigna permisos de ingreso específicos por persona sobre áreas y submenús individuales (ej. solo Jugadores, solo Directorio Médico o Pizarra).
+            </p>
+          </div>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (selectedUser) {
+              toast.success(`Permisos personalizados guardados para ${selectedUser.nombre}`);
+            }
+          }}
+          className="text-xs bg-gradient-primary shadow-elegant h-9"
+        >
+          <Save className="h-3.5 w-3.5 mr-1.5" />
+          Guardar Permisos de Usuario
+        </Button>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-12">
+        {/* Left Column: User Selector List */}
+        <Card className="md:col-span-4 p-4 space-y-4">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Seleccionar Usuario</Label>
+            <Input
+              placeholder="Buscar por nombre o correo..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              className="text-xs h-9"
+            />
+          </div>
+
+          <div className="space-y-1.5 max-h-[500px] overflow-y-auto pr-1">
+            {filteredUsers.map((u) => {
+              const isSelected = selectedUser?.id === u.id;
+              return (
+                <div
+                  key={u.id}
+                  onClick={() => setSelectedUser(u)}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
+                    isSelected
+                      ? "border-primary bg-primary/10 shadow-sm"
+                      : "border-border bg-card hover:bg-muted/40"
+                  }`}
+                >
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="bg-primary/20 text-xs font-bold text-primary">
+                      {u.nombre.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-foreground truncate">{u.nombre}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Right Column: Detailed Modules and Submodules Switch Grid */}
+        <Card className="md:col-span-8 p-6 space-y-6">
+          {selectedUser ? (
+            <>
+              <div className="border-b border-border pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Matriz de Acceso para: <span className="text-primary">{selectedUser.nombre}</span>
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Rol base: <span className="font-semibold capitalize">{selectedUser.role}</span> · Habilita o deshabilita accesos exactos a cada sección y submenú.
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-emerald-600">
+                  {Object.values(userPerms).filter(Boolean).length} reglas personalizadas
+                </Badge>
+              </div>
+
+              <div className="space-y-6 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                {MODULOS.map((mod) => {
+                  const parentKey = `mod_${mod.id}`;
+                  const isParentAllowed = userPerms[parentKey] ?? true;
+
+                  return (
+                    <div key={mod.id} className="border border-border/80 rounded-xl p-4 space-y-3 bg-muted/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            <mod.icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">{mod.nombre}</h4>
+                            <p className="text-[10px] text-muted-foreground">{mod.desc}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-semibold text-muted-foreground">
+                            {isParentAllowed ? "Habilitado" : "Deshabilitado"}
+                          </span>
+                          <Switch
+                            checked={isParentAllowed}
+                            onCheckedChange={(v) => handleToggleUserPerm(parentKey, v)}
+                          />
+                        </div>
+                      </div>
+
+                      {mod.subItems && mod.subItems.length > 0 && isParentAllowed && (
+                        <div className="pl-6 border-l-2 border-primary/20 space-y-2 pt-1">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Sub-secciones / Submenús de {mod.nombre}:
+                          </p>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {mod.subItems.map((sub) => {
+                              const subKey = `sub_${mod.id}_${sub.id}`;
+                              const isSubAllowed = userPerms[subKey] ?? true;
+                              return (
+                                <div
+                                  key={sub.id}
+                                  className="flex items-center justify-between p-2 rounded-lg border border-border/60 bg-background text-xs"
+                                >
+                                  <span className="text-[11px] font-medium text-foreground truncate flex items-center gap-1.5">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                    {sub.nombre}
+                                  </span>
+                                  <Switch
+                                    checked={isSubAllowed}
+                                    onCheckedChange={(v) => handleToggleUserPerm(subKey, v)}
+                                    className="scale-75 origin-right"
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground text-xs">
+              Selecciona un usuario de la lista izquierda para personalizar sus permisos.
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

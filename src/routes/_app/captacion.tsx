@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { crmPipelineStages, sedes, type CRMLead } from "@/lib/mock-data";
+import { crmPipelineStages, sedes } from "@/lib/mock-data";
+import { type CRMLead, type CRMStageId } from "@/lib/mock-crm";
 import { supabase } from "@/lib/supabase";
 import RendimientoStore from "@/lib/rendimiento-store";
 
@@ -34,19 +35,21 @@ function EmbudoCaptacionView() {
             categoria: "Sub-13",
             correo: l.email || "",
             telefono: l.telefono || "",
-            stage: l.estado || "nuevo",
+            stage: (l.estado || "nuevo") as CRMStageId,
             fuente: "Sitio web",
             score: 85,
             avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${l.nombre}`,
+            actividades: [],
+            pruebas: [],
           })));
         } else {
           // Fallback mock leads for demonstration
           setLeads([
-            { id: "1", nombre: "Mateo Fernández", disciplina: "Fútbol Sub-11", categoria: "Sub-11", correo: "mateo@mail.com", telefono: "8888-1111", stage: "nuevo", fuente: "Formulario Web", score: 90, avatar: "" },
-            { id: "2", nombre: "Santiago Vargas", disciplina: "Fútbol Sub-13", categoria: "Sub-13", correo: "santiago@mail.com", telefono: "8888-2222", stage: "interesado", fuente: "Instagram", score: 85, avatar: "" },
-            { id: "3", nombre: "Sofía Monge", disciplina: "Baloncesto U12", categoria: "Sub-12", correo: "sofia@mail.com", telefono: "8888-3333", stage: "prueba", fuente: "Recomendación", score: 95, avatar: "" },
-            { id: "4", nombre: "Gabriel Castro", disciplina: "Fútbol Sub-15", categoria: "Sub-15", correo: "gabriel@mail.com", telefono: "8888-4444", stage: "evaluacion", fuente: "Facebook Ads", score: 78, avatar: "" },
-            { id: "5", nombre: "Lucía Morales", disciplina: "Voleibol U14", categoria: "Sub-14", correo: "lucia@mail.com", telefono: "8888-5555", stage: "aprobado", fuente: "Volante impreso", score: 92, avatar: "" },
+            { id: "1", nombre: "Mateo Fernández", disciplina: "Fútbol Sub-11", categoria: "Sub-11", correo: "mateo@mail.com", telefono: "8888-1111", stage: "nuevo", fuente: "Formulario Web", score: 90, avatar: "", actividades: [], pruebas: [] },
+            { id: "2", nombre: "Santiago Vargas", disciplina: "Fútbol Sub-13", categoria: "Sub-13", correo: "santiago@mail.com", telefono: "8888-2222", stage: "interesado", fuente: "Instagram", score: 85, avatar: "", actividades: [], pruebas: [] },
+            { id: "3", nombre: "Sofía Monge", disciplina: "Baloncesto U12", categoria: "Sub-12", correo: "sofia@mail.com", telefono: "8888-3333", stage: "prueba", fuente: "Recomendación", score: 95, avatar: "", actividades: [], pruebas: [] },
+            { id: "4", nombre: "Gabriel Castro", disciplina: "Fútbol Sub-15", categoria: "Sub-15", correo: "gabriel@mail.com", telefono: "8888-4444", stage: "evaluacion", fuente: "Facebook Ads", score: 78, avatar: "", actividades: [], pruebas: [] },
+            { id: "5", nombre: "Lucía Morales", disciplina: "Voleibol U14", categoria: "Sub-14", correo: "lucia@mail.com", telefono: "8888-5555", stage: "aprobado", fuente: "Volante impreso", score: 92, avatar: "", actividades: [], pruebas: [] },
           ]);
         }
         setLoading(false);

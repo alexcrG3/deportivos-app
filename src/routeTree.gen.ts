@@ -31,6 +31,7 @@ import { Route as AppPruebasRouteImport } from './routes/_app/pruebas'
 import { Route as AppProspectosRouteImport } from './routes/_app/prospectos'
 import { Route as AppPosicionesRouteImport } from './routes/_app/posiciones'
 import { Route as AppPlantillasRouteImport } from './routes/_app/plantillas'
+import { Route as AppPlaneamientoRouteImport } from './routes/_app/planeamiento'
 import { Route as AppPartidosRouteImport } from './routes/_app/partidos'
 import { Route as AppPagosRouteImport } from './routes/_app/pagos'
 import { Route as AppOperacionRouteImport } from './routes/_app/operacion'
@@ -76,6 +77,7 @@ import { Route as AppRendimientoIndexRouteImport } from './routes/_app/rendimien
 import { Route as AppMedicoIndexRouteImport } from './routes/_app/medico.index'
 import { Route as AppJugadoresIndexRouteImport } from './routes/_app/jugadores.index'
 import { Route as AppEntrenadoresIndexRouteImport } from './routes/_app/entrenadores.index'
+import { Route as AppCoachIndexRouteImport } from './routes/_app/coach.index'
 import { Route as AppTacticaVideoRouteImport } from './routes/_app/tactica.video'
 import { Route as AppTacticaSimulacionesRouteImport } from './routes/_app/tactica.simulaciones'
 import { Route as AppTacticaRivalesRouteImport } from './routes/_app/tactica.rivales'
@@ -105,6 +107,7 @@ import { Route as AppIaPrediccionesRouteImport } from './routes/_app/ia.predicci
 import { Route as AppIaInsightsRouteImport } from './routes/_app/ia.insights'
 import { Route as AppIaAsistenteRouteImport } from './routes/_app/ia.asistente'
 import { Route as AppEntrenadoresIdRouteImport } from './routes/_app/entrenadores.$id'
+import { Route as AppCoachPlaneamientoRouteImport } from './routes/_app/coach.planeamiento'
 import { Route as AppMedicoJugadorIdRouteImport } from './routes/_app/medico.jugador.$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -214,6 +217,11 @@ const AppPosicionesRoute = AppPosicionesRouteImport.update({
 const AppPlantillasRoute = AppPlantillasRouteImport.update({
   id: '/plantillas',
   path: '/plantillas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlaneamientoRoute = AppPlaneamientoRouteImport.update({
+  id: '/planeamiento',
+  path: '/planeamiento',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPartidosRoute = AppPartidosRouteImport.update({
@@ -441,6 +449,11 @@ const AppEntrenadoresIndexRoute = AppEntrenadoresIndexRouteImport.update({
   path: '/entrenadores/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCoachIndexRoute = AppCoachIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCoachRoute,
+} as any)
 const AppTacticaVideoRoute = AppTacticaVideoRouteImport.update({
   id: '/video',
   path: '/video',
@@ -588,6 +601,11 @@ const AppEntrenadoresIdRoute = AppEntrenadoresIdRouteImport.update({
   path: '/entrenadores/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCoachPlaneamientoRoute = AppCoachPlaneamientoRouteImport.update({
+  id: '/planeamiento',
+  path: '/planeamiento',
+  getParentRoute: () => AppCoachRoute,
+} as any)
 const AppMedicoJugadorIdRoute = AppMedicoJugadorIdRouteImport.update({
   id: '/medico/jugador/$id',
   path: '/medico/jugador/$id',
@@ -613,7 +631,7 @@ export interface FileRoutesByFullPath {
   '/carga': typeof AppCargaRoute
   '/categorias': typeof AppCategoriasRoute
   '/checkin': typeof AppCheckinRoute
-  '/coach': typeof AppCoachRoute
+  '/coach': typeof AppCoachRouteWithChildren
   '/competiciones': typeof AppCompeticionesRoute
   '/comunicaciones': typeof AppComunicacionesRoute
   '/configuracion': typeof AppConfiguracionRoute
@@ -641,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/operacion': typeof AppOperacionRoute
   '/pagos': typeof AppPagosRoute
   '/partidos': typeof AppPartidosRoute
+  '/planeamiento': typeof AppPlaneamientoRoute
   '/plantillas': typeof AppPlantillasRoute
   '/posiciones': typeof AppPosicionesRoute
   '/prospectos': typeof AppProspectosRoute
@@ -656,6 +675,7 @@ export interface FileRoutesByFullPath {
   '/tienda': typeof AppTiendaRoute
   '/workflows': typeof AppWorkflowsRoute
   '/player-card/$token': typeof PlayerCardTokenRoute
+  '/coach/planeamiento': typeof AppCoachPlaneamientoRoute
   '/entrenadores/$id': typeof AppEntrenadoresIdRoute
   '/ia/asistente': typeof AppIaAsistenteRoute
   '/ia/insights': typeof AppIaInsightsRoute
@@ -685,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/tactica/rivales': typeof AppTacticaRivalesRoute
   '/tactica/simulaciones': typeof AppTacticaSimulacionesRoute
   '/tactica/video': typeof AppTacticaVideoRoute
+  '/coach/': typeof AppCoachIndexRoute
   '/entrenadores/': typeof AppEntrenadoresIndexRoute
   '/jugadores/': typeof AppJugadoresIndexRoute
   '/medico/': typeof AppMedicoIndexRoute
@@ -711,7 +732,6 @@ export interface FileRoutesByTo {
   '/carga': typeof AppCargaRoute
   '/categorias': typeof AppCategoriasRoute
   '/checkin': typeof AppCheckinRoute
-  '/coach': typeof AppCoachRoute
   '/competiciones': typeof AppCompeticionesRoute
   '/comunicaciones': typeof AppComunicacionesRoute
   '/configuracion': typeof AppConfiguracionRoute
@@ -739,6 +759,7 @@ export interface FileRoutesByTo {
   '/operacion': typeof AppOperacionRoute
   '/pagos': typeof AppPagosRoute
   '/partidos': typeof AppPartidosRoute
+  '/planeamiento': typeof AppPlaneamientoRoute
   '/plantillas': typeof AppPlantillasRoute
   '/posiciones': typeof AppPosicionesRoute
   '/prospectos': typeof AppProspectosRoute
@@ -752,6 +773,7 @@ export interface FileRoutesByTo {
   '/tienda': typeof AppTiendaRoute
   '/workflows': typeof AppWorkflowsRoute
   '/player-card/$token': typeof PlayerCardTokenRoute
+  '/coach/planeamiento': typeof AppCoachPlaneamientoRoute
   '/entrenadores/$id': typeof AppEntrenadoresIdRoute
   '/ia/asistente': typeof AppIaAsistenteRoute
   '/ia/insights': typeof AppIaInsightsRoute
@@ -781,6 +803,7 @@ export interface FileRoutesByTo {
   '/tactica/rivales': typeof AppTacticaRivalesRoute
   '/tactica/simulaciones': typeof AppTacticaSimulacionesRoute
   '/tactica/video': typeof AppTacticaVideoRoute
+  '/coach': typeof AppCoachIndexRoute
   '/entrenadores': typeof AppEntrenadoresIndexRoute
   '/jugadores': typeof AppJugadoresIndexRoute
   '/medico': typeof AppMedicoIndexRoute
@@ -809,7 +832,7 @@ export interface FileRoutesById {
   '/_app/carga': typeof AppCargaRoute
   '/_app/categorias': typeof AppCategoriasRoute
   '/_app/checkin': typeof AppCheckinRoute
-  '/_app/coach': typeof AppCoachRoute
+  '/_app/coach': typeof AppCoachRouteWithChildren
   '/_app/competiciones': typeof AppCompeticionesRoute
   '/_app/comunicaciones': typeof AppComunicacionesRoute
   '/_app/configuracion': typeof AppConfiguracionRoute
@@ -837,6 +860,7 @@ export interface FileRoutesById {
   '/_app/operacion': typeof AppOperacionRoute
   '/_app/pagos': typeof AppPagosRoute
   '/_app/partidos': typeof AppPartidosRoute
+  '/_app/planeamiento': typeof AppPlaneamientoRoute
   '/_app/plantillas': typeof AppPlantillasRoute
   '/_app/posiciones': typeof AppPosicionesRoute
   '/_app/prospectos': typeof AppProspectosRoute
@@ -852,6 +876,7 @@ export interface FileRoutesById {
   '/_app/tienda': typeof AppTiendaRoute
   '/_app/workflows': typeof AppWorkflowsRoute
   '/player-card/$token': typeof PlayerCardTokenRoute
+  '/_app/coach/planeamiento': typeof AppCoachPlaneamientoRoute
   '/_app/entrenadores/$id': typeof AppEntrenadoresIdRoute
   '/_app/ia/asistente': typeof AppIaAsistenteRoute
   '/_app/ia/insights': typeof AppIaInsightsRoute
@@ -881,6 +906,7 @@ export interface FileRoutesById {
   '/_app/tactica/rivales': typeof AppTacticaRivalesRoute
   '/_app/tactica/simulaciones': typeof AppTacticaSimulacionesRoute
   '/_app/tactica/video': typeof AppTacticaVideoRoute
+  '/_app/coach/': typeof AppCoachIndexRoute
   '/_app/entrenadores/': typeof AppEntrenadoresIndexRoute
   '/_app/jugadores/': typeof AppJugadoresIndexRoute
   '/_app/medico/': typeof AppMedicoIndexRoute
@@ -937,6 +963,7 @@ export interface FileRouteTypes {
     | '/operacion'
     | '/pagos'
     | '/partidos'
+    | '/planeamiento'
     | '/plantillas'
     | '/posiciones'
     | '/prospectos'
@@ -952,6 +979,7 @@ export interface FileRouteTypes {
     | '/tienda'
     | '/workflows'
     | '/player-card/$token'
+    | '/coach/planeamiento'
     | '/entrenadores/$id'
     | '/ia/asistente'
     | '/ia/insights'
@@ -981,6 +1009,7 @@ export interface FileRouteTypes {
     | '/tactica/rivales'
     | '/tactica/simulaciones'
     | '/tactica/video'
+    | '/coach/'
     | '/entrenadores/'
     | '/jugadores/'
     | '/medico/'
@@ -1007,7 +1036,6 @@ export interface FileRouteTypes {
     | '/carga'
     | '/categorias'
     | '/checkin'
-    | '/coach'
     | '/competiciones'
     | '/comunicaciones'
     | '/configuracion'
@@ -1035,6 +1063,7 @@ export interface FileRouteTypes {
     | '/operacion'
     | '/pagos'
     | '/partidos'
+    | '/planeamiento'
     | '/plantillas'
     | '/posiciones'
     | '/prospectos'
@@ -1048,6 +1077,7 @@ export interface FileRouteTypes {
     | '/tienda'
     | '/workflows'
     | '/player-card/$token'
+    | '/coach/planeamiento'
     | '/entrenadores/$id'
     | '/ia/asistente'
     | '/ia/insights'
@@ -1077,6 +1107,7 @@ export interface FileRouteTypes {
     | '/tactica/rivales'
     | '/tactica/simulaciones'
     | '/tactica/video'
+    | '/coach'
     | '/entrenadores'
     | '/jugadores'
     | '/medico'
@@ -1132,6 +1163,7 @@ export interface FileRouteTypes {
     | '/_app/operacion'
     | '/_app/pagos'
     | '/_app/partidos'
+    | '/_app/planeamiento'
     | '/_app/plantillas'
     | '/_app/posiciones'
     | '/_app/prospectos'
@@ -1147,6 +1179,7 @@ export interface FileRouteTypes {
     | '/_app/tienda'
     | '/_app/workflows'
     | '/player-card/$token'
+    | '/_app/coach/planeamiento'
     | '/_app/entrenadores/$id'
     | '/_app/ia/asistente'
     | '/_app/ia/insights'
@@ -1176,6 +1209,7 @@ export interface FileRouteTypes {
     | '/_app/tactica/rivales'
     | '/_app/tactica/simulaciones'
     | '/_app/tactica/video'
+    | '/_app/coach/'
     | '/_app/entrenadores/'
     | '/_app/jugadores/'
     | '/_app/medico/'
@@ -1349,6 +1383,13 @@ declare module '@tanstack/react-router' {
       path: '/plantillas'
       fullPath: '/plantillas'
       preLoaderRoute: typeof AppPlantillasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planeamiento': {
+      id: '/_app/planeamiento'
+      path: '/planeamiento'
+      fullPath: '/planeamiento'
+      preLoaderRoute: typeof AppPlaneamientoRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/partidos': {
@@ -1666,6 +1707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEntrenadoresIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coach/': {
+      id: '/_app/coach/'
+      path: '/'
+      fullPath: '/coach/'
+      preLoaderRoute: typeof AppCoachIndexRouteImport
+      parentRoute: typeof AppCoachRoute
+    }
     '/_app/tactica/video': {
       id: '/_app/tactica/video'
       path: '/video'
@@ -1869,6 +1917,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEntrenadoresIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/coach/planeamiento': {
+      id: '/_app/coach/planeamiento'
+      path: '/planeamiento'
+      fullPath: '/coach/planeamiento'
+      preLoaderRoute: typeof AppCoachPlaneamientoRouteImport
+      parentRoute: typeof AppCoachRoute
+    }
     '/_app/medico/jugador/$id': {
       id: '/_app/medico/jugador/$id'
       path: '/medico/jugador/$id'
@@ -1878,6 +1933,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppCoachRouteChildren {
+  AppCoachPlaneamientoRoute: typeof AppCoachPlaneamientoRoute
+  AppCoachIndexRoute: typeof AppCoachIndexRoute
+}
+
+const AppCoachRouteChildren: AppCoachRouteChildren = {
+  AppCoachPlaneamientoRoute: AppCoachPlaneamientoRoute,
+  AppCoachIndexRoute: AppCoachIndexRoute,
+}
+
+const AppCoachRouteWithChildren = AppCoachRoute._addFileChildren(
+  AppCoachRouteChildren,
+)
 
 interface AppIaRouteChildren {
   AppIaAsistenteRoute: typeof AppIaAsistenteRoute
@@ -1976,7 +2045,7 @@ interface AppRouteChildren {
   AppCargaRoute: typeof AppCargaRoute
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppCheckinRoute: typeof AppCheckinRoute
-  AppCoachRoute: typeof AppCoachRoute
+  AppCoachRoute: typeof AppCoachRouteWithChildren
   AppCompeticionesRoute: typeof AppCompeticionesRoute
   AppComunicacionesRoute: typeof AppComunicacionesRoute
   AppConfiguracionRoute: typeof AppConfiguracionRoute
@@ -2004,6 +2073,7 @@ interface AppRouteChildren {
   AppOperacionRoute: typeof AppOperacionRoute
   AppPagosRoute: typeof AppPagosRoute
   AppPartidosRoute: typeof AppPartidosRoute
+  AppPlaneamientoRoute: typeof AppPlaneamientoRoute
   AppPlantillasRoute: typeof AppPlantillasRoute
   AppPosicionesRoute: typeof AppPosicionesRoute
   AppProspectosRoute: typeof AppProspectosRoute
@@ -2040,7 +2110,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCargaRoute: AppCargaRoute,
   AppCategoriasRoute: AppCategoriasRoute,
   AppCheckinRoute: AppCheckinRoute,
-  AppCoachRoute: AppCoachRoute,
+  AppCoachRoute: AppCoachRouteWithChildren,
   AppCompeticionesRoute: AppCompeticionesRoute,
   AppComunicacionesRoute: AppComunicacionesRoute,
   AppConfiguracionRoute: AppConfiguracionRoute,
@@ -2068,6 +2138,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppOperacionRoute: AppOperacionRoute,
   AppPagosRoute: AppPagosRoute,
   AppPartidosRoute: AppPartidosRoute,
+  AppPlaneamientoRoute: AppPlaneamientoRoute,
   AppPlantillasRoute: AppPlantillasRoute,
   AppPosicionesRoute: AppPosicionesRoute,
   AppProspectosRoute: AppProspectosRoute,

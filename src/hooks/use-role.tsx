@@ -6,23 +6,24 @@ export type UserRole = "admin" | "coach" | "padres" | "fisioterapeuta";
 
 export const INITIAL_PERMISSIONS = {
   admin: {
-    dashboard: true, crm: true, operacion: true, asistencia: true, coach_os: true,
-    competiciones: true, rendimiento: true, medico: true, finanzas: true, ia: true, biblioteca: true, configuracion: true, muro: true
+    dashboard: true, operacion: true, asistencia: true, coordinacion_general: true, coach_os: true,
+    centro_tactico: true, competiciones: true, rendimiento: true, crm: true, personal: true,
+    finanzas: true, medico: true, logistica: true, ia: true, configuracion: true, soporte: true, muro: true
   },
   coach: {
-    // Coach NO ve el Dashboard General (admin). Su inicio es Coach OS.
-    dashboard: false, crm: false, operacion: true, asistencia: true, coach_os: true,
-    competiciones: true, rendimiento: true, medico: false, finanzas: false, ia: true, biblioteca: true, configuracion: false, muro: true
+    dashboard: false, operacion: true, asistencia: true, coordinacion_general: true, coach_os: true,
+    centro_tactico: true, competiciones: true, rendimiento: true, crm: false, personal: false,
+    finanzas: false, medico: false, logistica: false, ia: true, configuracion: false, soporte: true, muro: true
   },
   fisioterapeuta: {
-    // Fisioterapeuta ve el Área Médica, Citas, Lesiones y Wellness
-    dashboard: false, crm: false, operacion: false, asistencia: false, coach_os: false,
-    competiciones: false, rendimiento: true, medico: true, finanzas: false, ia: true, biblioteca: true, configuracion: false, muro: true
+    dashboard: false, operacion: false, asistencia: false, coordinacion_general: false, coach_os: false,
+    centro_tactico: false, competiciones: false, rendimiento: true, crm: false, personal: false,
+    finanzas: false, medico: true, logistica: false, ia: true, configuracion: false, soporte: true, muro: true
   },
   padres: {
-    // Padres tienen acceso a su Dashboard de auto-consulta y al Muro del Club
-    dashboard: true, crm: false, operacion: false, asistencia: true, coach_os: false,
-    competiciones: true, rendimiento: true, medico: false, finanzas: true, ia: false, biblioteca: false, configuracion: false, muro: true
+    dashboard: true, operacion: false, asistencia: true, coordinacion_general: false, coach_os: false,
+    centro_tactico: false, competiciones: true, rendimiento: true, crm: false, personal: false,
+    finanzas: true, medico: false, logistica: false, ia: false, configuracion: false, soporte: true, muro: true
   }
 };
 

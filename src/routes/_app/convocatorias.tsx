@@ -301,7 +301,8 @@ Soporte: soporte@asoderive.com`;
   }, [selectedPlayerIds]);
 
   const previewMessageEvaluated = useMemo(() => {
-    const apoderado = samplePlayer.encargadoLegal || samplePlayer.madreNombre || samplePlayer.padreNombre || "Patricia Fonseca";
+    const sp = samplePlayer as any;
+    const apoderado = sp.encargadoLegal || sp.madreNombre || sp.padreNombre || "Patricia Fonseca";
     const alumno = samplePlayer.nombre || "Aaron Pacheco Fonseca";
     const apellido = alumno.split(" ").slice(1).join(" ") || "Pacheco";
     const team = dynamicEquipos.find(e => e.id === newForm.equipoId) || dynamicEquipos[0];
@@ -406,10 +407,10 @@ Soporte: soporte@asoderive.com`;
           nombre: j.nombre,
           avatar: j.avatar,
           posicion: ["POR", "DEF", "MED", "DEL"][idx % 4],
-          estado: existingStatus as const,
-          encargadoLegal: j.encargadoLegal || j.madreNombre || j.padreNombre || "Patricia Fonseca",
-          telefonoEncargado: (j as any).whatsappEncargado || (j as any).madreWhatsapp || (j as any).padreWhatsapp || j.telefonoEncargado || j.madreTelefono || j.padreTelefono || j.telefonoEmergencia || "+506 8888-9900",
-          emailEncargado: j.emailEncargado || j.madreEmail || j.padreEmail || j.email || "encargado@deportivos.cr",
+          estado: existingStatus as any,
+          encargadoLegal: (j as any).encargadoLegal || (j as any).madreNombre || (j as any).padreNombre || "Patricia Fonseca",
+          telefonoEncargado: (j as any).whatsappEncargado || (j as any).madreWhatsapp || (j as any).padreWhatsapp || (j as any).telefonoEncargado || (j as any).madreTelefono || (j as any).padreTelefono || (j as any).telefonoEmergencia || "+506 8888-9900",
+          emailEncargado: (j as any).emailEncargado || (j as any).madreEmail || (j as any).padreEmail || (j as any).email || "encargado@deportivos.cr",
         };
       });
 
@@ -1092,12 +1093,12 @@ Soporte: soporte@asoderive.com`;
               <Avatar className="h-9 w-9 border border-indigo-500/40">
                 <AvatarImage src={samplePlayer.avatar} />
                 <AvatarFallback className="bg-indigo-900 text-white font-bold">
-                  {(samplePlayer.encargadoLegal || samplePlayer.nombre)[0]}
+                  {((samplePlayer as any).encargadoLegal || samplePlayer.nombre)[0]}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-white truncate">
-                  Para: {samplePlayer.encargadoLegal || samplePlayer.madreNombre || samplePlayer.padreNombre || "Patricia Fonseca"}
+                  Para: {(samplePlayer as any).encargadoLegal || (samplePlayer as any).madreNombre || (samplePlayer as any).padreNombre || "Patricia Fonseca"}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate">
                   Padre/Encargado legal de: <span className="font-semibold text-amber-400">{samplePlayer.nombre}</span>
@@ -1182,7 +1183,7 @@ Soporte: soporte@asoderive.com`;
                     📌 Asunto: 📝 Convocatoria de Partido Oficial - {samplePlayer.nombre} - Categoría {dynamicEquipos[0]?.categoria || "Sub-13"}
                   </p>
                   <p className="text-slate-400">De: <strong>Coordinación Deportiva Asoderive</strong> &lt;soporte@asoderive.com&gt;</p>
-                  <p className="text-slate-400">Para: <strong>{samplePlayer.encargadoLegal || "Patricia Fonseca"}</strong> &lt;{samplePlayer.emailEncargado || "encargado@deportivos.cr"}&gt;</p>
+                  <p className="text-slate-400">Para: <strong>{(samplePlayer as any).encargadoLegal || "Patricia Fonseca"}</strong> &lt;{(samplePlayer as any).emailEncargado || "encargado@deportivos.cr"}&gt;</p>
                 </div>
 
                 {/* Body Mail Template HTML Box */}

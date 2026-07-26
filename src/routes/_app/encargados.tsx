@@ -125,10 +125,10 @@ function EncargadosPage() {
                 categoria: activeChild.categoria || "Sub-13",
                 edad: activeChild.edad || 12,
                 posicion: activeChild.posicion || "Jugador de Campo",
-                tipoSanguineo: fullPlayerOS.condicionesMedicas?.tipoSanguineo || "O+",
+                tipoSanguineo: (fullPlayerOS as any).condicionesMedicas?.tipoSanguineo || "O+",
               }}
               equipo={activeChild.equipo || `${activeChild.disciplina || "Fútbol"} ${activeChild.categoria || "Oficial"}`}
-              logoEquipo={fullPlayerOS.logoEquipo || undefined}
+              logoEquipo={(fullPlayerOS as any).logoEquipo || undefined}
               numero={fullPlayerOS.numero || 10}
               entrenador={fullPlayerOS.entrenador || "Edgar Calderón"}
               estadoOp={fullPlayerOS.estadoOp || activeChild.estadoPago || "habilitado"}

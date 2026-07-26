@@ -148,7 +148,7 @@ function ComunicacionesPage() {
                     <CardContent>
                       <p className="text-xs text-muted-foreground mb-2">Variables</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {t.variables.map((v) => (
+                        {t.variables.map((v: any) => (
                           <Badge key={v} variant="secondary" className="font-mono text-[10px]">{`{{${v}}}`}</Badge>
                         ))}
                       </div>

@@ -90,7 +90,7 @@ export function AtencionClinicaModal({ open, onOpenChange, cita, onComplete }: A
       RendimientoStore.updateJugador(jugador.id, {
         estadoOp,
         notasSalud: `Restricción Fisioterapia: ${semaforoRestriccion}. Tratamiento: ${tecnicasSeleccionadas.join(", ")}. EVA: ${nivelDolorEva}/10.`,
-      });
+      } as any);
     }
 
     toast.success(`✅ Atención clínica completada para ${cita.jugadorNombre}. Semáforo actualizado a ${semaforoRestriccion}.`);

@@ -85,6 +85,7 @@ function getLocalDateStr(date: Date = new Date()): string {
 
 export function FinanzasBalance() {
   const now = new Date();
+  const todayStr = getLocalDateStr(now);
   const firstDayStr = getLocalDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
   const lastDayOfMonth = getLocalDateStr(new Date(now.getFullYear(), now.getMonth() + 1, 0));
 
@@ -545,7 +546,7 @@ export function FinanzasBalance() {
 
       toast.success(`💵 Ingreso de ₡${manualMonto.toLocaleString()} registrado en la BD`);
     } else {
-      const newEgreso: StoreEgreso = {
+      const newEgreso = {
         id: `egr_cash_${Date.now()}`,
         fecha: todayStr,
         concepto: manualConcepto,
@@ -559,7 +560,7 @@ export function FinanzasBalance() {
         organizacion_id: orgId,
       };
 
-      RendimientoStore.saveEgreso(newEgreso);
+      RendimientoStore.saveEgreso(newEgreso as any);
       try {
         const refConCat = `[CAT:${newEgreso.categoria}] EGRESO: ${newEgreso.concepto}`.slice(0, 100);
         await supabase.from("pagos").insert([{
@@ -699,7 +700,7 @@ export function FinanzasBalance() {
     const newEgresoId = `pag-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const fullRefText = `Factura ${refText} | ${iaTiqueteData.concepto || "Compra / Gasto Tiquete IA"}`.slice(0, 100);
     
-    const newEgreso: StoreEgreso = {
+    const newEgreso = {
       id: newEgresoId,
       fecha: todayStr,
       concepto: iaTiqueteData.concepto || "Compra / Gasto Tiquete IA",
@@ -714,7 +715,7 @@ export function FinanzasBalance() {
       organizacion_id: dbOrgId,
     };
 
-    RendimientoStore.saveEgreso(newEgreso);
+    RendimientoStore.saveEgreso(newEgreso as any);
 
     try {
       const catPrefix = `[CAT:${newEgreso.categoria}] `;
@@ -772,7 +773,7 @@ export function FinanzasBalance() {
     }
 
     const dbOrgId = "00000000-0000-0000-0000-000000000000";
-    const newEgreso: StoreEgreso = {
+    const newEgreso = {
       id: `pag-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       fecha: todayStr,
       concepto: egresoConcepto,
@@ -786,7 +787,7 @@ export function FinanzasBalance() {
       organizacion_id: dbOrgId,
     };
 
-    RendimientoStore.saveEgreso(newEgreso);
+    RendimientoStore.saveEgreso(newEgreso as any);
     try {
       const refConCat = `[CAT:${newEgreso.categoria}] EGRESO: ${newEgreso.concepto}`.slice(0, 100);
       const { error } = await supabase.from("pagos").insert([{

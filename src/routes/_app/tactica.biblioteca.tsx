@@ -10,7 +10,7 @@ import {
 import {
   BookOpen, Plus, Filter, Search, Download, Share2,
   Dumbbell, Layers, Video, FileText, Layout, BookMarked,
-  Star, Eye, Edit2, Copy, Printer, Sparkles, X, ChevronLeft, ChevronRight
+  Star, Eye, Edit2, Copy, Printer, Sparkles, X, ChevronLeft, ChevronRight, Play
 } from "lucide-react";
 import { toast } from "sonner";
 import RendimientoStore from "@/lib/rendimiento-store";

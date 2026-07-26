@@ -85,25 +85,44 @@ function EquiposPage() {
 
   useEffect(() => {
     const fetchEquiposDB = async () => {
-      const orgId = RendimientoStore.getActiveOrganizacionId();
-      await supabase.from("equipos").delete().in("nombre", ["U5 Asoderive", "Academia U13", "Academia U11", "Academia Sub-15 Élite"]);
-      
-      const realAsoderiveTeams = [
-        { id: `eq_u9_${orgId.slice(0, 8)}`, nombre: "U9 Asoderive", disciplina: "Fútbol", categoria: "Sub-9", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
-        { id: `eq_u11_${orgId.slice(0, 8)}`, nombre: "U11 Asoderive", disciplina: "Fútbol", categoria: "Sub-11", entrenador: "Carlos Fonseca", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
-        { id: `eq_u13_${orgId.slice(0, 8)}`, nombre: "U13 Asoderive", disciplina: "Fútbol", categoria: "Sub-13", entrenador: "Eduardo Mora", sede: "Sede Central", estado: "activo", organizacion_id: orgId },
-      ];
+      // Mapa de entrenadores correctos según categoría (tomado de la BD real)
+      const correctCoaches: Record<string, string> = {
+        "Sub-9": "Carlos Araya",
+        "Sub-11": "Tiffany Eduarte",
+        "Sub-13": "Eduardo Villa",
+      };
 
-      const { data: dbTeams } = await supabase.from("equipos").select("*").eq("organizacion_id", orgId);
-      if (!dbTeams || dbTeams.length === 0 || !dbTeams.some(t => t.nombre.includes("Asoderive"))) {
-        await supabase.from("equipos").upsert(realAsoderiveTeams);
-        setTeamsList(realAsoderiveTeams);
-        RendimientoStore.set("equipos_dynamics", realAsoderiveTeams);
-      } else {
-        const filtered = dbTeams.filter(t => !["U5 Asoderive", "Academia U13", "Academia U11", "Academia Sub-15 Élite"].includes(t.nombre) && !t.nombre.includes("U5"));
-        setTeamsList(filtered.length > 0 ? filtered : realAsoderiveTeams);
-        RendimientoStore.set("equipos_dynamics", filtered.length > 0 ? filtered : realAsoderiveTeams);
+      // 1. Traer los equipos reales con sus UUIDs reales
+      const { data: dbTeams } = await supabase.from("equipos").select("*");
+      if (!dbTeams || dbTeams.length === 0) return;
+
+      // 2. Detectar equipos cuyo entrenador difiere del correcto
+      const wrongTeams = dbTeams.filter(
+        (t) => correctCoaches[t.categoria] && t.entrenador !== correctCoaches[t.categoria]
+      );
+
+      // 3. Actualizar SÓLO los que tienen nombre incorrecto, usando su ID real de Supabase
+      if (wrongTeams.length > 0) {
+        await Promise.all(
+          wrongTeams.map((t) =>
+            supabase
+              .from("equipos")
+              .update({ entrenador: correctCoaches[t.categoria] })
+              .eq("id", t.id)
+          )
+        );
+        // 4. Refetch con datos ya corregidos
+        const { data: fresh } = await supabase.from("equipos").select("*");
+        if (fresh) {
+          setTeamsList(fresh);
+          RendimientoStore.set("equipos_dynamics", fresh);
+        }
+        return;
       }
+
+      // Sin cambios necesarios, usar lo que ya vino
+      setTeamsList(dbTeams);
+      RendimientoStore.set("equipos_dynamics", dbTeams);
     };
     fetchEquiposDB();
   }, [role, coachName]);

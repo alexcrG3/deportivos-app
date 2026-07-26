@@ -94,7 +94,7 @@ export interface BoardPlayer {
 
 export interface AnimationFrame {
   frameIndex: number;
-  players: { slotId: string; x: number; y: number }[];
+  players: { slotId: string; jugadorId?: string; x: number; y: number }[];
   ball: { x: number; y: number };
   arrows: Arrow[];
 }

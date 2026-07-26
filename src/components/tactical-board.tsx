@@ -294,8 +294,8 @@ export function TacticalBoard({
     updateSession(prev => ({
       ...prev,
       activeFrame: frameIdx,
-      players: playFrame.players.map(p => {
-        const pOs = getPlayerOS(p.jugadorId);
+      players: playFrame.players.map((p: any) => {
+        const pOs: any = getPlayerOS(p.jugadorId);
         return {
           slotId: p.slotId,
           jugadorId: p.jugadorId,
