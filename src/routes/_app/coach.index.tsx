@@ -326,67 +326,82 @@ function CoachOSDashboard() {
                   const rest = Math.max(0, teamPlayers.length - 5);
                   const isSelected = team.id === selectedTeamId;
                   return (
-                    <button
+                    <div
                       key={team.id}
                       onClick={() => setSelectedTeamId(team.id)}
-                      className={`rounded-xl border bg-card p-4 flex flex-col gap-3 text-left transition-all cursor-pointer ${
+                      className={`rounded-xl border bg-card p-4 flex flex-col gap-3 text-left transition-all ${
                         isSelected
                           ? "border-primary ring-2 ring-primary/20 shadow-md shadow-primary/10"
                           : "hover:border-primary/40 hover:shadow-sm"
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] font-bold px-2 py-0.5 ${isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-primary/10 text-primary border-primary/30"}`}
-                          >
-                            {team.categoria}
+                      {/* Clickable Header / Info — navigates directly to team details */}
+                      <Link
+                        to="/equipos"
+                        search={{ teamId: team.id } as any}
+                        className="flex flex-col gap-3 flex-1 group cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] font-bold px-2 py-0.5 ${isSelected ? "bg-primary text-primary-foreground border-primary" : "bg-primary/10 text-primary border-primary/30"}`}
+                            >
+                              {team.categoria}
+                            </Badge>
+                            <span className="font-bold text-sm group-hover:text-primary transition-colors">{team.nombre}</span>
+                          </div>
+                          <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shrink-0">
+                            activo
                           </Badge>
-                          <span className="font-bold text-sm">{team.nombre}</span>
                         </div>
-                        <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/30 shrink-0">
-                          activo
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="truncate">{team.sede || "Sede Central"}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Entrenador:{" "}
-                        <span className="font-semibold text-foreground">{team.entrenador || "Sin asignar"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex -space-x-2">
-                          {shown.map((p, i) => (
-                            <Avatar key={p.id || i} className="h-7 w-7 border-2 border-card">
-                              <AvatarImage src={p.avatar} />
-                              <AvatarFallback className="text-[9px] font-bold bg-primary/10 text-primary">
-                                {(p.nombre || "?")[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                          ))}
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{team.sede || "Sede Central"}</span>
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {rest > 0 ? `+${rest} · ` : ""}{teamPlayers.length} atletas
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link to={"/plantillas" as any} className="flex-1" onClick={e => e.stopPropagation()}>
-                          <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 h-7">
-                            <FileText className="w-3 h-3" />
+                        <div className="text-xs text-muted-foreground">
+                          Entrenador:{" "}
+                          <span className="font-semibold text-foreground">{team.entrenador || "Sin asignar"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-2">
+                            {shown.map((p, i) => (
+                              <Avatar key={p.id || i} className="h-7 w-7 border-2 border-card">
+                                <AvatarImage src={p.avatar} />
+                                <AvatarFallback className="text-[9px] font-bold bg-primary/10 text-primary">
+                                  {(p.nombre || "?")[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {rest > 0 ? `+${rest} · ` : ""}{teamPlayers.length} atletas
+                          </span>
+                        </div>
+                      </Link>
+
+                      {/* Separate Action Buttons Row at the Bottom */}
+                      <div className="flex gap-2 border-t pt-2.5 mt-auto" onClick={e => e.stopPropagation()}>
+                        <Link to={"/equipos" as any} search={{ teamId: team.id } as any} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full text-[11px] font-semibold gap-1 h-7 px-1.5">
+                            <Eye className="w-3 h-3 text-primary" />
+                            Ver Equipo
+                          </Button>
+                        </Link>
+                        <Link to={"/plantillas" as any} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full text-[11px] font-semibold gap-1 h-7 px-1.5">
+                            <FileText className="w-3 h-3 text-slate-500" />
                             Plantilla
                           </Button>
                         </Link>
-                        <Link to={"/entrenamientos" as any} className="flex-1" onClick={e => e.stopPropagation()}>
-                          <Button size="sm" className="w-full text-xs gap-1.5 h-7 bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Link to={"/entrenamientos" as any} className="flex-1">
+                          <Button size="sm" className="w-full text-[11px] font-semibold gap-1 h-7 px-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
                             <ClipboardList className="w-3 h-3" />
                             Asistencia
                           </Button>
                         </Link>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
