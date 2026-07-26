@@ -2744,7 +2744,12 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
               ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {teamPlanificaciones.map((plan) => {
-                    const totalMins = (plan.ejercicios || []).reduce((acc: number, cur: any) => acc + (Number(cur.duracion) || 0), 0);
+                    const ejerciciosArr = Array.isArray(plan.ejercicios)
+                      ? plan.ejercicios
+                      : typeof plan.ejercicios === "string"
+                      ? (() => { try { const p = JSON.parse(plan.ejercicios); return Array.isArray(p) ? p : []; } catch { return []; } })()
+                      : [];
+                    const totalMins = ejerciciosArr.reduce((acc: number, cur: any) => acc + (Number(cur.duracion) || 0), 0);
                     return (
                       <Card key={plan.id} className="shadow-card border flex flex-col justify-between overflow-hidden group hover:border-primary/30 transition-all duration-300">
                         <CardHeader className="pb-3 border-b bg-muted/20 flex flex-row items-start justify-between gap-2 space-y-0">
@@ -2794,11 +2799,11 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
 
                           <div className="space-y-2">
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                              <span>Sesiones & Tareas ({plan.ejercicios?.length || 0})</span>
+                              <span>Sesiones & Tareas ({ejerciciosArr.length})</span>
                               <span className="text-primary font-bold lowercase">{totalMins} mins</span>
                             </p>
                             <div className="space-y-1.5">
-                              {(plan.ejercicios || []).map((ex: any, idx: number) => (
+                              {ejerciciosArr.map((ex: any, idx: number) => (
                                 <div key={ex.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-card border text-xs hover:bg-muted/10 transition">
                                   <span className="font-medium text-foreground truncate pr-2">
                                     {idx + 1}. {ex.nombre}
