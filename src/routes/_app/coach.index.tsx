@@ -68,33 +68,64 @@ function CoachOSDashboard() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
-  // ── Load teams & players once (don't re-run on date change) ────────────────
+  // ── Load teams & players from store (instant, no extra Supabase calls) ──────
   useEffect(() => {
-    const loadStatic = async () => {
+    const loadStatic = () => {
       setLoading(true);
-      const orgId = RendimientoStore.getActiveOrganizacionId();
-      const [{ data: dbTeams }, { data: dbPlayers }] = await Promise.all([
-        supabase.from("equipos").select("*").eq("organizacion_id", orgId),
-        supabase.from("jugadores").select("id, nombre, categoria, avatar, estado").eq("organizacion_id", orgId).limit(500),
-      ]);
-      setAllTeams(dbTeams || []);
-      setAllPlayers(dbPlayers || []);
+      // Leer directamente de la memoria del store (ya sincronizado al arrancar)
+      const dbTeams = RendimientoStore.getEquipos() || [];
+      const dbPlayers = (RendimientoStore.getJugadores() || []).slice(0, 500).map((j: any) => ({
+        id: j.id, nombre: j.nombre, categoria: j.categoria, avatar: j.avatar, estado: j.estado,
+      }));
+      setAllTeams(dbTeams);
+      setAllPlayers(dbPlayers);
       setLoading(false);
     };
-    loadStatic();
+
+    // Si el store ya está sincronizado, usar datos de memoria directamente
+    if (RendimientoStore.isStoreSynced()) {
+      loadStatic();
+    } else {
+      // Si aún no sincronizó, esperar el evento
+      const handleSync = () => loadStatic();
+      window.addEventListener("rendimientoStoreUpdated", handleSync);
+      // Timeout de seguridad: si tarda más de 3s, mostrar lo que hay
+      const timeout = setTimeout(() => loadStatic(), 3000);
+      return () => {
+        window.removeEventListener("rendimientoStoreUpdated", handleSync);
+        clearTimeout(timeout);
+      };
+    }
   }, [selectedCoachId, coachName, selectedCoachName]);
 
-  // ── Re-fetch matches, sesiones & wellness when selected date changes ──────────
+  // ── Re-fetch matches, sesiones & wellness cuando cambia la fecha ──────────
   useEffect(() => {
     const loadForDate = async () => {
       const orgId = RendimientoStore.getActiveOrganizacionId();
-      const [{ data: dbMatches }, { data: dbWellness }, { data: dbSesiones }] = await Promise.all([
-        supabase.from("partidos").select("*").eq("fecha", selectedDate).order("hora", { ascending: true }).limit(20),
-        supabase.from("wellness").select("*").eq("fecha", selectedDate).limit(100),
-        supabase.from("sesiones").select("*").eq("fecha", selectedDate).order("hora", { ascending: true }).limit(20),
-      ]);
-      setAllMatches(dbMatches || []);
-      setAllSesiones(dbSesiones || []);
+
+      // Partidos y sesiones del store si están disponibles, sino consultar Supabase
+      const storePartidos = (RendimientoStore.getPartidos() || []).filter((p: any) => p.fecha === selectedDate);
+      const storeSesiones = (RendimientoStore.getSesiones() || []).filter((s: any) => s.fecha === selectedDate);
+
+      if (storePartidos.length > 0 || storeSesiones.length > 0) {
+        setAllMatches(storePartidos);
+        setAllSesiones(storeSesiones);
+      } else {
+        // Fallback: consultar Supabase solo si el store no tiene datos de esa fecha
+        const [{ data: dbMatches }, { data: dbSesiones }] = await Promise.all([
+          supabase.from("partidos").select("*").eq("fecha", selectedDate).order("hora", { ascending: true }).limit(20),
+          supabase.from("sesiones").select("*").eq("fecha", selectedDate).order("hora", { ascending: true }).limit(20),
+        ]);
+        setAllMatches(dbMatches || []);
+        setAllSesiones(dbSesiones || []);
+      }
+
+      // Wellness siempre desde Supabase (datos muy específicos del día)
+      const { data: dbWellness } = await supabase
+        .from("wellness")
+        .select("*")
+        .eq("fecha", selectedDate)
+        .limit(100);
 
       if (dbWellness && dbWellness.length > 0) {
         const atRisk = dbWellness
