@@ -1075,10 +1075,31 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
     }
   };
 
+  const handleClearPlayerWellness = async (playerId: string) => {
+    const todayStr = attendanceDate || new Date().toISOString().split("T")[0];
+    const current = RendimientoStore.getWellness();
+    const updated = current.filter(w => !(w.jugadorId === playerId && w.fecha === todayStr));
+    await RendimientoStore.set("wellness", updated);
+    const orgId = RendimientoStore.getActiveOrganizacionId();
+    await supabase.from("wellness").delete().eq("fecha", todayStr).eq("jugador_id", playerId).eq("organizacion_id", orgId);
+    window.dispatchEvent(new Event("organizacionChanged"));
+  };
+
+  const handleClearPlayerTest = async (playerId: string) => {
+    const todayStr = attendanceDate || new Date().toISOString().split("T")[0];
+    const current = RendimientoStore.getResultadosPruebas();
+    const updated = current.filter(t => !(t.jugadorId === playerId && t.fecha === todayStr));
+    await RendimientoStore.set("resultados_pruebas", updated);
+    setSavedTests(RendimientoStore.getResultadosPruebas());
+    window.dispatchEvent(new Event("organizacionChanged"));
+  };
+
   const handleMarkAllWellness = async () => {
     const todayStr = attendanceDate || new Date().toISOString().split("T")[0];
     let count = 0;
-    for (const p of teamPlayers) {
+    // Excluir automáticamente a jugadores marcados como Ausentes (A)
+    const presentPlayers = teamPlayers.filter(p => attendance[p.id] !== "A");
+    for (const p of presentPlayers) {
       const existing = RendimientoStore.getWellness().find(
         w => w.jugadorId === p.id && w.fecha === todayStr
       );
@@ -1101,17 +1122,19 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
       }
     }
     if (count > 0) {
-      toast.success(`Se registró Wellness óptimo para ${count} jugadores.`);
+      toast.success(`Se registró Wellness para ${count} jugadores presentes (ausentes excluidos).`);
       window.dispatchEvent(new Event("organizacionChanged"));
     } else {
-      toast.info("Todos los jugadores ya tienen registro Wellness para hoy.");
+      toast.info("No hay nuevos jugadores presentes para registrar Wellness.");
     }
   };
 
   const handleMarkAllTests = async () => {
     const todayStr = attendanceDate || new Date().toISOString().split("T")[0];
     let count = 0;
-    for (const p of teamPlayers) {
+    // Excluir automáticamente a jugadores marcados como Ausentes (A)
+    const presentPlayers = teamPlayers.filter(p => attendance[p.id] !== "A");
+    for (const p of presentPlayers) {
       const existing = savedTests.find(
         t => t.jugadorId === p.id && t.fecha === todayStr
       );
@@ -1130,10 +1153,10 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
     }
     if (count > 0) {
       setSavedTests(RendimientoStore.getResultadosPruebas());
-      toast.success(`Se registró Prueba Física (Velocidad 30m) para ${count} jugadores.`);
+      toast.success(`Se registró Prueba Física para ${count} jugadores presentes (ausentes excluidos).`);
       window.dispatchEvent(new Event("organizacionChanged"));
     } else {
-      toast.info("Todos los jugadores ya tienen registro de Pruebas Físicas para hoy.");
+      toast.info("No hay nuevos jugadores presentes para registrar Pruebas Físicas.");
     }
   };
 
@@ -1992,7 +2015,14 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                                   <button
                                     key={opt}
                                     disabled={isDisabled}
-                                    onClick={() => setAttendance(prev => ({ ...prev, [p.id]: opt }))}
+                                    onClick={async () => {
+                                      setAttendance(prev => ({ ...prev, [p.id]: opt }));
+                                      if (opt === "A") {
+                                        await handleClearPlayerWellness(p.id);
+                                        await handleClearPlayerTest(p.id);
+                                        toast.info(`${p.nombre} marcado como Ausente. Se removieron sus registros de Wellness y Pruebas.`);
+                                      }
+                                    }}
                                     className={`h-7 w-7 rounded-lg text-xs font-bold transition-all ${
                                       isDisabled 
                                         ? isSel ? `${colors[opt]} opacity-40 cursor-not-allowed` : "bg-muted/20 text-muted-foreground/20 cursor-not-allowed"
@@ -2007,9 +2037,20 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                           </TableCell>
                           <TableCell className="text-center">
                             {wellReg && wellReg.id ? (
-                              <Badge onClick={() => handleOpenWellnessModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                                🟢 {wellReg.score ?? wellReg.promedio ?? (wellReg.sueñoCalidad ? Math.round((wellReg.sueñoCalidad / 5) * 100) : 85)}%
-                              </Badge>
+                              <div className="inline-flex items-center gap-1">
+                                <Badge onClick={() => handleOpenWellnessModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20">
+                                  🟢 {wellReg.score ?? wellReg.promedio ?? (wellReg.sueñoCalidad ? Math.round((wellReg.sueñoCalidad / 5) * 100) : 85)}%
+                                </Badge>
+                                {(!hasSavedAttendance || isEditingHistory) && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleClearPlayerWellness(p.id); }}
+                                    title="Quitar Wellness de este jugador"
+                                    className="h-5 w-5 rounded-full hover:bg-rose-500/20 text-rose-500 flex items-center justify-center text-[10px] font-bold transition-colors"
+                                  >
+                                    ✕
+                                  </button>
+                                )}
+                              </div>
                             ) : (
                               <Button variant="ghost" size="sm" onClick={() => handleOpenWellnessModal(p)} className="h-7 text-[10px] font-semibold text-primary hover:bg-primary/5 px-2">
                                 Encuestar
@@ -2018,9 +2059,20 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                           </TableCell>
                           <TableCell className="text-center">
                             {testReg ? (
-                              <Badge onClick={() => handleOpenTestModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-amber-500/10 text-amber-500 border-amber-500/20">
-                                🏃 {testReg.tipoTest.includes("Velocidad") ? "30m" : "Test"}: {testReg.resultado} {testReg.unidad.substring(0, 3)}.
-                              </Badge>
+                              <div className="inline-flex items-center gap-1">
+                                <Badge onClick={() => handleOpenTestModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20">
+                                  🏃 {testReg.tipoTest.includes("Velocidad") ? "30m" : "Test"}: {testReg.resultado} {testReg.unidad.substring(0, 3)}.
+                                </Badge>
+                                {(!hasSavedAttendance || isEditingHistory) && (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleClearPlayerTest(p.id); }}
+                                    title="Quitar Prueba Física de este jugador"
+                                    className="h-5 w-5 rounded-full hover:bg-rose-500/20 text-rose-500 flex items-center justify-center text-[10px] font-bold transition-colors"
+                                  >
+                                    ✕
+                                  </button>
+                                )}
+                              </div>
                             ) : (
                               <Button variant="ghost" size="sm" onClick={() => handleOpenTestModal(p)} className="h-7 text-[10px] font-semibold text-purple-400 hover:bg-purple-500/5 px-2">
                                 + Test
