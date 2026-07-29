@@ -10,9 +10,9 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DeportivOS" />
-    <meta name="application-name" content="DeportivOS" />
-    <title>DeportivOS - Academia Deportiva Élite Sports</title>
+    <meta name="apple-mobile-web-app-title" content="NexusSport" />
+    <meta name="application-name" content="NexusSport" />
+    <title>NexusSport OS - Academia Deportiva Élite Sports</title>
   </head>
   <body>
     <div id="root"></div>
@@ -21,7 +21,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then((reg) => {
-            console.log('DeportivOS PWA SW registrado con éxito:', reg.scope);
+            console.log('NexusSport PWA SW registrado con éxito:', reg.scope);
           }).catch((err) => {
             console.log('Error registrando PWA SW:', err);
           });
