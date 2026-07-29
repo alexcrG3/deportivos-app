@@ -18,6 +18,23 @@ export default defineConfig(({ mode }) => {
       }),
       react(),
     ],
+    build: {
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            // Separar librerías grandes en su propio chunk cacheado
+            if (id.includes("node_modules/xlsx")) return "vendor-xlsx";
+            if (id.includes("node_modules/recharts") || id.includes("node_modules/d3")) return "vendor-charts";
+            if (id.includes("node_modules/@radix-ui")) return "vendor-radix";
+            if (id.includes("node_modules/lucide-react")) return "vendor-lucide";
+            if (id.includes("node_modules/@tanstack")) return "vendor-tanstack";
+            if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) return "vendor-react";
+            if (id.includes("node_modules/")) return "vendor-misc";
+          },
+        },
+      },
+    },
   };
 });
 

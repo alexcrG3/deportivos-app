@@ -878,12 +878,34 @@ class RendimientoStore {
         }
       };
 
-      // Lanzar todas las peticiones en paralelo
+      // ⚡ CARGA EN DOS OLAS:
+      // Ola 1 (crítica): Solo lo que necesita el dashboard y sidebar para arrancar
+      // Ola 2 (background): El resto de tablas, sin bloquear la UI
       const [
         dbJugadores,
-        dbPagos,
+        dbEquipos,
+        dbEntrenadores,
         dbCategorias,
         dbSedes,
+        dbOrgRes,
+        dbOrgsRes,
+      ] = await Promise.all([
+        fetchTablePromise("jugadores"),
+        fetchTablePromise("equipos"),
+        fetchTablePromise("entrenadores"),
+        fetchTablePromise("categorias"),
+        fetchTablePromise("sedes"),
+        fetchOrganizacion(),
+        fetchOrganizaciones(),
+      ]);
+
+      // Marcar como sincronizado con datos mínimos — la UI puede arrancar YA
+      this.isSynced = true;
+      window.dispatchEvent(new Event("rendimientoStoreUpdated"));
+
+      // Ola 2: Cargar el resto de datos en background sin bloquear
+      const [
+        dbPagos,
         dbLesiones,
         dbSesiones,
         dbEvals,
@@ -902,17 +924,10 @@ class RendimientoStore {
         dbTemporadas,
         dbDisciplinas,
         dbRecuperacion,
-        dbOrgRes,
-        dbOrgsRes,
-        dbEquipos,
-        dbEntrenadores,
         dbAsistencias,
         dbPlanificaciones
       ] = await Promise.all([
-        fetchTablePromise("jugadores"),
         fetchTablePromise("pagos"),
-        fetchTablePromise("categorias"),
-        fetchTablePromise("sedes"),
         fetchTablePromise("lesiones"),
         fetchTablePromise("sesiones_entrenamiento"),
         fetchTablePromise("evaluaciones_rapidas"),
@@ -931,10 +946,6 @@ class RendimientoStore {
         fetchTablePromise("temporadas"),
         fetchTablePromise("disciplinas"),
         fetchTablePromise("sesiones_recuperacion"),
-        fetchOrganizacion(),
-        fetchOrganizaciones(),
-        fetchTablePromise("equipos"),
-        fetchTablePromise("entrenadores"),
         fetchTablePromise("asistencias"),
         fetchTablePromise("planificaciones")
       ]);
