@@ -60,13 +60,8 @@ function HorariosPage() {
     try {
       if (!(window as any).horariosSyncPromise) {
         (window as any).horariosSyncPromise = (async () => {
-          // 1. Fetch coaches
-          const { data: dbCoaches } = await supabase
-            .from("entrenadores")
-            .select("*")
-            .eq("organizacion_id", orgId);
-
-          const coaches = dbCoaches || [];
+          // 1. Fetch coaches from store
+          const coaches = RendimientoStore.getEntrenadores();
 
           // Clean up ALL generated coach schedules to prevent duplicates/orphan entries
           await supabase

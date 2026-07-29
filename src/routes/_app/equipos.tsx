@@ -84,7 +84,7 @@ function EquiposPage() {
   const categories = useMemo(() => RendimientoStore.getCategorias(), [role, coachName]);
 
   useEffect(() => {
-    const fetchEquiposDB = async () => {
+    const load = async () => {
       // Mapa de entrenadores correctos según categoría (tomado de la BD real)
       const correctCoaches: Record<string, string> = {
         "Sub-9": "Carlos Araya",
@@ -92,8 +92,8 @@ function EquiposPage() {
         "Sub-13": "Eduardo Villa",
       };
 
-      // 1. Traer los equipos reales con sus UUIDs reales
-      const { data: dbTeams } = await supabase.from("equipos").select("*");
+      // 1. Traer los equipos desde el store
+      const dbTeams = RendimientoStore.getEquipos() || [];
       if (!dbTeams || dbTeams.length === 0) return;
 
       // 2. Detectar equipos cuyo entrenador difiere del correcto
@@ -111,20 +111,27 @@ function EquiposPage() {
               .eq("id", t.id)
           )
         );
-        // 4. Refetch con datos ya corregidos
-        const { data: fresh } = await supabase.from("equipos").select("*");
-        if (fresh) {
-          setTeamsList(fresh);
-          RendimientoStore.set("equipos_dynamics", fresh);
-        }
-        return;
+        // Supabase update done. To get fresh data from store, we might need to wait for sync, 
+        // but for now we just fallback to the current store data or trigger a sync if possible.
+        // The store syncs automatically on changes, but we'll just update local state after a small delay if needed.
       }
 
-      // Sin cambios necesarios, usar lo que ya vino
-      setTeamsList(dbTeams);
-      RendimientoStore.set("equipos_dynamics", dbTeams);
+      const freshTeams = RendimientoStore.getEquipos() || [];
+      setTeamsList(freshTeams);
+      RendimientoStore.set("equipos_dynamics", freshTeams);
     };
-    fetchEquiposDB();
+
+    if (RendimientoStore.isStoreSynced()) {
+      load();
+    } else {
+      const handleSync = () => load();
+      window.addEventListener("rendimientoStoreUpdated", handleSync);
+      const timeout = setTimeout(() => load(), 3000);
+      return () => {
+        window.removeEventListener("rendimientoStoreUpdated", handleSync);
+        clearTimeout(timeout);
+      };
+    }
   }, [role, coachName]);
 
   // Form states (Create)

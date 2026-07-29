@@ -173,104 +173,62 @@ function EntrenadoresPage() {
   const [nomNotas, setNomNotas] = useState("Viáticos de transporte y bono por rendimiento acumulado");
   const [nomMoneda, setNomMoneda] = useState<"CRC" | "USD">("CRC");
 
-  // Parallel Fast Background Fetching from Supabase DB
-  const fetchAllDataFromDB = async () => {
-    const orgId = RendimientoStore.getActiveOrganizacionId() || "org_asoderive_master";
-
-    try {
-      // Execute all 6 Supabase queries in PARALLEL for ultra-fast response
-      const [resCoaches, resAsist, resSol, resCerts, resEvals, resNominas] = await Promise.all([
-        supabase.from("entrenadores").select("*").eq("organizacion_id", orgId),
-        supabase.from("asistencias_staff").select("*").eq("organizacion_id", orgId),
-        supabase.from("solicitudes_permisos").select("*").eq("organizacion_id", orgId),
-        supabase.from("certificaciones_staff").select("*").eq("organizacion_id", orgId),
-        supabase.from("evaluaciones_staff").select("*").eq("organizacion_id", orgId),
-        supabase.from("nominas_entrenadores").select("*").eq("organizacion_id", orgId),
-      ]);
-
-      // 1. Entrenadores
-      if (resCoaches.data && resCoaches.data.length > 0) {
-        const mappedCoaches: StoreEntrenador[] = resCoaches.data.map((c: any) => ({
-          id: c.id,
-          nombre: c.nombre,
-          identificacion: c.identificacion || "ID-100",
-          correo: c.correo || `${c.nombre.toLowerCase().replace(/\s+/g, ".")}@asoderive.com`,
-          telefono: c.telefono || "+506 8888-0000",
-          whatsapp: c.whatsapp || c.telefono || "+506 8888-0000",
-          especialidad: c.especialidad || "Entrenador Formativo",
-          disciplinas: c.disciplinas || ["Fútbol"],
-          categorias: c.categorias || 1,
-          sedeId: c.sede_id || "Sede Central",
-          horario: c.horario || "L-V 14:00 - 18:00",
-          estado: c.estado || "activo",
-          avatar: c.avatar || `https://images.unsplash.com/photo-${c.nombre.includes("Tiffany") ? "1534528741775-53994a69daeb" : "1507003211169-0a1dd7228f2d"}?auto=format&fit=crop&w=100&q=80`,
-          organizacion_id: orgId,
-          tarifaSesion: c.tarifa_sesion || (c.moneda === "USD" ? 30 : 18500),
-          bonoPartido: c.bono_partido || (c.moneda === "USD" ? 40 : 25000),
-          moneda: c.moneda || "CRC",
-          cuentaBancaria: c.cuenta_bancaria || "CR05015202001023456789",
-        }));
-        setCoachesList(mappedCoaches);
-        RendimientoStore.set("entrenadores_dynamics", mappedCoaches);
-      }
-
-      // 2. Asistencias
-      if (resAsist.data && resAsist.data.length > 0) {
-        setAsistenciasList(resAsist.data);
-      }
-
-      // 3. Solicitudes
-      if (resSol.data && resSol.data.length > 0) {
-        setSolicitudesList(resSol.data);
-      }
-
-      // 4. Certificaciones
-      if (resCerts.data && resCerts.data.length > 0) {
-        setCertificacionesList(resCerts.data);
-      }
-
-      // 5. Evaluaciones
-      if (resEvals.data && resEvals.data.length > 0) {
-        setEvaluacionesList(resEvals.data);
-      }
-
-      // 6. Nóminas
-      if (resNominas.data && resNominas.data.length > 0) {
-        const mappedNominas: RegistroNominaEntrenador[] = resNominas.data.map((n: any) => ({
-          id: n.id,
-          organizacion_id: n.organizacion_id,
-          entrenadorId: n.entrenador_id,
-          entrenadorNombre: n.entrenador_nombre,
-          periodoInicio: n.periodo_inicio,
-          periodoFin: n.periodo_fin,
-          sesionesConcluidas: n.sesiones_concluidas || 14,
-          partidosConcluidos: n.partidos_concluidos || 4,
-          tarifaSesion: n.tarifa_sesion || 18500,
-          bonoPartido: n.bono_partido || 25000,
-          montoSesiones: n.monto_sesiones || 259000,
-          montoPartidos: n.monto_partidos || 100000,
-          montoAjustes: n.monto_ajustes || 25000,
-          notasAjustes: n.notas_ajustes || "Viáticos de transporte",
-          montoTotal: n.monto_total || 384000,
-          moneda: n.moneda || "CRC",
-          estado: n.estado || "pagado",
-          fechaPago: n.fecha_pago || new Date().toISOString().split("T")[0],
-        }));
-        setNominasDBList(mappedNominas);
-      }
-
-      // Run background DB seeding if needed asynchronously
-      ensureStaffDBDataSeeded();
-    } catch (err) {
-      console.error("Error background fetching DB staff data:", err);
+  const load = () => {
+    // 1. Entrenadores
+    const coaches = RendimientoStore.getEntrenadores();
+    if (coaches && coaches.length > 0) {
+      setCoachesList(coaches);
+      RendimientoStore.set("entrenadores_dynamics", coaches);
     }
+
+    // 2. Asistencias
+    const asist = RendimientoStore.get<any[]>("asistencias_staff", []);
+    if (asist && asist.length > 0) {
+      setAsistenciasList(asist);
+    }
+
+    // 3. Solicitudes
+    const sol = RendimientoStore.get<any[]>("solicitudes_permisos", []);
+    if (sol && sol.length > 0) {
+      setSolicitudesList(sol);
+    }
+
+    // 4. Certificaciones
+    const certs = RendimientoStore.get<any[]>("certificaciones_staff", []);
+    if (certs && certs.length > 0) {
+      setCertificacionesList(certs);
+    }
+
+    // 5. Evaluaciones
+    const evals = RendimientoStore.get<any[]>("evaluaciones_staff", []);
+    if (evals && evals.length > 0) {
+      setEvaluacionesList(evals);
+    }
+
+    // 6. Nóminas
+    const nominas = RendimientoStore.getNominas();
+    if (nominas && nominas.length > 0) {
+      setNominasDBList(nominas);
+    }
+
+    // Run background DB seeding if needed asynchronously
+    ensureStaffDBDataSeeded();
   };
 
   useEffect(() => {
-    fetchAllDataFromDB();
-    const handleSync = () => fetchAllDataFromDB();
-    window.addEventListener("organizacionChanged", handleSync);
-    return () => window.removeEventListener("organizacionChanged", handleSync);
+    if (RendimientoStore.isStoreSynced()) {
+      load();
+    } else {
+      const handleSync = () => load();
+      window.addEventListener("rendimientoStoreUpdated", handleSync);
+      window.addEventListener("organizacionChanged", handleSync);
+      const timeout = setTimeout(() => load(), 3000);
+      return () => {
+        window.removeEventListener("rendimientoStoreUpdated", handleSync);
+        window.removeEventListener("organizacionChanged", handleSync);
+        clearTimeout(timeout);
+      };
+    }
   }, []);
 
   // Filtered coaches
