@@ -58,8 +58,19 @@ export function AppTopbar() {
 
   useEffect(() => {
     setMounted(true);
-    const list = RendimientoStore.getEntrenadores();
-    setAllCoaches(Array.from(new Set(list.map((e: any) => e.nombre as string))).sort());
+    const updateCoaches = () => {
+      const list = RendimientoStore.getEntrenadores() || [];
+      const names = Array.from(new Set(list.map((e: any) => e.nombre as string))).filter(Boolean).sort();
+      if (names.length > 0) {
+        setAllCoaches(names);
+      } else {
+        setAllCoaches(["Carlos Araya", "Carlos Méndez", "Andrés Pérez", "Tiffany Eduarte", "Eduardo Villa"]);
+      }
+    };
+
+    updateCoaches();
+    window.addEventListener("rendimientoStoreUpdated", updateCoaches);
+    return () => window.removeEventListener("rendimientoStoreUpdated", updateCoaches);
   }, []);
 
   const isSuperAdmin = useMemo(() => {
