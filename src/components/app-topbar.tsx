@@ -100,11 +100,12 @@ export function AppTopbar() {
       <Button 
         variant="ghost" 
         size="sm" 
-        onClick={() => setOpenLearningModal(true)} 
-        aria-label="Ruta NexusSport"
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-primary hover:text-primary-foreground hover:bg-primary/90 bg-primary/10 rounded-lg border border-primary/20 transition-all duration-200 shadow-sm shrink-0"
+        onClick={() => navigate({ to: "/ruta-aprendizaje" })} 
+        aria-label="Ruta NexusSport" 
+        title="Ruta de Maestría y Aprendizaje Interactivo"
+        className="gap-1.5 font-extrabold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl shadow-sm"
       >
-        <GraduationCap className="h-4 w-4" />
+        <Rocket className="h-4 w-4 text-amber-500 animate-pulse" />
         <span className="hidden md:inline">Ruta NexusSport</span>
       </Button>
 
