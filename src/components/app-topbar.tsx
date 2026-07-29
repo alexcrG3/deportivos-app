@@ -103,7 +103,7 @@ export function AppTopbar() {
         onClick={() => navigate({ to: "/ruta-aprendizaje" })} 
         aria-label="Ruta NexusSport" 
         title="Ruta de Maestría y Aprendizaje Interactivo"
-        className="gap-1.5 font-extrabold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl shadow-sm"
+        className="hidden sm:flex gap-1.5 font-extrabold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl shadow-sm shrink-0"
       >
         <Rocket className="h-4 w-4 text-amber-500 animate-pulse" />
         <span className="hidden md:inline">Ruta NexusSport</span>
@@ -115,7 +115,7 @@ export function AppTopbar() {
         onClick={() => setOpenGuides(true)} 
         aria-label="Guías Interactivas" 
         title="Guías Interactivas y Manuales Paso a Paso"
-        className="gap-1.5 font-bold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl"
+        className="hidden sm:flex gap-1.5 font-bold text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl shrink-0"
       >
         <BookOpen className="h-4 w-4" />
         <span className="hidden md:inline">Guías Interactivas</span>

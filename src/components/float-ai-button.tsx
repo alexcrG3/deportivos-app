@@ -199,10 +199,10 @@ export function FloatAIButton() {
       {/* Permanent floating button */}
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        className="fixed bottom-6 right-6 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-amber-500 text-white shadow-[0_8px_30px_rgb(139,92,246,0.3)] hover:shadow-[0_8px_30px_rgb(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
-        title="Abrir DeportivOS AI Copiloto"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[90] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-amber-500 text-white shadow-[0_8px_30px_rgb(139,92,246,0.3)] hover:shadow-[0_8px_30px_rgb(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
+        title="Abrir Athletix AI Copiloto"
       >
-        {isOpen ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6 animate-pulse" />}
+        {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />}
       </button>
 
       {/* Slide Sidebar */}

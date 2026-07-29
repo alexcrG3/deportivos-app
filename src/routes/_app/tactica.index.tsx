@@ -180,30 +180,30 @@ function TacticaDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-6 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50 border border-[#E2E8F0] text-[#0F172A]">
-            <ShieldHalf className="h-6 w-6" />
+      <div className="bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-[12px] p-4 sm:p-6 shadow-sm mb-6 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 overflow-hidden">
+        <div className="flex items-start sm:items-center gap-3 min-w-0 w-full lg:w-auto">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 text-[#0F172A] dark:text-slate-100">
+            <ShieldHalf className="h-6 w-6 text-primary" />
           </div>
-          <div>
-            <h1 className="text-[28px] font-bold text-[#0F172A] tracking-tight flex items-center gap-2">
-              Área Técnica & Gobierno Deportivo
-              <Badge className="bg-blue-500/10 text-blue-700 border-none rounded-full px-[10px] py-[4px] text-[12px] font-medium uppercase">Enterprise 2.0</Badge>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-[28px] font-bold text-[#0F172A] dark:text-slate-100 tracking-tight flex flex-wrap items-center gap-2 leading-snug">
+              <span>Área Técnica & Gobierno Deportivo</span>
+              <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-none rounded-full px-[10px] py-[3px] text-[11px] font-medium uppercase shrink-0">Enterprise 2.0</Badge>
             </h1>
-            <p className="text-[#64748B] text-sm">
+            <p className="text-[#64748B] dark:text-slate-400 text-xs sm:text-sm mt-0.5">
               Auditoría metodológica en tiempo real, flujo IA y control de rendimiento.
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Link to="/tactica/planificacion">
-            <Button size="sm" variant="outline" className="border border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-slate-50 rounded-[8px] px-4 py-2 text-sm gap-1.5">
-              <BookOpen className="h-4 w-4" /> Planificación Metodológica
+        <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto shrink-0">
+          <Link to="/tactica/planificacion" className="w-full sm:w-auto">
+            <Button size="sm" variant="outline" className="w-full sm:w-auto border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-[8px] px-3.5 py-2 text-xs sm:text-sm gap-1.5 justify-center">
+              <BookOpen className="h-4 w-4 shrink-0" /> <span className="truncate">Planificación Metodológica</span>
             </Button>
           </Link>
-          <Link to="/tactica/pizarra">
-            <Button size="sm" className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5">
-              <ShieldHalf className="h-4 w-4" /> Centro Táctico
+          <Link to="/tactica/pizarra" className="w-full sm:w-auto">
+            <Button size="sm" className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-3.5 py-2 text-xs sm:text-sm font-medium gap-1.5 justify-center">
+              <ShieldHalf className="h-4 w-4 shrink-0" /> <span className="truncate">Centro Táctico</span>
             </Button>
           </Link>
         </div>
