@@ -135,14 +135,22 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
       loadRoleFromDB();
 
-      const storedPerms = localStorage.getItem("user-permissions");
-      if (storedPerms) {
-        try {
-          setPermissionsState(JSON.parse(storedPerms));
-        } catch (e) {
-          console.error("Error parsing stored permissions", e);
+      const loadPermissions = () => {
+        const storedPerms = localStorage.getItem("user-permissions") || localStorage.getItem("deportivos_user_permissions");
+        if (storedPerms) {
+          try {
+            setPermissionsState(JSON.parse(storedPerms));
+          } catch (e) {
+            console.error("Error parsing stored permissions", e);
+          }
         }
-      }
+      };
+
+      loadPermissions();
+
+      const handlePermUpdate = () => loadPermissions();
+      window.addEventListener("userPermissionsUpdated", handlePermUpdate);
+      window.addEventListener("storage", handlePermUpdate);
 
       // Restore selected coach from sessionStorage (clears on browser close)
       const storedCoachId = sessionStorage.getItem("selected_coach_id");
@@ -153,6 +161,11 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
         setSelectedCoachName(storedCoachName);
         setSelectedCoachIdentificacion(storedCoachIdent || null);
       }
+
+      return () => {
+        window.removeEventListener("userPermissionsUpdated", handlePermUpdate);
+        window.removeEventListener("storage", handlePermUpdate);
+      };
     }
   }, []);
 
@@ -174,6 +187,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
     setPermissionsState(newPerms);
     if (typeof window !== "undefined") {
       localStorage.setItem("user-permissions", JSON.stringify(newPerms));
+      localStorage.setItem("deportivos_user_permissions", JSON.stringify(newPerms));
+      window.dispatchEvent(new Event("userPermissionsUpdated"));
     }
   };
 
@@ -188,6 +203,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
       };
       if (typeof window !== "undefined") {
         localStorage.setItem("user-permissions", JSON.stringify(updated));
+        localStorage.setItem("deportivos_user_permissions", JSON.stringify(updated));
+        window.dispatchEvent(new Event("userPermissionsUpdated"));
       }
       return updated;
     });

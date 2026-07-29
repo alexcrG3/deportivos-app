@@ -460,15 +460,27 @@ export function AppSidebar() {
               // Admin siempre ve todo
               if (role === "admin") return true;
               
-              // Si el módulo principal o la pestaña está explícitamente apagada, ocultarla.
+              // 1. Si el módulo principal está apagado (false), OCULTARLO DE INMEDIATO
               if (rolePerms[it.id] === false) return false;
+              
+              // 2. Si tiene sub-links y TODOS los sub-links están apagados, ocultar el módulo padre
+              if (it.subLinks && it.subLinks.length > 0) {
+                const anySubAllowed = it.subLinks.some(s => {
+                  const sVal = s.id ? rolePerms[s.id] : undefined;
+                  const sCompVal = s.id ? rolePerms[`${it.id}_${s.id}`] : undefined;
+                  return sVal !== false && sCompVal !== false;
+                });
+                if (!anySubAllowed) return false;
+              }
+
+              // 3. Si tiene ítems hijos y TODOS los hijos están apagados, ocultar el módulo padre
+              if (it.childrenItems && it.childrenItems.length > 0) {
+                const anyChildAllowed = it.childrenItems.some(c => checkAllowed(c));
+                if (!anyChildAllowed) return false;
+              }
+
               if (rolePerms[it.id] === true) return true;
               
-              // Si el módulo padre no está apagado, verificar si al menos un hijo está habilitado.
-              if (it.childrenItems && it.childrenItems.some(c => checkAllowed(c))) return true;
-              if (it.subLinks && it.subLinks.some(s => s.id && rolePerms[s.id] !== false)) return true;
-              
-              // Si es un item sin estado explícito, se permite por defecto
               return true;
             };
 
@@ -565,11 +577,12 @@ export function AppSidebar() {
                           {item.subLinks.map((sub: any, idx) => {
                             const roleKey = role === "coach" ? "coach" : role;
                             
-                            // Verificar permisos por ID de sub-link
+                            // Verificar permisos por ID de sub-link (tanto por ID directo como compuesto)
                             const valById = sub.id ? permissions[roleKey]?.[sub.id] : undefined;
+                            const valByCompKey = sub.id ? permissions[roleKey]?.[`${item.id}_${sub.id}`] : undefined;
                             const parentAllowed = permissions[roleKey]?.[item.id] !== false;
                             
-                            const isDenied = valById === false || !parentAllowed;
+                            const isDenied = valById === false || valByCompKey === false || !parentAllowed;
                             if (isDenied && role !== "admin") return null;
 
                             const isSamePath = pathname === sub.url || (sub.url !== "/" && pathname.startsWith(sub.url + "/"));

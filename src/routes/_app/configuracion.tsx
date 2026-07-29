@@ -399,10 +399,28 @@ function ConfigPage() {
     }
     const targetRoleId = roleId === "coaches" ? "coach" : roleId;
     const currentVal = permissions[targetRoleId]?.[moduleId] ?? false;
-    updatePermission(targetRoleId, moduleId, !currentVal);
+    const newVal = !currentVal;
+
+    // Actualizar el módulo principal
+    updatePermission(targetRoleId, moduleId, newVal);
+
+    // Cascada: Apagar/encender también todos sus sub-items para consistencia total
+    const modConfig = MODULOS_PERMISOS.find(m => m.id === moduleId);
+    if (modConfig && modConfig.subItems) {
+      modConfig.subItems.forEach(sub => {
+        const compositeSubKey = `${modConfig.id}_${sub.id}`;
+        updatePermission(targetRoleId, compositeSubKey, newVal);
+        updatePermission(targetRoleId, sub.id, newVal);
+      });
+    }
   };
 
   const handleSave = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user-permissions", JSON.stringify(permissions));
+      localStorage.setItem("deportivos_user_permissions", JSON.stringify(permissions));
+      window.dispatchEvent(new Event("userPermissionsUpdated"));
+    }
     toast.success(`Permisos de ${activeRoleInfo?.nombre} actualizados con éxito.`);
   };
 
