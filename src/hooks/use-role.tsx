@@ -11,8 +11,9 @@ export const INITIAL_PERMISSIONS = {
     finanzas: true, medico: true, logistica: true, ia: true, configuracion: true, soporte: true, muro: true
   },
   coach: {
-    dashboard: false, operacion: true, asistencia: true, coordinacion_general: true, coach_os: true,
-    centro_tactico: true, competiciones: true, rendimiento: true, crm: false, personal: false,
+    dashboard: false, operacion: true, asistencia: true, op_jugadores: false, operacion_op_jugadores: false,
+    coordinacion_general: false, coord_planificacion: false, coordinacion_general_coord_planificacion: false,
+    coach_os: true, centro_tactico: true, competiciones: true, rendimiento: true, crm: false, personal: false,
     finanzas: false, medico: false, logistica: false, ia: true, configuracion: false, soporte: true, muro: true
   },
   fisioterapeuta: {
