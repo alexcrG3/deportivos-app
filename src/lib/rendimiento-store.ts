@@ -529,15 +529,34 @@ function normalScore(val: number, max = 5): number {
   return Math.round(((val - 1) / (max - 1)) * 100);
 }
 
-/** Calcula Wellness Score 0-100 */
-export function calcWellnessScore(w: Omit<WellnessRegistro, "id">): number {
-  const sueño    = normalScore(w.sueñoCalidad);    // 20%
-  const dolor    = invertScore(w.dolorMuscular);   // 20%
-  const estres   = invertScore(w.estres);          // 20%
-  const animo    = normalScore(w.animo);           // 20%
-  const energia  = normalScore(w.energia);         // 10%
-  const motiv    = normalScore(w.motivacion);      // 10%
-  return Math.round(sueño * 0.20 + dolor * 0.20 + estres * 0.20 + animo * 0.20 + energia * 0.10 + motiv * 0.10);
+export function calcWellnessScore(w: any): number {
+  if (!w) return 100;
+  const sueñoVal    = Number(w.sueñoCalidad ?? w.sueño_calidad ?? 4);
+  const dolorVal    = Number(w.dolorMuscular ?? w.dolor_muscular ?? 1);
+  const estresVal   = Number(w.estres ?? 1);
+  const fatigaVal   = Number(w.fatiga ?? 1);
+  const animoVal    = Number(w.animo ?? 4);
+  const energiaVal  = Number(w.energia ?? 4);
+  const motivVal    = Number(w.motivacion ?? 4);
+
+  const sueño    = normalScore(sueñoVal);    // 20%
+  const dolor    = invertScore(dolorVal);   // 20%
+  const estres   = invertScore(estresVal);  // 20%
+  const animo    = normalScore(animoVal);   // 20%
+  const energia  = normalScore(energiaVal); // 10%
+  const motiv    = normalScore(motivVal);   // 10%
+
+  let total = Math.round(sueño * 0.20 + dolor * 0.20 + estres * 0.20 + animo * 0.20 + energia * 0.10 + motiv * 0.10);
+  if (isNaN(total)) total = 100;
+
+  // Si el sueño es muy malo (<=2) o fatiga/dolor/estrés están elevados, se penaliza el score a zona de precaución/riesgo
+  if (sueñoVal <= 2 || fatigaVal >= 3 || dolorVal >= 3 || estresVal >= 3) {
+    if (total > 70) total = 70;
+  }
+  if (fatigaVal >= 5 || dolorVal >= 5) {
+    if (total > 45) total = 45;
+  }
+  return total;
 }
 
 /** Calcula ACWR dado array de cargas (últimas 4 semanas + semana actual) */
@@ -1001,9 +1020,7 @@ class RendimientoStore {
         consentFotos: j.consent_fotos,
         firmaBase64: j.firma_base64,
       }));
-      try {
-        localStorage.setItem("deportivos_hp_jugadores_dynamics", JSON.stringify(this.memoryCache["jugadores_dynamics"]));
-      } catch (e) {}
+
 
       // 2. PAGOS
       this.memoryCache["pagos_dynamics"] = dbPagos.map((p: any) => ({
@@ -1373,11 +1390,7 @@ class RendimientoStore {
       } catch (e) {}
     }
 
-    if (key === "jugadores_dynamics") {
-      try {
-        localStorage.setItem("deportivos_hp_jugadores_dynamics", JSON.stringify(value));
-      } catch (e) {}
-    }
+
 
     // Disparar sincronización asíncrona hacia Supabase en segundo plano
     const activeOrg = this.getActiveOrganizacionId();

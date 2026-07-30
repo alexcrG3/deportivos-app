@@ -213,8 +213,20 @@ function EquiposPage() {
   }, [role, coachName, teamsList]);
 
   const selectedTeam = useMemo(() => {
-    return visibleTeams.find(e => e.id === teamId);
+    if (!teamId) return undefined;
+    const searchLc = String(teamId).toLowerCase().trim();
+    return visibleTeams.find(e => {
+      if (!e) return false;
+      const eId = String(e.id || "").toLowerCase();
+      if (eId === searchLc) return true;
+      if (eId.replace(/[^a-z0-9]/g, "").includes(searchLc.replace(/[^a-z0-9]/g, ""))) return true;
+      if (searchLc.replace(/[^a-z0-9]/g, "").includes(eId.replace(/[^a-z0-9]/g, ""))) return true;
+      if (e.categoria && safeLower(e.categoria).includes(searchLc)) return true;
+      if (e.nombre && safeLower(e.nombre).includes(searchLc)) return true;
+      return false;
+    });
   }, [teamId, visibleTeams]);
+
 
   const handleCreateTeam = (e: React.FormEvent) => {
     e.preventDefault();
@@ -625,23 +637,38 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
   // Convocatorias from Supabase
   const [teamConvocatorias, setTeamConvocatorias] = useState<any[]>([]);
   useEffect(() => {
-    const orgId = RendimientoStore.getActiveOrganizacionId();
-    supabase
-      .from("convocatorias")
-      .select("*")
-      .eq("organizacion_id", orgId)
-      .order("fecha", { ascending: false })
-      .then(({ data }) => {
-        if (!data) return;
-        const filtered = data.filter((c: any) => {
-          const eq = (c.equipo || "").toLowerCase();
-          const tn = (team.nombre || "").toLowerCase();
-          const tc = (team.categoria || "").toLowerCase();
-          return eq.includes(tn) || eq.includes(tc) || tn.includes(eq) || tc.includes(eq);
+    let isMounted = true;
+    try {
+      const orgId = RendimientoStore.getActiveOrganizacionId();
+      supabase
+        .from("convocatorias")
+        .select("*")
+        .eq("organizacion_id", orgId)
+        .order("fecha", { ascending: false })
+        .then(({ data, error }) => {
+          if (!isMounted) return;
+          if (error) {
+            console.warn("Error consultando convocatorias:", error);
+            return;
+          }
+          if (!data) return;
+          const filtered = data.filter((c: any) => {
+            const eq = (c.equipo || "").toLowerCase();
+            const tn = (team.nombre || "").toLowerCase();
+            const tc = (team.categoria || "").toLowerCase();
+            return eq.includes(tn) || eq.includes(tc) || tn.includes(eq) || tc.includes(eq);
+          });
+          setTeamConvocatorias(filtered);
+        })
+        .catch((err) => {
+          console.warn("Excepción al consultar convocatorias:", err);
         });
-        setTeamConvocatorias(filtered);
-      });
+    } catch (e) {
+      console.warn("Excepción sincrónica convocatorias:", e);
+    }
+    return () => { isMounted = false; };
   }, [team]);
+
 
   const [isOpenPlayerCreate, setIsOpenPlayerCreate] = useState(false);
   const [isOpenPlayerEdit, setIsOpenPlayerEdit] = useState(false);
@@ -736,6 +763,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
   });
   const [hasSavedAttendance, setHasSavedAttendance] = useState(false);
   const [isEditingHistory, setIsEditingHistory] = useState(false);
+  const [selectedHistorySession, setSelectedHistorySession] = useState<string | null>(null);
 
   const diasNombresList = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -1940,170 +1968,140 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
             </CardContent>
           </Card>
 
-          {/* Sub-navegación dentro de Cancha & Asistencia */}
+          {/* HISTORIAL DE SESIONES – vista compacta tipo log */}
           <div className="border-t border-border/60 pt-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                 <ClipboardCheck className="h-5 w-5 text-primary" />
-                Pase de Asistencia & Registro de Sesión
+                Historial de Asistencias
               </h3>
+              <span className="text-xs text-muted-foreground">
+                {teamSessions.length} sesión{teamSessions.length !== 1 ? "es" : ""} registrada{teamSessions.length !== 1 ? "s" : ""}
+              </span>
             </div>
-            
-            {/* Formulario de Asistencia Rápida y Tests Incorporado */}
-            <div className="space-y-6">
-              {/* Selector de Fecha y Estado */}
-              <div className="bg-card border rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold text-primary uppercase tracking-wider">Sesión Activa de Cancha</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Marca asistencias, RPE, Wellness y pruebas físicas en menos de 10 segundos.</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input 
-                    type="date" 
-                    value={attendanceDate} 
-                    onChange={(e) => setAttendanceDate(e.target.value)}
-                    className="w-auto text-xs h-9 font-semibold"
-                  />
-                  {hasSavedAttendance && !isEditingHistory ? (
-                    <Button size="sm" variant="outline" onClick={() => setIsEditingHistory(true)} className="text-xs h-9 font-semibold">
-                      Editar asistencia
-                    </Button>
-                  ) : (
-                    <Button size="sm" onClick={() => handleSaveAttendance(false)} className="bg-primary text-primary-foreground text-xs h-9 font-semibold hover:bg-primary/95">
-                      Guardar Asistencia
-                    </Button>
-                  )}
-                </div>
+
+            {teamSessions.length === 0 ? (
+              <div className="text-center py-10 space-y-2 bg-muted/20 rounded-2xl border border-dashed border-border">
+                <ClipboardCheck className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                <p className="text-sm font-semibold text-muted-foreground">Sin sesiones registradas aún</p>
+                <p className="text-xs text-muted-foreground/70">
+                  Usa el botón <strong>INICIAR ENTRENAMIENTO EN CANCHA</strong> para registrar tu primera sesión.
+                </p>
               </div>
+            ) : (
+              <div className="space-y-2">
+                {teamSessions.map((s) => {
+                  const isOpen = selectedHistorySession === s.id;
+                  // Get full attendance record for this session date
+                  const fullReg = RendimientoStore.getAsistencia(team.nombre, s.fecha);
+                  const reg = fullReg?.registro || {};
+                  const vals = Object.values(reg) as string[];
+                  const p = vals.filter(v => v === "P").length;
+                  const t = vals.filter(v => v === "T").length;
+                  const a = vals.filter(v => v === "A").length;
+                  const j = vals.filter(v => v === "J").length;
+                  const total = vals.length;
+                  const pct = total > 0 ? Math.round(((p + t) / total) * 100) : 0;
 
-              {/* Tabla de Pase de Lista */}
-              <Card className={`shadow-card overflow-hidden transition-all duration-350 ${hasSavedAttendance && !isEditingHistory ? "opacity-75 bg-muted/5 border-dashed" : "opacity-100 bg-card"}`}>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40 hover:bg-muted/40">
-                      <TableHead>Jugador</TableHead>
-                      <TableHead>Asistencia</TableHead>
-                      <TableHead className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <span>Wellness Diario</span>
-                          {hasWellnessOnThisDay && (
-                            <Button size="xs" variant="outline" onClick={handleClearAllWellness} className="h-5 px-1.5 text-[9px] font-bold border-red-500/30 text-red-600 bg-red-500/5">Quitar</Button>
-                          )}
-                          <Button size="xs" variant="outline" onClick={handleMarkAllWellness} className="h-5 px-1.5 text-[9px] font-bold border-emerald-500/30 text-emerald-600 bg-emerald-500/5">Marcar Todos</Button>
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <span>Pruebas Físicas</span>
-                          {hasTestsOnThisDay && (
-                            <Button size="xs" variant="outline" onClick={handleClearAllTests} className="h-5 px-1.5 text-[9px] font-bold border-red-500/30 text-red-600 bg-red-500/5">Quitar</Button>
-                          )}
-                          <Button size="xs" variant="outline" onClick={handleMarkAllTests} className="h-5 px-1.5 text-[9px] font-bold border-violet-500/30 text-violet-600 bg-violet-500/5">Marcar Todos</Button>
-                        </div>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {teamPlayers.map((p) => {
-                      const todayStr = attendanceDate || new Date().toISOString().split("T")[0];
-                      const wellReg = RendimientoStore.getWellness().find(w => w.jugadorId === p.id && w.fecha === todayStr);
-                      const testReg = savedTests.find(t => t.jugadorId === p.id && t.fecha === todayStr);
+                  // Format date nicely
+                  const [y, mo, d] = (s.fecha || "").split("-");
+                  const dateObj = s.fecha ? new Date(Number(y), Number(mo) - 1, Number(d)) : null;
+                  const diaNombre = dateObj ? ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][dateObj.getDay()] : "";
+                  const mesNombre = dateObj ? ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][dateObj.getMonth()] : "";
+                  const fechaDisplay = dateObj ? `${diaNombre} ${Number(d)} ${mesNombre} ${y}` : s.fecha;
 
-                      return (
-                        <TableRow key={p.id} className={hasSavedAttendance && !isEditingHistory ? "hover:bg-transparent" : ""}>
-                          <TableCell className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={p.avatar} />
-                              <AvatarFallback>{p.nombre[0]}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm font-semibold text-foreground">{p.nombre}</span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              {(["P", "T", "A", "J"] as const).map((opt) => {
-                                const isSel = attendance[p.id] === opt;
-                                const colors: Record<string, string> = {
-                                  P: "bg-emerald-500 text-white",
-                                  T: "bg-amber-500 text-white",
-                                  A: "bg-rose-500 text-white",
-                                  J: "bg-blue-500 text-white",
-                                };
-                                const isDisabled = hasSavedAttendance && !isEditingHistory;
-                                return (
-                                  <button
-                                    key={opt}
-                                    disabled={isDisabled}
-                                    onClick={async () => {
-                                      setAttendance(prev => ({ ...prev, [p.id]: opt }));
-                                      if (opt === "A") {
-                                        await handleClearPlayerWellness(p.id);
-                                        await handleClearPlayerTest(p.id);
-                                        toast.info(`${p.nombre} marcado como Ausente. Se removieron sus registros de Wellness y Pruebas.`);
-                                      }
-                                    }}
-                                    className={`h-7 w-7 rounded-lg text-xs font-bold transition-all ${
-                                      isDisabled 
-                                        ? isSel ? `${colors[opt]} opacity-40 cursor-not-allowed` : "bg-muted/20 text-muted-foreground/20 cursor-not-allowed"
-                                        : isSel ? colors[opt] : "bg-muted text-muted-foreground hover:bg-muted-foreground/10"
-                                    }`}
-                                  >
-                                    {opt}
-                                  </button>
-                                );
-                              })}
+                  return (
+                    <div key={s.id} className="rounded-2xl border border-border overflow-hidden transition-all">
+                      {/* FILA COMPACTA – clic para expandir */}
+                      <button
+                        onClick={() => setSelectedHistorySession(isOpen ? null : s.id)}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
+                            pct >= 80 ? "bg-emerald-500/10 text-emerald-600" :
+                            pct >= 50 ? "bg-amber-500/10 text-amber-600" :
+                            "bg-rose-500/10 text-rose-600"
+                          }`}>
+                            {pct > 0 ? `${pct}%` : "📋"}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{fechaDisplay}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {s.tipo || "Entrenamiento"} {s.hora ? `· ${s.hora}` : ""} {s.duracion ? `· ${s.duracion} min` : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {total > 0 && (
+                            <div className="hidden sm:flex items-center gap-1.5 text-xs">
+                              {p > 0 && <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 font-bold">{p}P</span>}
+                              {t > 0 && <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 font-bold">{t}T</span>}
+                              {a > 0 && <span className="px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-700 font-bold">{a}A</span>}
+                              {j > 0 && <span className="px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-700 font-bold">{j}J</span>}
                             </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {wellReg && wellReg.id ? (
-                              <div className="inline-flex items-center gap-1">
-                                <Badge onClick={() => handleOpenWellnessModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20">
-                                  🟢 {wellReg.score ?? wellReg.promedio ?? (wellReg.sueñoCalidad ? Math.round((wellReg.sueñoCalidad / 5) * 100) : 85)}%
-                                </Badge>
-                                {(!hasSavedAttendance || isEditingHistory) && (
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleClearPlayerWellness(p.id); }}
-                                    title="Quitar Wellness de este jugador"
-                                    className="h-5 w-5 rounded-full hover:bg-rose-500/20 text-rose-500 flex items-center justify-center text-[10px] font-bold transition-colors"
-                                  >
-                                    ✕
-                                  </button>
-                                )}
+                          )}
+                          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-90" : ""}`} />
+                        </div>
+                      </button>
+
+                      {/* DETALLE EXPANDIBLE */}
+                      {isOpen && (
+                        <div className="border-t border-border bg-muted/10 px-4 py-4 space-y-3">
+                          {total === 0 ? (
+                            <p className="text-xs text-muted-foreground text-center py-2">
+                              No hay registro de asistencia guardado para esta sesión.
+                            </p>
+                          ) : (
+                            <>
+                              <div className="flex flex-wrap gap-3 text-xs font-semibold">
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />Presentes: {p}</span>
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />Tardíos: {t}</span>
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-rose-500 inline-block" />Ausentes: {a}</span>
+                                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-blue-500 inline-block" />Justificados: {j}</span>
+                                <span className="flex items-center gap-1 text-muted-foreground">· Total: {total} jugadores</span>
                               </div>
-                            ) : (
-                              <Button variant="ghost" size="sm" onClick={() => handleOpenWellnessModal(p)} className="h-7 text-[10px] font-semibold text-primary hover:bg-primary/5 px-2">
-                                Encuestar
-                              </Button>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {testReg ? (
-                              <div className="inline-flex items-center gap-1">
-                                <Badge onClick={() => handleOpenTestModal(p)} className="text-[10px] font-bold px-2 py-0.5 border cursor-pointer bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20">
-                                  🏃 {testReg.tipoTest.includes("Velocidad") ? "30m" : "Test"}: {testReg.resultado} {testReg.unidad.substring(0, 3)}.
-                                </Badge>
-                                {(!hasSavedAttendance || isEditingHistory) && (
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleClearPlayerTest(p.id); }}
-                                    title="Quitar Prueba Física de este jugador"
-                                    className="h-5 w-5 rounded-full hover:bg-rose-500/20 text-rose-500 flex items-center justify-center text-[10px] font-bold transition-colors"
-                                  >
-                                    ✕
-                                  </button>
-                                )}
+                              <div className="space-y-1 max-h-48 overflow-y-auto">
+                                {Object.entries(reg).map(([jugId, estado]) => {
+                                  const jugador = teamPlayers.find(pl => pl.id === jugId);
+                                  if (!jugador) return null;
+                                  const estadoColors: Record<string, string> = {
+                                    P: "bg-emerald-500 text-white",
+                                    T: "bg-amber-500 text-white",
+                                    A: "bg-rose-500 text-white",
+                                    J: "bg-blue-500 text-white",
+                                  };
+                                  return (
+                                    <div key={jugId} className="flex items-center justify-between py-1 border-b border-border/40 last:border-0">
+                                      <span className="text-xs text-foreground font-medium">{jugador.nombre}</span>
+                                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${estadoColors[estado as string] || "bg-muted text-muted-foreground"}`}>
+                                        {estado === "P" ? "Presente" : estado === "T" ? "Tardío" : estado === "A" ? "Ausente" : "Justificado"}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ) : (
-                              <Button variant="ghost" size="sm" onClick={() => handleOpenTestModal(p)} className="h-7 text-[10px] font-semibold text-purple-400 hover:bg-purple-500/5 px-2">
-                                + Test
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
+                            </>
+                          )}
+                          <div className="flex justify-end pt-1">
+                            <button
+                              onClick={() => {
+                                setAttendanceDate(s.fecha);
+                                setIsEditingHistory(true);
+                                setSelectedHistorySession(null);
+                              }}
+                              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                            >
+                              <Pencil className="h-3 w-3" /> Editar esta asistencia
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -2445,7 +2443,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                       <TableCell>
                         {wellReg && wellReg.id ? (
                           (() => {
-                            const sc = wellReg.score ?? wellReg.promedio ?? (wellReg.sueñoCalidad ? Math.round((wellReg.sueñoCalidad / 5) * 100) : 85);
+                            const sc = calcWellnessScore(wellReg);
                             let colorBadge = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
                             let label = "🟢";
                             if (sc < 50) {

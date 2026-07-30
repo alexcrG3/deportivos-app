@@ -15,19 +15,26 @@ import {
   Dumbbell, Clock, MapPin, Users, Plus, GripVertical, Search,
   CheckCircle2, Play, Activity, Mic, MicOff, AlertTriangle, ShieldCheck, ShieldHalf, Tv,
   ChevronRight, ArrowLeft, Timer, Trophy, Sparkles, HeartPulse, Flame,
-  FileText, Check, X, AlertCircle, HelpCircle, StopCircle, RefreshCw, Trash2
+  FileText, Check, X, AlertCircle, HelpCircle, StopCircle, RefreshCw, Trash2, Lock, Unlock, Maximize2
 } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
-import RendimientoStore from "@/lib/rendimiento-store";
+import RendimientoStore, { calcWellnessScore } from "@/lib/rendimiento-store";
 import { supabase } from "@/lib/supabase";
 import { CoachOsBanner } from "@/components/coach-os-banner";
+import TacticalBoard from "@/components/tactical-board";
+import { CanchaBCoachBoard } from "@/components/cancha-bcoach-board";
 
 export const Route = createFileRoute("/_app/entrenamientos")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    autostart: search.autostart as string | undefined,
-    teamName: search.teamName as string | undefined,
-    category: search.category as string | undefined,
-    fecha: search.fecha as string | undefined,
+  validateSearch: (search: Record<string, unknown> = {}): {
+    autostart?: string;
+    teamName?: string;
+    category?: string;
+    fecha?: string;
+  } => ({
+    autostart: typeof search?.autostart === "string" ? search.autostart : undefined,
+    teamName: typeof search?.teamName === "string" ? search.teamName : undefined,
+    category: typeof search?.category === "string" ? search.category : undefined,
+    fecha: typeof search?.fecha === "string" ? search.fecha : undefined,
   }),
   component: EntrenamientosPage,
 });
@@ -89,8 +96,19 @@ function EntrenamientosPage() {
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }, []);
+
   const [fechaSesion, setFechaSesion] = useState<string>(fechaParam || hoyYmd);
   const isFechaRetroactiva = fechaSesion !== hoyYmd;
+  const [isHistorialBloqueado, setIsHistorialBloqueado] = useState<boolean>(true);
+  const isReadOnly = isFechaRetroactiva && isHistorialBloqueado;
+
+  useEffect(() => {
+    if (fechaSesion !== hoyYmd) {
+      setIsHistorialBloqueado(true);
+    } else {
+      setIsHistorialBloqueado(false);
+    }
+  }, [fechaSesion, hoyYmd]);
 
   // Formatear texto de fecha legible dinámicamente
   const fechaTextoFormateada = useMemo(() => {
@@ -98,14 +116,6 @@ function EntrenamientosPage() {
     if (!y || !m || !d) return "";
     const dateObj = new Date(y, m - 1, d);
     return dateObj.toLocaleDateString("es-CR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  }, [fechaSesion]);
-
-  // Verificar si el día de la semana tiene o no práctica programada (Ej: Sabado/Domingo sin entrenamiento por defecto)
-  const esDiaSinEntrenamiento = useMemo(() => {
-    const [y, m, d] = fechaSesion.split("-").map(Number);
-    if (!y || !m || !d) return false;
-    const dayOfWeek = new Date(y, m - 1, d).getDay(); // 0 = Domingo, 6 = Sábado
-    return dayOfWeek === 0 || dayOfWeek === 6; // Sábados y Domingos se consideran días sin práctica regular
   }, [fechaSesion]);
 
   // Active Session State
@@ -120,6 +130,49 @@ function EntrenamientosPage() {
     jugadores: JUGADORES_DEMO_U9,
   });
 
+  // Verificar si la fecha seleccionada corresponde a un día sin práctica regular según el horario del equipo
+  const esDiaSinEntrenamiento = useMemo(() => {
+    const [y, m, d] = fechaSesion.split("-").map(Number);
+    if (!y || !m || !d) return false;
+    const dayOfWeek = new Date(y, m - 1, d).getDay(); // 0 = Dom, 1 = Lun, 2 = Mar, 3 = Mié, 4 = Jue, 5 = Vie, 6 = Sáb
+
+    // Consultar la configuración del equipo desde RendimientoStore
+    const equiposList = RendimientoStore.getEquipos();
+    const cleanStr = (s: string = "") => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const targetClean = cleanStr(sesionData?.equipo || sesionData?.categoria || teamNameParam || categoryParam || "u9");
+
+    const equipoObj = equiposList.find((eq) => {
+      const nameClean = cleanStr(eq.nombre || "");
+      const catClean = cleanStr(eq.categoria || "");
+      return (nameClean && (nameClean.includes(targetClean) || targetClean.includes(nameClean))) ||
+             (catClean && (catClean.includes(targetClean) || targetClean.includes(catClean)));
+    });
+
+    let configuredDays: number[] = [];
+
+    if (equipoObj) {
+      if (Array.isArray(equipoObj.dias_entrenamiento) && equipoObj.dias_entrenamiento.length > 0) {
+        configuredDays = equipoObj.dias_entrenamiento;
+      } else if (equipoObj.horario) {
+        const sched = equipoObj.horario.toLowerCase();
+        if (sched.includes("lun")) configuredDays.push(1);
+        if (sched.includes("mar")) configuredDays.push(2);
+        if (sched.includes("mié") || sched.includes("mie")) configuredDays.push(3);
+        if (sched.includes("jue")) configuredDays.push(4);
+        if (sched.includes("vie")) configuredDays.push(5);
+        if (sched.includes("sáb") || sched.includes("sab")) configuredDays.push(6);
+        if (sched.includes("dom")) configuredDays.push(0);
+      }
+    }
+
+    // Por defecto para U9 Asoderive, entrenan Martes (2), Miércoles (3), Jueves (4)
+    if (configuredDays.length === 0) {
+      configuredDays = [2, 3, 4];
+    }
+
+    return !configuredDays.includes(dayOfWeek);
+  }, [fechaSesion, sesionData?.equipo, sesionData?.categoria, teamNameParam, categoryParam]);
+
   // Mantener fecha de sesionData en sincro con fechaSesion
   useEffect(() => {
     setSesionData((prev) => ({
@@ -133,32 +186,49 @@ function EntrenamientosPage() {
     const allPlayers = RendimientoStore.getJugadores();
     const clean = (s: string = "") => s.toLowerCase().replace(/[^a-z0-9]/g, "");
     const targetClean = clean(category || teamName);
+    const targetNumMatch = (category || teamName).match(/\d+/);
+    const targetNum = targetNumMatch ? targetNumMatch[0] : "";
 
     let filtered = allPlayers.filter((p) => {
-      const pCat = clean(p.categoria || "");
-      return pCat === targetClean || pCat.includes(targetClean) || targetClean.includes(pCat);
+      const pCatClean = clean(p.categoria || "");
+      if (pCatClean && (pCatClean === targetClean || pCatClean.includes(targetClean) || targetClean.includes(pCatClean))) {
+        return true;
+      }
+      if (targetNum) {
+        const pNumMatch = (p.categoria || "").match(/\d+/);
+        if (pNumMatch && pNumMatch[0] === targetNum) return true;
+      }
+      return false;
     });
 
-    if (filtered.length === 0) {
+    if (filtered.length === 0 && allPlayers.length > 0) {
       filtered = allPlayers;
+    }
+
+    if (filtered.length === 0) {
+      return JUGADORES_DEMO_U9;
     }
 
     const todayStr = new Date().toISOString().split("T")[0];
     const wellnessList = RendimientoStore.getWellness();
 
     return filtered.map((p, idx) => {
-      const playerWell = wellnessList.find((w) => w.jugadorId === p.id && w.fecha === todayStr);
+      const playerWell = wellnessList.find((w) => w.jugadorId === p.id && (w.fecha === fechaSesion || w.fecha === todayStr));
 
-      let color: WellnessColor = "verde";
+      let color: WellnessColor = "ninguno" as any;
       let detalle: string | undefined = undefined;
 
       if (playerWell) {
-        if (playerWell.fatiga > 3 || playerWell.dolorMuscular > 3) {
+        const score = calcWellnessScore(playerWell);
+        if (score < 50 || playerWell.fatiga > 3 || playerWell.dolorMuscular > 3) {
           color = "rojo";
-          detalle = `Fatiga/Dolor alto reportado (${playerWell.fatiga}/5)`;
-        } else if (playerWell.fatiga > 2 || playerWell.dolorMuscular > 2 || playerWell.sueñoCalidad < 3) {
+          detalle = `Alerta Médica (${score}% Score)`;
+        } else if (score < 75 || playerWell.fatiga > 2 || playerWell.dolorMuscular > 2 || playerWell.sueñoCalidad <= 2) {
           color = "amarillo";
-          detalle = "Fatiga ligera o sueño incompleto";
+          detalle = `Precaución (${score}% Score)`;
+        } else {
+          color = "verde";
+          detalle = `Óptimo (${score}% Score)`;
         }
       }
 
@@ -177,31 +247,123 @@ function EntrenamientosPage() {
   useEffect(() => {
     const targetTeam = teamNameParam || "U9 Asoderive";
     const targetCat = categoryParam || "Sub-9";
-    const realPlayers = getRealPlayersForTeam(targetTeam, targetCat);
 
-    // Buscar preguntas reales desde el planeamiento metodológico del profesor
-    const planificaciones = RendimientoStore.getPlanificaciones();
-    const cleanCat = (targetCat || "").toLowerCase().trim();
-    const planEncontrado = planificaciones.find(
-      (p) => p && ((p.categoria || "").toLowerCase().includes(cleanCat) || (p.equipo || "").toLowerCase().includes(cleanCat))
-    );
+    const loadSessionPlayers = async () => {
+      const realPlayers = getRealPlayersForTeam(targetTeam, targetCat);
 
-    const preguntasReales = planEncontrado?.preguntasPedagogicas || planEncontrado?.preguntas || undefined;
+      // Cargar asistencias guardadas para la fechaSesion desde Supabase y RendimientoStore
+      const asistenciasMap: Record<string, EstadoAsistencia> = {};
+      const wellnessMap: Record<string, { color: WellnessColor; detalle?: string }> = {};
 
-    setSesionData((prev) => ({
-      ...prev,
-      equipo: targetTeam,
-      categoria: targetCat,
-      nombre: `Sesión de Cancha: ${targetTeam}`,
-      jugadores: realPlayers,
-      preguntasPedagogicas: preguntasReales,
-    }));
+      try {
+        const { data: dbAsist } = await supabase
+          .from("asistencia_registros")
+          .select("*")
+          .eq("fecha", fechaSesion);
+
+        if (dbAsist && dbAsist.length > 0) {
+          dbAsist.forEach((a: any) => {
+            if (a.jugador_id && a.estado_asistencia) {
+              asistenciasMap[a.jugador_id] = a.estado_asistencia as EstadoAsistencia;
+            }
+            if (a.jugador_id && a.wellness_color) {
+              wellnessMap[a.jugador_id] = {
+                color: a.wellness_color as WellnessColor,
+                detalle: a.wellness_alerta_detalle || undefined,
+              };
+            }
+          });
+        }
+      } catch (e) {}
+
+      try {
+        const storeAsist = RendimientoStore.getAsistencias().filter((a) => a.fecha === fechaSesion);
+        storeAsist.forEach((a) => {
+          if (a.jugadorId && a.estado) {
+            asistenciasMap[a.jugadorId] = a.estado as EstadoAsistencia;
+          }
+        });
+      } catch (e) {}
+
+      // Cargar notas de cierre/dictado y minutas desde Supabase para fechaSesion
+      try {
+        const { data: dbSesion } = await supabase
+          .from("sesiones_entrenamiento")
+          .select("*")
+          .eq("fecha", fechaSesion)
+          .maybeSingle();
+
+        if (dbSesion) {
+          if (dbSesion.notas_entrenador) setNotasVoz(dbSesion.notas_entrenador);
+          if (dbSesion.proxima_clase) setProximaClase(dbSesion.proxima_clase);
+          if (dbSesion.estado === "completada") setPaso1Concluido(true);
+        }
+
+        const { data: dbMinuta } = await supabase
+          .from("minutas_diario")
+          .select("*")
+          .eq("fecha", fechaSesion)
+          .maybeSingle();
+
+        if (dbMinuta) {
+          if (dbMinuta.observaciones) setNotasVoz(dbMinuta.observaciones);
+          if (dbMinuta.proxima_clase) setProximaClase(dbMinuta.proxima_clase);
+          if (dbMinuta.hay_lesion) {
+            setHayLesion(true);
+            if (dbMinuta.jugador_lesionado_id) setJugadorLesionadoId(dbMinuta.jugador_lesionado_id);
+            if (dbMinuta.gravedad_lesion) setGravedadLesion(dbMinuta.gravedad_lesion);
+            if (dbMinuta.descripcion_lesion) setDescripcionLesion(dbMinuta.descripcion_lesion);
+          }
+        }
+      } catch (e) {}
+
+      // Aplicar asistencias/wellness guardados a cada jugador
+      const jugadoresActualizados = realPlayers.map((j) => {
+        const estadoGuardado = asistenciasMap[j.id];
+        const wellGuardado = wellnessMap[j.id];
+        return {
+          ...j,
+          asistencia: estadoGuardado || j.asistencia,
+          wellnessColor: wellGuardado ? wellGuardado.color : j.wellnessColor,
+          wellnessDetalle: wellGuardado ? wellGuardado.detalle : j.wellnessDetalle,
+        };
+      });
+
+      const planificaciones = RendimientoStore.getPlanificaciones();
+      const cleanCat = (targetCat || "").toLowerCase().trim();
+      const planEncontrado = planificaciones.find(
+        (p) => p && ((p.categoria || "").toLowerCase().includes(cleanCat) || (p.equipo || "").toLowerCase().includes(cleanCat))
+      );
+
+      const preguntasReales = planEncontrado?.preguntasPedagogicas || planEncontrado?.preguntas || undefined;
+
+      setSesionData((prev) => ({
+        ...prev,
+        equipo: targetTeam,
+        categoria: targetCat,
+        nombre: `Sesión de Cancha: ${targetTeam}`,
+        jugadores: jugadoresActualizados,
+        preguntasPedagogicas: preguntasReales,
+      }));
+    };
+
+    loadSessionPlayers();
+
+    const t1 = setTimeout(loadSessionPlayers, 500);
+    const t2 = setTimeout(loadSessionPlayers, 1500);
+    window.addEventListener("organizacionChanged", loadSessionPlayers);
 
     if (autostart === "true") {
       setModoSesion("activa");
       setPasoActivo(1);
     }
-  }, [autostart, teamNameParam, categoryParam]);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("organizacionChanged", loadSessionPlayers);
+    };
+  }, [autostart, teamNameParam, categoryParam, fechaSesion]);
 
   // Chronometer & Countdown State for Paso 2
   const [tabBloqueActivo, setTabBloqueActivo] = useState<"bloque1" | "bloque2" | "bloque3">("bloque1");
@@ -256,19 +418,67 @@ function EntrenamientosPage() {
 
   // Paso 3 Modal State (Cierre & Incidencias)
   const [modalCierreSesion, setModalCierreSesion] = useState<boolean>(false);
+  const [modalPizarraTactica, setModalPizarraTactica] = useState<boolean>(false);
+  const [isFullScreenPizarra, setIsFullScreenPizarra] = useState<boolean>(false);
+
+  // Sesión inicial de Pizarra Táctica con los jugadores reales desplegados en la cancha verde
+  const initialTacticalSession = useMemo(() => {
+    const positions = [
+      { x: 10, y: 32.5 },  // Portero
+      { x: 28, y: 15 },    // Lateral Izquierdo
+      { x: 26, y: 32.5 },  // Central
+      { x: 28, y: 50 },    // Lateral Derecho
+      { x: 50, y: 15 },    // Extremo Izquierdo
+      { x: 48, y: 32.5 },  // Mediocentro
+      { x: 50, y: 50 },    // Extremo Derecho
+      { x: 75, y: 32.5 },  // Delantero
+    ];
+
+    const playersOnBoard = (sesionData.jugadores || []).map((j, idx) => {
+      const pos = positions[idx % positions.length];
+      return {
+        slotId: `slot-${j.id}`,
+        jugadorId: j.id,
+        nombre: j.nombre,
+        avatar: j.avatar,
+        x: pos.x,
+        y: pos.y,
+      };
+    });
+
+    return {
+      id: `cancha-pizarra-${fechaSesion}`,
+      nombre: `Pizarra Táctica — ${sesionData.equipo}`,
+      sport: "football" as const,
+      players: playersOnBoard,
+      arrows: [],
+      zones: [],
+      cones: [
+        { id: "c1", x: 20, y: 10, color: "#f59e0b" },
+        { id: "c2", x: 20, y: 55, color: "#f59e0b" },
+        { id: "c3", x: 80, y: 10, color: "#f59e0b" },
+        { id: "c4", x: 80, y: 55, color: "#f59e0b" },
+      ],
+      ball: { x: 50, y: 32.5 },
+    };
+  }, [sesionData.jugadores, sesionData.equipo, fechaSesion]);
   const [notasVoz, setNotasVoz] = useState<string>("");
+  const [proximaClase, setProximaClase] = useState<string>("");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [hayLesion, setHayLesion] = useState<boolean>(false);
   const [jugadorLesionadoId, setJugadorLesionadoId] = useState<string>(JUGADORES_DEMO_U9[0].id);
   const [gravedadLesion, setGravedadLesion] = useState<"leve" | "moderada" | "grave">("leve");
   const [descripcionLesion, setDescripcionLesion] = useState<string>("");
 
+  const [activeSpeechTarget, setActiveSpeechTarget] = useState<"notasVoz" | "proximaClase">("notasVoz");
+
   // Voice to Text Dictation (Web Speech API)
-  const startSpeechRecognition = () => {
+  const startSpeechRecognition = (target: "notasVoz" | "proximaClase" = "notasVoz") => {
     if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
       toast.error("El navegador no soporta dictado por voz. Puedes escribir la nota manualmente.");
       return;
     }
+    setActiveSpeechTarget(target);
     try {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -278,14 +488,18 @@ function EntrenamientosPage() {
 
       recognition.onstart = () => {
         setIsRecording(true);
-        toast.info("🎙️ Escuchando... Habla ahora para dictar la nota.");
+        toast.info(`🎙️ Escuchando... Dictando en ${target === "notasVoz" ? "Notas del Día" : "Para la Próxima Clase"}.`);
       };
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setNotasVoz((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        if (target === "notasVoz") {
+          setNotasVoz((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        } else {
+          setProximaClase((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
         setIsRecording(false);
-        toast.success("Nota dictada agregada.");
+        toast.success("✨ Dictado capturado correctamente.");
       };
 
       recognition.onerror = () => setIsRecording(false);
@@ -300,9 +514,24 @@ function EntrenamientosPage() {
 
   // Change Player Attendance in Paso 1
   const toggleAsistencia = (jugadorId: string, estado: EstadoAsistencia) => {
+    if (isFechaRetroactiva && isHistorialBloqueado) {
+      toast.warning("🔒 Historial bloqueado en modo solo lectura. Haz clic en 'Habilitar Edición de Historial' arriba para modificar esta fecha pasada.");
+      return;
+    }
     setSesionData((prev) => ({
       ...prev,
-      jugadores: prev.jugadores.map((j) => (j.id === jugadorId ? { ...j, asistencia: estado } : j)),
+      jugadores: prev.jugadores.map((j) => {
+        if (j.id !== jugadorId) return j;
+        const isAbsentOrJustified = estado === "ausente" || estado === "justificado";
+        return {
+          ...j,
+          asistencia: estado,
+          wellnessColor: isAbsentOrJustified ? ("ninguno" as any) : (j.wellnessColor === ("ninguno" as any) ? "verde" : j.wellnessColor),
+          wellnessDetalle: isAbsentOrJustified ? undefined : j.wellnessDetalle,
+          tiempoTest: isAbsentOrJustified ? undefined : j.tiempoTest,
+          testStatus: isAbsentOrJustified ? undefined : j.testStatus,
+        };
+      }),
     }));
   };
 
@@ -322,6 +551,7 @@ function EntrenamientosPage() {
 
     // 1. Guardar Sesión en Supabase DB
     try {
+      await supabase.from("sesiones_entrenamiento").delete().eq("fecha", fechaSesion);
       const { error } = await supabase.from("sesiones_entrenamiento").insert({
         id: sesionDbId,
         organizacion_id: RendimientoStore.getActiveOrganizacionId(),
@@ -354,6 +584,7 @@ function EntrenamientosPage() {
 
     // 2. Guardar Asistencias en Supabase DB
     try {
+      await supabase.from("asistencia_registros").delete().eq("fecha", fechaSesion);
       const asistenciasDb = (sesionData.jugadores || []).map((j) => ({
         id: `asis-${Date.now()}-${j.id}`,
         sesion_id: sesionDbId,
@@ -410,6 +641,27 @@ function EntrenamientosPage() {
       } catch (e) {
         console.warn("Nota de inserción en incidencias_lesiones:", e);
       }
+    }
+
+    // 5. Sincronizar en la tabla global de Bitácora / Minutas (minutas_diario)
+    try {
+      const jugadorLes = (sesionData.jugadores || []).find((j) => j.id === jugadorLesionadoId);
+      await supabase.from("minutas_diario").upsert({
+        id: `minuta-${sesionDbId}`,
+        titulo: sesionData.nombre || `Sesión de Cancha: ${sesionData.equipo}`,
+        fecha: fechaSesion,
+        equipo: sesionData.equipo,
+        observaciones: notasVoz || "Sesión ejecutada con éxito.",
+        proxima_clase: proximaClase || "",
+        hay_lesion: hayLesion,
+        jugador_lesionado_id: hayLesion ? jugadorLesionadoId : null,
+        jugador_lesionado_nombre: hayLesion ? (jugadorLes?.nombre || "Atleta") : null,
+        gravedad_lesion: hayLesion ? gravedadLesion : null,
+        descripcion_lesion: hayLesion ? descripcionLesion : null,
+        organizacion_id: RendimientoStore.getActiveOrganizacionId(),
+      });
+    } catch (e) {
+      console.warn("Nota de inserción en minutas_diario:", e);
     }
 
     toast.dismiss(toastId);
@@ -509,9 +761,33 @@ function EntrenamientosPage() {
                 className="bg-white text-xs font-bold text-[#0F172A] px-2.5 py-1 rounded-lg border border-[#E2E8F0] focus:outline-none focus:ring-2 focus:ring-[#2563EB] cursor-pointer"
               />
               {isFechaRetroactiva && (
-                <Badge className="bg-amber-500/10 text-amber-700 border border-amber-500/30 text-[10px] font-bold">
-                  Pase Retroactivo
-                </Badge>
+                <div className="flex items-center gap-1.5">
+                  <Badge className="bg-amber-500/10 text-amber-700 border border-amber-500/30 text-[10px] font-bold">
+                    Pase Retroactivo
+                  </Badge>
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (isHistorialBloqueado) {
+                        setIsHistorialBloqueado(false);
+                        toast.success(`🔓 Edición del historial habilitada para la fecha ${fechaSesion}.`);
+                      } else {
+                        setIsHistorialBloqueado(true);
+                        toast.info("🔒 Historial bloqueado en modo solo lectura.");
+                      }
+                    }}
+                    className={`h-7 px-2 text-[10px] font-black rounded-lg gap-1.5 transition-all ${
+                      isHistorialBloqueado
+                        ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100"
+                        : "bg-emerald-600 text-white hover:bg-emerald-500"
+                    }`}
+                  >
+                    {isHistorialBloqueado ? <Lock className="h-3.5 w-3.5 text-amber-700" /> : <Unlock className="h-3.5 w-3.5" />}
+                    {isHistorialBloqueado ? "Habilitar Edición de Historial" : "Bloquear Historial"}
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -555,11 +831,7 @@ function EntrenamientosPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!paso1Concluido) {
-                    toast.info("Debes concluir el Paso 1 antes de ir al reporte final.");
-                    return;
-                  }
-                  setModalCierreSesion(true);
+                  setPasoActivo(3);
                 }}
                 className={`px-3 py-1 rounded-full transition ${
                   pasoActivo === 3 ? "bg-[#10B981] text-white shadow-sm" : "text-[#64748B] hover:text-[#0F172A]"
@@ -576,6 +848,32 @@ function EntrenamientosPage() {
         {/* ════════════════════════════════════════════════════════════════ */}
         {pasoActivo === 1 && (
           <div className="max-w-5xl mx-auto space-y-4 pb-24">
+            {/* BANNER DE HISTORIAL SOLO LECTURA */}
+            {isReadOnly && (
+              <div className="p-4 bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-amber-950 shadow-sm animate-pulse">
+                <div className="flex items-center gap-3">
+                  <Lock className="h-6 w-6 text-amber-600 shrink-0" />
+                  <div>
+                    <strong className="text-xs sm:text-sm font-extrabold text-amber-900 block">🔒 Historial en Modo Solo Lectura ({fechaSesion})</strong>
+                    <p className="text-[11px] text-amber-800 font-medium mt-0.5">
+                      Estás consultando una fecha pasada. Todos los botones están deshabilitados para evitar cambios accidentales.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    setIsHistorialBloqueado(false);
+                    toast.success(`🔓 Edición del historial habilitada para ${fechaSesion}.`);
+                  }}
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs h-9 px-4 rounded-xl shadow-sm gap-1.5 uppercase tracking-wide shrink-0"
+                >
+                  <Unlock className="h-4 w-4" /> Habilitar Edición de Historial
+                </Button>
+              </div>
+            )}
+
             {/* ADVERTENCIA DE DÍA SIN ENTRENAMIENTO PROGRAMADO */}
             {esDiaSinEntrenamiento && (
               <div className="bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xl text-amber-900 text-xs flex items-center gap-3">
@@ -589,7 +887,22 @@ function EntrenamientosPage() {
               </div>
             )}
 
-            <div className="bg-[#2563EB]/10 border border-[#2563EB]/20 p-4 rounded-xl text-[#2563EB] text-xs flex flex-wrap items-center justify-between gap-3 shadow-sm">
+            {/* BITÁCORA Y DICTADO POR VOZ DEL DÍA SI YA EXISTE O FUE GUARDADO */}
+            {notasVoz && (
+              <div className="bg-indigo-50/90 border border-indigo-200 p-4 rounded-xl text-indigo-950 text-xs shadow-sm space-y-2">
+                <div className="flex items-center justify-between font-bold text-indigo-900">
+                  <span className="flex items-center gap-2 text-xs uppercase tracking-wide font-extrabold">
+                    🎙️ Notas de Cierre & Bitácora del Día (Dictado por Voz)
+                  </span>
+                  <Badge className="bg-indigo-600 text-white font-bold text-[10px]">Guardado en DB</Badge>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-indigo-100 text-xs text-slate-800 font-medium whitespace-pre-wrap shadow-2xs">
+                  "{notasVoz}"
+                </div>
+              </div>
+            )}
+
+            <div className={`bg-[#2563EB]/10 border border-[#2563EB]/20 p-4 rounded-xl text-[#2563EB] text-xs flex flex-wrap items-center justify-between gap-3 shadow-sm ${isReadOnly ? "opacity-50 pointer-events-none" : ""}`}>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-[#2563EB] shrink-0" />
                 <span>
@@ -602,7 +915,9 @@ function EntrenamientosPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  disabled={isReadOnly}
                   onClick={() => {
+                    if (isReadOnly) return;
                     setIsTestMasivo(true);
                     setModalTestSpeed(true);
                   }}
@@ -614,12 +929,19 @@ function EntrenamientosPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  disabled={isReadOnly}
                   onClick={() => {
+                    if (isReadOnly) return;
                     setSesionData((prev) => ({
                       ...prev,
-                      jugadores: prev.jugadores.map((j) => ({ ...j, wellnessColor: "verde", wellnessDetalle: undefined })),
+                      jugadores: prev.jugadores.map((j) => {
+                        if (j.asistencia === "ausente" || j.asistencia === "justificado") {
+                          return { ...j, wellnessColor: "ninguno" as any, wellnessDetalle: undefined };
+                        }
+                        return { ...j, wellnessColor: "verde", wellnessDetalle: undefined };
+                      }),
                     }));
-                    toast.success("✨ ¡Semáforo de Wellness Óptimo (100%) aplicado a todo el equipo!");
+                    toast.success("✨ Semáforo Wellness (100% Óptimo) aplicado a los atletas presentes.");
                   }}
                   className="h-8.5 text-[11px] font-extrabold bg-white border-[#2563EB]/40 text-[#2563EB] hover:bg-[#2563EB]/10 rounded-xl gap-1.5 shadow-sm"
                 >
@@ -640,7 +962,26 @@ function EntrenamientosPage() {
               </div>
 
               {/* LISTA DE ALUMNOS EN MICRO-TARJETAS INDEPENDIENTES CON FONDO CEBRA Y BOTONES ERGONÓMICOS TÁCTILES */}
-              {sesionData.jugadores.map((j, index) => {
+              {sesionData.jugadores.length === 0 ? (
+                <div className="bg-white p-8 rounded-xl border border-[#E2E8F0] text-center space-y-3 shadow-sm my-4">
+                  <AlertCircle className="h-10 w-10 text-amber-500 mx-auto" />
+                  <h4 className="font-bold text-sm text-[#0F172A]">No hay jugadores en la lista de asistencia</h4>
+                  <p className="text-xs text-[#64748B] max-w-md mx-auto">
+                    No se encontraron atletas registrados para la categoría "{sesionData.categoria}". Puedes cargar la plantilla de demostración para iniciar la toma de asistencia.
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSesionData((prev) => ({ ...prev, jugadores: JUGADORES_DEMO_U9 }));
+                      toast.success("✨ Plantilla de alumnos cargada exitosamente.");
+                    }}
+                    className="bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold text-xs rounded-xl px-4 py-2"
+                  >
+                    ✨ Cargar Plantilla Demo (Sub-9)
+                  </Button>
+                </div>
+              ) : (
+                sesionData.jugadores.map((j, index) => {
                 const isEven = index % 2 === 0;
                 return (
                   <div
@@ -681,15 +1022,26 @@ function EntrenamientosPage() {
                         {/* Botón dinámico de Wellness con indicación visual de Semáforo */}
                         <button
                           type="button"
+                          disabled={isReadOnly}
                           title="Encuestar estado de Salud / Wellness"
                           onClick={() => {
+                            if (isReadOnly) {
+                              toast.warning("🔒 Historial bloqueado. Haz clic en 'Habilitar Edición de Historial' arriba para hacer cambios.");
+                              return;
+                            }
                             setJugadorWellnessSel(j);
-                            setWellEstadoSel(j.wellnessColor);
+                            setWellEstadoSel(j.wellnessColor || ("ninguno" as any));
                             setWellDetalleInput(j.wellnessDetalle || "");
                             setModalCoachWellness(true);
                           }}
                           className={`px-3 py-2 rounded-xl text-[11px] font-extrabold border flex items-center gap-1.5 active:scale-95 transition shadow-sm ${
-                            j.wellnessColor === "verde"
+                            isReadOnly ? "opacity-40 cursor-not-allowed" : ""
+                          } ${
+                            j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "bg-slate-100 text-slate-400 border-slate-200"
+                              : (j.wellnessColor as any) === "ninguno" || !j.wellnessColor
+                              ? "bg-white text-slate-600 border-[#E2E8F0] hover:bg-[#F4F5F7]"
+                              : j.wellnessColor === "verde"
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                               : j.wellnessColor === "amarillo"
                               ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100"
@@ -697,24 +1049,49 @@ function EntrenamientosPage() {
                           }`}
                         >
                           <HeartPulse className={`h-4 w-4 shrink-0 ${
-                            j.wellnessColor === "verde" ? "text-emerald-600" : j.wellnessColor === "amarillo" ? "text-amber-600" : "text-red-600"
+                            j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "text-slate-400"
+                              : (j.wellnessColor as any) === "ninguno" || !j.wellnessColor
+                              ? "text-slate-400"
+                              : j.wellnessColor === "verde"
+                              ? "text-emerald-600"
+                              : j.wellnessColor === "amarillo"
+                              ? "text-amber-600"
+                              : "text-red-600"
                           }`} />
                           <span>
-                            {j.wellnessColor === "verde" ? "🟢 Óptimo" : j.wellnessColor === "amarillo" ? "🟡 Fatiga" : "🔴 Alerta"}
+                            {j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "⚪ N/A"
+                              : (j.wellnessColor as any) === "ninguno" || !j.wellnessColor
+                              ? "🤍 Wellness"
+                              : j.wellnessColor === "verde"
+                              ? "🟢 Óptimo"
+                              : j.wellnessColor === "amarillo"
+                              ? "🟡 Fatiga"
+                              : "🔴 Alerta"}
                           </span>
                         </button>
 
                         {/* Botón dinámico de Test Físico con Semáforo según Calificación */}
                         <button
                           type="button"
+                          disabled={isReadOnly}
                           title="Registrar Prueba Física / Velocidad"
                           onClick={() => {
+                            if (isReadOnly) {
+                              toast.warning("🔒 Historial bloqueado. Haz clic en 'Habilitar Edición de Historial' arriba para hacer cambios.");
+                              return;
+                            }
                             setIsTestMasivo(false);
                             setJugadorTestSel(j.id);
                             setModalTestSpeed(true);
                           }}
                           className={`px-3 py-2 rounded-xl text-[11px] font-extrabold border flex items-center gap-1.5 active:scale-95 transition shadow-sm ${
-                            j.testStatus === "excelente"
+                            isReadOnly ? "opacity-40 cursor-not-allowed" : ""
+                          } ${
+                            j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "bg-slate-100 text-slate-400 border-slate-200"
+                              : j.testStatus === "excelente"
                               ? "bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100"
                               : j.testStatus === "promedio"
                               ? "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100"
@@ -724,11 +1101,21 @@ function EntrenamientosPage() {
                           }`}
                         >
                           <Timer className={`h-4 w-4 shrink-0 ${
-                            j.testStatus === "excelente" ? "text-emerald-600" : j.testStatus === "promedio" ? "text-amber-600" : j.testStatus === "bajo" ? "text-red-600" : "text-amber-500"
+                            j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "text-slate-400"
+                              : j.testStatus === "excelente"
+                              ? "text-emerald-600"
+                              : j.testStatus === "promedio"
+                              ? "text-amber-600"
+                              : j.testStatus === "bajo"
+                              ? "text-red-600"
+                              : "text-amber-500"
                           }`} />
                           <span>
-                            {j.tiempoTest
-                              ? `${j.testStatus === "excelente" ? "🟢" : j.testStatus === "promedio" ? "🟡" : "🔴"} ${j.tiempoTest}s`
+                            {j.asistencia === "ausente" || j.asistencia === "justificado"
+                              ? "⚪ N/A"
+                              : j.tiempoTest
+                              ? `${j.testStatus === "excelente" ? "🟢" : j.testStatus === "promedio" ? "🟡" : "🔴"} 🏃 ${j.tiempoTest} seg.`
                               : "+ Test"}
                           </span>
                         </button>
@@ -747,9 +1134,14 @@ function EntrenamientosPage() {
                             <button
                               key={btn.key}
                               type="button"
+                              disabled={isReadOnly}
                               onClick={() => toggleAsistencia(j.id, btn.key as EstadoAsistencia)}
                               className={`h-11 min-w-[44px] px-3 rounded-xl font-black text-xs flex flex-col items-center justify-center transition-all duration-200 active:scale-95 ${
-                                isActive
+                                isReadOnly
+                                  ? isActive
+                                    ? `${btn.activeBg} opacity-40 cursor-not-allowed`
+                                    : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0] opacity-40 cursor-not-allowed"
+                                  : isActive
                                   ? `${btn.activeBg} scale-[1.05]`
                                   : "bg-[#F1F5F9] text-[#94A3B8] border border-[#E2E8F0] hover:bg-[#E2E8F0] hover:text-[#475569] opacity-70"
                               }`}
@@ -763,7 +1155,8 @@ function EntrenamientosPage() {
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
 
             {/* STICKY FOOTER PERMANENTE (SIEMPRE VISIBLE EN NAVEGACIÓN Y PWA MÓVIL) */}
@@ -844,26 +1237,38 @@ function EntrenamientosPage() {
           <div className="max-w-5xl mx-auto space-y-5 pb-24">
             {/* BARRA SUPERIOR DE BLOQUES CON BORDE Y RESALTE VISUAL FUERTE DE ESTADO ACTIVO */}
             <Tabs value={tabBloqueActivo} onValueChange={(val) => handleCambiarBloque(val as any)} className="w-full space-y-4">
-              <TabsList className="grid grid-cols-3 bg-white p-1.5 rounded-2xl border border-[#E2E8F0] shadow-sm h-13">
-                <TabsTrigger
-                  value="bloque1"
-                  className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <TabsList className="grid grid-cols-3 bg-white p-1.5 rounded-2xl border border-[#E2E8F0] shadow-sm h-13 flex-1">
+                  <TabsTrigger
+                    value="bloque1"
+                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                  >
+                    🔥 Bloque 1: Calentamiento (15m)
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="bloque2"
+                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                  >
+                    ⚽ Bloque 2: Específico (60m)
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="bloque3"
+                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                  >
+                    🧘 Bloque 3: Calma (15m)
+                  </TabsTrigger>
+                </TabsList>
+
+                <Button
+                  size="sm"
+                  type="button"
+                  onClick={() => setModalPizarraTactica(true)}
+                  className="h-12 px-4 text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl gap-2 shadow-md shrink-0 uppercase tracking-wider active:scale-95 transition"
                 >
-                  🔥 Bloque 1: Calentamiento (15m)
-                </TabsTrigger>
-                <TabsTrigger
-                  value="bloque2"
-                  className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
-                >
-                  ⚽ Bloque 2: Específico (60m)
-                </TabsTrigger>
-                <TabsTrigger
-                  value="bloque3"
-                  className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
-                >
-                  🧘 Bloque 3: Calma (15m)
-                </TabsTrigger>
-              </TabsList>
+                  <Sparkles className="h-4 w-4 text-amber-300 animate-pulse" />
+                  <span>🎨 Abrir Pizarra Táctica</span>
+                </Button>
+              </div>
 
               {/* BLOQUE 1: CALENTAMIENTO (FASE INICIAL) */}
               <TabsContent value="bloque1" className="space-y-4">
@@ -919,15 +1324,26 @@ function EntrenamientosPage() {
                       <span className="text-xs font-black text-emerald-200 uppercase tracking-widest flex items-center gap-1.5">
                         <ShieldHalf className="h-4 w-4 text-emerald-400" /> DISPOSICIÓN DE CONOS Y ESPACIO (15X15M)
                       </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowTacticalCanvas(!showTacticalCanvas)}
-                        className="h-8 text-[11px] font-extrabold bg-[#022C22] text-emerald-300 border-[#059669] hover:bg-[#065F46] rounded-xl gap-1.5"
-                      >
-                        <Tv className="h-3.5 w-3.5 text-emerald-400" />
-                        <span>{showTacticalCanvas ? "📐 Ver Disposición Táctica" : "📺 Ver Demo Vídeo Corto para Alumnos"}</span>
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => setModalPizarraTactica(true)}
+                          className="h-8 text-[11px] font-black bg-[#10B981] hover:bg-[#059669] text-white rounded-xl gap-1.5 shadow-md border border-emerald-400/40"
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                          <span>🎨 Abrir Pizarra Táctica</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowTacticalCanvas(!showTacticalCanvas)}
+                          className="h-8 text-[11px] font-extrabold bg-[#022C22] text-emerald-300 border-[#059669] hover:bg-[#065F46] rounded-xl gap-1.5"
+                        >
+                          <Tv className="h-3.5 w-3.5 text-emerald-400" />
+                          <span>{showTacticalCanvas ? "📐 Ver Disposición Táctica" : "📺 Ver Demo Vídeo Corto para Alumnos"}</span>
+                        </Button>
+                      </div>
                     </div>
 
                     {showTacticalCanvas ? (
@@ -1024,15 +1440,26 @@ function EntrenamientosPage() {
                         </p>
                       </div>
 
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowTacticalCanvas(!showTacticalCanvas)}
-                        className="h-8.5 text-[11px] font-extrabold bg-[#022C22] text-emerald-300 border-[#059669] hover:bg-[#065F46] rounded-xl gap-1.5 shrink-0"
-                      >
-                        <Tv className="h-4 w-4 text-emerald-400" />
-                        <span>{showTacticalCanvas ? "📐 Ver Gráfico Táctico Cancha" : "📺 Ver Demo Video Corto Circuito"}</span>
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => setModalPizarraTactica(true)}
+                          className="h-8.5 text-[11px] font-black bg-[#10B981] hover:bg-[#059669] text-white rounded-xl gap-1.5 shadow-md border border-emerald-400/40"
+                        >
+                          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                          <span>🎨 Abrir Pizarra Táctica</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowTacticalCanvas(!showTacticalCanvas)}
+                          className="h-8.5 text-[11px] font-extrabold bg-[#022C22] text-emerald-300 border-[#059669] hover:bg-[#065F46] rounded-xl gap-1.5 shrink-0"
+                        >
+                          <Tv className="h-4 w-4 text-emerald-400" />
+                          <span>{showTacticalCanvas ? "📐 Ver Gráfico Táctico Cancha" : "📺 Ver Demo Video Corto Circuito"}</span>
+                        </Button>
+                      </div>
                     </div>
 
                     {showTacticalCanvas ? (
@@ -1184,6 +1611,239 @@ function EntrenamientosPage() {
           </div>
         )}
 
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {/* PASO 3: PANTALLA DE CIERRE & REPORTE FINAL DE LA SESIÓN          */}
+        {/* ════════════════════════════════════════════════════════════════ */}
+        {pasoActivo === 3 && (
+          <div className="max-w-5xl mx-auto space-y-6 pb-24">
+            {/* Header del Reporte */}
+            <Card className="bg-white border-[#E2E8F0] shadow-sm p-6 rounded-2xl space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold text-[10px] uppercase">
+                      ✓ Sesión Finalizada & Guardada en DB
+                    </Badge>
+                    {isFechaRetroactiva && (
+                      <Badge className="bg-amber-100 text-amber-800 border-amber-300 font-extrabold text-[10px] uppercase">
+                        Pase Retroactivo
+                      </Badge>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-black text-[#0F172A] mt-1 flex items-center gap-2">
+                    <FileText className="h-6 w-6 text-[#2563EB]" />
+                    Reporte Final de Cancha: {sesionData.equipo}
+                  </h2>
+                  <p className="text-xs text-[#64748B] mt-0.5">
+                    {fechaTextoFormateada} · Categoría {sesionData.categoria} · Sede Central
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setModoSesion("normal");
+                      setPasoActivo(1);
+                    }}
+                    className="h-10 text-xs font-bold border-[#E2E8F0] text-[#0F172A] hover:bg-[#F8F9FA] rounded-xl gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Volver a Sesiones
+                  </Button>
+                  <Button
+                    onClick={handleGuardarSesionFinal}
+                    className="h-10 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded-xl shadow-sm gap-2 uppercase tracking-wide"
+                  >
+                    <CheckCircle2 className="h-4 w-4 text-white" /> 💾 Guardar Cambios del Reporte
+                  </Button>
+                </div>
+              </div>
+
+              {/* Tarjetas de Resumen Numérico de Asistencia */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+                  <p className="text-xs font-extrabold text-emerald-800 uppercase tracking-wider">Presentes</p>
+                  <p className="text-2xl font-black text-emerald-700 mt-1">
+                    {sesionData.jugadores.filter((j) => j.asistencia === "presente").length}
+                  </p>
+                </div>
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
+                  <p className="text-xs font-extrabold text-amber-800 uppercase tracking-wider">Tarde</p>
+                  <p className="text-2xl font-black text-amber-700 mt-1">
+                    {sesionData.jugadores.filter((j) => j.asistencia === "tarde").length}
+                  </p>
+                </div>
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-center">
+                  <p className="text-xs font-extrabold text-red-800 uppercase tracking-wider">Ausentes</p>
+                  <p className="text-2xl font-black text-red-700 mt-1">
+                    {sesionData.jugadores.filter((j) => j.asistencia === "ausente").length}
+                  </p>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                  <p className="text-xs font-extrabold text-blue-800 uppercase tracking-wider">Justificados</p>
+                  <p className="text-2xl font-black text-blue-700 mt-1">
+                    {sesionData.jugadores.filter((j) => j.asistencia === "justificado").length}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* SECCIÓN 1: NOTAS DEL DÍA & DICTADO POR VOZ */}
+            <Card className="bg-white border-[#E2E8F0] shadow-sm p-6 rounded-2xl space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-black text-[#0F172A] flex items-center gap-2">
+                  <Mic className="h-5 w-5 text-[#2563EB]" />
+                  Notas del Día & Bitácora del Entrenador (Dictado por Voz o Teclado):
+                </Label>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={startSpeechRecognition}
+                  className={`h-8.5 text-xs font-bold gap-2 rounded-xl transition ${
+                    isRecording ? "bg-red-500 text-white animate-pulse" : "bg-[#2563EB]/10 text-[#2563EB] border-[#2563EB]/30 hover:bg-[#2563EB]/20"
+                  }`}
+                >
+                  {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isRecording ? "Detener Dictado" : "🎙️ Dictar por Voz"}
+                </Button>
+              </div>
+
+              <Textarea
+                value={notasVoz}
+                onChange={(e) => setNotasVoz(e.target.value)}
+                placeholder="Escribe o dicta las observaciones tácticas, actitudinales o notas destacadas del entrenamiento..."
+                rows={3}
+                className="bg-[#F8F9FA] text-xs font-medium border-[#E2E8F0] rounded-xl text-[#0F172A] focus:bg-white p-3"
+              />
+
+              <div className="pt-2 space-y-1.5 border-t border-[#E2E8F0]">
+                <Label className="text-xs font-bold text-[#0F172A]">Para la Próxima Clase (Temas a Recordar / Reforzar):</Label>
+                <Textarea
+                  value={proximaClase}
+                  onChange={(e) => setProximaClase(e.target.value)}
+                  placeholder="Ej. Continuar con la práctica de juego rápido y pases cortos."
+                  rows={2}
+                  className="bg-[#F8F9FA] text-xs font-medium border-[#E2E8F0] rounded-xl text-[#0F172A] focus:bg-white p-3"
+                />
+              </div>
+            </Card>
+
+            {/* SECCIÓN 2: REGISTRO DE LESIONES E INCIDENCIAS */}
+            <Card className="bg-white border-[#E2E8F0] shadow-sm p-6 rounded-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <h3 className="font-bold text-sm text-[#0F172A]">Registro de Lesiones o Incidencias Médicas</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="lesion-switch-p3" className="text-xs font-bold text-[#64748B] cursor-pointer">
+                    ¿Ocurrió alguna lesión en la práctica?
+                  </Label>
+                  <Switch
+                    id="lesion-switch-p3"
+                    checked={hayLesion}
+                    onCheckedChange={setHayLesion}
+                  />
+                </div>
+              </div>
+
+              {hayLesion && (
+                <div className="p-4 bg-red-50/60 border border-red-200 rounded-xl space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-[#0F172A]">Seleccionar Jugador Lesionado:</Label>
+                      <Select value={jugadorLesionadoId} onValueChange={setJugadorLesionadoId}>
+                        <SelectTrigger className="bg-white text-xs h-10 border-[#E2E8F0] rounded-xl">
+                          <SelectValue placeholder="Seleccionar jugador..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {sesionData.jugadores.map((j) => (
+                            <SelectItem key={j.id} value={j.id} className="text-xs font-medium">
+                              {j.nombre} ({j.categoria})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs font-bold text-[#0F172A]">Nivel de Gravedad:</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { key: "leve", label: "Leve (1-3 días)" },
+                          { key: "moderada", label: "Moderada (1-2 sem)" },
+                          { key: "grave", label: "Grave (+3 sem)" },
+                        ].map((g) => (
+                          <button
+                            key={g.key}
+                            type="button"
+                            onClick={() => setGravedadLesion(g.key as any)}
+                            className={`py-2 rounded-xl text-xs font-bold border transition ${
+                              gravedadLesion === g.key
+                                ? "bg-red-600 text-white border-red-600 shadow-sm"
+                                : "bg-white text-[#64748B] border-[#E2E8F0] hover:bg-[#F8F9FA]"
+                            }`}
+                          >
+                            {g.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs font-bold text-[#0F172A]">Descripción de la Lesión:</Label>
+                    <Input
+                      value={descripcionLesion}
+                      onChange={(e) => setDescripcionLesion(e.target.value)}
+                      placeholder="Ej. Torcedura leve en tobillo derecho al disputar balón."
+                      className="bg-white text-xs h-10 border-[#E2E8F0] rounded-xl"
+                    />
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* SECCIÓN 3: TABLA DETALLADA DE ASISTENCIA Y WELLNESS */}
+            <Card className="bg-white border-[#E2E8F0] shadow-sm p-6 rounded-2xl space-y-4">
+              <h3 className="font-extrabold text-sm text-[#0F172A] uppercase tracking-wider">
+                Desglose Individual de la Plantilla ({sesionData.jugadores.length} Atletas)
+              </h3>
+
+              <div className="divide-y divide-[#E2E8F0]">
+                {sesionData.jugadores.map((j) => (
+                  <div key={j.id} className="py-3 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <img src={j.avatar} alt={j.nombre} className="h-10 w-10 rounded-xl object-cover border border-[#E2E8F0]" />
+                      <div>
+                        <p className="font-bold text-xs text-[#0F172A]">{j.nombre}</p>
+                        <p className="text-[11px] text-[#64748B]">
+                          Wellness: {j.wellnessColor === "verde" ? "🟢 Óptimo" : j.wellnessColor === "amarillo" ? "🟡 Fatiga" : "🔴 Alerta"}
+                          {j.wellnessDetalle ? ` (${j.wellnessDetalle})` : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Badge
+                      className={`font-black text-xs px-3 py-1 uppercase rounded-xl ${
+                        j.asistencia === "presente"
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                          : j.asistencia === "tarde"
+                          ? "bg-amber-100 text-amber-800 border-amber-300"
+                          : j.asistencia === "ausente"
+                          ? "bg-red-100 text-red-800 border-red-300"
+                          : "bg-blue-100 text-blue-800 border-blue-300"
+                      }`}
+                    >
+                      {j.asistencia}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
+
         {/* MODAL ADVERTENCIA: PASO 1 YA CONCLUIDO */}
         <Dialog open={modalConfirmPaso1} onOpenChange={setModalConfirmPaso1}>
           <DialogContent className="sm:max-w-[440px] rounded-2xl bg-white text-[#0F172A] border border-[#E2E8F0] p-6 shadow-xl space-y-4">
@@ -1255,13 +1915,13 @@ function EntrenamientosPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={startSpeechRecognition}
+                    onClick={() => startSpeechRecognition("notasVoz")}
                     className={`h-7 text-[11px] font-semibold rounded-lg border-[#E2E8F0] gap-1.5 ${
-                      isRecording ? "bg-red-600 text-white animate-pulse" : "text-[#2563EB] bg-[#2563EB]/10 hover:bg-[#2563EB]/20 border-[#2563EB]/20"
+                      isRecording && activeSpeechTarget === "notasVoz" ? "bg-red-600 text-white animate-pulse" : "text-[#2563EB] bg-[#2563EB]/10 hover:bg-[#2563EB]/20 border-[#2563EB]/20"
                     }`}
                   >
-                    {isRecording ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
-                    {isRecording ? "Grabando..." : "🎙️ Dictar por Voz"}
+                    {isRecording && activeSpeechTarget === "notasVoz" ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {isRecording && activeSpeechTarget === "notasVoz" ? "Grabando..." : "🎙️ Dictar por Voz"}
                   </Button>
                 </div>
                 <Textarea
@@ -1269,6 +1929,32 @@ function EntrenamientosPage() {
                   value={notasVoz}
                   onChange={(e) => setNotasVoz(e.target.value)}
                   placeholder="Ej. Buena actitud del grupo. Trabajar más la precisión del pase corto en la próxima sesión."
+                  className="bg-[#F8F9FA] border-[#E2E8F0] text-xs rounded-xl text-[#0F172A] placeholder:text-[#94A3B8] focus:bg-white focus:ring-2 focus:ring-[#2563EB]"
+                />
+              </div>
+
+              {/* PARA LA PRÓXIMA CLASE */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold text-[#0F172A]">Para la Próxima Clase (Temas a Recordar / Reforzar):</Label>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => startSpeechRecognition("proximaClase")}
+                    className={`h-7 text-[11px] font-semibold rounded-lg border-[#E2E8F0] gap-1.5 ${
+                      isRecording && activeSpeechTarget === "proximaClase" ? "bg-red-600 text-white animate-pulse" : "text-[#2563EB] bg-[#2563EB]/10 hover:bg-[#2563EB]/20 border-[#2563EB]/20"
+                    }`}
+                  >
+                    {isRecording && activeSpeechTarget === "proximaClase" ? <MicOff className="h-3.5 w-3.5" /> : <Mic className="h-3.5 w-3.5" />}
+                    {isRecording && activeSpeechTarget === "proximaClase" ? "Grabando..." : "🎙️ Dictar por Voz"}
+                  </Button>
+                </div>
+                <Textarea
+                  rows={2}
+                  value={proximaClase}
+                  onChange={(e) => setProximaClase(e.target.value)}
+                  placeholder="Ej. Continuar con la práctica de juego rápido y pases cortos."
                   className="bg-[#F8F9FA] border-[#E2E8F0] text-xs rounded-xl text-[#0F172A] placeholder:text-[#94A3B8] focus:bg-white focus:ring-2 focus:ring-[#2563EB]"
                 />
               </div>
@@ -1554,6 +2240,7 @@ function EntrenamientosPage() {
                   { key: "verde", title: "🟢 100% Óptimo (Sin fatiga ni dolores)", desc: "Listo para máxima intensidad" },
                   { key: "amarillo", title: "🟡 Fatiga Ligera / Sueño Incompleto", desc: "Cansancio o molestia menor" },
                   { key: "rojo", title: "🔴 Alerta Médica / Dolor Muscular Activo", desc: "Requiere reposo o evaluación médica" },
+                  { key: "ninguno", title: "⚪ Sin Wellness / N/A (Desmarcar Estado)", desc: "Sin evaluación de bienestar (ej: atleta ausente)" },
                 ].map((st) => (
                   <button
                     key={st.key}
@@ -1613,6 +2300,45 @@ function EntrenamientosPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* MODAL PANTALLA COMPLETA INMERSIVA DE PIZARRA TÁCTICA BCOACH EN CANCHA */}
+        {modalPizarraTactica && (
+          <div className="fixed inset-0 z-[99999] bg-[#0b0f19] text-white flex flex-col p-2 sm:p-4 overflow-hidden animate-fadeIn">
+            {/* ENCABEZADO SUPERIOR CON TÍTULO Y BOTÓN CERRAR */}
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0 gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-emerald-400 shrink-0" />
+                <div>
+                  <h2 className="text-sm sm:text-base font-black text-white leading-tight">
+                    🎨 Pizarra Táctica Profesional de Cancha — {sesionData.equipo} ({sesionData.categoria})
+                  </h2>
+                  <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                    Dibuja libremente a mano alzada con tu dedo o stylus, ubica jugadores numerados, alineaciones en 1-clic y equipamiento.
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                size="sm"
+                type="button"
+                onClick={() => setModalPizarraTactica(false)}
+                className="h-8.5 px-3 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white rounded-xl font-bold text-xs gap-1.5 border border-red-500/30 transition shrink-0"
+              >
+                <X className="h-4 w-4" />
+                <span>Cerrar Pizarra</span>
+              </Button>
+            </div>
+
+            {/* CONTENEDOR 100% PANTALLA COMPLETA DE LA PIZARRA */}
+            <div className="flex-1 overflow-hidden min-h-0 pt-2">
+              <CanchaBCoachBoard
+                teamName={sesionData.equipo}
+                category={sesionData.categoria}
+                onClose={() => setModalPizarraTactica(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1687,7 +2413,7 @@ function EntrenamientosPage() {
                     onClick={() => {
                       setFechaSesion(s.fecha);
                       setModoSesion("activa");
-                      setPasoActivo(1);
+                      setPasoActivo(s.estado === "completada" ? 3 : 1);
                     }}
                     className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl gap-1.5 h-9"
                   >

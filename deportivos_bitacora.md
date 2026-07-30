@@ -3,6 +3,68 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
+## [29/07/2026 - Noche: Pizarra Táctica Profesional — Rediseño Completo, Foto de Campo, Pinch-Zoom & Botones Visibles]
+
+- **Rediseño del Canvas SVG para Llenar Espacio en Todos los Dispositivos (`src/components/cancha-bcoach-board.tsx`):**
+  - Eliminado el patrón `aspectRatio: "100/65"` + `flexShrink` que hacía que el campo se redujera al calcular la altura disponible en tablet y PC landscape, generando grandes barras negras a los lados.
+  - El SVG ahora usa `width: 100%; height: 100%` con `preserveAspectRatio="xMidYMid meet"`, llenando todo el contenedor disponible.
+  - El fondo del SVG se cambió a verde oscuro (`#183b18`) para que las áreas de letterbox se mezclen visualmente con el campo y no se vean barras negras.
+
+- **Corrección del Layout Portrait (Móvil y Tablet Vertical):**
+  - Reemplazado `100vh / 100vw` por `calc(100dvh - 9rem) / 100dvw` para descontar correctamente la altura de los toolbars superiores e inferiores.
+  - La rotación `-90deg` ahora encaja exactamente en el viewport real disponible sin desbordarse hacia la zona de los controles.
+
+- **Zoom Funcional con Scroll (`zoom > 1`):**
+  - Cuando `zoom > 1`, el contenedor interior se expande proporcionalmente (`${zoom * 100}%`) y el contenedor padre activa `overflow: auto`, permitiendo navegar la pizarra ampliada con scroll.
+  - Indicador de porcentaje de zoom flotante (ej. `150%`) visible en la esquina inferior derecha cuando el zoom difiere de 1×.
+
+- **Pinch-to-Zoom Táctil Implementado (`handleTouchStart / Move / End`):**
+  - Añadidas las funciones de gestos táctiles de 2 dedos que estaban referenciadas pero no definidas (causaban el crash `handleTouchStart is not defined`).
+  - Gesto de apertura de dedos → zoom in hasta ×3; cierre de dedos → zoom out hasta ×0.5.
+
+- **Botones de Acción Visibles en el Header (estilo video táctico):**
+  - Eliminado el menú `+ Acciones` escondido en un Popover único.
+  - Reemplazado por botones directamente visibles: **📷 Foto del Campo**, **📹 Video**, **👥 Alineaciones ▾**, **🗑️ Limpiar**, **⛶ Pantalla Completa**.
+  - En móvil se muestran solo los íconos; en tablet/PC aparece el texto.
+  - El dropdown de **Alineaciones** lista todas las formaciones disponibles (4-3-3, 4-4-2, 4-2-3-1, 3-4-3, etc.) en 1-clic.
+
+- **Funcionalidad de Foto del Campo con Cámara Real:**
+  - Nuevo botón **📷 Foto del Campo** que usa `<input type="file" accept="image/*" capture="environment">` para abrir directamente la cámara trasera del dispositivo en móvil/tablet.
+  - La foto capturada se establece como fondo del SVG (`<image href={...} preserveAspectRatio="xMidYMid slice">`), permitiendo dibujar tácticas directamente sobre la foto del campo real.
+  - Badge **"📸 Foto activa ✕"** aparece en el header para quitar la foto con 1 tap y volver a la cancha 2D verde.
+  - Si se carga una imagen desde el explorador de archivos (no video), también se usa como fondo (no abre modo video).
+
+- **`handleClear` Mejorado:**
+  - El botón Limpiar ahora también resetea `backgroundImageUrl` y `activeVideoUrl`, dejando la pizarra completamente limpia incluyendo el fondo.
+
+- **Respaldo de Seguridad:**
+  - Backup de la versión anterior en `src/components/cancha-bcoach-board.backup.tsx`.
+
+---
+
+## [29/07/2026 - Rediseño de Asistencias, Módulo de Planificación Manual & Optimización de Rendimiento]
+
+- **Historial de Asistencias Desacoplado & Vista Compacta (`src/routes/_app/equipos.tsx`):**
+  - Reemplazada la antigua tabla estática de pase de lista en la pestaña *Cancha & Asistencia* por un **Historial de Asistencias** compacto tipo log.
+  - Cada fila muestra la fecha formateada en idioma local, el tipo de sesión, la duración, el porcentaje de presencia acumulado y los Badges de resumen (`P` Presente, `T` Tardío, `A` Ausente, `J` Justificado).
+  - Al hacer clic en cualquier fila del historial, se despliega una vista en línea con la lista de jugadores, sus estados individuales y un botón de acción rápida *"Editar esta asistencia"*.
+  - El formulario de pase de lista activo queda reservado exclusivamente dentro del asistente guiado de 3 pasos (*Asistencia $\rightarrow$ Trabajo de Cancha $\rightarrow$ Cierre*) lanzado desde el botón **INICIAR ENTRENAMIENTO EN CANCHA**.
+
+- **Suite de Planificación Manual Integrada (`src/routes/_app/planeamiento.tsx`):**
+  - Implementada la funcionalidad del botón **"Planificar Manualmente"**, desplegando un modal de selección para *Planificación Semanal*, *Microciclo*, *Mesociclo* y *Macrociclo*.
+  - Diseñado el flujo interactivo de creación paso a paso donde el entrenador configura objetivos formativos, volumen de minutos, intensidades RPE esperadas y ejercicios de la biblioteca.
+  - Ajustes de diseño fluido y responsivo en rejilla para uso óptimo en pantallas de tablets y teléfonos móviles.
+
+- **Optimización de Carga Inicial & Lecturas de Memoria (`src/routes/_app/*`):**
+  - Reemplazadas las consultas `SELECT` redundantes a Supabase durante el montaje inicial de rutas por lecturas desde la memoria local del `RendimientoStore`.
+  - Integrado el patrón de comprobación `RendimientoStore.isStoreSynced()` con escuchadores del evento `rendimientoStoreUpdated` y timeouts de seguridad.
+
+- **Resiliencia en Rutas y Manejo de Parámetros `teamId` (`src/routes/_app/equipos.tsx`):**
+  - Mejorado el algoritmo de coincidencia para el parámetro de búsqueda `teamId` en la URL (`/equipos?teamId=eq_u9`), permitiendo resolver de forma flexible IDs exactos o parciales (`eq_u9`, `u9`, `Sub-9`, etc.).
+  - Añadido resguardo mediante bloques `try/catch` y `.catch()` en llamadas a Supabase (`convocatorias`), evitando pantallas de error 500 o fallos de red no controlados.
+
+---
+
 ## [25/07/2026 - Sesión Nocturna: Corrección de Menú y Privilegios de Coach]
 
 - **Ordenamiento Dinámico del Menú Lateral (`src/components/app-sidebar.tsx`):**

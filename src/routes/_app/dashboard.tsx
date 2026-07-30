@@ -55,39 +55,19 @@ function Dashboard() {
   // ─── ALL HOOKS MUST COME BEFORE ANY CONDITIONAL RETURN ───
   const [showWizard, setShowWizard] = useState(true);
 
-  // ─── MIGRACIÓN LOCALSTORAGE → SUPABASE ───
-  const [migrableKeys, setMigrableKeys] = useState<string[]>([]);
+  // ─── LIMPIEZA AUTOMÁTICA DE CLAVES LOCALES OBSOLETAS ───
   useEffect(() => {
-    localStorage.setItem("deportivos_cloud_migrated", "true");
-    setMigrableKeys([]);
-  }, []);
-
-  const handleCloudMigration = async () => {
-    try {
-      toast.loading("Migrando datos a Supabase...");
-      const keys = ["jugadores_dynamics", "entrenadores_dynamics", "equipos_dynamics", "categorias_dynamics", "pagos_dynamics", "sedes_dynamics"];
-      for (const key of keys) {
-        const val = localStorage.getItem(`deportivos_hp_${key}`);
-        if (val) {
-          const parsed = JSON.parse(val);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            RendimientoStore.set(key, parsed);
-          }
-        }
-      }
-      keys.forEach(k => localStorage.removeItem(`deportivos_hp_${k}`));
-      localStorage.setItem("deportivos_cloud_migrated", "true");
-      setMigrableKeys([]);
-      toast.dismiss();
-      toast.success("¡Migración exitosa! Todos tus datos están ahora en la nube.");
-      RendimientoStore.syncFromSupabase();
-      setTimeout(() => window.location.reload(), 1200);
-    } catch (e) {
-      console.error(e);
-      toast.dismiss();
-      toast.error("Error al migrar. Inténtalo de nuevo.");
+    if (typeof window !== "undefined") {
+      const legacyKeys = [
+        "jugadores_dynamics", "entrenadores_dynamics", "equipos_dynamics", 
+        "categorias_dynamics", "pagos_dynamics", "sedes_dynamics", "lesiones"
+      ];
+      legacyKeys.forEach(k => {
+        localStorage.removeItem(`deportivos_hp_${k}`);
+      });
+      localStorage.removeItem("deportivos_cloud_migrated");
     }
-  };
+  }, []);
   const currentPlayers = useMemo(() => RendimientoStore.getJugadores(), []);
   const activeOrgId = useMemo(() => RendimientoStore.getActiveOrganizacionId(), []);
   const activeOrg = useMemo(() => {
@@ -323,36 +303,7 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ⚡ BANNER DE MIGRACIÓN DE LOCALSTORAGE A SUPABASE ⚡ */}
-      {migrableKeys.length > 0 && (
-        <Card className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-bold text-[10px] uppercase tracking-wider">
-                    Migración de datos a la Nube
-                  </Badge>
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                  ¡Detectamos datos locales listos para sincronizar!
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl">
-                  Tienes <strong>{migrableKeys.map(k => k.replace("_dynamics", "")).join(", ")}</strong> guardados en la memoria local de este navegador.
-                  Presiona el botón para migrarlos directamente a tu base de datos Supabase en la nube.
-                </p>
-              </div>
-              <Button
-                className="btn-primary flex gap-2 shrink-0"
-                onClick={handleCloudMigration}
-              >
-                <TrendingUp className="h-4 w-4" /> Sincronizar con Supabase
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {showWizard && !wizardCompleted && (
         <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
