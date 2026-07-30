@@ -409,12 +409,21 @@ export function CoachPlannerPage() {
             ))}
           </div>
 
-          <Button
-            onClick={() => setAiModalAbierto(true)}
-            className="bg-[#2563EB] hover:bg-blue-700 text-white font-medium text-xs py-2.5 px-5 rounded-[12px] shadow-none gap-2 uppercase tracking-wider"
-          >
-            <Sparkles className="h-4 w-4 animate-pulse text-amber-300" /> ✨ Planificar con IA
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              onClick={iniciarPlanificacionManual}
+              variant="outline"
+              className="bg-white hover:bg-slate-50 text-slate-700 dark:text-slate-200 border-slate-300 font-semibold text-xs py-2.5 px-4 rounded-[12px] shadow-none gap-2 uppercase tracking-wider"
+            >
+              <Pencil className="h-4 w-4 text-slate-500" /> ✏️ Planificar a Mano
+            </Button>
+            <Button
+              onClick={() => setAiModalAbierto(true)}
+              className="bg-[#2563EB] hover:bg-blue-700 text-white font-semibold text-xs py-2.5 px-5 rounded-[12px] shadow-none gap-2 uppercase tracking-wider"
+            >
+              <Sparkles className="h-4 w-4 animate-pulse text-amber-300" /> ✨ Planificar con IA
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-[#F1F5F9] pt-4">
