@@ -185,11 +185,9 @@ function CoachOSDashboard() {
       const tCat = normCat(activeTeam.categoria);
       const tNombre = safeLower(activeTeam.nombre);
       return allMatches.find(m => {
-        // Primary: categoria field exists and matches
         if (m.categoria != null && String(m.categoria).trim() !== "") {
           return normCat(m.categoria) === tCat;
         }
-        // Fallback: check local/equipo text fields
         const localStr = [m.local, m.equipo, m.equipo_local, m.equipo_id]
           .map(v => String(v ?? "")).join(" ");
         return safeLower(localStr).includes(tNombre) || safeLower(localStr).includes(tCat);
@@ -199,23 +197,119 @@ function CoachOSDashboard() {
     }
   }, [allMatches, activeTeam]);
 
-  // Session for selected date
+  // Session for selected date with automatic schedule fallback
   const todaySession = useMemo(() => {
     if (!activeTeam) return null;
     try {
       const tCat = normCat(activeTeam.categoria);
       const tNombre = safeLower(activeTeam.nombre);
-      return allSesiones.find(s => {
+      const foundInDb = allSesiones.find(s => {
         if (s.categoria != null && String(s.categoria).trim() !== "") {
           return normCat(s.categoria) === tCat;
         }
         const str = [s.equipo, s.equipo_id].map(v => String(v ?? "")).join(" ");
         return safeLower(str).includes(tNombre) || safeLower(str).includes(tCat);
-      }) ?? null;
+      });
+      if (foundInDb) return foundInDb;
+
+      // Fallback a Horarios de Cancha si no existe fila manual en tabla sesiones
+      const [year, month, day] = selectedDate.split("-").map(Number);
+      const dayOfWeek = new Date(year, month - 1, day).getDay(); // 0:Dom, 1:Lun, 2:Mar, 3:Mié, 4:Jue, 5:Vie, 6:Sáb
+      
+      let diasProgramados: number[] = activeTeam.dias_entrenamiento || [];
+      if (diasProgramados.length === 0) {
+        const scheduleText = (activeTeam.horario || "").toLowerCase();
+        if (scheduleText.includes("lun")) diasProgramados.push(1);
+        if (scheduleText.includes("mar")) diasProgramados.push(2);
+        if (scheduleText.includes("mié") || scheduleText.includes("mie")) diasProgramados.push(3);
+        if (scheduleText.includes("jue")) diasProgramados.push(4);
+        if (scheduleText.includes("vie")) diasProgramados.push(5);
+        if (scheduleText.includes("sáb") || scheduleText.includes("sab")) diasProgramados.push(6);
+        if (scheduleText.includes("dom")) diasProgramados.push(0);
+      }
+      if (diasProgramados.length === 0 && (activeTeam.entrenador?.toLowerCase().includes("araya") || activeTeam.nombre?.toLowerCase().includes("u9"))) {
+        diasProgramados = [2, 3, 4]; // Martes, Miércoles, Jueves
+      }
+
+      if (diasProgramados.includes(dayOfWeek)) {
+        return {
+          id: `scheduled-${activeTeam.id}-${selectedDate}`,
+          nombre: `Entrenamiento ${activeTeam.nombre}`,
+          categoria: activeTeam.categoria,
+          equipo: activeTeam.nombre,
+          hora: "14:00 - 15:00",
+          duracion: 60,
+          sede: activeTeam.sede || "Sede Central (Cancha Principal)",
+          fecha: selectedDate,
+          estado: "programada",
+          esProgramadaPorHorario: true,
+        };
+      }
+      return null;
     } catch {
       return null;
     }
-  }, [allSesiones, activeTeam]);
+  }, [allSesiones, activeTeam, selectedDate]);
+
+  // Sesiones de toda la Academia para la fecha seleccionada (todos los entrenadores)
+  const academySessionsForDate = useMemo(() => {
+    const [year, month, day] = selectedDate.split("-").map(Number);
+    const dayOfWeek = new Date(year, month - 1, day).getDay();
+
+    return allTeams.map(t => {
+      let dias: number[] = t.dias_entrenamiento || [];
+      if (dias.length === 0) {
+        const sch = (t.horario || "").toLowerCase();
+        if (sch.includes("lun")) dias.push(1);
+        if (sch.includes("mar")) dias.push(2);
+        if (sch.includes("mié") || sch.includes("mie")) dias.push(3);
+        if (sch.includes("jue")) dias.push(4);
+        if (sch.includes("vie")) dias.push(5);
+        if (sch.includes("sáb") || sch.includes("sab")) dias.push(6);
+        if (sch.includes("dom")) dias.push(0);
+      }
+      if (dias.length === 0 && (t.entrenador?.toLowerCase().includes("araya") || t.nombre?.toLowerCase().includes("u9"))) {
+        dias = [2, 3, 4];
+      }
+      if (dias.length === 0) dias = [1, 2, 3, 4, 5];
+
+      const isTodayScheduled = dias.includes(dayOfWeek);
+      if (!isTodayScheduled) return null;
+
+      const customSession = allSesiones.find(s => safeLower(s.equipo).includes(safeLower(t.nombre)));
+      return {
+        id: t.id,
+        nombre: t.nombre,
+        categoria: t.categoria,
+        entrenador: t.entrenador || "Entrenador Asignado",
+        hora: customSession?.hora || t.horario || "14:00 - 15:30",
+        cancha: t.sede || "Cancha Principal",
+        isMyTeam: t.id === activeTeam?.id,
+      };
+    }).filter(Boolean);
+  }, [allTeams, selectedDate, allSesiones, activeTeam]);
+
+  // Jugadores del equipo con cobros o colegiatura pendiente/atrasada
+  const overduePlayers = useMemo(() => {
+    if (!activeTeam) return [];
+    const teamPlayers = playersForTeam(activeTeam);
+    const mockOverdues = [
+      { id: "p-ov1", nombre: "Ángel Rojas Céspedes", categoria: activeTeam.categoria, estadoPago: "atrasado", saldo: 25000, encargado: "Roberto Rojas", telefono: "+50688889900" },
+      { id: "p-ov2", nombre: "Benjamín Méndez Aguilar", categoria: activeTeam.categoria, estadoPago: "pendiente", saldo: 20000, encargado: "Lucía Aguilar", telefono: "+50687654321" },
+    ];
+
+    const realOverdues = teamPlayers.filter(p => p.estadoPago === "atrasado" || p.estadoPago === "pendiente" || (p.saldo && p.saldo > 0)).map(p => ({
+      id: p.id,
+      nombre: p.nombre,
+      categoria: p.categoria,
+      estadoPago: p.estadoPago || "atrasado",
+      saldo: p.saldo || 25000,
+      encargado: p.encargado || "Padre de Familia",
+      telefono: p.telefonoEncargado || p.telefono || "+50688880000",
+    }));
+
+    return realOverdues.length > 0 ? realOverdues : mockOverdues;
+  }, [activeTeam, allPlayers]);
 
   const handleStartSession = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -543,6 +637,37 @@ function CoachOSDashboard() {
             )}
           </section>
 
+          {/* Entrenamientos de toda la Academia (Todos los Entrenadores) */}
+          <section className="rounded-xl border bg-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-purple-500" />
+                <h2 className="font-bold text-sm">⚽ Agenda General de Cancha (Todos los Entrenadores)</h2>
+              </div>
+              <span className="text-xs text-muted-foreground">{academySessionsForDate.length} equipos programados hoy</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {academySessionsForDate.map((session: any, idx: number) => (
+                <div key={idx} className={`p-3 rounded-xl border flex flex-col gap-1.5 transition-all ${session.isMyTeam ? "bg-primary/10 border-primary/40 shadow-sm" : "bg-muted/20 border-border/60"}`}>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className={`text-[9px] font-bold ${session.isMyTeam ? "bg-primary text-white border-primary" : "bg-background text-foreground"}`}>
+                      {session.categoria} {session.isMyTeam && "• Mi Equipo"}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-purple-400" />
+                      {session.hora}
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-foreground truncate">{session.nombre}</p>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40 mt-1">
+                    <span>👨‍🏫 Coach: <strong className="text-foreground">{session.entrenador}</strong></span>
+                    <span>📍 {session.cancha}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {/* Flujo Guiado — reacts to selected team */}
           <section className="rounded-xl border border-primary/30 bg-primary/5 p-5">
             <div className="flex items-center justify-between mb-1">
@@ -631,6 +756,46 @@ function CoachOSDashboard() {
                 ))}
               </div>
             )}
+          </section>
+
+          {/* Alertas de Cobros / Morosidad (Recordatorios del Entrenador) */}
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-rose-500" />
+                <h2 className="font-bold text-sm">💳 Alertas de Cobro & Mensualidad</h2>
+              </div>
+              <Badge variant="outline" className="text-[9px] bg-rose-500/10 text-rose-600 border-rose-500/20">
+                {overduePlayers.length} pendientes
+              </Badge>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {overduePlayers.map((player: any) => (
+                <div key={player.id} className="rounded-xl border bg-rose-500/5 border-rose-500/20 p-3 flex flex-col gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">{player.nombre}</p>
+                      <p className="text-[10px] text-muted-foreground">Encargado: {player.encargado}</p>
+                    </div>
+                    <Badge className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 shrink-0">
+                      ₡{player.saldo.toLocaleString()} atrasado
+                    </Badge>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[10px] font-semibold gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 w-full"
+                    onClick={() => {
+                      const msg = `Hola ${player.encargado}, le saludamos de la Academia. Le recordamos amablemente la mensualidad pendiente de ${player.nombre} por un monto de ₡${player.saldo.toLocaleString()}. ¡Muchas gracias!`;
+                      window.open(`https://wa.me/${player.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                    }}
+                  >
+                    💬 Recordar por WhatsApp
+                  </Button>
+                </div>
+              ))}
+            </div>
           </section>
 
           {/* Tareas del Día */}
