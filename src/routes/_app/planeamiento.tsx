@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Sparkles, Activity, Award, Pencil, Info, UserX, CloudSun, MapPin, CheckCircle2, ChevronRight,
-  Plus, Trash2, BookOpen, Clock, Calendar, Check, Search, Dumbbell, Shield, Zap, X
+  Plus, Trash2, BookOpen, Clock, Calendar, Check, Search, Dumbbell, Shield, Zap, X,
+  Calendar as CalendarIcon, Layers, CalendarRange
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRole } from "@/hooks/use-role";
@@ -313,7 +314,71 @@ export function CoachPlannerPage() {
     });
     setDiasPlan(actualizados);
     guardarPlanificacionDb(actualizados);
+  // Modales de Planificación Manual
+  const [openSelectorModal, setOpenSelectorModal] = useState(false);
+  const [openEditWeekly, setOpenEditWeekly] = useState(false);
+  const [weeklyResponsable, setWeeklyResponsable] = useState(coachName || "Carlos Araya");
+  const [weeklyObjetivo, setWeeklyObjetivo] = useState("Desarrollo del juego asociativo y transiciones rápidas");
+  const [weeklyActividades, setWeeklyActividades] = useState([
+    { dia: 0, titulo: "Técnica individual y pases cortos", hora: "14:00", tipo: "entreno" },
+    { dia: 1, titulo: "Visualización de táctica grupal", hora: "15:00", tipo: "video" },
+    { dia: 2, titulo: "Posicionamiento de líneas y basculación", hora: "14:00", tipo: "entreno" },
+    { dia: 3, titulo: "Sesión regenerativa y estiramientos", hora: "09:00", tipo: "recuperacion" },
+    { dia: 4, titulo: "Fútbol tenis y táctica fija", hora: "14:00", tipo: "entreno" },
+    { dia: 5, titulo: "Partido amistoso vs Academias", hora: "10:00", tipo: "partido" },
+    { dia: 6, titulo: "Descanso activo", hora: "", tipo: "descanso" },
+  ]);
+
+  const updateWeeklyActivity = (diaIdx: number, field: string, value: any) => {
+    setWeeklyActividades(prev => {
+      const exists = prev.some(a => a.dia === diaIdx);
+      if (exists) {
+        return prev.map(a => a.dia === diaIdx ? { ...a, [field]: value } : a);
+      }
+      return [...prev, { dia: diaIdx, titulo: "", hora: "", tipo: "entreno", [field]: value }];
+    });
   };
+
+  const handleSaveWeeklyManual = (e: React.FormEvent) => {
+    e.preventDefault();
+    const actualizados = { ...diasPlan };
+    diasSemanaArray.forEach(({ fechaStr }, idx) => {
+      const act = weeklyActividades.find(a => a.dia === idx) || { titulo: "Entrenamiento", tipo: "entreno" };
+      const esDescanso = act.tipo === "descanso";
+      actualizados[fechaStr] = {
+        ...actualizados[fechaStr],
+        tipoJornada: esDescanso ? "Descanso" : act.tipo === "partido" ? "Partido" : act.tipo === "recuperacion" ? "Recuperación" : "Entreno",
+        objetivoFisico: !esDescanso ? "Acondicionamiento físico específico" : "",
+        objetivoTecnico: !esDescanso ? (act.titulo || "Técnica individual y táctica de conjunto") : "",
+        objetivoTactico: !esDescanso ? weeklyObjetivo : "",
+        objetivoMental: !esDescanso ? "Enfoque y disciplina" : "",
+        bloques: !esDescanso ? [
+          { nombre: "1. Calentamiento", duracionMin: 15, descripcion: act.titulo || "Calentamiento con balón" },
+          { nombre: "2. Fase Principal", duracionMin: 45, descripcion: "Trabajo técnico-táctico en campo" },
+          { nombre: "3. Vuelta a la Calma", duracionMin: 15, descripcion: "Estiramientos y retroalimentación" }
+        ] : [],
+        sugeridoIA: false,
+      };
+    });
+    setDiasPlan(actualizados);
+    guardarPlanificacionDb(actualizados);
+    setOpenEditWeekly(false);
+    toast.success("✅ Planificación semanal guardada correctamente.");
+  };
+
+  const [openCreatePlan, setOpenCreatePlan] = useState(false);
+  const [planName, setPlanName] = useState("");
+  const [planStart, setPlanStart] = useState("");
+  const [planEnd, setPlanEnd] = useState("");
+  const [planObjectives, setPlanObjectives] = useState("");
+  const [planExercises, setPlanExercises] = useState([{ id: "ex_1", nombre: "", duracion: 15 }]);
+
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openEditPhase, setOpenEditPhase] = useState(false);
+  const [phaseName, setPhaseName] = useState("");
+  const [phaseStart, setPhaseStart] = useState("");
+  const [phaseEnd, setPhaseEnd] = useState("");
+  const [phaseNotas, setPhaseNotas] = useState("");
 
   const [aiModalAbierto, setAiModalAbierto] = useState(false);
   const [aiPrioridades, setAiPrioridades] = useState<string[]>(["Salida limpia desde atrás", "Presión alta tras pérdida"]);
@@ -411,11 +476,11 @@ export function CoachPlannerPage() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <Button
-              onClick={iniciarPlanificacionManual}
+              onClick={() => setOpenSelectorModal(true)}
               variant="outline"
               className="bg-white hover:bg-slate-50 text-slate-700 dark:text-slate-200 border-slate-300 font-semibold text-xs py-2.5 px-4 rounded-[12px] shadow-none gap-2 uppercase tracking-wider"
             >
-              <Pencil className="h-4 w-4 text-slate-500" /> ✏️ Planificar a Mano
+              <Pencil className="h-4 w-4 text-slate-500" /> ✏️ Planificar Manualmente
             </Button>
             <Button
               onClick={() => setAiModalAbierto(true)}
@@ -990,6 +1055,351 @@ export function CoachPlannerPage() {
             >
               {aiGenerando ? "⚡ Procesando con Athletix AI..." : "✨ Generar Lienzo en 5 seg"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG SELECTOR INTELIGENTE: "¿Qué deseas planificar hoy?" ──────────────── */}
+      <Dialog open={openSelectorModal} onOpenChange={setOpenSelectorModal}>
+        <DialogContent className="sm:max-w-[550px] bg-background border shadow-elegant text-foreground">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Plus className="h-5 w-5 text-primary text-blue-600" /> ¿Qué deseas planificar hoy?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Selecciona el tipo de ciclo que deseas estructurar o editar para el equipo <strong className="text-foreground">{equipoSel}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {/* CARD 1: Semanal */}
+            <button
+              onClick={() => {
+                setOpenSelectorModal(false);
+                setOpenEditWeekly(true);
+              }}
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 transition-all text-center group"
+            >
+              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <CalendarIcon className="h-5 w-5 text-blue-600" />
+              </div>
+              <p className="text-xs font-bold text-foreground">Plan Semanal</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Lunes a Domingo, entrenos y partidos detallados</p>
+            </button>
+
+            {/* CARD 2: Microciclo */}
+            <button
+              onClick={() => {
+                setOpenSelectorModal(false);
+                setOpenCreatePlan(true);
+              }}
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 transition-all text-center group"
+            >
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <Zap className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-bold text-foreground">⚡ Microciclo</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Estructura de tareas y sesiones a corto plazo</p>
+            </button>
+
+            {/* CARD 3: Mesociclo */}
+            <button
+              onClick={() => {
+                setOpenSelectorModal(false);
+                setOpenCreateModal(true);
+              }}
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 transition-all text-center group"
+            >
+              <div className="h-10 w-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <Layers className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-bold text-foreground">🔁 Mesociclo</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Plan metodológico y contenidos mensuales</p>
+            </button>
+
+            {/* CARD 4: Temporada */}
+            <button
+              onClick={() => {
+                setOpenSelectorModal(false);
+                setOpenCreateModal(true);
+              }}
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 transition-all text-center group"
+            >
+              <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                <CalendarRange className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-bold text-foreground">📆 Fase de Temporada</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Bloques y periodos clave del año</p>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG 1: EDITAR PLANIFICACIÓN SEMANAL ────────────────────────── */}
+      <Dialog open={openEditWeekly} onOpenChange={setOpenEditWeekly}>
+        <DialogContent className="sm:max-w-[620px] bg-background border shadow-elegant text-foreground max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Pencil className="h-5 w-5 text-primary text-blue-600" /> Editar Planificación Semanal
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Modifica el responsable, objetivo y las actividades de cada día de la semana.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveWeeklyManual} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Responsable</Label>
+                <Input
+                  placeholder="Nombre del entrenador"
+                  value={weeklyResponsable}
+                  onChange={e => setWeeklyResponsable(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Objetivo Semanal</Label>
+                <Input
+                  placeholder="Ej. Desarrollo del juego asociativo"
+                  value={weeklyObjetivo}
+                  onChange={e => setWeeklyObjetivo(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-3 space-y-3">
+              <Label className="text-xs font-bold text-foreground">Actividades por día</Label>
+              <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                {["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"].map((dayLabel, idx) => {
+                  const act = weeklyActividades.find((a: any) => a.dia === idx) || { dia: idx, titulo: "", hora: "", tipo: "entreno" };
+                  return (
+                    <div key={idx} className="grid grid-cols-[60px_1fr_90px_120px] gap-2 items-center bg-muted/20 border border-border/40 rounded-xl px-3 py-2">
+                      <span className="text-xs font-bold text-muted-foreground">{dayLabel}</span>
+                      <Input
+                        placeholder="Actividad del día"
+                        value={act.titulo || ""}
+                        onChange={e => updateWeeklyActivity(idx, "titulo", e.target.value)}
+                        className="text-xs h-8"
+                      />
+                      <Input
+                        placeholder="HH:MM"
+                        value={act.hora || ""}
+                        onChange={e => updateWeeklyActivity(idx, "hora", e.target.value)}
+                        className="text-xs h-8 text-center"
+                      />
+                      <select
+                        value={act.tipo || "entreno"}
+                        onChange={e => updateWeeklyActivity(idx, "tipo", e.target.value)}
+                        className="h-8 rounded-md border border-input bg-background px-2 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                      >
+                        <option value="entreno">Entreno</option>
+                        <option value="partido">Partido</option>
+                        <option value="recuperacion">Recuperación</option>
+                        <option value="video">Video</option>
+                        <option value="descanso">Descanso</option>
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t pt-3">
+              <Button type="button" variant="outline" onClick={() => setOpenEditWeekly(false)} className="text-xs h-9">Cancelar</Button>
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-elegant text-xs h-9">Guardar Semana</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG 2: NUEVA PLANIFICACIÓN DE MICROCICLO ────────────────────── */}
+      <Dialog open={openCreatePlan} onOpenChange={setOpenCreatePlan}>
+        <DialogContent className="sm:max-w-[550px] bg-background border shadow-elegant text-foreground max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Zap className="h-5 w-5 text-amber-500" /> Nueva Planificación de Microciclo
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Define el nombre del ciclo, la semana de duración y las tareas específicas de entrenamiento para el equipo <strong className="text-foreground">{equipoSel}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Nombre del Ciclo *</Label>
+              <Input
+                placeholder="Ej. Microciclo 1: Transición Defensiva"
+                value={planName}
+                onChange={e => setPlanName(e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Fecha Inicio *</Label>
+                <Input type="date" value={planStart} onChange={e => setPlanStart(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Fecha Fin *</Label>
+                <Input type="date" value={planEnd} onChange={e => setPlanEnd(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Objetivos de Rendimiento</Label>
+              <Textarea
+                rows={3}
+                placeholder="Ej. Mejorar la transición de ataque a defensa y el repliegue en bloque medio."
+                value={planObjectives}
+                onChange={e => setPlanObjectives(e.target.value)}
+              />
+            </div>
+
+            <div className="border-t pt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold">Tareas / Ejercicios específicos</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] gap-1"
+                  onClick={() => setPlanExercises([...planExercises, { id: `ex_${Date.now()}`, nombre: "", duracion: 15 }])}
+                >
+                  <Plus className="h-3 w-3" /> Agregar Ejercicio
+                </Button>
+              </div>
+
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {planExercises.map((ex, i) => (
+                  <div key={ex.id || i} className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-4">{i + 1}.</span>
+                    <Input
+                      placeholder="Nombre del ejercicio o tarea (ej. Rondo 4v2)"
+                      value={ex.nombre}
+                      onChange={e => {
+                        const copy = [...planExercises];
+                        copy[i].nombre = e.target.value;
+                        setPlanExercises(copy);
+                      }}
+                      className="text-xs h-8 flex-1"
+                    />
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Input
+                        type="number"
+                        value={ex.duracion}
+                        onChange={e => {
+                          const copy = [...planExercises];
+                          copy[i].duracion = Number(e.target.value);
+                          setPlanExercises(copy);
+                        }}
+                        className="text-xs h-8 w-16 text-center"
+                      />
+                      <span className="text-[10px] text-muted-foreground">min</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-destructive"
+                      onClick={() => setPlanExercises(planExercises.filter((_, idx) => idx !== i))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t pt-3">
+              <Button type="button" variant="outline" onClick={() => setOpenCreatePlan(false)} className="text-xs h-9">Cancelar</Button>
+              <Button
+                type="button"
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9"
+                onClick={() => {
+                  iniciarPlanificacionManual();
+                  setOpenCreatePlan(false);
+                  toast.success("⚡ Microciclo creado exitosamente.");
+                }}
+              >
+                Guardar Planificación
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DIALOG 3: NUEVA PLANIFICACIÓN MENSUAL (MESOCICLO / TEMPORADA) ──── */}
+      <Dialog open={openCreateModal} onOpenChange={setOpenCreateModal}>
+        <DialogContent className="sm:max-w-[700px] bg-background border shadow-elegant text-foreground max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Layers className="h-5 w-5 text-purple-500" /> Nueva Planificación (Mesociclo / Temporada)
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Configura el currículum de entrenamiento mensual o el macrociclo anual para el equipo <strong className="text-foreground">{equipoSel}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Categoría *</Label>
+                <Input value={categoriaSel} onChange={e => setCategoriaSel(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Equipo</Label>
+                <Input value={equipoSel} readOnly className="bg-muted/50" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Entrenador</Label>
+                <Input value={weeklyResponsable} onChange={e => setWeeklyResponsable(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Fecha de Creación</Label>
+                <Input type="date" defaultValue={new Date().toISOString().split("T")[0]} />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold">Objetivo General *</Label>
+              <Textarea rows={2} placeholder="Describa el objetivo formativo principal de la categoría..." />
+            </div>
+
+            <div className="border-t pt-3 space-y-2">
+              <Label className="text-xs font-bold text-purple-600">Pilares de Trabajo por Bloque</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-2">
+                  <p className="text-xs font-bold text-purple-700">Trabajo Técnico</p>
+                  <Input placeholder="Ej. Control orientado..." className="text-xs h-7" />
+                </div>
+                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 space-y-2">
+                  <p className="text-xs font-bold text-blue-700">Táctica Colectiva</p>
+                  <Input placeholder="Ej. Basculación..." className="text-xs h-7" />
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                  <p className="text-xs font-bold text-emerald-700">Física Base</p>
+                  <Input placeholder="Ej. Fuerza explosiva..." className="text-xs h-7" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t pt-3">
+              <Button type="button" variant="outline" onClick={() => setOpenCreateModal(false)} className="text-xs h-9">Cancelar</Button>
+              <Button
+                type="button"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs h-9"
+                onClick={() => {
+                  iniciarPlanificacionManual();
+                  setOpenCreateModal(false);
+                  toast.success("🔁 Mesociclo guardado exitosamente.");
+                }}
+              >
+                Guardar Planificación
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
