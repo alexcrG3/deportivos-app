@@ -176,6 +176,7 @@ export function CanchaBCoachBoard({
 
   // Zoom + pan
   const [zoom, setZoom] = useState(1);
+  const [isDockMinimized, setIsDockMinimized] = useState(false);
   const lastPinchDist = useRef<number | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -580,136 +581,82 @@ export function CanchaBCoachBoard({
   );
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#070b14] text-white overflow-hidden select-none relative">
-      {/* ── BCOACH TOP HEADER TOOLBAR ───────────────────────────────────────── */}
-      <div className="shrink-0 bg-[#0f172a]/95 border-b border-slate-800 px-3 py-2 flex items-center justify-between gap-2 shadow-lg z-30">
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col w-full h-full bg-[#183b18] text-white overflow-hidden select-none relative">
+      {/* ── TOP FLOATING GLASS HUD (HUD Superior Flotante Estilo bCoach) ───────────────────────── */}
+      <div className="absolute top-2 left-2 right-2 z-30 flex items-center justify-between pointer-events-none gap-2">
+        {/* Left Floating Pill */}
+        <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/85 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-full shadow-2xl">
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              className="p-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 transition text-xs font-bold"
               title="Volver"
             >
               ←
             </button>
           )}
-          <div>
-            <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
-              <span>🎨 Pizarra Táctica Profesional</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                {activeVideoUrl ? "📹 Modo Video Partido" : "⚽ Cancha 2D"}
-              </span>
-            </h3>
-          </div>
+          <h3 className="text-xs font-black text-white flex items-center gap-1.5">
+            <span>🎨 Pizarra Táctica</span>
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              {activeVideoUrl ? "📹 Video" : "⚽ 2D"}
+            </span>
+          </h3>
         </div>
 
-        {/* TOP RIGHT: QUICK ACTIONS VISIBLES + SECONDARY "+" MENU */}
-        <div className="flex items-center gap-1.5 flex-wrap justify-end">
-
-          {/* VIDEO CONTROLS when video is active */}
-          {activeVideoUrl && (
-            <div className="flex items-center gap-1.5 bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-xl">
-              <button
-                type="button"
-                onClick={toggleVideoPlay}
-                className="p-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition"
-              >
-                {isPlayingVideo ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-              </button>
-              <span className="text-[10px] font-mono text-emerald-300 font-bold">
-                {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveVideoUrl(null)}
-                className="text-[10px] text-red-400 hover:text-red-300 px-1 font-bold"
-              >
-                ✕ Cancha
-              </button>
-            </div>
-          )}
-
-          {/* ── BOTONES RÁPIDOS VISIBLES (como en el video táctico) ── */}
-
-          {/* 📷 Foto del Campo — abre cámara trasera del dispositivo */}
+        {/* Right Floating Quick Tools */}
+        <div className="pointer-events-auto flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2 py-1 rounded-full shadow-2xl">
+          {/* Photo */}
           <button
             type="button"
             onClick={() => cameraInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-violet-700 border border-slate-700 hover:border-violet-500 text-[11px] font-bold text-slate-200 hover:text-white transition"
-            title="Tomar foto del campo real con la cámara y usarla de fondo"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-violet-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+            title="Tomar foto del campo"
           >
-            <span className="text-sm leading-none">📷</span>
-            <span className="hidden sm:inline">Foto del Campo</span>
+            <span>📷</span>
+            <span className="hidden sm:inline">Foto</span>
           </button>
 
-          {/* Indicador activo: foto de campo cargada */}
-          {backgroundImageUrl && (
-            <div className="flex items-center gap-1.5 bg-violet-900/60 border border-violet-500/50 px-2 py-1 rounded-xl">
-              <span className="text-[10px] font-bold text-violet-300">📸 Foto activa</span>
-              <button
-                type="button"
-                onClick={() => setBackgroundImageUrl(null)}
-                className="text-[10px] text-red-400 hover:text-red-300 font-bold"
-                title="Quitar foto y volver a Cancha 2D"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-
-          {/* 📹 Cargar Video */}
+          {/* Video */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-emerald-700 border border-slate-700 hover:border-emerald-500 text-[11px] font-bold text-slate-200 hover:text-white transition"
-            title="Cargar video o imagen de partido para análisis"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+            title="Cargar video"
           >
-            <Video className="h-3.5 w-3.5 text-emerald-400" />
+            <Video className="h-3 w-3 text-emerald-400" />
             <span className="hidden sm:inline">Video</span>
           </button>
 
-          {/* Formaciones 1-clic */}
+          {/* Formations */}
           <Popover>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-blue-700 border border-slate-700 hover:border-blue-500 text-[11px] font-bold text-slate-200 hover:text-white transition"
-                title="Alineaciones tácticas 1-clic"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-blue-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+                title="Alineaciones 1-clic"
               >
-                <Users className="h-3.5 w-3.5 text-blue-400" />
+                <Users className="h-3 w-3 text-blue-400" />
                 <span className="hidden sm:inline">Alineaciones</span>
-                <ChevronDown className="h-3 w-3 text-slate-500" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-52 bg-slate-900 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-0.5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase px-2 py-1 block">Plantillas 1-Clic</span>
+            <PopoverContent className="w-48 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-0.5">
+              <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-1 block">Plantillas 1-Clic</span>
               {Object.entries(FORMATIONS).map(([key, f]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => loadFormation(key)}
-                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:bg-blue-600 hover:text-white transition flex justify-between items-center"
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-blue-600 hover:text-white transition flex justify-between items-center"
                 >
-                  <span className="font-black text-sm">{key}</span>
-                  <span className="text-[10px] opacity-70">{f.label}</span>
+                  <span className="font-black text-xs">{key}</span>
+                  <span className="text-[9px] opacity-70">{f.label}</span>
                 </button>
               ))}
             </PopoverContent>
           </Popover>
 
-          {/* Limpiar pizarra rápido */}
-          <button
-            type="button"
-            onClick={handleClear}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-red-900 border border-slate-700 hover:border-red-600 text-[11px] font-bold text-slate-400 hover:text-red-300 transition"
-            title="Limpiar pizarra"
-          >
-            <Trash2 className="h-3.5 w-3.5 text-red-500" />
-            <span className="hidden sm:inline">Limpiar</span>
-          </button>
-
-          {/* Pantalla completa */}
+          {/* Fullscreen */}
           <button
             type="button"
             onClick={() => {
@@ -719,11 +666,10 @@ export function CanchaBCoachBoard({
                 document.exitFullscreen?.();
               }
             }}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-emerald-400 hover:text-emerald-200 transition"
-            title="Pantalla completa"
+            className="p-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-emerald-400 transition"
+            title="Pantalla Completa"
           >
             <Maximize2 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Pantalla Completa</span>
           </button>
         </div>
 
@@ -734,7 +680,6 @@ export function CanchaBCoachBoard({
           onChange={handleCustomVideoUpload}
           className="hidden"
         />
-        {/* Camera input: opens device rear camera directly on mobile */}
         <input
           ref={cameraInputRef}
           type="file"
@@ -745,16 +690,15 @@ export function CanchaBCoachBoard({
         />
       </div>
 
-      {/* ── MAIN CANVAS AREA (VIDEO OR 2D PITCH) ────────────────────────────── */}
+      {/* ── 100% CANVAS FIELD AREA (Cancha Verde Edge-to-Edge) ────────────────── */}
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 relative bg-[#183b18] flex items-center justify-center overflow-hidden"
-        style={{ overflow: zoom > 1 ? "auto" : "hidden" }}
+        className="w-full h-full flex-1 relative bg-[#183b18] overflow-auto flex items-center justify-center"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* HTML5 VIDEO LAYER */}
+        {/* HTML5 Video Layer */}
         {activeVideoUrl && (
           <video
             ref={videoRef}
@@ -769,16 +713,14 @@ export function CanchaBCoachBoard({
 
         <div
           style={{
-            width: zoom > 1 ? `${zoom * 100}%` : "100%",
-            height: zoom > 1 ? `${zoom * 100}%` : "100%",
-            maxWidth: "100%",
-            maxHeight: "100%",
+            width: `${zoom * 100}%`,
+            height: `${zoom * 100}%`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
             zIndex: 10,
-            transition: "width 0.1s ease-out, height 0.1s ease-out",
+            transition: isDrawing || dragging ? "none" : "width 0.1s ease-out, height 0.1s ease-out",
           }}
         >
           {svgElement}
@@ -786,214 +728,223 @@ export function CanchaBCoachBoard({
 
         {/* Zoom indicator */}
         {zoom !== 1 && (
-          <div className="absolute bottom-2 right-2 bg-black/70 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-700 pointer-events-none z-20">
+          <div className="absolute bottom-16 right-3 bg-black/80 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-700 pointer-events-none z-20">
             {Math.round(zoom * 100)}%
           </div>
         )}
       </div>
 
-      {/* ── BCOACH DOCK FLOTANTE INFERIOR DE HERRAMIENTAS ───────────────────── */}
-      <div className="shrink-0 bg-[#0f172a]/95 border-t border-slate-800 p-2 flex flex-wrap items-center justify-between gap-2 shadow-2xl z-30">
-        {/* GRUPO DIBUJO Y HERRAMIENTAS */}
-        <div className="flex items-center gap-1 bg-[#1e293b] p-1 rounded-xl border border-slate-700">
+      {/* ── BOTTOM FLOATING DOCK (Dock Inferior Flotante de Cristal Estilo bCoach) ─────────── */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 max-w-[95vw] pointer-events-auto">
+        {isDockMinimized ? (
           <button
             type="button"
-            onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-              activeTool === "draw-solid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
-            }`}
+            onClick={() => setIsDockMinimized(false)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-950/90 border border-white/20 text-white font-bold text-xs shadow-2xl backdrop-blur-md hover:scale-105 transition"
           >
-            <Pencil className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Lápiz</span>
+            <Pencil className="h-4 w-4 text-emerald-400" />
+            <span>Herramientas Pizarra</span>
           </button>
+        ) : (
+          <div className="bg-slate-950/85 backdrop-blur-lg border border-white/15 p-2 rounded-2xl shadow-2xl text-white flex flex-col items-center gap-1.5">
+            {/* ROW 1: TOOLS & COLORS & THICKNESS */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              {/* Tools Group */}
+              <div className="flex items-center gap-0.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
+                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
+                    activeTool === "draw-solid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                  title="Lápiz"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Lápiz</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-              activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <span className="font-mono text-emerald-400 font-bold">┊</span> <span className="hidden sm:inline">Pase</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
+                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
+                    activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                  title="Pase"
+                >
+                  <span className="font-mono text-emerald-400 font-bold">┊</span> <span className="hidden sm:inline">Pase</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-              activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <ArrowRight className="h-3.5 w-3.5 text-amber-400" /> <span className="hidden sm:inline">Tiro</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
+                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
+                    activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                  title="Tiro"
+                >
+                  <ArrowRight className="h-3.5 w-3.5 text-amber-400" /> <span className="hidden sm:inline">Tiro</span>
+                </button>
 
-          {/* HERRAMIENTA ZONA SOMBREADA ESTILO BCOACH (00:27) */}
-          <button
-            type="button"
-            onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-              activeTool === "draw-zone" ? "bg-orange-600 text-white shadow-md ring-1 ring-orange-400" : "text-slate-400 hover:text-white"
-            }`}
-            title="Marcar Zona Sombreada de Espacio"
-          >
-            <Square className="h-3.5 w-3.5 text-orange-400 fill-orange-400/40" />
-            <span className="hidden sm:inline">Zona</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
+                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
+                    activeTool === "draw-zone" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                  title="Zona Sombreada"
+                >
+                  <Square className="h-3.5 w-3.5 text-orange-400" /> <span className="hidden sm:inline">Zona</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTool("eraser")}
-            className={`p-1.5 rounded-lg transition ${activeTool === "eraser" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`}
-            title="Borrador"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("eraser")}
+                  className={`p-1.5 rounded-lg transition ${activeTool === "eraser" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`}
+                  title="Borrador"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
 
-        {/* PALETA DE COLORES Y SELECCIÓN DE GROSOR DE LÍNEA */}
-        <div className="flex items-center gap-2 bg-[#1e293b] px-2 py-1 rounded-xl border border-slate-700">
-          <div className="flex items-center gap-1">
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setColor(c)}
-                className={`h-4.5 w-4.5 rounded-full border transition-transform ${
-                  color === c ? "scale-125 border-white ring-2 ring-emerald-400" : "border-transparent opacity-75 hover:opacity-100"
-                }`}
-                style={{ backgroundColor: c, width: 18, height: 18 }}
-              />
-            ))}
+              {/* Color Palette */}
+              <div className="flex items-center gap-1 bg-slate-900/90 px-2 py-1.5 rounded-xl border border-slate-800">
+                {COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`h-4.5 w-4.5 rounded-full border transition-transform ${
+                      color === c ? "scale-125 border-white ring-2 ring-emerald-400" : "border-transparent opacity-75 hover:opacity-100"
+                    }`}
+                    style={{ backgroundColor: c, width: 16, height: 16 }}
+                  />
+                ))}
+              </div>
+
+              {/* Line thickness */}
+              <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setStrokeW(0.4)}
+                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
+                    strokeW <= 0.5 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
+                  }`}
+                >
+                  Fina
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrokeW(0.8)}
+                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
+                    strokeW > 0.5 && strokeW <= 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
+                  }`}
+                >
+                  Media
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrokeW(1.6)}
+                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
+                    strokeW > 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
+                  }`}
+                >
+                  Gruesa
+                </button>
+              </div>
+            </div>
+
+            {/* ROW 2: PLAYERS & ZOOM & ACTIONS & COLLAPSE BUTTON */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-between w-full pt-0.5 border-t border-white/10">
+              {/* Players/Items */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-player")}
+                  className={`h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${
+                    activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-300 border border-slate-800"
+                  }`}
+                >
+                  <User className="h-3 w-3 text-amber-400" />
+                  <span>+#{nextNum}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); }}
+                  className="h-6.5 px-2 rounded-lg text-xs font-bold bg-slate-900 text-slate-300 border border-slate-800"
+                >
+                  ⚽
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-text")}
+                  className={`h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${
+                    activeTool === "add-text" ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-300 border border-slate-800"
+                  }`}
+                >
+                  <TextIcon className="h-3 w-3 text-violet-400" />
+                </button>
+              </div>
+
+              {/* Zoom controls */}
+              <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-0.5 rounded-lg border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setZoom((z) => Math.min(3, parseFloat((z + 0.25).toFixed(2))))}
+                  className="p-1 text-slate-300 hover:text-white"
+                  title="Zoom +"
+                >
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))}
+                  className="p-1 text-slate-300 hover:text-white"
+                  title="Zoom -"
+                >
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={resetView}
+                  className="p-1 text-slate-400 hover:text-white"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Actions & Minimize Dock Button */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  disabled={paths.length === 0 && zones.length === 0}
+                  className="p-1 text-amber-400 hover:text-amber-200 disabled:opacity-30 text-xs font-bold"
+                  title="Deshacer"
+                >
+                  ↩
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="p-1 text-red-400 hover:text-red-300"
+                  title="Limpiar"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDockMinimized(true)}
+                  className="p-1 text-slate-400 hover:text-white bg-slate-800/80 rounded-lg ml-1"
+                  title="Minimizar Herramientas"
+                >
+                  <Eye className="h-3.5 w-3.5 text-slate-300" />
+                </button>
+              </div>
+            </div>
           </div>
-
-          <div className="h-4 w-px bg-slate-700 mx-0.5" />
-
-          {/* GROSOR DE LÍNEA: FINA / MEDIA / GRUESA */}
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setStrokeW(0.4)}
-              className={`h-6 px-1.5 rounded text-[10px] font-bold border transition ${
-                strokeW <= 0.5 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-              }`}
-              title="Línea Fina (0.4)"
-            >
-              Fina
-            </button>
-            <button
-              type="button"
-              onClick={() => setStrokeW(0.8)}
-              className={`h-6 px-1.5 rounded text-[10px] font-bold border transition ${
-                strokeW > 0.5 && strokeW <= 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-              }`}
-              title="Línea Media (0.8)"
-            >
-              Media
-            </button>
-            <button
-              type="button"
-              onClick={() => setStrokeW(1.6)}
-              className={`h-6 px-1.5 rounded text-[10px] font-bold border transition ${
-                strokeW > 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-              }`}
-              title="Línea Gruesa (1.6)"
-            >
-              Gruesa
-            </button>
-          </div>
-        </div>
-
-        {/* JUGADOR, BALÓN Y TEXTO */}
-        <div className="flex items-center gap-1 bg-[#1e293b] p-1 rounded-xl border border-slate-700">
-          <Button
-            size="sm"
-            type="button"
-            variant="ghost"
-            onClick={() => setActiveTool("add-player")}
-            className={`h-7 px-2 text-xs font-bold gap-1 ${activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "text-slate-300"}`}
-          >
-            <User className="h-3.5 w-3.5 text-amber-400" />
-            <span>+#{nextNum}</span>
-          </Button>
-
-          <Button
-            size="sm"
-            type="button"
-            variant="ghost"
-            onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); }}
-            className="h-7 px-2 text-xs font-bold text-slate-300"
-          >
-            <span>⚽</span>
-          </Button>
-
-          <Button
-            size="sm"
-            type="button"
-            variant="ghost"
-            onClick={() => setActiveTool("add-text")}
-            className={`h-7 px-2 text-xs font-bold gap-1 ${activeTool === "add-text" ? "bg-violet-600 text-white" : "text-slate-300"}`}
-          >
-            <TextIcon className="h-3.5 w-3.5 text-violet-400" />
-          </Button>
-        </div>
-
-        {/* ZOOM, UNDO, CLEAR & FULLSCREEN */}
-        <div className="flex items-center gap-1 bg-[#1e293b] p-1 rounded-xl border border-slate-700">
-          <button
-            type="button"
-            onClick={() => setZoom((z) => Math.min(4, parseFloat((z + 0.25).toFixed(2))))}
-            className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700"
-            title="Zoom In"
-          >
-            <ZoomIn className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))}
-            className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700"
-            title="Zoom Out"
-          >
-            <ZoomOut className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={resetView}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
-            title="Reset Zoom"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={paths.length === 0 && zones.length === 0}
-            className="p-1 text-amber-400 hover:text-amber-200 disabled:opacity-30"
-            title="Deshacer"
-          >
-            ↩
-          </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg"
-            title="Limpiar Pizarra"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen?.().catch(() => {});
-              } else {
-                document.exitFullscreen?.();
-              }
-            }}
-            className="p-1 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950 rounded-lg"
-            title="Pantalla Completa"
-          >
-            <Maximize2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

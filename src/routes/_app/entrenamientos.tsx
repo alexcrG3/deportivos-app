@@ -2303,34 +2303,9 @@ function EntrenamientosPage() {
 
         {/* MODAL PANTALLA COMPLETA INMERSIVA DE PIZARRA TÁCTICA BCOACH EN CANCHA */}
         {modalPizarraTactica && (
-          <div className="fixed inset-0 z-[99999] bg-[#0b0f19] text-white flex flex-col p-2 sm:p-4 overflow-hidden animate-fadeIn">
-            {/* ENCABEZADO SUPERIOR CON TÍTULO Y BOTÓN CERRAR */}
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0 gap-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-emerald-400 shrink-0" />
-                <div>
-                  <h2 className="text-sm sm:text-base font-black text-white leading-tight">
-                    🎨 Pizarra Táctica Profesional de Cancha — {sesionData.equipo} ({sesionData.categoria})
-                  </h2>
-                  <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
-                    Dibuja libremente a mano alzada con tu dedo o stylus, ubica jugadores numerados, alineaciones en 1-clic y equipamiento.
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                size="sm"
-                type="button"
-                onClick={() => setModalPizarraTactica(false)}
-                className="h-8.5 px-3 bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white rounded-xl font-bold text-xs gap-1.5 border border-red-500/30 transition shrink-0"
-              >
-                <X className="h-4 w-4" />
-                <span>Cerrar Pizarra</span>
-              </Button>
-            </div>
-
-            {/* CONTENEDOR 100% PANTALLA COMPLETA DE LA PIZARRA */}
-            <div className="flex-1 overflow-hidden min-h-0 pt-2">
+          <div className="fixed inset-0 z-[99999] bg-[#183b18] text-white flex flex-col p-0 overflow-hidden animate-fadeIn">
+            {/* CONTENEDOR 100% PANTALLA COMPLETA EDGE-TO-EDGE DE LA PIZARRA */}
+            <div className="flex-1 w-full h-full overflow-hidden min-h-0">
               <CanchaBCoachBoard
                 teamName={sesionData.equipo}
                 category={sesionData.categoria}
