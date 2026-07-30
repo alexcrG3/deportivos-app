@@ -311,6 +311,59 @@ function CoachOSDashboard() {
     return realOverdues.length > 0 ? realOverdues : mockOverdues;
   }, [activeTeam, allPlayers]);
 
+  // Próximos Entrenamientos Agendados del Entrenador (Próximos 14 días)
+  const upcomingCoachSessions = useMemo(() => {
+    if (!activeTeam) return [];
+    const diasNombresList = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    
+    let diasProgramados: number[] = activeTeam.dias_entrenamiento || [];
+    if (diasProgramados.length === 0) {
+      const scheduleText = (activeTeam.horario || "").toLowerCase();
+      if (scheduleText.includes("lun")) diasProgramados.push(1);
+      if (scheduleText.includes("mar")) diasProgramados.push(2);
+      if (scheduleText.includes("mié") || scheduleText.includes("mie")) diasProgramados.push(3);
+      if (scheduleText.includes("jue")) diasProgramados.push(4);
+      if (scheduleText.includes("vie")) diasProgramados.push(5);
+      if (scheduleText.includes("sáb") || scheduleText.includes("sab")) diasProgramados.push(6);
+      if (scheduleText.includes("dom")) diasProgramados.push(0);
+    }
+    if (diasProgramados.length === 0 && (activeTeam.entrenador?.toLowerCase().includes("araya") || activeTeam.nombre?.toLowerCase().includes("u9"))) {
+      diasProgramados = [2, 3, 4]; // Martes, Miércoles, Jueves
+    }
+
+    const results = [];
+    const baseDate = new Date();
+    for (let offset = 1; offset <= 14; offset++) {
+      const futureDateObj = new Date(baseDate.valueOf());
+      futureDateObj.setDate(baseDate.getDate() + offset);
+
+      const yyyy = futureDateObj.getFullYear();
+      const mm = String(futureDateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(futureDateObj.getDate()).padStart(2, "0");
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      const dayOfWeek = futureDateObj.getDay();
+
+      if (diasProgramados.includes(dayOfWeek)) {
+        const diaNombre = diasNombresList[dayOfWeek];
+        const relativeText = offset === 1 ? "Mañana" : `En ${offset} días`;
+
+        results.push({
+          fechaStr: dateStr,
+          diaNombre,
+          diaNumero: dd,
+          mesTexto: futureDateObj.toLocaleDateString("es-ES", { month: "short" }),
+          relativeText,
+          hora: activeTeam.horario || "14:00 - 15:00",
+          equipoNombre: activeTeam.nombre,
+          categoria: activeTeam.categoria,
+          sede: activeTeam.sede || "Sede Central (Cancha Principal)",
+        });
+      }
+      if (results.length >= 3) break;
+    }
+    return results;
+  }, [activeTeam]);
+
   const handleStartSession = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!todaySession) {
@@ -591,8 +644,8 @@ function CoachOSDashboard() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-600 border-blue-500/30">
-                        SESIÓN DE ENTRENAMIENTO
+                      <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-600 border-blue-500/30 font-bold">
+                        SESIÓN DE ENTRENAMIENTO (HOY)
                       </Badge>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
@@ -609,7 +662,7 @@ function CoachOSDashboard() {
                   </div>
                 </div>
                 <Link to={"/entrenamientos" as any} search={{ teamName: activeTeam?.nombre, category: activeTeam?.categoria, fecha: selectedDate, autostart: "true" } as any}>
-                  <Button variant="outline" size="sm" className="text-xs gap-1.5 shrink-0">
+                  <Button size="sm" className="text-xs gap-1.5 shrink-0 bg-primary text-primary-foreground font-bold hover:bg-primary/95">
                     <Play className="w-3 h-3" />
                     Pasar Lista
                   </Button>
@@ -633,6 +686,38 @@ function CoachOSDashboard() {
                   <Plus className="w-3 h-3" />
                   Nueva Sesión
                 </Button>
+              </div>
+            )}
+
+            {/* Banner destacado del Próximo Entrenamiento del Entrenador */}
+            {upcomingCoachSessions.length > 0 && (
+              <div className="mt-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500 text-white font-bold flex items-center justify-center text-sm shadow-md shrink-0">
+                    🗓️
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                        Próximo Entrenamiento de {activeCoachName || "Carlos Araya"}
+                      </span>
+                      <Badge className="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0">
+                        {upcomingCoachSessions[0].relativeText}
+                      </Badge>
+                    </div>
+                    <p className="text-sm font-bold text-foreground">
+                      {upcomingCoachSessions[0].diaNombre} {upcomingCoachSessions[0].fechaStr} · {upcomingCoachSessions[0].hora}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      📍 {upcomingCoachSessions[0].sede} ({upcomingCoachSessions[0].equipoNombre})
+                    </p>
+                  </div>
+                </div>
+                <Link to={"/planeamiento" as any} className="shrink-0">
+                  <Button size="sm" variant="outline" className="text-xs font-bold border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20">
+                    📋 Preparar Planificación
+                  </Button>
+                </Link>
               </div>
             )}
           </section>
