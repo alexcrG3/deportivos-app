@@ -314,6 +314,8 @@ export function CoachPlannerPage() {
     });
     setDiasPlan(actualizados);
     guardarPlanificacionDb(actualizados);
+  };
+
   // Modales de Planificación Manual
   const [openSelectorModal, setOpenSelectorModal] = useState(false);
   const [openEditWeekly, setOpenEditWeekly] = useState(false);
