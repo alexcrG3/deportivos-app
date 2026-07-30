@@ -3,6 +3,39 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
+## [30/07/2026 - Pizarra Táctica bCoach Elite 100% Pantalla Completa, HUD & Dock Flotante de Cristal, Selector Multiequipo & Dock Compacto Mobile-First]
+
+- **Transformación de la Cancha a 100% Pantalla Completa (Edge-to-Edge) (`src/components/cancha-bcoach-board.tsx`):**
+  - Eliminadas las barras superiores e inferiores fijas oscuras que ocupaban ~35% de la pantalla. El campo verde ahora ocupa el 100% del viewport en teléfonos y tablets sin márgenes ni marcos negros.
+  - Removido el contenedor con padding e historial rígido en el modal inmersivo de `src/routes/_app/entrenamientos.tsx`, otorgando 100% espacio real a la cancha (`p-0`).
+
+- **HUD Superior Flotante Translúcido (Estilo Glassmorphism):**
+  - Barra superior flotante de cristal (`bg-slate-950/85 backdrop-blur-md`) con píldoras independientes para: Volver, Modo 2D/Video, Cámara Foto del Campo, Cargar Video, Alineaciones 1-clic y Pantalla Completa.
+
+- **Dock Inferior Flotante & Minimizable con Modo Mobile-First:**
+  - **En Móvil (< 640px):** Barra ultra compacta de 1 sola fila con 6 botones táctiles grandes de 40×40px (Lápiz, Pase, Tiro, Zona, Jugador, Borrador), botón del color de equipo activo con ciclo de 1 toque, botón `⋮` de más herramientas y botón `👁` de ocultar.
+  - **Bottom Sheet Táctil en Móvil:** Cajón deslizante animado desde abajo con gesto *swipe-down* (desliza 60px para cerrar) o toque en fondo oscuro. Contiene paleta de colores de trazo (36px), grosores, selector de equipo con confirmation toast, balón, texto, deshacer, limpiar y zoom.
+  - **En Tablet/PC (≥ 640px):** Menú expandido completo de 2 filas flotantes sobre la cancha.
+
+- **Selector Multiequipo y Despliegue 11vs11 Rival (Home vs Rival):**
+  - Añadido soporte para 7 colores de equipos (`orange`, `blue`, `red`, `white`, `yellow`, `black`, `green`) con su correspondiente mapeo cromático y contraste de números.
+  - Botón selector de color de equipo integrado en la barra flotante y en el Bottom Sheet. Al tocar sobre un jugador existente con la herramienta `add-player` activa, cambia instantáneamente el color del jugador.
+  - Menú de **Alineaciones 1-Clic** actualizado con opciones para desplegar automáticamente **Mi Equipo (11)** y **Equipo Rival 11vs11** en el campo contrario (mirrored) en color Azul o Rojo.
+
+- **Corrección de Zoom Fluido y Multitáctil:**
+  - Removidos los bloqueos `maxWidth: 100%` y `maxHeight: 100%` que impedían el escalado visual cuando `zoom > 1`.
+  - Zoom multitáctil con dos dedos (*pinch-to-zoom*) y botones `+` / `-` escalan la pizarra hasta 300% con scroll y pan fluido.
+
+- **Persistencia en Repositorio GitHub:**
+  - Commits subidos a la rama `main` de `https://github.com/alexcrG3/deportivos-app.git`:
+    - `31810c4`: `feat(pizarra): cancha 100% pantalla completa estilo bCoach con dock y hud flotante de cristal`
+    - `91dcd37`: `feat(pizarra): selector de color de equipo y despliegue 11vs11 para equipos rivales`
+    - `efc555c`: `feat(pizarra/mobile): dock compacto 1-fila + bottom sheet drawer tactil para movil`
+    - `f8c1a35`: `fix: selector color equipo mobile con ciclo 1-toque y confirmacion`
+    - `19076e3`: `build-clean: adicion de ignores para videos en root`
+
+---
+
 ## [29/07/2026 - Noche: Pizarra Táctica Profesional — Rediseño Completo, Foto de Campo, Pinch-Zoom & Botones Visibles]
 
 - **Rediseño del Canvas SVG para Llenar Espacio en Todos los Dispositivos (`src/components/cancha-bcoach-board.tsx`):**
