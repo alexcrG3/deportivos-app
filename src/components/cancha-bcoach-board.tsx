@@ -181,17 +181,29 @@ export function CanchaBCoachBoard({
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // SVG coordinate transformation
+  // SVG coordinate transformation (handles portrait SVG rotation 90° CW)
   const getSVGCoords = useCallback((clientX: number, clientY: number): { x: number; y: number } => {
     if (!svgRef.current) return { x: 50, y: 32.5 };
     const rect = svgRef.current.getBoundingClientRect();
+    if (isPortrait) {
+      // Portrait viewBox is "0 0 65 100" and SVG content is wrapped in <g transform="translate(65,0) rotate(90)">
+      // clientX/clientY relative to rect:
+      // px is 0..65 from left to right on screen
+      // py is 0..100 from top to bottom on screen
+      const px = ((clientX - rect.left) / rect.width) * 65;
+      const py = ((clientY - rect.top) / rect.height) * 100;
+      return {
+        x: Math.max(0, Math.min(VW, py)),
+        y: Math.max(0, Math.min(VH, 65 - px)),
+      };
+    }
     const rx = (clientX - rect.left) / rect.width;
     const ry = (clientY - rect.top) / rect.height;
     return {
       x: Math.max(0, Math.min(VW, rx * VW)),
       y: Math.max(0, Math.min(VH, ry * VH)),
     };
-  }, []);
+  }, [isPortrait]);
 
   // Video play/pause toggle
   const toggleVideoPlay = () => {
@@ -395,13 +407,14 @@ export function CanchaBCoachBoard({
   const svgElement = (
     <svg
       ref={svgRef}
-      viewBox={`0 0 ${VW} ${VH}`}
+      viewBox={isPortrait ? "0 0 65 100" : `0 0 ${VW} ${VH}`}
       preserveAspectRatio="xMidYMid meet"
       style={{
         touchAction: "none",
         display: "block",
         width: "100%",
         height: "100%",
+        maxHeight: "100%",
         // Dark green bg fills letterbox areas so no black bars
         background: "#183b18",
       }}
@@ -416,146 +429,153 @@ export function CanchaBCoachBoard({
         </marker>
       </defs>
 
-      {/* Field Background: Photo/Image > Video (handled externally) > Green 2D Pitch */}
-      {backgroundImageUrl ? (
-        // Photo or uploaded image as background for drawing on top
-        <image
-          href={backgroundImageUrl}
-          x="0" y="0"
-          width={VW} height={VH}
-          preserveAspectRatio="xMidYMid slice"
-        />
-      ) : !activeVideoUrl ? (
-        // Default green 2D tactical field
-        <SportFieldInner sport="football" />
-      ) : null}
+      <g transform={isPortrait ? "translate(65,0) rotate(90)" : undefined}>
+        {/* Field Background: Photo/Image > Video (handled externally) > Green 2D Pitch */}
+        {backgroundImageUrl ? (
+          // Photo or uploaded image as background for drawing on top
+          <image
+            href={backgroundImageUrl}
+            x="0" y="0"
+            width={VW} height={VH}
+            preserveAspectRatio="xMidYMid slice"
+          />
+        ) : !activeVideoUrl ? (
+          // Default green 2D tactical field
+          <SportFieldInner sport="football" />
+        ) : null}
 
-      {/* Shaded Space Zones (Zonas sombreadas transparentes estilo bCoach 00:27) */}
-      {zones.map((z) => (
-        <rect
-          key={z.id}
-          x={z.x}
-          y={z.y}
-          width={z.width}
-          height={z.height}
-          rx={1.5}
-          fill={z.color}
-          fillOpacity={0.35}
-          stroke={z.color}
-          strokeWidth={0.6}
-          strokeDasharray="2,2"
-          onPointerDown={(e) => {
-            if (activeTool === "eraser") {
+        {/* Shaded Space Zones (Zonas sombreadas transparentes estilo bCoach 00:27) */}
+        {zones.map((z) => (
+          <rect
+            key={z.id}
+            x={z.x}
+            y={z.y}
+            width={z.width}
+            height={z.height}
+            rx={1.5}
+            fill={z.color}
+            fillOpacity={0.35}
+            stroke={z.color}
+            strokeWidth={0.6}
+            strokeDasharray="2,2"
+            onPointerDown={(e) => {
+              if (activeTool === "eraser") {
+                e.stopPropagation();
+                setZones((prev) => prev.filter((item) => item.id !== z.id));
+              }
+            }}
+          />
+        ))}
+
+        {/* Live Zone Preview */}
+        {isDrawing && activeTool === "draw-zone" && zoneStart && zoneCurrent && (
+          <rect
+            x={Math.min(zoneStart.x, zoneCurrent.x)}
+            y={Math.min(zoneStart.y, zoneCurrent.y)}
+            width={Math.abs(zoneCurrent.x - zoneStart.x)}
+            height={Math.abs(zoneCurrent.y - zoneStart.y)}
+            rx={1.5}
+            fill={color}
+            fillOpacity={0.35}
+            stroke={color}
+            strokeWidth={0.6}
+            strokeDasharray="2,2"
+          />
+        )}
+
+        {/* Saved paths */}
+        {paths.map((p) => (
+          <path key={p.id} d={pointsToD(p.points)} fill="none" stroke={p.color} strokeWidth={p.width}
+            strokeDasharray={p.style === "dashed" ? "3,2" : undefined}
+            strokeLinecap="round" strokeLinejoin="round"
+            markerEnd={p.style === "arrow" ? "url(#bcoach-arrow)" : undefined}
+            onPointerDown={(e) => { if (activeTool === "eraser") { e.stopPropagation(); setPaths((prev) => prev.filter((q) => q.id !== p.id)); } }}
+          />
+        ))}
+
+        {/* Live path */}
+        {isDrawing && activeTool !== "draw-zone" && livePts.length > 1 && (
+          <path d={pointsToD(livePts)} fill="none" stroke={color} strokeWidth={strokeW}
+            strokeDasharray={strokeType === "dashed" ? "3,2" : undefined}
+            strokeLinecap="round" strokeLinejoin="round" opacity={0.9}
+            markerEnd={strokeType === "arrow" ? "url(#bcoach-arrow)" : undefined}
+          />
+        )}
+
+        {/* Players */}
+        {players.map((p) => (
+          <g key={p.id} transform={`translate(${p.x},${p.y})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
               e.stopPropagation();
-              setZones((prev) => prev.filter((item) => item.id !== z.id));
-            }
-          }}
-        />
-      ))}
+              if (activeTool === "eraser") { setPlayers((prev) => prev.filter((q) => q.id !== p.id)); return; }
+              setDragging({ type: "player", id: p.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <circle r={1.6} fill={p.color === "orange" ? "#f97316" : "#2563eb"} stroke="#ffffff" strokeWidth={0.3} />
+            <text textAnchor="middle" dominantBaseline="central" fontSize={1.4}
+              fill="#ffffff" fontWeight="900" fontFamily="Inter,sans-serif"
+              transform={isPortrait ? "rotate(-90)" : undefined}
+              style={{ pointerEvents: "none" }}>
+              {p.number}
+            </text>
+          </g>
+        ))}
 
-      {/* Live Zone Preview */}
-      {isDrawing && activeTool === "draw-zone" && zoneStart && zoneCurrent && (
-        <rect
-          x={Math.min(zoneStart.x, zoneCurrent.x)}
-          y={Math.min(zoneStart.y, zoneCurrent.y)}
-          width={Math.abs(zoneCurrent.x - zoneStart.x)}
-          height={Math.abs(zoneCurrent.y - zoneStart.y)}
-          rx={1.5}
-          fill={color}
-          fillOpacity={0.35}
-          stroke={color}
-          strokeWidth={0.6}
-          strokeDasharray="2,2"
-        />
-      )}
+        {/* Realistic Vector Soccer Ball */}
+        {balls.map((b) => (
+          <g key={b.id} transform={`translate(${b.x},${b.y})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setBalls((prev) => prev.filter((q) => q.id !== b.id)); return; }
+              setDragging({ type: "ball", id: b.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            {/* Base white sphere */}
+            <circle r={2.2} fill="#ffffff" stroke="#0f172a" strokeWidth={0.35} />
+            {/* Central Pentagonal Panel */}
+            <polygon points="0,-0.8 0.76,-0.25 0.47,0.65 -0.47,0.65 -0.76,-0.25" fill="#0f172a" />
+            {/* Seams connecting to outer edge */}
+            <line x1="0" y1="-0.8" x2="0" y2="-2.1" stroke="#0f172a" strokeWidth={0.3} />
+            <line x1="0.76" y1="-0.25" x2="2.0" y2="-0.6" stroke="#0f172a" strokeWidth={0.3} />
+            <line x1="0.47" y1="0.65" x2="1.3" y2="1.7" stroke="#0f172a" strokeWidth={0.3} />
+            <line x1="-0.47" y1="0.65" x2="-1.3" y2="1.7" stroke="#0f172a" strokeWidth={0.3} />
+            <line x1="-0.76" y1="-0.25" x2="-2.0" y2="-0.6" stroke="#0f172a" strokeWidth={0.3} />
+            {/* Outer edge black patches */}
+            <polygon points="-0.6,-1.9 0,-2.1 0.6,-1.9 0.3,-1.4 -0.3,-1.4" fill="#0f172a" />
+            <polygon points="1.8,-0.2 2.0,-0.6 1.6,-1.2 1.2,-0.9 1.4,-0.3" fill="#0f172a" />
+            <polygon points="1.1,1.5 1.3,1.7 0.7,2.0 0.4,1.4 0.9,1.1" fill="#0f172a" />
+            <polygon points="-1.1,1.5 -1.3,1.7 -0.7,2.0 -0.4,1.4 -0.9,1.1" fill="#0f172a" />
+            <polygon points="-1.8,-0.2 -2.0,-0.6 -1.6,-1.2 -1.2,-0.9 -1.4,-0.3" fill="#0f172a" />
+          </g>
+        ))}
 
-      {/* Saved paths */}
-      {paths.map((p) => (
-        <path key={p.id} d={pointsToD(p.points)} fill="none" stroke={p.color} strokeWidth={p.width}
-          strokeDasharray={p.style === "dashed" ? "3,2" : undefined}
-          strokeLinecap="round" strokeLinejoin="round"
-          markerEnd={p.style === "arrow" ? "url(#bcoach-arrow)" : undefined}
-          onPointerDown={(e) => { if (activeTool === "eraser") { e.stopPropagation(); setPaths((prev) => prev.filter((q) => q.id !== p.id)); } }}
-        />
-      ))}
-
-      {/* Live path */}
-      {isDrawing && activeTool !== "draw-zone" && livePts.length > 1 && (
-        <path d={pointsToD(livePts)} fill="none" stroke={color} strokeWidth={strokeW}
-          strokeDasharray={strokeType === "dashed" ? "3,2" : undefined}
-          strokeLinecap="round" strokeLinejoin="round" opacity={0.9}
-          markerEnd={strokeType === "arrow" ? "url(#bcoach-arrow)" : undefined}
-        />
-      )}
-
-      {/* Players */}
-      {players.map((p) => (
-        <g key={p.id} transform={`translate(${p.x},${p.y})`}
-          style={{ cursor: "grab" }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            if (activeTool === "eraser") { setPlayers((prev) => prev.filter((q) => q.id !== p.id)); return; }
-            setDragging({ type: "player", id: p.id });
-            (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
-          }}
-        >
-          <circle r={1.6} fill={p.color === "orange" ? "#f97316" : "#2563eb"} stroke="#ffffff" strokeWidth={0.3} />
-          <text textAnchor="middle" dominantBaseline="central" fontSize={1.4}
-            fill="#ffffff" fontWeight="900" fontFamily="Inter,sans-serif" style={{ pointerEvents: "none" }}>
-            {p.number}
-          </text>
-        </g>
-      ))}
-
-      {/* Realistic Vector Soccer Ball */}
-      {balls.map((b) => (
-        <g key={b.id} transform={`translate(${b.x},${b.y})`}
-          style={{ cursor: "grab" }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            if (activeTool === "eraser") { setBalls((prev) => prev.filter((q) => q.id !== b.id)); return; }
-            setDragging({ type: "ball", id: b.id });
-            (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
-          }}
-        >
-          {/* Base white sphere */}
-          <circle r={2.2} fill="#ffffff" stroke="#0f172a" strokeWidth={0.35} />
-          {/* Central Pentagonal Panel */}
-          <polygon points="0,-0.8 0.76,-0.25 0.47,0.65 -0.47,0.65 -0.76,-0.25" fill="#0f172a" />
-          {/* Seams connecting to outer edge */}
-          <line x1="0" y1="-0.8" x2="0" y2="-2.1" stroke="#0f172a" strokeWidth={0.3} />
-          <line x1="0.76" y1="-0.25" x2="2.0" y2="-0.6" stroke="#0f172a" strokeWidth={0.3} />
-          <line x1="0.47" y1="0.65" x2="1.3" y2="1.7" stroke="#0f172a" strokeWidth={0.3} />
-          <line x1="-0.47" y1="0.65" x2="-1.3" y2="1.7" stroke="#0f172a" strokeWidth={0.3} />
-          <line x1="-0.76" y1="-0.25" x2="-2.0" y2="-0.6" stroke="#0f172a" strokeWidth={0.3} />
-          {/* Outer edge black patches */}
-          <polygon points="-0.6,-1.9 0,-2.1 0.6,-1.9 0.3,-1.4 -0.3,-1.4" fill="#0f172a" />
-          <polygon points="1.8,-0.2 2.0,-0.6 1.6,-1.2 1.2,-0.9 1.4,-0.3" fill="#0f172a" />
-          <polygon points="1.1,1.5 1.3,1.7 0.7,2.0 0.4,1.4 0.9,1.1" fill="#0f172a" />
-          <polygon points="-1.1,1.5 -1.3,1.7 -0.7,2.0 -0.4,1.4 -0.9,1.1" fill="#0f172a" />
-          <polygon points="-1.8,-0.2 -2.0,-0.6 -1.6,-1.2 -1.2,-0.9 -1.4,-0.3" fill="#0f172a" />
-        </g>
-      ))}
-
-      {/* Texts */}
-      {texts.map((t) => (
-        <g key={t.id} transform={`translate(${t.x},${t.y})`}
-          style={{ cursor: "grab" }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            if (activeTool === "eraser") { setTexts((prev) => prev.filter((q) => q.id !== t.id)); return; }
-            setDragging({ type: "text", id: t.id });
-            (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
-          }}
-        >
-          <rect x={-0.5} y={-2} width={t.text.length * 1.15 + 1} height={3.2}
-            fill="rgba(15,23,42,0.85)" rx={0.6} stroke={t.color} strokeWidth={0.2} />
-          <text fontSize={1.8} fontWeight="900" fill={t.color}
-            fontFamily="Inter,sans-serif" dominantBaseline="central" style={{ pointerEvents: "none" }}>
-            {t.text}
-          </text>
-        </g>
-      ))}
+        {/* Texts */}
+        {texts.map((t) => (
+          <g key={t.id} transform={`translate(${t.x},${t.y})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setTexts((prev) => prev.filter((q) => q.id !== t.id)); return; }
+              setDragging({ type: "text", id: t.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <rect x={-0.5} y={-2} width={t.text.length * 1.15 + 1} height={3.2}
+              fill="rgba(15,23,42,0.85)" rx={0.6} stroke={t.color} strokeWidth={0.2}
+              transform={isPortrait ? "rotate(-90)" : undefined} />
+            <text fontSize={1.8} fontWeight="900" fill={t.color}
+              fontFamily="Inter,sans-serif" dominantBaseline="central"
+              transform={isPortrait ? "rotate(-90)" : undefined}
+              style={{ pointerEvents: "none" }}>
+              {t.text}
+            </text>
+          </g>
+        ))}
+      </g>
     </svg>
   );
 
@@ -728,7 +748,7 @@ export function CanchaBCoachBoard({
       {/* ── MAIN CANVAS AREA (VIDEO OR 2D PITCH) ────────────────────────────── */}
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 relative bg-[#183b18]"
+        className="flex-1 min-h-0 relative bg-[#183b18] flex items-center justify-center overflow-hidden"
         style={{ overflow: zoom > 1 ? "auto" : "hidden" }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -747,53 +767,22 @@ export function CanchaBCoachBoard({
           />
         )}
 
-        {isPortrait ? (
-          /*
-           * PORTRAIT MODE: rotate -90° so the landscape field appears vertically.
-           * Rendered dimensions:
-           *   width  = available container height (≈ 100dvh minus toolbars ~9rem)
-           *   height = container width (100dvw)
-           * After -90° rotation:
-           *   visual_width  = rendered height = 100dvw → fills screen width ✓
-           *   visual_height = rendered width  = dvh - 9rem → fits in screen ✓
-           */
-          <div
-            style={{
-              position: "absolute",
-              width: "calc(100dvh - 9rem)",
-              height: "100dvw",
-              transform: `rotate(-90deg) scale(${zoom})`,
-              transformOrigin: "50% 50%",
-              top: "50%",
-              left: "50%",
-              marginLeft: "calc(-50dvw)",
-              marginTop: "calc(-(100dvh - 9rem) / 2)",
-              zIndex: 10,
-            }}
-          >
-            {svgElement}
-          </div>
-        ) : (
-          /*
-           * LANDSCAPE MODE: SVG fills 100%×100% of container.
-           * preserveAspectRatio="xMidYMid meet" keeps field proportional.
-           * SVG background (#183b18) makes letterbox margins dark green.
-           * zoom > 1: inner div expands beyond 100%, outer div scrolls.
-           */
-          <div
-            style={{
-              width: zoom > 1 ? `${zoom * 100}%` : "100%",
-              height: zoom > 1 ? `${zoom * 100}%` : "100%",
-              minWidth: "100%",
-              minHeight: "100%",
-              position: "relative",
-              zIndex: 10,
-              transition: "width 0.1s ease-out, height 0.1s ease-out",
-            }}
-          >
-            {svgElement}
-          </div>
-        )}
+        <div
+          style={{
+            width: zoom > 1 ? `${zoom * 100}%` : "100%",
+            height: zoom > 1 ? `${zoom * 100}%` : "100%",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            zIndex: 10,
+            transition: "width 0.1s ease-out, height 0.1s ease-out",
+          }}
+        >
+          {svgElement}
+        </div>
 
         {/* Zoom indicator */}
         {zoom !== 1 && (

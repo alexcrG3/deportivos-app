@@ -9,6 +9,11 @@ import tailwindcss from "@tailwindcss/vite";
 // @cloudflare/vite-plugin builds from this — wrangler.jsonc main alone is insufficient.
 export default defineConfig(({ mode }) => {
   return {
+    server: {
+      watch: {
+        ignored: ["**/*.mp4", "**/*.mov", "**/*.avi"],
+      },
+    },
     plugins: [
       tsconfigPaths(),
       tailwindcss(),
