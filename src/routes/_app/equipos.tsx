@@ -737,18 +737,38 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
   const [hasSavedAttendance, setHasSavedAttendance] = useState(false);
   const [isEditingHistory, setIsEditingHistory] = useState(false);
 
-  const isTrainingDay = useMemo(() => {
-    if (!attendanceDate) return true;
+  const diasNombresList = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+  const configuredDays = useMemo(() => {
     let dias: number[] = team.dias_entrenamiento || [];
-    if (dias.length === 0 && (team.entrenador?.toLowerCase().includes("araya") || team.nombre?.toLowerCase().includes("u9"))) {
-      dias = [1, 5]; // Lunes y Viernes
+    if (dias.length === 0) {
+      const scheduleText = (team.horario || "").toLowerCase();
+      if (scheduleText.includes("lun")) dias.push(1);
+      if (scheduleText.includes("mar")) dias.push(2);
+      if (scheduleText.includes("mié") || scheduleText.includes("mie")) dias.push(3);
+      if (scheduleText.includes("jue")) dias.push(4);
+      if (scheduleText.includes("vie")) dias.push(5);
+      if (scheduleText.includes("sáb") || scheduleText.includes("sab")) dias.push(6);
+      if (scheduleText.includes("dom")) dias.push(0);
     }
-    if (dias.length === 0) return true;
+    if (dias.length === 0 && (team.entrenador?.toLowerCase().includes("araya") || team.nombre?.toLowerCase().includes("u9"))) {
+      dias = [2, 3, 4]; // Martes (2), Miércoles (3), Jueves (4)
+    }
+    return dias;
+  }, [team]);
+
+  const isTrainingDay = useMemo(() => {
+    if (!attendanceDate || configuredDays.length === 0) return true;
     const [year, month, day] = attendanceDate.split("-").map(Number);
     const dateObj = new Date(year, month - 1, day);
     const dayOfWeek = dateObj.getDay();
-    return dias.includes(dayOfWeek);
-  }, [attendanceDate, team]);
+    return configuredDays.includes(dayOfWeek);
+  }, [attendanceDate, configuredDays]);
+
+  const configuredDaysText = useMemo(() => {
+    if (configuredDays.length === 0) return "Todos los días";
+    return configuredDays.map(d => diasNombresList[d]).join(", ");
+  }, [configuredDays]);
 
   const teamSessions = useMemo(() => {
     const listSesiones = RendimientoStore.getSesiones().filter(s => {
@@ -909,15 +929,12 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
   }, [team.nombre, attendanceDate]);
 
   const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
+  const [showNonTrainingDayModal, setShowNonTrainingDayModal] = useState(false);
 
   const handleSaveAttendance = async (force = false) => {
-    if (!isTrainingDay) {
-      const diasNombres = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-      const diasConfigurados = (team.dias_entrenamiento || []).map((d: number) => diasNombres[d]).join(", ");
-      const msgDias = diasConfigurados ? `(Días programados: ${diasConfigurados})` : "(Sin días programados configurados)";
-      if (!confirm(`Atención: Hoy no es un día de entrenamiento programado para este equipo ${msgDias}. ¿Deseas guardar la asistencia de todas formas?`)) {
-        return;
-      }
+    if (!isTrainingDay && !force) {
+      setShowNonTrainingDayModal(true);
+      return;
     }
 
     if (hasSavedAttendance && !isEditingHistory && !force) {
@@ -930,6 +947,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
     setHasSavedAttendance(true);
     setIsEditingHistory(false);
     setShowOverwriteWarning(false);
+    setShowNonTrainingDayModal(false);
 
     if (isNew) {
       toast.success(`Asistencia para el equipo ${team.nombre} guardada exitosamente para la fecha ${attendanceDate}.`);
@@ -2272,7 +2290,7 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
                 )}
                 {!isTrainingDay && (
                   <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/20 text-[10px] font-bold">
-                    ⚠️ Fuera de Horario (Miércoles y Jueves)
+                    ⚠️ Fuera de Horario (Días programados: {configuredDaysText})
                   </Badge>
                 )}
               </div>
@@ -3684,6 +3702,36 @@ function TeamDetail({ team, onBack }: TeamDetailProps) {
               Aceptar
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Advertencia de Día Fuera de Horario Programado */}
+      <Dialog open={showNonTrainingDayModal} onOpenChange={setShowNonTrainingDayModal}>
+        <DialogContent className="sm:max-w-[480px] bg-background border shadow-elegant text-foreground">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-amber-500">
+              📅 Fecha Fuera de Horario Programado
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground pt-1">
+              La fecha seleccionada (<span className="font-bold text-foreground">{attendanceDate}</span>) no corresponde a un día de entrenamiento oficial del equipo <span className="font-bold text-primary">{team.nombre}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-3 text-xs text-muted-foreground">
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 font-medium">
+              🗓️ <strong>Días oficiales configurados:</strong> {configuredDaysText} ({team.horario || "14:00 - 15:00"})
+            </div>
+            <p>
+              Si realizaste una sesión extraordinaria de entrenamiento o reposición en esta fecha, puedes registrar la asistencia presionando <strong>"Guardar como Sesión Extraordinaria"</strong>. De lo contrario, selecciona una fecha correspondiente al horario oficial.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0 pt-2 flex flex-col sm:flex-row justify-end">
+            <Button variant="outline" size="sm" onClick={() => setShowNonTrainingDayModal(false)}>
+              Cambiar Fecha
+            </Button>
+            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold" onClick={() => { setShowNonTrainingDayModal(false); handleSaveAttendance(true); }}>
+              Guardar como Sesión Extraordinaria
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
