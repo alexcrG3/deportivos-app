@@ -580,7 +580,7 @@ export function CoachPlannerPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           <div className="lg:col-span-3 space-y-4">
             {alcance === "Semanal" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:overflow-x-auto md:pb-3 xl:grid xl:grid-cols-7 gap-3 scrollbar-thin">
                 {diasSemanaArray.filter(d => d.semana === 1).map(({ nombre, fechaStr }) => {
                   const dia = diasPlan[fechaStr] || {
                     diaSemana: nombre,
@@ -594,31 +594,64 @@ export function CoachPlannerPage() {
                   };
                   const esHoy = fechaStr === hoyStr;
                   return (
-                    <Card key={fechaStr} className={`border rounded-[12px] p-4 flex flex-col justify-between space-y-3 shadow-none transition-all ${dia.sugeridoIA ? "border-[#2563EB] bg-[#F8FAFC]" : "bg-[#FFFFFF] border-[#E2E8F0]"} ${esHoy ? "border-purple-600 bg-purple-50/30 ring-2 ring-purple-500/20 shadow-sm" : ""}`}>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className={`text-sm font-bold ${esHoy ? "text-purple-900" : "text-[#0F172A]"}`}>{nombre}</span>
-                          {esHoy && <span className="px-2.5 py-0.5 rounded-full bg-purple-600 text-white font-bold text-[10px] shadow-sm">HOY</span>}
+                    <Card
+                      key={fechaStr}
+                      className={`border rounded-[14px] p-3.5 flex flex-col justify-between space-y-3 shadow-none transition-all md:min-w-[175px] md:flex-1 shrink-0 ${
+                        dia.sugeridoIA ? "border-[#2563EB] bg-[#F8FAFC]" : "bg-[#FFFFFF] border-[#E2E8F0]"
+                      } ${esHoy ? "border-purple-600 bg-purple-50/40 ring-2 ring-purple-500/20 shadow-sm" : ""}`}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                          <span className={`text-xs md:text-sm font-bold truncate ${esHoy ? "text-purple-900" : "text-[#0F172A]"}`}>
+                            {nombre}
+                          </span>
+                          {esHoy && (
+                            <Badge className="bg-purple-600 text-white font-bold text-[9px] px-1.5 py-0 shrink-0">
+                              HOY
+                            </Badge>
+                          )}
                         </div>
-                        <p className="text-[11px] text-[#64748B] font-mono">{fechaStr}</p>
-                        <div className="pt-1">
-                          <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full uppercase ${dia.tipoJornada === "Entreno" ? "bg-blue-50 text-[#2563EB]" : dia.tipoJornada === "Partido" ? "bg-emerald-50 text-[#059669]" : dia.tipoJornada === "Recuperación" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-[#64748B]"}`}>
+                        <p className="text-[10px] text-[#64748B] font-mono">{fechaStr}</p>
+                        <div className="pt-0.5">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            dia.tipoJornada === "Entreno" ? "bg-blue-50 text-[#2563EB]" : dia.tipoJornada === "Partido" ? "bg-emerald-50 text-[#059669]" : dia.tipoJornada === "Recuperación" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-[#64748B]"
+                          }`}>
                             {dia.tipoJornada}
                           </span>
                         </div>
                       </div>
-                      <div className="space-y-1.5 flex-1 min-h-[150px]">
+
+                      <div className="space-y-1.5 flex-1 min-h-[140px] pt-1">
                         {dia.tipoJornada === "Descanso" ? (
-                          <div className="h-full flex items-center justify-center p-3 text-center text-xs font-medium text-[#64748B] bg-[#F8F9FA] rounded-[12px] border border-dashed border-[#E2E8F0]">😴 Día Libre</div>
+                          <div className="h-full min-h-[120px] flex items-center justify-center p-3 text-center text-xs font-medium text-[#64748B] bg-[#F8F9FA] rounded-xl border border-dashed border-[#E2E8F0]">
+                            😴 Día Libre
+                          </div>
                         ) : (
-                          <>
-                            {dia.objetivoFisico && <div className="p-2 rounded-[8px] bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-900 font-medium">🟢 Físico: {dia.objetivoFisico}</div>}
-                            {dia.objetivoTecnico && <div className="p-2 rounded-[8px] bg-blue-500/10 border border-blue-500/20 text-[11px] text-blue-900 font-medium">🔵 Técnico: {dia.objetivoTecnico}</div>}
-                            {dia.objetivoTactico && <div className="p-2 rounded-[8px] bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-900 font-medium">🟣 Táctico: {dia.objetivoTactico}</div>}
-                          </>
+                          <div className="space-y-1.5">
+                            {dia.objetivoFisico && (
+                              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] md:text-[11px] text-emerald-900 font-medium leading-tight break-words">
+                                🟢 <strong>Físico:</strong> {dia.objetivoFisico}
+                              </div>
+                            )}
+                            {dia.objetivoTecnico && (
+                              <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[10px] md:text-[11px] text-blue-900 font-medium leading-tight break-words">
+                                🔵 <strong>Técnico:</strong> {dia.objetivoTecnico}
+                              </div>
+                            )}
+                            {dia.objetivoTactico && (
+                              <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[10px] md:text-[11px] text-purple-900 font-medium leading-tight break-words">
+                                🟣 <strong>Táctico:</strong> {dia.objetivoTactico}
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
-                      <Button onClick={() => abrirConfiguracionDia(dia)} variant="outline" className="w-full text-xs font-semibold h-8 rounded-[12px] border-[#E2E8F0] text-[#2563EB] hover:bg-blue-50 shadow-none transition-all">
+
+                      <Button
+                        onClick={() => abrirConfiguracionDia(dia)}
+                        variant="outline"
+                        className="w-full text-xs font-bold h-8 rounded-xl border-[#E2E8F0] text-[#2563EB] hover:bg-blue-50 shadow-none transition-all"
+                      >
                         <Pencil className="h-3 w-3 mr-1" /> Configurar
                       </Button>
                     </Card>
@@ -634,7 +667,7 @@ export function CoachPlannerPage() {
                     <h3 className="font-bold text-sm text-[#0F172A] border-b pb-2">
                       SEMANA {weekIndex + 1}
                     </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:overflow-x-auto md:pb-3 xl:grid xl:grid-cols-7 gap-3 scrollbar-thin">
                       {diasSemanaArray.filter(d => d.semana === weekIndex + 1).map(({ nombre, fechaStr }) => {
                         const dia = diasPlan[fechaStr] || {
                           diaSemana: nombre,
