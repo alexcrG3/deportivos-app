@@ -938,17 +938,31 @@ export function CanchaBCoachBoard({
               </button>
             </div>
 
-            {/* Color dot: shows active color, tap → opens sheet */}
+            {/* Team color cycle button — cicla entre colores de equipo en 1 toque */}
             <button
               type="button"
-              onClick={() => setIsSheetOpen(true)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all"
-              title="Color y más opciones"
+              onClick={() => {
+                const keys = Object.keys(TEAM_COLORS_MAP) as PlayerTeamColor[];
+                const nextIdx = (keys.indexOf(teamColor) + 1) % keys.length;
+                const nextColor = keys[nextIdx];
+                setTeamColor(nextColor);
+                setActiveTool("add-player");
+                toast.success(`Equipo: ${TEAM_COLORS_MAP[nextColor].label}`);
+              }}
+              className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-slate-900/80 border-2 active:scale-90 transition-all shrink-0"
+              style={{ borderColor: TEAM_COLORS_MAP[teamColor].bg + "99" }}
+              title="Cambiar color de equipo (toca para ciclar)"
             >
-              <span className="w-5 h-5 rounded-full border-2 border-white/60 shadow-md" style={{ backgroundColor: color }} />
+              <span
+                className="w-5 h-5 rounded-full border-2 border-white/70 shadow-md"
+                style={{ backgroundColor: TEAM_COLORS_MAP[teamColor].bg }}
+              />
+              <span className="text-[8px] font-bold text-slate-400 leading-none">
+                {TEAM_COLORS_MAP[teamColor].label.split(" ")[0]}
+              </span>
             </button>
 
-            {/* More (⋮) → opens bottom sheet */}
+            {/* More → opens bottom sheet */}
             <button
               type="button"
               onClick={() => setIsSheetOpen(true)}
@@ -1047,12 +1061,21 @@ export function CanchaBCoachBoard({
                 <button
                   key={key}
                   type="button"
-                  onClick={() => { setTeamColor(key as PlayerTeamColor); setActiveTool("add-player"); }}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition active:scale-95 ${teamColor === key ? "border-white text-white shadow-md" : "border-slate-800 text-slate-400"}`}
-                  style={{ backgroundColor: teamColor === key ? item.bg + "33" : undefined }}
+                  onClick={() => {
+                    setTeamColor(key as PlayerTeamColor);
+                    setActiveTool("add-player");
+                    setIsSheetOpen(false);
+                    toast.success(`✅ Equipo ${item.label} — toca la cancha para añadir jugadores`);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-bold border-2 transition active:scale-95 ${teamColor === key ? "text-white shadow-lg scale-105" : "border-slate-800 text-slate-400"}`}
+                  style={{
+                    borderColor: teamColor === key ? item.bg : undefined,
+                    backgroundColor: teamColor === key ? item.bg + "44" : undefined,
+                  }}
                 >
-                  <span className="w-4 h-4 rounded-full border border-white/40 shrink-0" style={{ backgroundColor: item.bg }} />
+                  <span className="w-5 h-5 rounded-full border-2 border-white/60 shadow shrink-0" style={{ backgroundColor: item.bg }} />
                   <span>{item.label}</span>
+                  {teamColor === key && <span className="ml-auto text-white text-base leading-none">✓</span>}
                 </button>
               ))}
             </div>
