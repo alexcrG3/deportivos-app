@@ -39,13 +39,25 @@ interface ShadedZone {
   color: string;
 }
 
+export type PlayerTeamColor = "orange" | "blue" | "red" | "white" | "yellow" | "black" | "green";
+
 interface BoardPlayer {
   id: string;
   number: string;
-  color: "orange" | "blue";
+  color: PlayerTeamColor;
   x: number;
   y: number;
 }
+
+export const TEAM_COLORS_MAP: Record<PlayerTeamColor, { bg: string; text: string; label: string }> = {
+  orange: { bg: "#f97316", text: "#ffffff", label: "🟠 Naranja" },
+  blue:   { bg: "#2563eb", text: "#ffffff", label: "🔵 Azul" },
+  red:    { bg: "#ef4444", text: "#ffffff", label: "🔴 Rojo" },
+  white:  { bg: "#ffffff", text: "#0f172a", label: "⚪ Blanco" },
+  yellow: { bg: "#eab308", text: "#0f172a", label: "🟡 Amarillo" },
+  black:  { bg: "#0f172a", text: "#ffffff", label: "🖤 Negro" },
+  green:  { bg: "#22c55e", text: "#ffffff", label: "🟢 Verde" },
+};
 
 interface BoardBall {
   id: string;
@@ -172,7 +184,7 @@ export function CanchaBCoachBoard({
   const [dragging, setDragging] = useState<{ type: "player" | "ball" | "text" | "zone"; id: string } | null>(null);
 
   const [nextNum, setNextNum] = useState(1);
-  const [teamColor, setTeamColor] = useState<"orange" | "blue">("orange");
+  const [teamColor, setTeamColor] = useState<PlayerTeamColor>("orange");
 
   // Zoom + pan
   const [zoom, setZoom] = useState(1);
@@ -353,13 +365,35 @@ export function CanchaBCoachBoard({
     setDragging(null);
   }, [isDrawing, activeTool, zoneStart, zoneCurrent, livePts, color, strokeW, strokeType]);
 
-  const loadFormation = useCallback((key: string) => {
+  const loadFormation = useCallback((key: string, colorOverride?: PlayerTeamColor) => {
     const f = FORMATIONS[key];
     if (!f) return;
-    setPlayers(
-      f.pts.map((c, i) => ({ id: `fp-${i}-${Date.now()}`, number: c.n, color: "orange" as const, x: c.x, y: c.y }))
-    );
-    toast.success(`👥 ${f.label} desplegada`);
+    const targetColor = colorOverride || teamColor;
+    setPlayers((prev) => [
+      ...prev,
+      ...f.pts.map((c, i) => ({
+        id: `fp-${i}-${Date.now()}`,
+        number: c.n,
+        color: targetColor,
+        x: c.x,
+        y: c.y,
+      })),
+    ]);
+    toast.success(`👥 ${f.label} (${TEAM_COLORS_MAP[targetColor].label}) desplegada`);
+  }, [teamColor]);
+
+  const loadRivalTeam = useCallback((key: string = "4-3-3", rivalColor: PlayerTeamColor = "blue") => {
+    const f = FORMATIONS[key];
+    if (!f) return;
+    const rivalPts = f.pts.map((c, i) => ({
+      id: `fp-rival-${i}-${Date.now()}`,
+      number: c.n,
+      color: rivalColor,
+      x: 100 - c.x,
+      y: c.y,
+    }));
+    setPlayers((prev) => [...prev, ...rivalPts]);
+    toast.success(`🔴 Equipo Rival 11vs11 (${TEAM_COLORS_MAP[rivalColor].label}) desplegado`);
   }, []);
 
   const handleClear = () => {
@@ -504,25 +538,33 @@ export function CanchaBCoachBoard({
         )}
 
         {/* Players */}
-        {players.map((p) => (
-          <g key={p.id} transform={`translate(${p.x},${p.y})`}
-            style={{ cursor: "grab" }}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              if (activeTool === "eraser") { setPlayers((prev) => prev.filter((q) => q.id !== p.id)); return; }
-              setDragging({ type: "player", id: p.id });
-              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
-            }}
-          >
-            <circle r={1.6} fill={p.color === "orange" ? "#f97316" : "#2563eb"} stroke="#ffffff" strokeWidth={0.3} />
-            <text textAnchor="middle" dominantBaseline="central" fontSize={1.4}
-              fill="#ffffff" fontWeight="900" fontFamily="Inter,sans-serif"
-              transform={isPortrait ? "rotate(-90)" : undefined}
-              style={{ pointerEvents: "none" }}>
-              {p.number}
-            </text>
-          </g>
-        ))}
+        {players.map((p) => {
+          const teamMeta = TEAM_COLORS_MAP[p.color] || TEAM_COLORS_MAP.orange;
+          return (
+            <g key={p.id} transform={`translate(${p.x},${p.y})`}
+              style={{ cursor: "grab" }}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                if (activeTool === "eraser") { setPlayers((prev) => prev.filter((q) => q.id !== p.id)); return; }
+                if (activeTool === "add-player") {
+                  setPlayers((prev) => prev.map((q) => q.id === p.id ? { ...q, color: teamColor } : q));
+                  toast.success(`Jugador #${p.number} cambiado a equipo ${TEAM_COLORS_MAP[teamColor].label}`);
+                  return;
+                }
+                setDragging({ type: "player", id: p.id });
+                (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+              }}
+            >
+              <circle r={1.6} fill={teamMeta.bg} stroke="#ffffff" strokeWidth={0.35} />
+              <text textAnchor="middle" dominantBaseline="central" fontSize={1.4}
+                fill={teamMeta.text} fontWeight="900" fontFamily="Inter,sans-serif"
+                transform={isPortrait ? "rotate(-90)" : undefined}
+                style={{ pointerEvents: "none" }}>
+                {p.number}
+              </text>
+            </g>
+          );
+        })}
 
         {/* Realistic Vector Soccer Ball */}
         {balls.map((b) => (
@@ -640,8 +682,8 @@ export function CanchaBCoachBoard({
                 <span className="hidden sm:inline">Alineaciones</span>
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-0.5">
-              <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-1 block">Plantillas 1-Clic</span>
+            <PopoverContent className="w-56 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-1">
+              <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Alineaciones Mi Equipo</span>
               {Object.entries(FORMATIONS).map(([key, f]) => (
                 <button
                   key={key}
@@ -653,6 +695,23 @@ export function CanchaBCoachBoard({
                   <span className="text-[9px] opacity-70">{f.label}</span>
                 </button>
               ))}
+
+              <div className="h-px bg-white/10 my-1" />
+              <span className="text-[9px] font-bold text-red-400 uppercase px-2 py-0.5 block">Equipo Rival (Campo Contrario)</span>
+              <button
+                type="button"
+                onClick={() => loadRivalTeam("4-3-3", "blue")}
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:bg-blue-600 hover:text-white transition flex justify-between items-center bg-blue-950/40 border border-blue-800/40"
+              >
+                <span>🔵 Rival 4-3-3 (Azul)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => loadRivalTeam("4-4-2", "red")}
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-600 hover:text-white transition flex justify-between items-center bg-red-950/40 border border-red-800/40"
+              >
+                <span>🔴 Rival 4-4-2 (Rojo)</span>
+              </button>
             </PopoverContent>
           </Popover>
 
@@ -866,6 +925,44 @@ export function CanchaBCoachBoard({
                   <User className="h-3 w-3 text-amber-400" />
                   <span>+#{nextNum}</span>
                 </button>
+
+                {/* Selector de Color de Equipo para Jugadores */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 bg-slate-900 text-white border border-slate-700 shadow"
+                      title="Cambiar color del equipo para jugadores"
+                    >
+                      <span
+                        className="h-3 w-3 rounded-full border border-white/60 shrink-0"
+                        style={{ backgroundColor: TEAM_COLORS_MAP[teamColor].bg }}
+                      />
+                      <span className="text-[10px]">{TEAM_COLORS_MAP[teamColor].label.split(" ")[0]}</span>
+                      <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-40 bg-slate-950/95 border-slate-800 text-white p-1.5 rounded-xl shadow-2xl z-50 space-y-1">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Color del Equipo</span>
+                    {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setTeamColor(key as PlayerTeamColor);
+                          setActiveTool("add-player");
+                          toast.success(`Equipo cambiado a ${item.label}`);
+                        }}
+                        className={`w-full text-left px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
+                          teamColor === key ? "bg-slate-800 text-white ring-1 ring-emerald-400" : "text-slate-300 hover:bg-slate-800"
+                        }`}
+                      >
+                        <span className="h-3.5 w-3.5 rounded-full border border-white/50 shrink-0" style={{ backgroundColor: item.bg }} />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
 
                 <button
                   type="button"
