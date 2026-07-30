@@ -189,7 +189,9 @@ export function CanchaBCoachBoard({
   // Zoom + pan
   const [zoom, setZoom] = useState(1);
   const [isDockMinimized, setIsDockMinimized] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const lastPinchDist = useRef<number | null>(null);
+  const sheetTouchStartY = useRef<number | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -787,157 +789,65 @@ export function CanchaBCoachBoard({
 
         {/* Zoom indicator */}
         {zoom !== 1 && (
-          <div className="absolute bottom-16 right-3 bg-black/80 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-700 pointer-events-none z-20">
+          <div className="absolute bottom-20 right-3 bg-black/80 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-700 pointer-events-none z-20">
             {Math.round(zoom * 100)}%
           </div>
         )}
       </div>
 
-      {/* ── BOTTOM FLOATING DOCK (Dock Inferior Flotante de Cristal Estilo bCoach) ─────────── */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 max-w-[95vw] pointer-events-auto">
-        {isDockMinimized ? (
-          <button
-            type="button"
-            onClick={() => setIsDockMinimized(false)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-950/90 border border-white/20 text-white font-bold text-xs shadow-2xl backdrop-blur-md hover:scale-105 transition"
-          >
-            <Pencil className="h-4 w-4 text-emerald-400" />
-            <span>Herramientas Pizarra</span>
-          </button>
-        ) : (
-          <div className="bg-slate-950/85 backdrop-blur-lg border border-white/15 p-2 rounded-2xl shadow-2xl text-white flex flex-col items-center gap-1.5">
-            {/* ROW 1: TOOLS & COLORS & THICKNESS */}
+      {/* ── BOTTOM DOCK: Compact 1-row on mobile, expanded on tablet/desktop ─── */}
+      {!isDockMinimized && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto w-full px-3 flex justify-center">
+
+          {/* ── TABLET / DESKTOP: Full 2-row expanded dock (sm and up) ── */}
+          <div className="hidden sm:flex bg-slate-950/85 backdrop-blur-lg border border-white/15 p-2 rounded-2xl shadow-2xl text-white flex-col items-center gap-1.5 max-w-[95vw]">
+            {/* ROW 1: TOOLS + COLORS + THICKNESS */}
             <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              {/* Tools Group */}
+              {/* Tools */}
               <div className="flex items-center gap-0.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-                    activeTool === "draw-solid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Lápiz"
-                >
-                  <Pencil className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Lápiz</span>
+                <button type="button" onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-solid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                  <Pencil className="h-3.5 w-3.5" /> <span>Lápiz</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-                    activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Pase"
-                >
-                  <span className="font-mono text-emerald-400 font-bold">┊</span> <span className="hidden sm:inline">Pase</span>
+                <button type="button" onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                  <span className="font-mono text-emerald-400">┊</span> <span>Pase</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-                    activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Tiro"
-                >
-                  <ArrowRight className="h-3.5 w-3.5 text-amber-400" /> <span className="hidden sm:inline">Tiro</span>
+                <button type="button" onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                  <ArrowRight className="h-3.5 w-3.5 text-amber-400" /> <span>Tiro</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${
-                    activeTool === "draw-zone" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                  title="Zona Sombreada"
-                >
-                  <Square className="h-3.5 w-3.5 text-orange-400" /> <span className="hidden sm:inline">Zona</span>
+                <button type="button" onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-zone" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white"}`}>
+                  <Square className="h-3.5 w-3.5 text-orange-400" /> <span>Zona</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTool("eraser")}
-                  className={`p-1.5 rounded-lg transition ${activeTool === "eraser" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`}
-                  title="Borrador"
-                >
+                <button type="button" onClick={() => setActiveTool("eraser")} className={`p-1.5 rounded-lg transition ${activeTool === "eraser" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
-
-              {/* Color Palette */}
+              {/* Colors */}
               <div className="flex items-center gap-1 bg-slate-900/90 px-2 py-1.5 rounded-xl border border-slate-800">
                 {COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    className={`h-4.5 w-4.5 rounded-full border transition-transform ${
-                      color === c ? "scale-125 border-white ring-2 ring-emerald-400" : "border-transparent opacity-75 hover:opacity-100"
-                    }`}
-                    style={{ backgroundColor: c, width: 16, height: 16 }}
-                  />
+                  <button key={c} type="button" onClick={() => setColor(c)} className={`rounded-full border transition-transform ${color === c ? "scale-125 border-white ring-2 ring-emerald-400" : "border-transparent opacity-75 hover:opacity-100"}`} style={{ backgroundColor: c, width: 16, height: 16 }} />
                 ))}
               </div>
-
-              {/* Line thickness */}
+              {/* Thickness */}
               <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-1 rounded-xl border border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setStrokeW(0.4)}
-                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
-                    strokeW <= 0.5 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-                  }`}
-                >
-                  Fina
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStrokeW(0.8)}
-                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
-                    strokeW > 0.5 && strokeW <= 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-                  }`}
-                >
-                  Media
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStrokeW(1.6)}
-                  className={`h-5.5 px-1.5 rounded text-[9px] font-bold border transition ${
-                    strokeW > 1.0 ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-                  }`}
-                >
-                  Gruesa
-                </button>
+                {([["Fina", 0.4, "≤0.5"], ["Media", 0.8, "0.5-1"], ["Gruesa", 1.6, ">1"]] as [string, number, string][]).map(([label, val]) => (
+                  <button key={label} type="button" onClick={() => setStrokeW(val)}
+                    className={`h-6 px-1.5 rounded text-[9px] font-bold border transition ${
+                      (label === "Fina" && strokeW <= 0.5) || (label === "Media" && strokeW > 0.5 && strokeW <= 1.0) || (label === "Gruesa" && strokeW > 1.0)
+                        ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
+                    }`}>{label}</button>
+                ))}
               </div>
             </div>
-
-            {/* ROW 2: PLAYERS & ZOOM & ACTIONS & COLLAPSE BUTTON */}
-            <div className="flex items-center gap-1.5 flex-wrap justify-between w-full pt-0.5 border-t border-white/10">
-              {/* Players/Items */}
+            {/* ROW 2: PLAYERS + ZOOM + ACTIONS */}
+            <div className="flex items-center gap-1.5 justify-between w-full pt-0.5 border-t border-white/10">
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTool("add-player")}
-                  className={`h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${
-                    activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-300 border border-slate-800"
-                  }`}
-                >
-                  <User className="h-3 w-3 text-amber-400" />
-                  <span>+#{nextNum}</span>
+                <button type="button" onClick={() => setActiveTool("add-player")} className={`h-7 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-300 border border-slate-800"}`}>
+                  <User className="h-3 w-3 text-amber-400" /><span>+#{nextNum}</span>
                 </button>
-
-                {/* Selector de Color de Equipo para Jugadores */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 bg-slate-900 text-white border border-slate-700 shadow"
-                      title="Cambiar color del equipo para jugadores"
-                    >
-                      <span
-                        className="h-3 w-3 rounded-full border border-white/60 shrink-0"
-                        style={{ backgroundColor: TEAM_COLORS_MAP[teamColor].bg }}
-                      />
+                    <button type="button" className="h-7 px-2 rounded-lg text-xs font-bold flex items-center gap-1 bg-slate-900 text-white border border-slate-700">
+                      <span className="h-3 w-3 rounded-full border border-white/60" style={{ backgroundColor: TEAM_COLORS_MAP[teamColor].bg }} />
                       <span className="text-[10px]">{TEAM_COLORS_MAP[teamColor].label.split(" ")[0]}</span>
                       <ChevronDown className="h-2.5 w-2.5 text-slate-400" />
                     </button>
@@ -945,104 +855,257 @@ export function CanchaBCoachBoard({
                   <PopoverContent className="w-40 bg-slate-950/95 border-slate-800 text-white p-1.5 rounded-xl shadow-2xl z-50 space-y-1">
                     <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Color del Equipo</span>
                     {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setTeamColor(key as PlayerTeamColor);
-                          setActiveTool("add-player");
-                          toast.success(`Equipo cambiado a ${item.label}`);
-                        }}
-                        className={`w-full text-left px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-2 ${
-                          teamColor === key ? "bg-slate-800 text-white ring-1 ring-emerald-400" : "text-slate-300 hover:bg-slate-800"
-                        }`}
-                      >
-                        <span className="h-3.5 w-3.5 rounded-full border border-white/50 shrink-0" style={{ backgroundColor: item.bg }} />
-                        <span>{item.label}</span>
+                      <button key={key} type="button" onClick={() => { setTeamColor(key as PlayerTeamColor); setActiveTool("add-player"); }} className={`w-full text-left px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-2 ${teamColor === key ? "bg-slate-800 text-white ring-1 ring-emerald-400" : "text-slate-300 hover:bg-slate-800"}`}>
+                        <span className="h-3.5 w-3.5 rounded-full border border-white/50" style={{ backgroundColor: item.bg }} /><span>{item.label}</span>
                       </button>
                     ))}
                   </PopoverContent>
                 </Popover>
-
-                <button
-                  type="button"
-                  onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); }}
-                  className="h-6.5 px-2 rounded-lg text-xs font-bold bg-slate-900 text-slate-300 border border-slate-800"
-                >
-                  ⚽
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTool("add-text")}
-                  className={`h-6.5 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${
-                    activeTool === "add-text" ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-300 border border-slate-800"
-                  }`}
-                >
-                  <TextIcon className="h-3 w-3 text-violet-400" />
-                </button>
+                <button type="button" onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); }} className="h-7 px-2 rounded-lg text-xs font-bold bg-slate-900 text-slate-300 border border-slate-800">⚽</button>
+                <button type="button" onClick={() => setActiveTool("add-text")} className={`h-7 px-2 rounded-lg text-xs font-bold flex items-center ${activeTool === "add-text" ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-300 border border-slate-800"}`}><TextIcon className="h-3 w-3 text-violet-400" /></button>
               </div>
-
-              {/* Zoom controls */}
               <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-0.5 rounded-lg border border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setZoom((z) => Math.min(3, parseFloat((z + 0.25).toFixed(2))))}
-                  className="p-1 text-slate-300 hover:text-white"
-                  title="Zoom +"
-                >
-                  <ZoomIn className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))}
-                  className="p-1 text-slate-300 hover:text-white"
-                  title="Zoom -"
-                >
-                  <ZoomOut className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={resetView}
-                  className="p-1 text-slate-400 hover:text-white"
-                  title="Reset Zoom"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </button>
+                <button type="button" onClick={() => setZoom((z) => Math.min(3, parseFloat((z + 0.25).toFixed(2))))} className="p-1 text-slate-300 hover:text-white"><ZoomIn className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))} className="p-1 text-slate-300 hover:text-white"><ZoomOut className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={resetView} className="p-1 text-slate-400 hover:text-white"><RotateCcw className="h-3.5 w-3.5" /></button>
               </div>
-
-              {/* Actions & Minimize Dock Button */}
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handleUndo}
-                  disabled={paths.length === 0 && zones.length === 0}
-                  className="p-1 text-amber-400 hover:text-amber-200 disabled:opacity-30 text-xs font-bold"
-                  title="Deshacer"
-                >
-                  ↩
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  className="p-1 text-red-400 hover:text-red-300"
-                  title="Limpiar"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsDockMinimized(true)}
-                  className="p-1 text-slate-400 hover:text-white bg-slate-800/80 rounded-lg ml-1"
-                  title="Minimizar Herramientas"
-                >
-                  <Eye className="h-3.5 w-3.5 text-slate-300" />
-                </button>
+                <button type="button" onClick={handleUndo} disabled={paths.length === 0 && zones.length === 0} className="p-1 text-amber-400 hover:text-amber-200 disabled:opacity-30 text-xs font-bold">↩</button>
+                <button type="button" onClick={handleClear} className="p-1 text-red-400 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button>
+                <button type="button" onClick={() => setIsDockMinimized(true)} className="p-1 text-slate-400 hover:text-white bg-slate-800/80 rounded-lg ml-1"><Eye className="h-3.5 w-3.5 text-slate-300" /></button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+
+          {/* ── MOBILE (< sm): Compact 1-row pill bar ── */}
+          <div className="flex sm:hidden items-center gap-1.5 bg-slate-950/90 backdrop-blur-lg border border-white/15 px-2 py-1.5 rounded-2xl shadow-2xl">
+
+            {/* Active tool indicator + tool quick-switch pills */}
+            <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+              {/* Lápiz */}
+              <button
+                type="button"
+                onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-solid" ? "bg-blue-600 text-white shadow-md shadow-blue-900/50" : "text-slate-400"}`}
+                title="Lápiz"
+              >
+                <Pencil className="h-5 w-5" />
+              </button>
+              {/* Pase */}
+              <button
+                type="button"
+                onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-dashed" ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/50" : "text-slate-400"}`}
+                title="Pase"
+              >
+                <span className="font-mono text-lg font-black leading-none">┊</span>
+              </button>
+              {/* Tiro */}
+              <button
+                type="button"
+                onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-arrow" ? "bg-amber-600 text-white shadow-md shadow-amber-900/50" : "text-slate-400"}`}
+                title="Tiro con flecha"
+              >
+                <ArrowRight className="h-5 w-5" />
+              </button>
+              {/* Zona */}
+              <button
+                type="button"
+                onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-zone" ? "bg-orange-600 text-white shadow-md shadow-orange-900/50" : "text-slate-400"}`}
+                title="Zona Sombreada"
+              >
+                <Square className="h-5 w-5" />
+              </button>
+              {/* Jugador */}
+              <button
+                type="button"
+                onClick={() => setActiveTool("add-player")}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "add-player" ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-900/50" : "text-slate-400"}`}
+                title={`Añadir jugador #${nextNum}`}
+              >
+                <User className="h-5 w-5" />
+              </button>
+              {/* Borrador */}
+              <button
+                type="button"
+                onClick={() => setActiveTool("eraser")}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "eraser" ? "bg-red-600 text-white shadow-md shadow-red-900/50" : "text-slate-400"}`}
+                title="Borrador"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Color dot: shows active color, tap → opens sheet */}
+            <button
+              type="button"
+              onClick={() => setIsSheetOpen(true)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all"
+              title="Color y más opciones"
+            >
+              <span className="w-5 h-5 rounded-full border-2 border-white/60 shadow-md" style={{ backgroundColor: color }} />
+            </button>
+
+            {/* More (⋮) → opens bottom sheet */}
+            <button
+              type="button"
+              onClick={() => setIsSheetOpen(true)}
+              className="w-10 h-10 rounded-xl flex flex-col items-center justify-center gap-0.5 bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all"
+              title="Más herramientas"
+            >
+              <span className="w-1 h-1 rounded-full bg-slate-300" />
+              <span className="w-1 h-1 rounded-full bg-slate-300" />
+              <span className="w-1 h-1 rounded-full bg-slate-300" />
+            </button>
+
+            {/* Minimize */}
+            <button
+              type="button"
+              onClick={() => setIsDockMinimized(true)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all text-slate-400"
+              title="Ocultar barra"
+            >
+              <Eye className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Floating restore pill when minimized */}
+      {isDockMinimized && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => setIsDockMinimized(false)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-950/90 border border-white/20 text-white font-bold text-sm shadow-2xl backdrop-blur-md active:scale-95 transition-all"
+          >
+            <Pencil className="h-4 w-4 text-emerald-400" />
+            <span className="hidden sm:inline">Herramientas</span>
+          </button>
+        </div>
+      )}
+
+      {/* ── MOBILE BOTTOM SHEET (drawer) — portado encima de todo ── */}
+      {isSheetOpen && (
+        <>
+          {/* Backdrop: cierra el sheet al tocar fuera */}
+          <div
+            className="absolute inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
+            onPointerDown={() => setIsSheetOpen(false)}
+          />
+          {/* Sheet panel */}
+          <div
+            className="absolute bottom-0 left-0 right-0 z-50 bg-slate-950 border-t border-white/15 rounded-t-3xl shadow-2xl pt-2 pb-6 px-4 animate-slide-up"
+            onTouchStart={(e) => { sheetTouchStartY.current = e.touches[0].clientY; }}
+            onTouchEnd={(e) => {
+              if (sheetTouchStartY.current !== null) {
+                const delta = e.changedTouches[0].clientY - sheetTouchStartY.current;
+                if (delta > 60) setIsSheetOpen(false);
+                sheetTouchStartY.current = null;
+              }
+            }}
+          >
+            {/* Handle bar visual */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-700 mx-auto mb-4" />
+
+            {/* SECTION: Colores de trazo */}
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Color del trazo</p>
+            <div className="flex items-center gap-3 flex-wrap mb-4">
+              {COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { setColor(c); }}
+                  className={`w-9 h-9 rounded-full border-2 transition-all active:scale-90 ${color === c ? "border-white scale-110 shadow-lg" : "border-transparent opacity-70"}`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+
+            {/* SECTION: Grosor */}
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Grosor de línea</p>
+            <div className="flex gap-2 mb-4">
+              {([["Fina", 0.4], ["Media", 0.8], ["Gruesa", 1.6]] as [string, number][]).map(([label, val]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setStrokeW(val)}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition active:scale-95 ${
+                    (label === "Fina" && strokeW <= 0.5) || (label === "Media" && strokeW > 0.5 && strokeW <= 1.0) || (label === "Gruesa" && strokeW > 1.0)
+                      ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-900 text-slate-300 border-slate-800"
+                  }`}
+                >{label}</button>
+              ))}
+            </div>
+
+            {/* SECTION: Color de equipo para jugadores */}
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Color del equipo</p>
+            <div className="flex gap-2 flex-wrap mb-4">
+              {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => { setTeamColor(key as PlayerTeamColor); setActiveTool("add-player"); }}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition active:scale-95 ${teamColor === key ? "border-white text-white shadow-md" : "border-slate-800 text-slate-400"}`}
+                  style={{ backgroundColor: teamColor === key ? item.bg + "33" : undefined }}
+                >
+                  <span className="w-4 h-4 rounded-full border border-white/40 shrink-0" style={{ backgroundColor: item.bg }} />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* SECTION: Acciones */}
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Acciones</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); setIsSheetOpen(false); }}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-300 active:scale-95"
+              >
+                ⚽ <span>Balón</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setActiveTool("add-text"); setIsSheetOpen(false); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 border rounded-xl text-sm font-bold active:scale-95 ${activeTool === "add-text" ? "bg-violet-700 border-violet-500 text-white" : "bg-slate-900 border-slate-800 text-slate-300"}`}
+              >
+                <TextIcon className="h-4 w-4" /><span>Texto</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={paths.length === 0 && zones.length === 0}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-amber-400 disabled:opacity-30 active:scale-95"
+              >
+                ↩ <span>Deshacer</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { handleClear(); setIsSheetOpen(false); }}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 border border-red-900/60 rounded-xl text-sm font-bold text-red-400 active:scale-95"
+              >
+                <Trash2 className="h-4 w-4" /><span>Limpiar</span>
+              </button>
+            </div>
+
+            {/* Zoom row */}
+            <div className="flex gap-2 mt-2">
+              <button type="button" onClick={() => setZoom((z) => Math.min(3, parseFloat((z + 0.25).toFixed(2))))} className="flex-1 flex items-center justify-center gap-1 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-300 active:scale-95">
+                <ZoomIn className="h-4 w-4" /><span>Zoom +</span>
+              </button>
+              <button type="button" onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))} className="flex-1 flex items-center justify-center gap-1 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-300 active:scale-95">
+                <ZoomOut className="h-4 w-4" /><span>Zoom -</span>
+              </button>
+              <button type="button" onClick={resetView} className="flex-1 flex items-center justify-center gap-1 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-400 active:scale-95">
+                <RotateCcw className="h-4 w-4" /><span>Reset</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
