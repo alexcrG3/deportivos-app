@@ -106,7 +106,12 @@ export const categorias: any[] = [];
 
 export const entrenadores: any[] = [];
 
-export const equipos: any[] = [];
+export const equipos: any[] = [
+  { id: "eq-u11", nombre: "U11 Asoderive", categoria: "Sub-11", disciplina: "Fútbol", entrenador: "Carlos Araya", sede: "Sede Central", estado: "activo" },
+  { id: "eq-u13", nombre: "U13 Asoderive", categoria: "Sub-13", disciplina: "Fútbol", entrenador: "Edgar Calderón", sede: "Sede Central", estado: "activo" },
+  { id: "eq-u15", nombre: "U15 Asoderive", categoria: "Sub-15", disciplina: "Fútbol", entrenador: "Carlos Méndez", sede: "Sede Central", estado: "activo" },
+  { id: "eq-u17", nombre: "U17 Asoderive", categoria: "Sub-17", disciplina: "Fútbol", entrenador: "Andrés Pérez", sede: "Sede Central", estado: "activo" },
+];
 
 export const instalaciones: any[] = [];
 export const horarios: any[] = [];

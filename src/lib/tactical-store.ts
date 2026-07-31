@@ -522,20 +522,19 @@ const INITIAL_FORMATIONS: Formation[] = [
 
 const INITIAL_OPPONENTS: Opponent[] = [
   {
-    id: "op1",
-    nombre: "Club Heredia FC U13",
-    escudo: "🦉",
-    entrenador: "Mario Quesada",
+    id: "op-san-jose-u9",
+    nombre: "U9 San Jose FC",
+    escudo: "⚡",
+    entrenador: "Fernando Montero",
     sistemaBase: "4-3-3",
-    fortalezas: ["Ataque rápido por bandas", "Presión tras pérdida", "Defensores altos"],
-    debilidades: ["Vulnerables a pases filtrados", "Repliegue defensivo lento"],
+    fortalezas: ["Ataque rápido por bandas", "Presión tras pérdida"],
+    debilidades: ["Repliegue defensivo lento"],
     resultadosRecientes: [
-      { fecha: "2026-07-05", resultado: "1-2", rival: "Saprissa U13", tipo: "derrota" },
-      { fecha: "2026-06-28", resultado: "3-1", rival: "LD Alajuelense U13", tipo: "victoria" },
+      { fecha: "2026-07-20", resultado: "2-1", rival: "Asoderive U9", tipo: "victoria" },
     ],
-    jugadoresDestacados: ["Gutiérrez #10", "Salazar #9"],
-    observaciones: "Equipo U13 muy físico en ataque. Hay que poblar el mediocampo y presionar su salida.",
-    peligrosidad: "alto",
+    jugadoresDestacados: ["García #10", "Navarro #9"],
+    observaciones: "Rival competitivo Sub-9 con buena rotación.",
+    peligrosidad: "medio",
   },
 ];
 
@@ -1223,7 +1222,12 @@ export class TacticalStore {
 
   // --- OPPONENTS ---
   static getOpponents(): Opponent[] {
-    return this.get<Opponent[]>("tact_opponents", INITIAL_OPPONENTS);
+    const list = this.get<Opponent[]>("tact_opponents", INITIAL_OPPONENTS);
+    if (!list || list.length === 0 || list.some(o => o.nombre.includes("U13") || o.nombre.includes("U11"))) {
+      this.set("tact_opponents", INITIAL_OPPONENTS);
+      return INITIAL_OPPONENTS;
+    }
+    return list;
   }
 
   static getOpponent(id: string): Opponent | undefined {
@@ -1233,6 +1237,11 @@ export class TacticalStore {
   static saveOpponent(opp: Opponent): void {
     const all = this.getOpponents().filter(x => x.id !== opp.id);
     all.push(opp);
+    this.set("tact_opponents", all);
+  }
+
+  static deleteOpponent(id: string): void {
+    const all = this.getOpponents().filter(x => x.id !== id);
     this.set("tact_opponents", all);
   }
 

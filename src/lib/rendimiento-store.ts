@@ -816,29 +816,18 @@ class RendimientoStore {
   // Limpia memoryCache Y localStorage si detecta datos mock de sesiones anteriores.
   private static _bustStaleMockData = (() => {
     if (typeof window === "undefined") return;
-    const CACHE_VERSION = "v2026.07.23.c";
-    const MOCK_KEYS = ["equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics", "partidos", "partidos_dynamics"];
-    const storedVersion = localStorage.getItem("deportivos_cache_version");
-    if (storedVersion !== CACHE_VERSION) {
-      // Limpiar caches viejos de localStorage
-      MOCK_KEYS.forEach(k => {
-        localStorage.removeItem(`deportivos_cache_${k}`);
-        localStorage.removeItem(`deportivos_hp_${k}`);
-      });
-      // Resetear el flag de purga para que corra en la próxima sincronización
-      localStorage.removeItem("deportivos_mock_purge_v1");
-      localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
-    }
-    // Si la purga de datos mock de Supabase no se ha corrido aún, forzar re-sync
-    if (!localStorage.getItem("deportivos_mock_purge_v1")) {
-      setTimeout(() => {
-        try {
-          (RendimientoStore as any).isSynced = false;
-          (RendimientoStore as any).syncPromise = null;
-          RendimientoStore.syncFromSupabase();
-        } catch(_) {}
-      }, 100);
-    }
+    const CACHE_VERSION = "v2026.07.31.v100_no_localstorage";
+    const MOCK_KEYS = [
+      "equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics",
+      "partidos", "partidos_dynamics", "objetivos_jugadores", "pagos_dynamics", "lesiones",
+      "evaluaciones_rapidas", "wellness", "resultados_pruebas"
+    ];
+    // Forzar limpieza completa de localStorage
+    MOCK_KEYS.forEach(k => {
+      localStorage.removeItem(`deportivos_cache_${k}`);
+      localStorage.removeItem(`deportivos_hp_${k}`);
+    });
+    localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
   })();
 
   public static isStoreSynced(): boolean {
@@ -852,17 +841,19 @@ class RendimientoStore {
 
     this.syncPromise = (async () => {
       try {
-      // Limpiar caché de datos mock guardados en localStorage de sesiones anteriores
-      const CACHE_VERSION = "v2025.07.23";
+      // Purga total de datos mock locales en localStorage
+      const CACHE_VERSION = "v2026.07.31.pure_supabase";
       const storedVersion = localStorage.getItem("deportivos_cache_version");
       if (storedVersion !== CACHE_VERSION) {
-        const mockKeys = ["equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics", "partidos"];
+        const mockKeys = [
+          "equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics",
+          "partidos", "objetivos_jugadores", "pagos_dynamics", "lesiones"
+        ];
         mockKeys.forEach(k => {
           localStorage.removeItem(`deportivos_cache_${k}`);
           localStorage.removeItem(`deportivos_hp_${k}`);
         });
         localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
-        // Limpiar memoryCache de datos viejos
         mockKeys.forEach(k => { delete this.memoryCache[k]; });
       }
 
@@ -3281,16 +3272,24 @@ class RendimientoStore {
   }
   // --- EQUIPOS DYNAMICS ---
   public static getEquipos(): any[] {
-    if (!this.isBrowser()) return [];
+    if (!this.isBrowser()) return equipos;
     const activeOrg = this.getActiveOrganizacionId();
-    const stored = this.get<any[]>("equipos_dynamics", []);
+    
+    // Purga de localStorage para evitar que datos cacheados corrompan la UI
+    localStorage.removeItem("deportivos_cache_equipos_dynamics");
+    localStorage.removeItem("deportivos_hp_equipos_dynamics");
 
-    const filtered = (stored || []).filter(e => 
+    let source = this.memoryCache["equipos_dynamics"];
+    if (!source || source.length === 0) {
+      source = equipos;
+      this.memoryCache["equipos_dynamics"] = equipos;
+    }
+
+    const filtered = (source || []).filter((e: any) => 
       (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
       !e.nombre?.includes("U5") && e.categoria !== "Sub-5"
     );
-    this.memoryCache["equipos_dynamics"] = filtered;
-    return filtered.sort((a, b) => this.parseCategoryAge(a.categoria || a.nombre) - this.parseCategoryAge(b.categoria || b.nombre));
+    return filtered.sort((a: any, b: any) => this.parseCategoryAge(a.categoria || a.nombre) - this.parseCategoryAge(b.categoria || b.nombre));
   }
 
   public static getPartidos(): any[] {
@@ -3378,7 +3377,7 @@ class RendimientoStore {
   // --- ORGANIZACIONES (TENANTS) ---
   public static getOrganizaciones(): any[] {
     const defaultOrgs = [
-      { id: "00000000-0000-0000-0000-000000000000", nombre: "Academia Asoderive", slug: "asoderive", correo: "admin@asoderive.com", pais: "Costa Rica" }
+      { id: "00000000-0000-0000-0000-000000000000", nombre: "Academia Asoderive", slug: "asoderive", correo: "admin@asoderive.com", pais: "Costa Rica", logo: "/asoderive-logo.jpg" }
     ];
     return this.get<any[]>("organizaciones_dynamics", defaultOrgs);
   }

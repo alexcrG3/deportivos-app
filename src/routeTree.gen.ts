@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SaasAdminRouteImport } from './routes/saas-admin'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as InscripcionRouteImport } from './routes/inscripcion'
@@ -110,6 +112,11 @@ import { Route as AppEntrenadoresIdRouteImport } from './routes/_app/entrenadore
 import { Route as AppCoachPlaneamientoRouteImport } from './routes/_app/coach.planeamiento'
 import { Route as AppMedicoJugadorIdRouteImport } from './routes/_app/medico.jugador.$id'
 
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -118,6 +125,11 @@ const SignupRoute = SignupRouteImport.update({
 const SaasAdminRoute = SaasAdminRouteImport.update({
   id: '/saas-admin',
   path: '/saas-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -617,8 +629,10 @@ export interface FileRoutesByFullPath {
   '/inscripcion': typeof InscripcionRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/privacidad': typeof PrivacidadRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
+  '/terminos': typeof TerminosRoute
   '/asistencia': typeof AppAsistenciaRoute
   '/asistencia-staff': typeof AppAsistenciaStaffRoute
   '/auditoria': typeof AppAuditoriaRoute
@@ -718,8 +732,10 @@ export interface FileRoutesByTo {
   '/inscripcion': typeof InscripcionRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/privacidad': typeof PrivacidadRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
+  '/terminos': typeof TerminosRoute
   '/asistencia': typeof AppAsistenciaRoute
   '/asistencia-staff': typeof AppAsistenciaStaffRoute
   '/auditoria': typeof AppAuditoriaRoute
@@ -818,8 +834,10 @@ export interface FileRoutesById {
   '/inscripcion': typeof InscripcionRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/privacidad': typeof PrivacidadRoute
   '/saas-admin': typeof SaasAdminRoute
   '/signup': typeof SignupRoute
+  '/terminos': typeof TerminosRoute
   '/_app/asistencia': typeof AppAsistenciaRoute
   '/_app/asistencia-staff': typeof AppAsistenciaStaffRoute
   '/_app/auditoria': typeof AppAuditoriaRoute
@@ -921,8 +939,10 @@ export interface FileRouteTypes {
     | '/inscripcion'
     | '/landing'
     | '/login'
+    | '/privacidad'
     | '/saas-admin'
     | '/signup'
+    | '/terminos'
     | '/asistencia'
     | '/asistencia-staff'
     | '/auditoria'
@@ -1022,8 +1042,10 @@ export interface FileRouteTypes {
     | '/inscripcion'
     | '/landing'
     | '/login'
+    | '/privacidad'
     | '/saas-admin'
     | '/signup'
+    | '/terminos'
     | '/asistencia'
     | '/asistencia-staff'
     | '/auditoria'
@@ -1121,8 +1143,10 @@ export interface FileRouteTypes {
     | '/inscripcion'
     | '/landing'
     | '/login'
+    | '/privacidad'
     | '/saas-admin'
     | '/signup'
+    | '/terminos'
     | '/_app/asistencia'
     | '/_app/asistencia-staff'
     | '/_app/auditoria'
@@ -1224,13 +1248,22 @@ export interface RootRouteChildren {
   InscripcionRoute: typeof InscripcionRoute
   LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   SaasAdminRoute: typeof SaasAdminRoute
   SignupRoute: typeof SignupRoute
+  TerminosRoute: typeof TerminosRoute
   PlayerCardTokenRoute: typeof PlayerCardTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -1243,6 +1276,13 @@ declare module '@tanstack/react-router' {
       path: '/saas-admin'
       fullPath: '/saas-admin'
       preLoaderRoute: typeof SaasAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -2170,8 +2210,10 @@ const rootRouteChildren: RootRouteChildren = {
   InscripcionRoute: InscripcionRoute,
   LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
+  PrivacidadRoute: PrivacidadRoute,
   SaasAdminRoute: SaasAdminRoute,
   SignupRoute: SignupRoute,
+  TerminosRoute: TerminosRoute,
   PlayerCardTokenRoute: PlayerCardTokenRoute,
 }
 export const routeTree = rootRouteImport

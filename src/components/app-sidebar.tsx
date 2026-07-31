@@ -533,7 +533,7 @@ export function AppSidebar() {
                             className="w-full text-xs bg-sidebar-accent/60 border border-sidebar-border/80 rounded px-2 py-1 text-sidebar-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
                           >
                             <option value="" className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
-                              {loadingCoaches ? "Cargando..." : "— Todos —"}
+                              {loadingCoaches ? "Cargando..." : "— Seleccionar Entrenador —"}
                             </option>
                             {coachesList.map((c: any) => (
                               <option key={c.id} value={c.id} className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">

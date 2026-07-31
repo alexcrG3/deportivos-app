@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { toast } from "sonner";
+import { useRole } from "@/hooks/use-role";
 
 export const Route = createFileRoute("/_app/competiciones")({ component: CompeticionesPage });
 
@@ -24,6 +25,9 @@ const tipoColor: Record<string, string> = {
 };
 
 function CompeticionesPage() {
+  const { role, coachName, selectedCoachName } = useRole();
+  const activeCoach = selectedCoachName || (role === "coach" ? coachName : "Carlos Araya");
+
   const [competicionesList, setCompeticionesList] = useState<any[]>([]);
   const [standingsList, setStandingsList] = useState<any[]>([]);
   const [temporadasList, setTemporadasList] = useState<any[]>([]);
@@ -40,7 +44,7 @@ function CompeticionesPage() {
     nombre: "",
     tipo: "Liga",
     disciplina: "Fútbol",
-    categoria: "Sub-15",
+    categoria: "Sub-11",
     equipos: 10,
     jornadaActual: 1,
     jornadas: 18,
@@ -49,7 +53,30 @@ function CompeticionesPage() {
   });
 
   const loadData = () => {
-    const comps = RendimientoStore.getCompeticiones();
+    let comps = RendimientoStore.getCompeticiones();
+    // Si el entrenador es Carlos Araya, su ÚNICO equipo es U9 Asoderive (Sub-9)
+    if (activeCoach && activeCoach.includes("Carlos Araya")) {
+      comps = comps.filter(c => {
+        const cName = (c.nombre || c.categoria || "").toLowerCase();
+        return !cName.includes("u13") && !cName.includes("sub-13") && !cName.includes("u11") && !cName.includes("sub-11");
+      });
+      if (comps.length === 0) {
+        comps = [{
+          id: "comp_u9_asoderive",
+          nombre: "Liga U9 Asoderive",
+          tipo: "Liga",
+          disciplina: "Fútbol",
+          categoria: "Sub-9",
+          equipos: 10,
+          jornadaActual: 1,
+          jornadas: 18,
+          estado: "en_curso",
+          temporadaId: "temp2026",
+          sedes: ["Cancha Asoderive Central"]
+        }];
+      }
+    }
+
     setCompeticionesList(comps);
 
     if (comps.length > 0) {
@@ -61,7 +88,21 @@ function CompeticionesPage() {
       setSel(null);
     }
 
-    setStandingsList(RendimientoStore.getClasificaciones());
+    let standings = RendimientoStore.getClasificaciones();
+    if (activeCoach && activeCoach.includes("Carlos Araya")) {
+      standings = standings.filter(s => {
+        const name = (s.equipo || s.club || s.competicion || "").toLowerCase();
+        return !name.includes("u13") && !name.includes("u11");
+      });
+      if (standings.length === 0) {
+        standings = [
+          { id: "st1", equipo: "U9 Asoderive", pj: 1, pg: 1, pe: 0, pp: 0, gf: 3, gc: 1, dg: 2, pts: 3 },
+          { id: "st2", equipo: "Saprissa FC U9", pj: 1, pg: 0, pe: 1, pp: 0, gf: 1, gc: 1, dg: 0, pts: 1 },
+          { id: "st3", equipo: "U9 San Jose FC", pj: 1, pg: 0, pe: 0, pp: 1, gf: 1, gc: 3, dg: -2, pts: 0 },
+        ];
+      }
+    }
+    setStandingsList(standings);
     const temps = RendimientoStore.getTemporadas();
     setTemporadasList(temps);
     setSedesList(RendimientoStore.getSedes());

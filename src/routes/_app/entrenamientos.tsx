@@ -839,8 +839,38 @@ function EntrenamientosPage() {
   };
 
   // ─────────────────────────────────────────────
-  // Carga 100% directa desde Supabase PostgreSQL
+  // Carga y Filtrado por Entrenador desde Supabase
   // ─────────────────────────────────────────────
+  const effectiveCoachName = useMemo(() => {
+    if (role === "admin" && selectedCoachName) {
+      return selectedCoachName;
+    }
+    if (role === "coach" && coachName) {
+      return coachName;
+    }
+    return selectedCoachName || coachName || "";
+  }, [role, selectedCoachName, coachName]);
+
+  const coachEquipos = useMemo(() => {
+    const all = RendimientoStore.getEquipos();
+    if (!effectiveCoachName) return all;
+    return all.filter(t => {
+      const entName = (t.entrenador || t.entrenador_nombre || "").toLowerCase().trim();
+      return entName && (entName.includes(effectiveCoachName.toLowerCase().trim()) || effectiveCoachName.toLowerCase().trim().includes(entName));
+    });
+  }, [effectiveCoachName]);
+
+  useEffect(() => {
+    if (coachEquipos.length > 0) {
+      const targetEq = coachEquipos[0];
+      setSesionData(prev => ({
+        ...prev,
+        equipo: targetEq.nombre,
+        categoria: targetEq.categoria || prev.categoria,
+      }));
+    }
+  }, [coachEquipos]);
+
   const [listaSesionesDb, setListaSesionesDb] = useState<any[]>([]);
   const [loadingSesionesDb, setLoadingSesionesDb] = useState<boolean>(true);
 
@@ -848,7 +878,6 @@ function EntrenamientosPage() {
     setLoadingSesionesDb(true);
 
     try {
-      // Consultar absolutamente TODAS las sesiones almacenadas en la tabla Supabase
       const { data, error } = await supabase
         .from("sesiones_entrenamiento")
         .select("*")
@@ -857,7 +886,6 @@ function EntrenamientosPage() {
       if (data && data.length > 0) {
         setListaSesionesDb(data);
       } else {
-        // Si no hay datos en la tabla sesiones_entrenamiento
         const { data: asisData } = await supabase
           .from("asistencia_registros")
           .select("fecha, sesion_id")
@@ -865,10 +893,13 @@ function EntrenamientosPage() {
 
         if (asisData && asisData.length > 0) {
           const fechasUnicas = Array.from(new Set(asisData.map((a: any) => a.fecha)));
+          const activeTeamName = coachEquipos[0]?.nombre || "Equipo Principal";
           const sesionesReales = fechasUnicas.map((f: string) => ({
             id: `ses-db-${f}`,
             nombre: `Sesión de Cancha (${f})`,
-            equipo_id: sesionData.equipo,
+            equipo: activeTeamName,
+            equipo_id: activeTeamName,
+            entrenador: effectiveCoachName,
             fecha: f,
           }));
           setListaSesionesDb(sesionesReales);
@@ -886,7 +917,25 @@ function EntrenamientosPage() {
 
   useEffect(() => {
     cargarSesionesDb();
-  }, [hoyYmd, sesionData.equipo]);
+  }, [hoyYmd, effectiveCoachName, selectedCoachId]);
+
+  const filteredSesionesDb = useMemo(() => {
+    if (!effectiveCoachName) return listaSesionesDb;
+
+    const activeCoach = effectiveCoachName.toLowerCase().trim();
+    const validTeamNames = new Set(coachEquipos.map(e => (e.nombre || "").toLowerCase().trim()));
+
+    return listaSesionesDb.filter(s => {
+      if (s.entrenador) {
+        return s.entrenador.toLowerCase().trim() === activeCoach;
+      }
+      const sEq = (s.equipo || s.equipo_id || "").toLowerCase().trim();
+      if (sEq && validTeamNames.has(sEq)) {
+        return true;
+      }
+      return false;
+    });
+  }, [listaSesionesDb, effectiveCoachName, coachEquipos]);
 
   // ─────────────────────────────────────────────
   //  MODO SESIÓN ACTIVA EN CANCHA (FLUJO 3 PASOS)
@@ -2591,12 +2640,12 @@ function EntrenamientosPage() {
             <div className="p-8 text-center text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-950 rounded-2xl animate-pulse">
               ⚡ Sincronizando repositorio de sesiones desde Supabase PostgreSQL...
             </div>
-          ) : listaSesionesDb.length === 0 ? (
+          ) : filteredSesionesDb.length === 0 ? (
             <div className="p-8 text-center text-xs font-medium text-slate-500 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-dashed border-slate-300">
-              🗄️ No se encontraron registros de entrenamiento en Supabase para este club. Presiona <strong>INICIAR SESIÓN EN CANCHA</strong> para registrar la primera.
+              🗄️ No se encontraron registros de entrenamiento en Supabase para este entrenador. Presiona <strong>INICIAR SESIÓN EN CANCHA</strong> para registrar la primera.
             </div>
           ) : (
-            listaSesionesDb.map((s, idx) => (
+            filteredSesionesDb.map((s, idx) => (
               <div key={s.id || idx} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-wrap items-center justify-between gap-3 hover:border-indigo-500/40 transition">
                 <div className="space-y-1">
                   <span className="font-mono text-xs font-bold text-indigo-600">

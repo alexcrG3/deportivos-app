@@ -64,43 +64,50 @@ const CATALOGO_CLUB = {
 };
 
 export function CoachPlannerPage() {
-  const { role, coachName } = useRole();
+  const { role, coachName, selectedCoachId, selectedCoachName } = useRole();
+
+  const effectiveCoachName = useMemo(() => {
+    if (role === "admin" && selectedCoachName) {
+      return selectedCoachName;
+    }
+    if (role === "coach" && coachName) {
+      return coachName;
+    }
+    return selectedCoachName || coachName || "";
+  }, [role, selectedCoachName, coachName]);
 
   const [dbEquipos, setDbEquipos] = useState<any[]>([]);
-  const [equipoSel, setEquipoSel] = useState<string>("U11 Asoderive");
+  const [equipoSel, setEquipoSel] = useState<string>("");
   const [categoriaSel, setCategoriaSel] = useState<string>("Sub-11");
   const [alcance, setAlcance] = useState<"Semanal" | "Quincenal" | "Mensual">("Semanal");
   const [lesionadosDb, setLesionadosDb] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchEquiposDb = async () => {
-      // 1. Equipos con los entrenadores REALES según la base de datos Supabase
-      const equiposReales = [
-        { id: "eq_u9_00000000", nombre: "U9 Asoderive", disciplina: "Fútbol", categoria: "Sub-9", entrenador: "Carlos Araya", sede: "Sede Central", estado: "activo" },
-        { id: "eq_u11_00000000", nombre: "U11 Asoderive", disciplina: "Fútbol", categoria: "Sub-11", entrenador: "Tiffany Eduarte", sede: "Sede Central", estado: "activo" },
-        { id: "eq_u13_00000000", nombre: "U13 Asoderive", disciplina: "Fútbol", categoria: "Sub-13", entrenador: "Eduardo Villa", sede: "Sede Central", estado: "activo" }
-      ];
-
-      // Actualizar automáticamente los registros desactualizados en Supabase DB
-      await supabase.from("equipos").upsert(equiposReales);
-
-      // 2. Consultar la tabla `equipos` ya actualizada desde Supabase PostgreSQL
+      const orgId = RendimientoStore.getActiveOrganizacionId();
       const { data } = await supabase.from("equipos").select("*").order("nombre");
       
-      if (data && data.length > 0) {
-        const activeCoach = coachName || "Carlos Araya";
-        const misEquipos = data.filter((e: any) => 
-          (e.entrenador && e.entrenador.toLowerCase().includes(activeCoach.toLowerCase())) ||
-          (e.entrenador_nombre && e.entrenador_nombre.toLowerCase().includes(activeCoach.toLowerCase()))
-        );
+      const storeEquipos = RendimientoStore.getEquipos();
+      const allEquipos = (data && data.length > 0) ? data : storeEquipos;
+
+      const activeCoach = (effectiveCoachName || "").trim().toLowerCase();
+
+      if (activeCoach) {
+        const misEquipos = allEquipos.filter((e: any) => {
+          const entName = (e.entrenador || e.entrenador_nombre || "").toLowerCase().trim();
+          return entName && (entName.includes(activeCoach) || activeCoach.includes(entName));
+        });
 
         if (misEquipos.length > 0) {
           setDbEquipos(misEquipos);
           setEquipoSel(misEquipos[0].nombre);
         } else {
-          setDbEquipos(data);
-          setEquipoSel(data[0].nombre);
+          setDbEquipos(allEquipos);
+          if (allEquipos.length > 0) setEquipoSel(allEquipos[0].nombre);
         }
+      } else {
+        setDbEquipos(allEquipos);
+        if (allEquipos.length > 0) setEquipoSel(allEquipos[0].nombre);
       }
 
       const { data: lesData } = await supabase.from("incidencias_lesiones").select("*");
@@ -109,7 +116,7 @@ export function CoachPlannerPage() {
       }
     };
     fetchEquiposDb();
-  }, [coachName]);
+  }, [effectiveCoachName, role, selectedCoachId]);
 
   useEffect(() => {
     const eqObj = dbEquipos.find((e) => e.nombre === equipoSel || e.id === equipoSel);

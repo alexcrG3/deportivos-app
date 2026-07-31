@@ -857,3 +857,46 @@ Una academia deportiva maneja inventario físico constante: uniformes, balones, 
   - Se restauró el menú original de **`Área Técnica`** en el perfil de Administrador, manteniendo sus accesos a *Coach OS* (simulación de entrenadores), *Centro Táctico*, *Competiciones* y *Alto Rendimiento*.
 * **Ocultado de la Vercel Toolbar:**
   - Inyección de reglas CSS específicas en `styles.css` para ocultar por completo el widget flotante de feedback y speed insights de Vercel en la versión de producción desplegada.
+
+## [31/07/2026]
+* **Rediseño Completo & Suite Táctica Profesional 2D/Video (`CanchaBCoachBoard`):**
+  * **Sistema de Animación por Fotogramas / Pasos Tácticos (Playbook 60 FPS)**:
+    - Implementación del motor de interpolación fluida a 60 FPS con aceleración cúbica ease-in-out (`requestAnimationFrame`).
+    - Captura de fotogramas ilimitados con el botón `+ Paso (N)` y barra de control de reproducción (`Paso 1`, `Paso 2`, `Paso 3`, etc.).
+    - Botón de eliminación de pasos individuales `🗑️` y control de pausar/reproducir.
+  * **Animación de Pases y Tiros a Marco**:
+    - Recorrido realista del balón siguiendo exactamente la trayectoria del pase o tiro trazado por el entrenador.
+    - Animación visual de guiones deslizantes en flujo continuo (`bcoachPassFlow`) para trazos de pases punteados.
+    - Efecto de pulso resplandeciente (Glow `bcoachShotGlow`) para flechas de tiros a marco.
+  * **Conos Naranja & Equipamiento de Entrenamiento**:
+    - Fichas vectoriales 2D de Conos de Entrenamiento (`#f97316`) con franja reflectante para circuitos físicos-tácticos y slalom.
+    - Mini Arcos de Entrenamiento (`🥅`) vectoriales colocables en cualquier zona del campo.
+    - Eliminación de conos y mini arcos integrada con la herramienta borrador `🧽` y la limpieza completa de la pizarra `🧹`.
+  * **Guardiola Grid (5 Pasillos Tácticos & Tercios)**:
+    - Interruptor `📐 Grid` para alternar la visualización de los 5 pasillos tácticos (Bandas, Pasillos Interiores / Half-spaces y Pasillo Central) y los 3 tercios de cancha.
+  * **Banco y Biblioteca de Pizarras Guardadas**:
+    - Almacenamiento local + sincronización asíncrona con Supabase (`pizarras`).
+    - Carga en 1 toque de plantillas oficiales precargadas: *4-3-3 Ofensiva*, *4-4-2 Bloque Medio*, *4-2-3-1 Presión Alta*, *Futsal 5v5 (Rombo 1-2-1)*, *Juego de Posición 5v4*, *Salida Lavolpiana*.
+    - Botones de acción `✏️ Editar` para renombrar ejercicios guardados y `🗑️ Eliminar` para borrar del banco.
+  * **Numeración Dinámica de Camisetas por Color de Equipo**:
+    - Seguimiento independiente de dorsales por color de uniforme (`orange`, `blue`, `red`, etc.), iniciando siempre en `#1`.
+  * **Modal de Confirmación Dark Glassmorphic**:
+    - Reemplazo de las ventanas `confirm()` nativas por un diálogo estilizado de vidrio oscuro con badge de advertencia.
+  * **Optimización visual y de escala**:
+    - Escalado del balón a tamaño proporcional realista (`r={1.15}`) respecto a las fichas de los jugadores (`r={1.8}`).
+    - Estilización y centrado automático de etiquetas de texto con cápsulas de cristal (glassmorphism badges) para evitar desbordamientos de pantalla en móviles y tablets.
+* **Implementación de Pizarra de Partido (Plan de Juego / Matchday Board) & Filtros de Carlos Araya:**
+  * **Convocatoria Real & Dorsales Oficiales**:
+    - Carga automática de los 11 titulares convocados de la categoría **U9 Asoderive** en la pizarra con nombres reales y dorsales en cápsulas identificadoras bajo cada ficha.
+  * **Estrategia por Fases del Juego**:
+    - Selector táctico de 1-clic con 4 fases: *🟢 Ataque Organizado*, *🔴 Bloque Defensivo*, *🔄 Transición* y *🎯 Balón Parado (ABP)*.
+  * **Modo Entretiempo / Camerino (15 Minutos)**:
+    - Módulo táctico de descanso para tablets/TVs con panel de **Sustituciones en Vivo** (remplazo de titulares por suplentes convocados) y botón **📲 Compartir Ajustes por WhatsApp / Email** para el cuerpo técnico.
+  * **Selector de Modo en Cabecera & Accesos Directos**:
+    - Desplegable superior para alternar entre *🏆 Modo Partido (Plan de Juego)* y *🏋️ Modo Entrenamiento*.
+    - Acceso directo integrado en la Ficha de Convocatorias (`/convocatorias`) y en la Agenda de Partidos (`/partidos`).
+  * **Aislamiento U9 Carlos Araya & Módulo CRUD de Eliminación**:
+    - Purga total de torneos y rivales de U11 y U13 para Carlos Araya (limitado estrictamente a la categoría Sub-9 / U9 Asoderive).
+    - Remoción de Liga Deportiva Alajuelense U9, dejando como único partido agendado el encuentro del 2 de agosto vs **U9 San Jose FC**.
+    - Adición de botones de eliminación directa (CRUD Delete con ícono `Trash2`) en Expedientes de Rivales (`/tactica/rivales`) y Agenda de Partidos (`/partidos`).
+

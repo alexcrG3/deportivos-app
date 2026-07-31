@@ -8,9 +8,10 @@ import RendimientoStore from "@/lib/rendimiento-store";
 import {
   Swords, Plus, ShieldAlert, Award, Star, Info, TrendingUp,
   Video, Eye, BrainCircuit, CheckSquare, FileText, ArrowRight,
-  Shield, AlertTriangle, ArrowLeftRight, Layout, Calendar
+  Shield, AlertTriangle, ArrowLeftRight, Layout, Calendar, Trash2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useRole } from "@/hooks/use-role";
 
 export const Route = createFileRoute("/_app/tactica/rivales")({ component: RivalesTacticos });
 
@@ -32,13 +33,26 @@ const RESULT_SYMBOL: Record<string, string> = {
 };
 
 function RivalesTacticos() {
+  const { role, coachName, selectedCoachName } = useRole();
+  const activeCoach = selectedCoachName || (role === "coach" ? coachName : "Carlos Araya");
+
   const dbPartidos = RendimientoStore.getPartidos();
   const customOpponents = TacticalStore.getOpponents();
 
   const opponents = useMemo(() => {
-    const rivalNames = Array.from(new Set(dbPartidos.map(m => m.rival).filter(Boolean)));
+    // Filtrar partidos que no sean del entrenador activo
+    const filteredPartidos = dbPartidos.filter(m => {
+      const eq = (m.equipo || "").toLowerCase();
+      const ent = (m.entrenador || "").toLowerCase();
+      if (activeCoach.includes("Carlos Araya") && (eq.includes("u13") || eq.includes("u11") || ent.includes("edgar"))) {
+        return false;
+      }
+      return true;
+    });
+
+    const rivalNames = Array.from(new Set(filteredPartidos.map(m => m.rival).filter(Boolean)));
     const extracted: Opponent[] = rivalNames.map((rivalName, idx) => {
-      const rivalMatches = dbPartidos.filter(m => m.rival === rivalName);
+      const rivalMatches = filteredPartidos.filter(m => m.rival === rivalName);
       const resultadosRecientes = rivalMatches.map(m => {
         let tipo: "victoria" | "derrota" | "empate" = "empate";
         if (m.resultado) {
@@ -71,13 +85,26 @@ function RivalesTacticos() {
       };
     });
 
-    const filteredCustom = customOpponents.filter(o => o.id !== "op1" && o.id !== "op2");
+    const filteredCustom = customOpponents.filter(o => {
+      const oName = o.nombre.toLowerCase();
+      if (activeCoach.includes("Carlos Araya") && (oName.includes("u13") || oName.includes("u11"))) return false;
+      return true;
+    });
     return [...extracted, ...filteredCustom];
-  }, [dbPartidos, customOpponents]);
+  }, [dbPartidos, customOpponents, activeCoach]);
 
   const [selectedOpponentId, setSelectedOpponentId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"ficha" | "analisis" | "checklist" | "ia">("ficha");
   const [showAddRival, setShowAddRival] = useState(false);
+
+  const handleDeleteRival = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    TacticalStore.deleteOpponent(id);
+    toast.success("Rival eliminado del expediente táctico");
+    if (selectedOpponentId === id) {
+      setSelectedOpponentId(null);
+    }
+  };
 
   // New Opponent Form State
   const [newRivalForm, setNewRivalForm] = useState({
@@ -185,10 +212,10 @@ function RivalesTacticos() {
               const danger = DANGER_INDEX[opp.peligrosidad];
               const isSelected = selectedOpp?.id === opp.id;
               return (
-                <button
+                <div
                   key={opp.id}
                   onClick={() => handleSelectOpponent(opp.id)}
-                  className={`w-full text-left p-4 rounded-[12px] border transition-all duration-300 flex items-center justify-between ${
+                  className={`w-full text-left p-4 rounded-[12px] border transition-all duration-300 flex items-center justify-between cursor-pointer group ${
                     isSelected
                       ? "border-[#2563EB] bg-slate-50 ring-1 ring-[#2563EB]"
                       : "border-[#E2E8F0] bg-white hover:bg-slate-50 hover:border-slate-300 text-[#0F172A]"
@@ -201,13 +228,24 @@ function RivalesTacticos() {
                       <p className="text-[11px] text-[#64748B] truncate">DT: {opp.entrenador}</p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={`badge-pill text-[10px] ${danger.style.includes('emerald') ? 'badge-success' : danger.style.includes('amber') ? 'badge-warning' : danger.style.includes('orange') ? 'badge-warning' : 'badge-danger'}`}>
-                      {danger.label}
-                    </span>
-                    <span className="text-[11px] font-medium text-[#64748B]">{opp.sistemaBase}</span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`badge-pill text-[10px] ${danger.style.includes('emerald') ? 'badge-success' : danger.style.includes('amber') ? 'badge-warning' : danger.style.includes('orange') ? 'badge-warning' : 'badge-danger'}`}>
+                        {danger.label}
+                      </span>
+                      <span className="text-[11px] font-medium text-[#64748B]">{opp.sistemaBase}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-rose-500 hover:text-rose-700 hover:bg-rose-50 opacity-80 group-hover:opacity-100 transition-opacity"
+                      title="Eliminar Rival"
+                      onClick={(e) => handleDeleteRival(opp.id, e)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -233,11 +271,21 @@ function RivalesTacticos() {
                     </div>
                   </div>
                 </div>
-                <Link to="/tactica/estrategias">
-                  <Button size="sm" className="btn-secondary gap-1.5">
-                    Preparar Estrategia <ArrowRight className="h-4 w-4" />
+                <div className="flex items-center gap-2">
+                  <Link to="/tactica/estrategias">
+                    <Button size="sm" className="btn-secondary gap-1.5">
+                      Preparar Estrategia <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-rose-200 text-rose-600 hover:bg-rose-50 gap-1.5"
+                    onClick={(e) => handleDeleteRival(selectedOpp.id, e)}
+                  >
+                    <Trash2 className="h-4 w-4" /> Eliminar Rival
                   </Button>
-                </Link>
+                </div>
               </CardContent>
             </Card>
 

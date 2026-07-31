@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { playerObjectives as initialObjectives } from "@/lib/mock-data";
-import { Flag, Plus, Calendar, Trash2, Edit2, X } from "lucide-react";
+import { Flag, Plus, Calendar, Trash2, Edit2, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { useRole } from "@/hooks/use-role";
@@ -34,45 +33,65 @@ interface Objective {
   fechaObjetivo: string;
   observaciones: string;
   estado: "en_progreso" | "completado";
+  entrenador?: string;
 }
 
 function ObjetivosPage() {
   const { role, coachName, selectedCoachId, selectedCoachName } = useRole();
   const [list, setList] = useState<Objective[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isOpenCreate, setIsOpenCreate] = useState(false);
   const [editingItem, setEditingItem] = useState<Objective | null>(null);
 
-  // Obtener equipos del coach/admin
+  // Nombre del entrenador efectivo seleccionado en la vista
+  const effectiveCoachName = useMemo(() => {
+    if (role === "admin" && selectedCoachName) {
+      return selectedCoachName;
+    }
+    if (role === "coach" && coachName) {
+      return coachName;
+    }
+    return selectedCoachName || coachName || "";
+  }, [role, selectedCoachName, coachName]);
+
+  // Equipos asignados al entrenador activo
   const dynamicEquipos = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    if (role === "admin") return all;
-    return all.filter(t => t.entrenador === coachName);
-  }, [role, coachName]);
+    if (!effectiveCoachName) return all;
+    return all.filter(t => t.entrenador === effectiveCoachName);
+  }, [effectiveCoachName]);
 
-  // Helper para normalizar categorías
-  const normalizeCategoryName = (s: string) => {
-    return s.toLowerCase()
-      .replace(/[^a-z0-9]/g, "")
-      .replace("elite", "")
-      .replace("sub", "")
-      .replace("futbol", "")
-      .replace("femenino", "")
-      .trim();
-  };
-
-  // Obtener jugadores del coach/admin
+  // Jugadores pertenecientes al entrenador activo
   const dynamicJugadores = useMemo(() => {
     const allPlayers = RendimientoStore.getJugadores();
-    if (role === "admin") return allPlayers;
+    if (!effectiveCoachName) return allPlayers;
+    if (dynamicEquipos.length === 0) return [];
     
+    const isFemaleTeam = dynamicEquipos.some(t => {
+      const combined = ((t.nombre || "") + " " + (t.categoria || "")).toLowerCase();
+      return combined.includes("femenin") || combined.includes("fem");
+    });
+
     return allPlayers.filter(p => {
-      const pCat = normalizeCategoryName(p.categoria || "");
-      return dynamicEquipos.some(eq => {
-        const tCat = normalizeCategoryName(eq.categoria || eq.nombre || "");
-        return pCat === tCat || (tCat && pCat.includes(tCat)) || (pCat && tCat.includes(pCat));
+      const pGender = (p.genero || "").toLowerCase();
+      const pCat = (p.categoria || "").toLowerCase();
+      const pTeam = (p.equipo || "").toLowerCase();
+      const isFemalePlayer = pGender.includes("fem") || pCat.includes("femenin") || pTeam.includes("femenin");
+
+      if (isFemaleTeam !== isFemalePlayer) return false;
+
+      const normPCat = pCat.replace(/f[úu]tbol/g, "").trim();
+      return dynamicEquipos.some(t => {
+        const eqName = (t.nombre || "").toLowerCase().replace(/f[úu]tbol/g, "").trim();
+        const eqCat = (t.categoria || "").toLowerCase().replace(/f[úu]tbol/g, "").trim();
+        if (!eqName && !eqCat) return true;
+        return (
+          (eqCat && (normPCat.includes(eqCat) || eqCat.includes(normPCat))) ||
+          (eqName && (pTeam.includes(eqName) || eqName.includes(pTeam) || normPCat.includes(eqName)))
+        );
       });
     });
-  }, [role, dynamicEquipos]);
+  }, [effectiveCoachName, dynamicEquipos]);
 
   // Form states
   const [form, setForm] = useState({
@@ -81,38 +100,41 @@ function ObjetivosPage() {
     titulo: "",
     progreso: 20,
     fechaInicio: new Date().toISOString().slice(0, 10),
-    fechaObjetivo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), // +30 days
+    fechaObjetivo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     observaciones: "",
     estado: "en_progreso" as Objective["estado"],
   });
 
-  // Inicializar jugadorId por defecto una vez que se cargan los jugadores
   useEffect(() => {
-    if (dynamicJugadores.length > 0 && !form.jugadorId) {
+    if (dynamicJugadores.length > 0) {
       setForm(f => ({ ...f, jugadorId: dynamicJugadores[0].id }));
     }
   }, [dynamicJugadores]);
 
-  // Load from Supabase (objetivos_jugadores) or fallback to mock
+  // CARGA 100% EN VIVO DESDE SUPABASE
   const loadObjetivos = async () => {
+    setLoading(true);
     const orgId = RendimientoStore.getActiveOrganizacionId();
+    
     const { data, error } = await supabase
       .from("objetivos_jugadores")
       .select("*")
       .eq("organizacion_id", orgId)
       .order("fecha_inicio", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      // Fallback to mock data if no DB records exist
-      setList(initialObjectives as Objective[]);
+    if (error) {
+      console.error("[Supabase Error] No se pudieron obtener los objetivos:", error.message);
+      toast.error("Error consultando Supabase: " + error.message);
+      setList([]);
+      setLoading(false);
       return;
     }
 
-    const mapped: Objective[] = data.map((o: any) => ({
+    const mapped: Objective[] = (data || []).map((o: any) => ({
       id: o.id,
       jugadorId: o.jugador_id,
       jugador: o.jugador,
-      avatar: o.avatar || "",
+      avatar: o.avatar || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80",
       tipo: o.tipo || "tecnico",
       titulo: o.titulo,
       progreso: o.progreso || 0,
@@ -120,37 +142,56 @@ function ObjetivosPage() {
       fechaObjetivo: o.fecha_objetivo,
       observaciones: o.observaciones || "",
       estado: o.estado || "en_progreso",
+      entrenador: o.entrenador || "",
     }));
+
     setList(mapped);
+    setLoading(false);
   };
 
   useEffect(() => {
     loadObjetivos();
-  }, [selectedCoachId, role]);
+  }, [selectedCoachId, role, effectiveCoachName]);
 
-  const saveToStorage = async (updated: Objective[]) => {
-    setList(updated);
-    // Persist to Supabase
-    const orgId = RendimientoStore.getActiveOrganizacionId();
-    for (const o of updated) {
-      await supabase.from("objetivos_jugadores").upsert({
-        id: o.id,
-        jugador_id: o.jugadorId,
-        jugador: o.jugador,
-        avatar: o.avatar,
-        tipo: o.tipo,
-        titulo: o.titulo,
-        progreso: o.progreso,
-        fecha_inicio: o.fechaInicio,
-        fecha_objetivo: o.fechaObjetivo,
-        observaciones: o.observaciones,
-        estado: o.estado,
-        organizacion_id: orgId,
-      });
+  // VACIAR TODOS LOS REGISTROS DE PRUEBA DE LA TABLA EN SUPABASE
+  const handlePurgeSupabase = async () => {
+    if (!confirm("¿Deseas eliminar permanentemente TODOS los registros de objetivos guardados en Supabase para dejar la tabla limpia?")) {
+      return;
     }
+    setLoading(true);
+    const orgId = RendimientoStore.getActiveOrganizacionId();
+    const { error } = await supabase
+      .from("objetivos_jugadores")
+      .delete()
+      .eq("organizacion_id", orgId);
+
+    if (error) {
+      toast.error("Error al borrar en Supabase: " + error.message);
+      setLoading(false);
+      return;
+    }
+
+    setList([]);
+    setLoading(false);
+    toast.success("¡Tabla 'objetivos_jugadores' vaciada completamente en Supabase!");
   };
 
-  const handleCreate = () => {
+  // Filtrado por entrenador seleccionado (Muestra información de TODOS hasta que se seleccione uno)
+  const filteredList = useMemo(() => {
+    const activeCoach = (effectiveCoachName || "").trim().toLowerCase();
+
+    return list.filter(o => {
+      // Si hay un entrenador activo seleccionado, filtrar por ese entrenador
+      if (activeCoach) {
+        return o.entrenador?.toLowerCase().trim() === activeCoach;
+      }
+      // Si no se ha seleccionado entrenador (— Seleccionar Entrenador —), mostrar la información de TODOS
+      return true;
+    });
+  }, [list, effectiveCoachName]);
+
+  // CREAR OBJETIVO EN SUPABASE
+  const handleCreate = async () => {
     if (!form.titulo.trim()) {
       toast.error("El título del objetivo es obligatorio.");
       return;
@@ -160,8 +201,36 @@ function ObjetivosPage() {
       toast.error("No hay ningún jugador disponible para asignar.");
       return;
     }
-    const newItem: Objective = {
-      id: `obj_${Date.now()}`,
+
+    const orgId = RendimientoStore.getActiveOrganizacionId();
+    const newId = `obj_${Date.now()}`;
+    const activeCoach = effectiveCoachName || coachName || "";
+
+    const newItemPayload = {
+      id: newId,
+      jugador_id: targetPlayer.id,
+      jugador: targetPlayer.nombre,
+      avatar: targetPlayer.avatar,
+      tipo: form.tipo,
+      titulo: form.titulo,
+      progreso: form.progreso,
+      fecha_inicio: form.fechaInicio,
+      fecha_objetivo: form.fechaObjetivo,
+      observaciones: form.observaciones,
+      estado: form.estado,
+      entrenador: activeCoach,
+      organizacion_id: orgId,
+    };
+
+    const { error } = await supabase.from("objetivos_jugadores").insert([newItemPayload]);
+
+    if (error) {
+      toast.error("Error al guardar en Supabase: " + error.message);
+      return;
+    }
+
+    const newObjItem: Objective = {
+      id: newId,
       jugadorId: targetPlayer.id,
       jugador: targetPlayer.nombre,
       avatar: targetPlayer.avatar,
@@ -172,13 +241,11 @@ function ObjetivosPage() {
       fechaObjetivo: form.fechaObjetivo,
       observaciones: form.observaciones,
       estado: form.estado,
+      entrenador: activeCoach,
     };
 
-    const updated = [newItem, ...list];
-    saveToStorage(updated);
+    setList(prev => [newObjItem, ...prev]);
     setIsOpenCreate(false);
-
-    // Reset form
     setForm({
       jugadorId: dynamicJugadores[0]?.id || "",
       tipo: "tecnico",
@@ -189,25 +256,56 @@ function ObjetivosPage() {
       observaciones: "",
       estado: "en_progreso",
     });
-    toast.success("¡Nuevo objetivo de rendimiento establecido!");
+    toast.success("¡Objetivo guardado directamente en Supabase!");
   };
 
-  const handleUpdate = () => {
+  // ACTUALIZAR OBJETIVO EN SUPABASE
+  const handleUpdate = async () => {
     if (!editingItem) return;
     if (!editingItem.titulo.trim()) {
       toast.error("El título es obligatorio.");
       return;
     }
-    const updated = list.map(item => item.id === editingItem.id ? editingItem : item);
-    saveToStorage(updated);
+
+    const { error } = await supabase
+      .from("objetivos_jugadores")
+      .update({
+        jugador: editingItem.jugador,
+        tipo: editingItem.tipo,
+        titulo: editingItem.titulo,
+        progreso: editingItem.progreso,
+        fecha_inicio: editingItem.fechaInicio,
+        fecha_objetivo: editingItem.fechaObjetivo,
+        observaciones: editingItem.observaciones,
+        estado: editingItem.estado,
+        entrenador: editingItem.entrenador,
+      })
+      .eq("id", editingItem.id);
+
+    if (error) {
+      toast.error("Error al actualizar en Supabase: " + error.message);
+      return;
+    }
+
+    setList(prev => prev.map(item => item.id === editingItem.id ? editingItem : item));
     setEditingItem(null);
-    toast.success("¡Objetivo del deportista actualizado!");
+    toast.success("¡Objetivo actualizado en Supabase!");
   };
 
-  const handleDelete = (id: string, title: string) => {
-    const updated = list.filter(item => item.id !== id);
-    saveToStorage(updated);
-    toast.success(`Objetivo "${title}" eliminado.`);
+  // ELIMINAR OBJETIVO DE SUPABASE
+  const handleDelete = async (id: string, title: string) => {
+    const { error } = await supabase
+      .from("objetivos_jugadores")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast.error("Error al eliminar en Supabase: " + error.message);
+      return;
+    }
+
+    setList(prev => prev.filter(item => item.id !== id));
+    toast.success(`Objetivo "${title}" eliminado de Supabase.`);
   };
 
   return (
@@ -217,82 +315,112 @@ function ObjetivosPage() {
         <div>
           <h1 className="page-header-title">Objetivos individuales</h1>
           <p className="page-header-subtitle">
-            {role === "admin" && selectedCoachName
-              ? `Objetivos asignados por ${selectedCoachName}`
-              : "Seguimiento de metas por atleta — visible en su Player OS."}
+            {effectiveCoachName
+              ? `Objetivos asignados por ${effectiveCoachName} — Datos 100% en vivo (Supabase)`
+              : "Seguimiento de metas por atleta — Datos 100% en vivo (Supabase)"}
           </p>
         </div>
-        <Button onClick={() => setIsOpenCreate(true)}>
-          <Plus className="mr-1 h-4 w-4" />Nuevo objetivo
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadObjetivos} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} /> Refrescar Supabase
+          </Button>
+          <Button variant="destructive" size="sm" onClick={handlePurgeSupabase} disabled={loading}>
+            <Trash2 className="h-4 w-4 mr-1" /> Vaciar Supabase
+          </Button>
+          <Button onClick={() => setIsOpenCreate(true)}>
+            <Plus className="mr-1 h-4 w-4" />Nuevo objetivo
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((o) => (
-          <Card key={o.id} className="premium-card hover:shadow-sm transition-all flex flex-col justify-between">
-            <div>
-              <CardHeader className="flex-row items-start justify-between space-y-0 p-4">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={o.avatar} />
-                    <AvatarFallback>{o.jugador[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <CardTitle className="text-sm font-bold text-foreground truncate">{o.jugador}</CardTitle>
-                    <Badge variant="secondary" className={`mt-1 capitalize text-[9px] font-bold border ${tipoMeta[o.tipo] || "bg-muted text-muted-foreground"}`}>
-                      {o.tipo}
-                    </Badge>
-                  </div>
-                </div>
-                {o.estado === "completado" ? (
-                  <Badge className="bg-success/10 text-success border border-success/20 text-[9px] font-bold" variant="secondary">Completado</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-[9px] font-bold border-border">En progreso</Badge>
-                )}
-              </CardHeader>
-              <CardContent className="space-y-3 p-4 pt-0">
-                <p className="text-xs font-bold text-foreground flex items-start gap-2 leading-snug">
-                  <Flag className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {o.titulo}
-                </p>
+      {loading ? (
+        <Card className="p-12 text-center bg-card border-border">
+          <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-3" />
+          <p className="text-xs text-muted-foreground">Consultando base de datos Supabase...</p>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredList.length === 0 ? (
+            <Card className="col-span-full p-8 text-center bg-card border-border border-dashed">
+              <Flag className="h-10 w-10 text-muted-foreground mx-auto mb-2 opacity-50" />
+              <h3 className="text-base font-bold text-foreground">No hay objetivos asignados</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                {effectiveCoachName 
+                  ? `No se encontraron objetivos guardados en Supabase para el profesor ${effectiveCoachName}.`
+                  : "No se encontraron objetivos registrados en la base de datos de Supabase."}
+              </p>
+              <Button size="sm" className="mt-4" onClick={() => setIsOpenCreate(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Crear Nuevo Objetivo en Supabase
+              </Button>
+            </Card>
+          ) : (
+            filteredList.map((o) => (
+              <Card key={o.id} className="premium-card hover:shadow-sm transition-all flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                    <span>Progreso del Objetivo</span>
-                    <span className="font-semibold text-foreground">{o.progreso}%</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden border border-border/30">
-                    <div className="h-full bg-gradient-to-r from-primary to-primary/70" style={{ width: `${o.progreso}%` }} />
-                  </div>
+                  <CardHeader className="flex-row items-start justify-between space-y-0 p-4">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar className="h-9 w-9">
+                        <AvatarImage src={o.avatar} />
+                        <AvatarFallback>{o.jugador[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm font-bold text-foreground truncate">{o.jugador}</CardTitle>
+                        <Badge variant="secondary" className={`mt-1 capitalize text-[9px] font-bold border ${tipoMeta[o.tipo] || "bg-muted text-muted-foreground"}`}>
+                          {o.tipo}
+                        </Badge>
+                      </div>
+                    </div>
+                    {o.estado === "completado" ? (
+                      <Badge className="bg-success/10 text-success border border-success/20 text-[9px] font-bold" variant="secondary">Completado</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[9px] font-bold border-border">En progreso</Badge>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-3 p-4 pt-0">
+                    <p className="text-xs font-bold text-foreground flex items-start gap-2 leading-snug">
+                      <Flag className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {o.titulo}
+                    </p>
+                    <div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                        <span>Progreso del Objetivo</span>
+                        <span className="font-semibold text-foreground">{o.progreso}%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden border border-border/30">
+                        <div className="h-full bg-gradient-to-r from-primary to-primary/70" style={{ width: `${o.progreso}%` }} />
+                      </div>
+                    </div>
+                    <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <Calendar className="h-3.5 w-3.5 text-primary" /> {o.fechaInicio} → {o.fechaObjetivo}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed bg-muted/20 p-2 rounded-lg border border-border/55">{o.observaciones}</p>
+                  </CardContent>
                 </div>
-                <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5 text-primary" /> {o.fechaInicio} → {o.fechaObjetivo}
-                </p>
-                <p className="text-[11px] text-muted-foreground leading-relaxed bg-muted/20 p-2 rounded-lg border border-border/55">{o.observaciones}</p>
-              </CardContent>
-            </div>
-            
-            <div className="p-4 pt-0 flex gap-2 justify-end">
-              <Button 
-                variant="outline" 
-                size="xs" 
-                className="text-[10px] border-border h-7 font-bold px-2.5"
-                onClick={() => setEditingItem(o)}
-              >
-                <Edit2 className="h-3 w-3 mr-1" /> Editar
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg border border-transparent"
-                onClick={() => handleDelete(o.id, o.titulo)}
-                title="Eliminar objetivo"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
+                
+                <div className="p-4 pt-0 flex gap-2 justify-end">
+                  <Button 
+                    variant="outline" 
+                    size="xs" 
+                    className="text-[10px] border-border h-7 font-bold px-2.5"
+                    onClick={() => setEditingItem(o)}
+                  >
+                    <Edit2 className="h-3 w-3 mr-1" /> Editar
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg border border-transparent"
+                    onClick={() => handleDelete(o.id, o.titulo)}
+                    title="Eliminar objetivo de Supabase"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Create Modal */}
       {isOpenCreate && (
@@ -300,7 +428,7 @@ function ObjetivosPage() {
           <Card className="bg-card border-border w-full max-w-md shadow-2xl">
             <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b">
               <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <Plus className="h-5 w-5 text-primary" /> Establecer Nuevo Objetivo
+                <Plus className="h-5 w-5 text-primary" /> Guardar Objetivo en Supabase
               </CardTitle>
               <button 
                 onClick={() => setIsOpenCreate(false)} 
@@ -399,25 +527,15 @@ function ObjetivosPage() {
                 <textarea 
                   value={form.observaciones}
                   onChange={e => setForm(f => ({ ...f, observaciones: e.target.value }))}
-                  placeholder="Notas sobre el plan de acción..."
-                  className="w-full h-16 rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none resize-none"
+                  placeholder="Detalles sobre el plan de acción..."
+                  rows={3}
+                  className="w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
-                  onClick={handleCreate}
-                >
-                  Establecer Objetivo
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-border text-muted-foreground text-xs" 
-                  onClick={() => setIsOpenCreate(false)}
-                >
-                  Cancelar
-                </Button>
+              <div className="flex gap-2 justify-end pt-2">
+                <Button variant="outline" size="sm" onClick={() => setIsOpenCreate(false)}>Cancelar</Button>
+                <Button size="sm" onClick={handleCreate}>Guardar en Supabase</Button>
               </div>
             </CardContent>
           </Card>
@@ -430,7 +548,7 @@ function ObjetivosPage() {
           <Card className="bg-card border-border w-full max-w-md shadow-2xl">
             <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b">
               <CardTitle className="text-base text-foreground flex items-center gap-2">
-                <Edit2 className="h-5 w-5 text-primary" /> Editar Objetivo
+                <Edit2 className="h-5 w-5 text-primary" /> Editar Objetivo (Supabase)
               </CardTitle>
               <button 
                 onClick={() => setEditingItem(null)} 
@@ -440,21 +558,22 @@ function ObjetivosPage() {
               </button>
             </CardHeader>
             <CardContent className="p-4 pt-4 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-muted-foreground">Deportista</label>
+                <input 
+                  type="text" 
+                  value={editingItem.jugador}
+                  disabled
+                  className="w-full h-9 rounded-lg border border-input bg-muted px-3 text-xs text-muted-foreground outline-none"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Jugador</label>
-                  <input 
-                    type="text" 
-                    value={editingItem.jugador}
-                    disabled
-                    className="w-full h-9 rounded-lg border border-input bg-muted px-3 text-xs text-muted-foreground outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Tipo de Meta *</label>
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Tipo de Meta</label>
                   <select 
                     value={editingItem.tipo}
-                    onChange={e => setEditingItem(prev => prev ? { ...prev, tipo: e.target.value as Objective["tipo"] } : null)}
+                    onChange={e => setEditingItem({ ...editingItem, tipo: e.target.value as Objective["tipo"] })}
                     className="w-full h-9 rounded-lg border border-input bg-background px-2 text-xs text-foreground outline-none"
                   >
                     <option value="tecnico">Técnico</option>
@@ -464,54 +583,11 @@ function ObjetivosPage() {
                     <option value="disciplinario">Disciplinario</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground">Título / Meta del Objetivo *</label>
-                <input 
-                  type="text" 
-                  value={editingItem.titulo}
-                  onChange={e => setEditingItem(prev => prev ? { ...prev, titulo: e.target.value } : null)}
-                  className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Fecha Inicio *</label>
-                  <input 
-                    type="date" 
-                    value={editingItem.fechaInicio}
-                    onChange={e => setEditingItem(prev => prev ? { ...prev, fechaInicio: e.target.value } : null)}
-                    className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Fecha Límite *</label>
-                  <input 
-                    type="date" 
-                    value={editingItem.fechaObjetivo}
-                    onChange={e => setEditingItem(prev => prev ? { ...prev, fechaObjetivo: e.target.value } : null)}
-                    className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Progreso (%)</label>
-                  <input 
-                    type="number" 
-                    value={editingItem.progreso}
-                    onChange={e => setEditingItem(prev => prev ? { ...prev, progreso: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) } : null)}
-                    className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none"
-                  />
-                </div>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold text-muted-foreground">Estado</label>
                   <select 
                     value={editingItem.estado}
-                    onChange={e => setEditingItem(prev => prev ? { ...prev, estado: e.target.value as Objective["estado"] } : null)}
+                    onChange={e => setEditingItem({ ...editingItem, estado: e.target.value as Objective["estado"] })}
                     className="w-full h-9 rounded-lg border border-input bg-background px-2 text-xs text-foreground outline-none"
                   >
                     <option value="en_progreso">En Progreso</option>
@@ -521,28 +597,43 @@ function ObjetivosPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-muted-foreground">Observaciones / Notas</label>
-                <textarea 
-                  value={editingItem.observaciones}
-                  onChange={e => setEditingItem(prev => prev ? { ...prev, observaciones: e.target.value } : null)}
-                  className="w-full h-16 rounded-lg border border-input bg-background px-3 py-2 text-xs text-foreground outline-none resize-none"
+                <label className="text-[10px] uppercase font-bold text-muted-foreground">Título / Meta</label>
+                <input 
+                  type="text" 
+                  value={editingItem.titulo}
+                  onChange={e => setEditingItem({ ...editingItem, titulo: e.target.value })}
+                  className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none"
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button 
-                  className="flex-1 bg-primary text-white text-xs font-bold"
-                  onClick={handleUpdate}
-                >
-                  Guardar Cambios
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-border text-muted-foreground text-xs" 
-                  onClick={() => setEditingItem(null)}
-                >
-                  Cancelar
-                </Button>
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs mb-1">
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Progreso (%):</label>
+                  <span className="font-bold text-foreground">{editingItem.progreso}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="100" 
+                  value={editingItem.progreso}
+                  onChange={e => setEditingItem({ ...editingItem, progreso: parseInt(e.target.value) || 0 })}
+                  className="w-full accent-primary"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-muted-foreground">Observaciones / Notas</label>
+                <textarea 
+                  value={editingItem.observaciones}
+                  onChange={e => setEditingItem({ ...editingItem, observaciones: e.target.value })}
+                  rows={3}
+                  className="w-full rounded-lg border border-input bg-background p-3 text-xs text-foreground outline-none"
+                />
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <Button variant="outline" size="sm" onClick={() => setEditingItem(null)}>Cancelar</Button>
+                <Button size="sm" onClick={handleUpdate}>Actualizar en Supabase</Button>
               </div>
             </CardContent>
           </Card>
@@ -551,5 +642,3 @@ function ObjetivosPage() {
     </div>
   );
 }
-
-export default ObjetivosPage;

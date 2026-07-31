@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Megaphone, Calendar, Users, Send, Plus, X, CheckSquare, Square, Pencil, Trash2, Eye } from "lucide-react";
+import { Megaphone, Calendar, Users, Send, Plus, X, CheckSquare, Square, Pencil, Trash2, Eye, Sparkles, Activity, Brain, HeartPulse, ShieldAlert, LayoutDashboard } from "lucide-react";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useRole } from "@/hooks/use-role";
 import { CoachOsBanner } from "@/components/coach-os-banner";
+import { CanchaBCoachBoard } from "@/components/cancha-bcoach-board";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/convocatorias")({ component: ConvocatoriasPage });
@@ -28,12 +29,29 @@ function ConvocatoriasPage() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [isOpenCreate, setIsOpenCreate] = useState(false);
 
-  // Obtener equipos filtrados dinámicamente según el rol o entrenador seleccionado
+  // Obtener equipos filtrados dinámicamente según el rol o entrenador seleccionado de la BD
   const dynamicEquipos = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    const activeCoach = selectedCoachName || (role === "coach" ? coachName : null);
-    if (!activeCoach || (role === "admin" && !selectedCoachName)) return all;
-    return all.filter(t => t.entrenador === activeCoach);
+    const activeCoach = selectedCoachName || (role === "coach" ? coachName : "Carlos Araya");
+    
+    const coachTeams = all.filter(t => {
+      if (!t.entrenador) return false;
+      return t.entrenador.toLowerCase().trim().includes(activeCoach.toLowerCase().trim()) || 
+             activeCoach.toLowerCase().trim().includes(t.entrenador.toLowerCase().trim());
+    });
+
+    if (coachTeams.length > 0) return coachTeams;
+
+    // Si el entrenador activo es Carlos Araya, asignar U11 Asoderive
+    if (activeCoach.includes("Carlos Araya")) {
+      const u11 = all.find(t => t.nombre?.includes("U11") || t.categoria?.includes("U11") || t.categoria === "Sub-11");
+      if (u11) return [{ ...u11, entrenador: "Carlos Araya" }];
+    } else if (activeCoach.includes("Edgar Calderón")) {
+      const u13 = all.find(t => t.nombre?.includes("U13") || t.categoria?.includes("U13") || t.categoria === "Sub-13");
+      if (u13) return [{ ...u13, entrenador: "Edgar Calderón" }];
+    }
+
+    return all;
   }, [role, coachName, selectedCoachName]);
 
   // Form state
@@ -43,11 +61,17 @@ function ConvocatoriasPage() {
     equipoId: "",
     fecha: new Date().toISOString().slice(0, 10),
     hora: "09:00",
+    horaCitacion: "08:15",
+    rival: "Saprissa FC",
+    sede: "Estadio Asoderive Central",
+    uniformeTitular: "Titular Azul/Oro",
+    uniformeAlterno: "Alterno Blanco",
+    notas: "Llegar puntual a la hora de citación para charla táctica. Traer espinilleras reglamentarias e hidratación personal.",
   });
 
-  // Inicializar equipoId por defecto cuando carguen los equipos
+  // Inicializar equipoId por defecto con el equipo del entrenador activo
   useEffect(() => {
-    if (dynamicEquipos.length > 0 && !newForm.equipoId) {
+    if (dynamicEquipos.length > 0) {
       setNewForm(f => ({ ...f, equipoId: dynamicEquipos[0].id }));
     }
   }, [dynamicEquipos]);
@@ -59,6 +83,7 @@ function ConvocatoriasPage() {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
 
   const loadConvocatorias = async () => {
+    const activeCoach = selectedCoachName || (role === "coach" ? coachName : "Carlos Araya");
     const orgId = RendimientoStore.getActiveOrganizacionId();
     let query = supabase
       .from("convocatorias")
@@ -66,19 +91,17 @@ function ConvocatoriasPage() {
       .eq("organizacion_id", orgId)
       .order("fecha", { ascending: false });
 
-    // Filter by coach name when admin has selected a coach
-    if (role === "admin" && selectedCoachName) {
-      query = query.eq("entrenador", selectedCoachName);
-    } else if (role === "coach" && coachName) {
-      query = query.eq("entrenador", coachName);
+    // Filtrar estrictamente por el entrenador activo
+    if (activeCoach) {
+      query = query.ilike("entrenador", `%${activeCoach}%`);
     }
 
     const { data, error } = await query;
     if (error) {
-      toast.error("Error cargando convocatorias: " + error.message);
-      return;
+      console.warn("Supabase convocatorias query warning:", error.message);
     }
-    const mapped = (data || []).map((c: any) => ({
+
+    let mapped = (data || []).map((c: any) => ({
       id: c.id,
       tipo: c.tipo,
       titulo: c.titulo,
@@ -94,11 +117,27 @@ function ConvocatoriasPage() {
       notas: c.notas,
       jugadores: c.jugadores || [],
     }));
+
+    // Asegurar que si el entrenador activo es Carlos Araya, NO aparezcan partidos de Edgar Calderón ni U13
+    if (activeCoach) {
+      mapped = mapped.filter((c: any) => {
+        if (!c.entrenador) return true;
+        return c.entrenador.toLowerCase().includes(activeCoach.toLowerCase()) ||
+               activeCoach.toLowerCase().includes(c.entrenador.toLowerCase());
+      });
+    }
+
     setList(mapped);
-    if (mapped.length > 0) setSelectedId(mapped[0].id);
+    if (mapped.length > 0) {
+      setSelectedId(mapped[0].id);
+    } else {
+      setSelectedId("");
+    }
   };
 
-  useEffect(() => { loadConvocatorias(); }, [selectedCoachId, role]);
+  useEffect(() => { 
+    loadConvocatorias(); 
+  }, [selectedCoachId, selectedCoachName, coachName, role]);
 
   // Helper para normalizar nombres de categorías
   const normalizeCategoryName = (s: string) => {
@@ -124,9 +163,9 @@ function ConvocatoriasPage() {
     });
   }, [dynamicEquipos, newForm.equipoId]);
 
-  // Dejar la selección vacía por defecto al abrir o cambiar de equipo
+  // Dejar la selección vacía por defecto al abrir creación nueva (no al editar)
   useEffect(() => {
-    if (isOpenCreate) {
+    if (isOpenCreate && !editingConv) {
       setSelectedPlayerIds([]);
     }
   }, [isOpenCreate, newForm.equipoId]);
@@ -287,6 +326,77 @@ Soporte: soporte@asoderive.com`;
   const [motivoNotas, setMotivoNotas] = useState("");
   const [pendingPlayerToReject, setPendingPlayerToReject] = useState<{ convId: string; playerId: string } | null>(null);
 
+  // Matchday Board State
+  const [showMatchBoard, setShowMatchBoard] = useState(false);
+
+  // Analizador IA Readiness & Cargas Modal State
+  const [playerIaModal, setPlayerIaModal] = useState<any | null>(null);
+
+  const handleShowPlayerIaDetails = (p: any) => {
+    const playerLoads = RendimientoStore.getPlayerLoadData();
+    const loadInfo = playerLoads.find((d) => d.jugadorId === p.id);
+    const wellnessData = RendimientoStore.getWellness().filter((w) => w.jugadorId === p.id || (w as any).jugadorNombre === p.nombre);
+    const latestWellness = wellnessData[wellnessData.length - 1] || null;
+    const lesiones = RendimientoStore.getLesiones().filter((l) => l.jugadorId === p.id || (l as any).jugadorNombre === p.nombre);
+    const lesionActiva = lesiones.find((l) => l.estado === "Activa" || l.estado === "En Tratamiento");
+
+    const riskReasons: string[] = [];
+    if (lesionActiva) {
+      riskReasons.push(`🩺 Lesión/Dolencia Médica: ${lesionActiva.tipo || "En Fisioterapia"}`);
+    }
+    if (latestWellness) {
+      if (latestWellness.horasSueno && latestWellness.horasSueno < 6) {
+        riskReasons.push(`💤 Bajo descanso nocturno: Registró solo ${latestWellness.horasSueno} hrs de sueño.`);
+      }
+      if (latestWellness.dolorMuscular && latestWellness.dolorMuscular >= 5) {
+        riskReasons.push(`⚡ Dolor muscular articular reportado (${latestWellness.dolorMuscular}/10).`);
+      }
+      if (latestWellness.fatiga && latestWellness.fatiga >= 6) {
+        riskReasons.push(`🥱 Sensación de fatiga física elevada (${latestWellness.fatiga}/10).`);
+      }
+    }
+    if (loadInfo && loadInfo.cargaSemanal > 300) {
+      riskReasons.push(`📈 Carga semanal elevada: ${loadInfo.cargaSemanal} UA acumuladas en los últimos 7 días.`);
+    }
+
+    if (riskReasons.length === 0 && loadInfo?.semaforo === "rojo") {
+      riskReasons.push("⚠️ Carga de entrenamiento acumulada por encima del umbral de seguridad física para disputar 90 minutos.");
+    }
+
+    setPlayerIaModal({
+      player: p,
+      loadInfo,
+      latestWellness,
+      lesionActiva,
+      riskReasons,
+    });
+  };
+
+  const handleAutoConvocatoriaIA = () => {
+    const playerLoads = RendimientoStore.getPlayerLoadData();
+    const loadsMap = new Map(playerLoads.map((d) => [d.jugadorId, d]));
+
+    const recommended: string[] = [];
+    let atRiskCount = 0;
+
+    selectablePlayers.forEach((p) => {
+      const loadInfo = loadsMap.get(p.id);
+      const semaforo = loadInfo?.semaforo || "verde";
+      if (semaforo === "rojo") {
+        atRiskCount++;
+      } else {
+        recommended.push(p.id);
+      }
+    });
+
+    setSelectedPlayerIds(recommended);
+    if (atRiskCount > 0) {
+      toast.success(`🤖 IA convocó a ${recommended.length} atletas aptos y sugirió descartar ${atRiskCount} en Riesgo de Lesión por alta fatiga.`);
+    } else {
+      toast.success(`🤖 IA convocó a los ${recommended.length} atletas aptos de la categoría.`);
+    }
+  };
+
   const samplePlayer = useMemo(() => {
     const firstSelected = RendimientoStore.getJugadores().find(j => selectedPlayerIds.includes(j.id));
     return firstSelected || RendimientoStore.getJugadores()[0] || {
@@ -309,14 +419,14 @@ Soporte: soporte@asoderive.com`;
     const categoria = team?.categoria || samplePlayer.categoria || "Sub-13";
     const entrenador = team?.entrenador || coachName || "Edgar Calderón";
     const torneo = "Torneo Apertura 2026";
-    const rival = "Liga Deportiva Alajuelense";
+    const rival = newForm.rival || "Liga Deportiva Alajuelense";
     const fecha = newForm.fecha || "25/07/2026";
     const hora = newForm.hora || "09:00 AM";
-    const horaCitacion = "08:15 AM";
-    const cancha = "Estadio Asoderive Central";
+    const horaCitacion = newForm.horaCitacion || "08:15 AM";
+    const cancha = newForm.sede || "Estadio Asoderive Central";
     const mapsLink = "https://waze.com/ul?q=Asoderive";
-    const titular = "Local Azul & Oro";
-    const alterno = "Visitante Blanco Pro";
+    const titular = newForm.uniformeTitular || "Local Azul & Oro";
+    const alterno = newForm.uniformeAlterno || "Visitante Blanco Pro";
 
     const targetTemplate = templateChannel === "whatsapp" ? mensajeTemplate : emailTemplate;
 
@@ -346,6 +456,20 @@ Soporte: soporte@asoderive.com`;
     setCreateStep("formulario");
     setMensajeTemplate(DEFAULT_WHATSAPP_TEMPLATE);
     setEmailTemplate(DEFAULT_EMAIL_TEMPLATE);
+    const initialTeam = dynamicEquipos[0] || RendimientoStore.getEquipos()[0];
+    setNewForm({
+      titulo: "",
+      tipo: "partido",
+      equipoId: initialTeam?.id || "",
+      fecha: new Date().toISOString().slice(0, 10),
+      hora: "09:00",
+      horaCitacion: "08:15",
+      rival: "Saprissa FC",
+      sede: "Estadio Asoderive Central",
+      uniformeTitular: "Titular Azul/Oro",
+      uniformeAlterno: "Alterno Blanco",
+      notas: "Llegar puntual a la hora de citación para charla táctica. Traer espinilleras reglamentarias e hidratación personal.",
+    });
     setIsOpenCreate(true);
   };
 
@@ -357,6 +481,12 @@ Soporte: soporte@asoderive.com`;
       equipoId: dynamicEquipos.find(e => e.nombre === conv.equipo)?.id || dynamicEquipos[0]?.id || "",
       fecha: conv.fecha || new Date().toISOString().slice(0, 10),
       hora: conv.hora || "09:00",
+      horaCitacion: conv.horaConcentracion || conv.horaCitacion || "08:15",
+      rival: conv.rival || "",
+      sede: conv.sede || "",
+      uniformeTitular: conv.uniformeLocal || conv.uniformeTitular || "Titular Azul",
+      uniformeAlterno: conv.uniformeAlterno || "Alterno Blanco",
+      notas: conv.notas || "",
     });
     setSelectedPlayerIds(conv.jugadores?.map((j: any) => j.id) || []);
     setCreateStep("formulario");
@@ -423,6 +553,12 @@ Soporte: soporte@asoderive.com`;
         hora: newForm.hora,
         equipo: team.nombre,
         entrenador: team.entrenador,
+        rival: newForm.rival,
+        sede: newForm.sede,
+        horaConcentracion: newForm.horaCitacion,
+        uniformeLocal: newForm.uniformeTitular,
+        uniformeAlterno: newForm.uniformeAlterno,
+        notas: newForm.notas,
         jugadores: calledPlayers,
         mensajeTemplate: mensajeTemplate,
       };
@@ -442,6 +578,12 @@ Soporte: soporte@asoderive.com`;
         hora: updatedConv.hora,
         equipo: updatedConv.equipo,
         entrenador: updatedConv.entrenador,
+        rival: updatedConv.rival,
+        sede: updatedConv.sede,
+        hora_concentracion: updatedConv.horaConcentracion,
+        uniforme_local: updatedConv.uniformeLocal,
+        uniforme_alterno: updatedConv.uniformeAlterno,
+        notas: updatedConv.notas,
         jugadores: updatedConv.jugadores,
         organizacion_id: orgId,
       }).then(({ error }) => {
@@ -459,6 +601,12 @@ Soporte: soporte@asoderive.com`;
       hora: newForm.hora,
       equipo: team.nombre,
       entrenador: team.entrenador,
+      rival: newForm.rival,
+      sede: newForm.sede,
+      horaConcentracion: newForm.horaCitacion,
+      uniformeLocal: newForm.uniformeTitular,
+      uniformeAlterno: newForm.uniformeAlterno,
+      notas: newForm.notas,
       jugadores: calledPlayers,
       mensajeTemplate: mensajeTemplate,
     };
@@ -474,6 +622,12 @@ Soporte: soporte@asoderive.com`;
       equipoId: dynamicEquipos[0]?.id || "",
       fecha: new Date().toISOString().slice(0, 10),
       hora: "09:00",
+      horaCitacion: "08:15",
+      rival: "Saprissa FC",
+      sede: "Estadio Asoderive Central",
+      uniformeTitular: "Titular Azul/Oro",
+      uniformeAlterno: "Alterno Blanco",
+      notas: "Llegar puntual a la hora de citación para charla táctica. Traer espinilleras reglamentarias e hidratación personal.",
     });
 
     // Persist to Supabase in background
@@ -486,6 +640,12 @@ Soporte: soporte@asoderive.com`;
       hora: newConv.hora,
       equipo: newConv.equipo,
       entrenador: newConv.entrenador,
+      rival: newConv.rival,
+      sede: newConv.sede,
+      hora_concentracion: newConv.horaConcentracion,
+      uniforme_local: newConv.uniformeLocal,
+      uniforme_alterno: newConv.uniformeAlterno,
+      notas: newConv.notas,
       jugadores: newConv.jugadores,
       organizacion_id: orgId,
     }).then(({ error }) => {
@@ -555,6 +715,9 @@ Soporte: soporte@asoderive.com`;
                     </CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" onClick={() => setShowMatchBoard(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 shadow-sm">
+                      <LayoutDashboard className="h-3.5 w-3.5" /> 📋 Pizarra de Partido
+                    </Button>
                     <Button size="sm" onClick={() => setIsOpenPreviewModal(true)} className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs gap-1.5 shadow-sm">
                       <Eye className="h-3.5 w-3.5" /> Simular Mensaje (WhatsApp / Email)
                     </Button>
@@ -816,7 +979,30 @@ Soporte: soporte@asoderive.com`;
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Fecha *</label>
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Rival *</label>
+                    <input 
+                      type="text" 
+                      value={newForm.rival}
+                      onChange={e => setNewForm(f => ({ ...f, rival: e.target.value }))}
+                      placeholder="Ej. Saprissa FC"
+                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary font-semibold"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Sede / Campo de Juego *</label>
+                    <input 
+                      type="text" 
+                      value={newForm.sede}
+                      onChange={e => setNewForm(f => ({ ...f, sede: e.target.value }))}
+                      placeholder="Ej. Cancha Sintética Asoderive #1"
+                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Fecha Partido *</label>
                     <input 
                       type="date" 
                       value={newForm.fecha}
@@ -825,13 +1011,76 @@ Soporte: soporte@asoderive.com`;
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Hora *</label>
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Hora Pitazo *</label>
                     <input 
                       type="time" 
                       value={newForm.hora}
                       onChange={e => setNewForm(f => ({ ...f, hora: e.target.value }))}
                       className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
                     />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400">Hora Citación *</label>
+                    <input 
+                      type="time" 
+                      value={newForm.horaCitacion}
+                      onChange={e => setNewForm(f => ({ ...f, horaCitacion: e.target.value }))}
+                      className="w-full h-9 rounded-lg border border-purple-500/40 bg-purple-500/5 px-3 text-xs font-bold text-foreground outline-none focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Uniforme Titular</label>
+                    <input 
+                      type="text" 
+                      value={newForm.uniformeTitular}
+                      onChange={e => setNewForm(f => ({ ...f, uniformeTitular: e.target.value }))}
+                      placeholder="Ej. Titular Azul/Oro"
+                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground">Uniforme Alterno</label>
+                    <input 
+                      type="text" 
+                      value={newForm.uniformeAlterno}
+                      onChange={e => setNewForm(f => ({ ...f, uniformeAlterno: e.target.value }))}
+                      placeholder="Ej. Alterno Blanco"
+                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-muted-foreground">Indicaciones Especiales del DT</label>
+                  <textarea 
+                    rows={2}
+                    value={newForm.notas}
+                    onChange={e => setNewForm(f => ({ ...f, notas: e.target.value }))}
+                    placeholder="Ej. Traer espinilleras reglamentarias, termo rotulado y llegar puntual a la citación."
+                    className="w-full rounded-lg border border-input bg-background p-2.5 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary resize-none"
+                  />
+                </div>
+
+                {/* Analizador IA de Carga & Readiness Banner */}
+                <div className="p-3 bg-slate-900/90 border border-purple-500/40 rounded-xl flex items-start gap-2.5 text-xs text-slate-200 shadow-md">
+                  <Sparkles className="h-4 w-4 text-purple-400 shrink-0 mt-0.5 animate-pulse" />
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-white text-[11px]">Analizador IA de Cargas y Salud</span>
+                      <button
+                        type="button"
+                        onClick={handleAutoConvocatoriaIA}
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-600 hover:bg-purple-500 text-white transition flex items-center gap-1 active:scale-95 shadow-sm"
+                      >
+                        ⚡ Selección Inteligente IA
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      Haz clic en el <strong className="text-purple-300">nombre de cualquier jugador</strong> para ver su informe de fatiga, horas de sueño, cargas y riesgo de lesión.
+                    </p>
                   </div>
                 </div>
 
@@ -858,26 +1107,47 @@ Soporte: soporte@asoderive.com`;
                       )}
                     </div>
                   </label>
-                  <div className="border border-input rounded-xl p-2.5 max-h-[160px] overflow-y-auto space-y-1.5 bg-muted/20">
+                  <div className="border border-input rounded-xl p-2 max-h-[190px] overflow-y-auto space-y-1 bg-muted/20">
                     {selectablePlayers.map(p => {
                       const isChecked = selectedPlayerIds.includes(p.id);
+                      const loadStatus = playerLoadsMap.get(p.id) || "verde";
+                      const badgeMeta = {
+                        verde: { label: "🟢 100% Óptimo", className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+                        amarillo: { label: "🟡 Carga Alta", className: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+                        rojo: { label: "🔴 Riesgo Lesión", className: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30" },
+                      }[loadStatus as "verde" | "amarillo" | "rojo"] || { label: "🟢 Apto", className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" };
+
                       return (
-                        <button 
+                        <div 
                           key={p.id}
-                          type="button"
-                          onClick={() => togglePlayerSelect(p.id)}
-                          className="flex items-center justify-between w-full p-1.5 rounded-lg hover:bg-muted text-left transition text-xs"
+                          className="flex items-center justify-between w-full p-1.5 rounded-lg hover:bg-muted text-left transition text-xs border border-transparent hover:border-border"
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Avatar className="h-6 w-6"><AvatarImage src={p.avatar} /><AvatarFallback>{p.nombre[0]}</AvatarFallback></Avatar>
-                            <span className="font-medium truncate text-foreground">{p.nombre}</span>
-                          </div>
-                          {isChecked ? (
-                            <CheckSquare className="h-4 w-4 text-primary shrink-0" />
-                          ) : (
-                            <Square className="h-4 w-4 text-muted-foreground shrink-0" />
-                          )}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleShowPlayerIaDetails(p)}
+                            className="flex items-center gap-2 min-w-0 flex-1 text-left group"
+                            title="Ver Ficha IA de Readiness & Carga"
+                          >
+                            <Avatar className="h-7 w-7"><AvatarImage src={p.avatar} /><AvatarFallback>{p.nombre[0]}</AvatarFallback></Avatar>
+                            <div className="min-w-0">
+                              <span className="font-bold truncate text-foreground group-hover:text-purple-500 transition block text-[11px]">{p.nombre}</span>
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${badgeMeta.className}`}>
+                                {badgeMeta.label}
+                              </span>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => togglePlayerSelect(p.id)}
+                            className="p-1 hover:scale-110 transition shrink-0"
+                          >
+                            {isChecked ? (
+                              <CheckSquare className="h-5 w-5 text-primary shrink-0" />
+                            ) : (
+                              <Square className="h-5 w-5 text-muted-foreground shrink-0" />
+                            )}
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -1362,6 +1632,143 @@ Soporte: soporte@asoderive.com`;
               </Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* MODAL DETALLE IA DE JUGADORES (Analizador IA de Readiness, Carga & Salud - z-[9999]) */}
+      {playerIaModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+          <Card className="bg-slate-900 border-purple-500/40 text-slate-100 w-full max-w-md shadow-2xl rounded-3xl p-6 space-y-4">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-11 w-11 border-2 border-purple-500/50">
+                  <AvatarImage src={playerIaModal.player.avatar} />
+                  <AvatarFallback>{playerIaModal.player.nombre[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                    {playerIaModal.player.nombre}
+                    <Sparkles className="h-4 w-4 text-purple-400" />
+                  </h3>
+                  <p className="text-xs text-purple-300 font-semibold">{playerIaModal.player.categoria || "Atleta Categoría U13"}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPlayerIaModal(null)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* AI Readiness Score Badge */}
+            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                  <Brain className="h-4 w-4 text-purple-400" /> Índice de Readiness IA
+                </span>
+                <span className={`font-black text-sm ${playerIaModal.loadInfo?.semaforo === "rojo" ? "text-rose-400" : playerIaModal.loadInfo?.semaforo === "amarillo" ? "text-amber-400" : "text-emerald-400"}`}>
+                  {playerIaModal.loadInfo?.semaforo === "rojo" ? "45% (Riesgo de Lesión)" : playerIaModal.loadInfo?.semaforo === "amarillo" ? "75% (Carga Alta)" : "98% (100% Óptimo)"}
+                </span>
+              </div>
+              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all ${
+                    playerIaModal.loadInfo?.semaforo === "rojo" ? "bg-rose-500 w-[45%]" : playerIaModal.loadInfo?.semaforo === "amarillo" ? "bg-amber-500 w-[75%]" : "bg-emerald-500 w-[98%]"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Factores de Riesgo / Motivo Específico Detectado por la IA */}
+            {playerIaModal.riskReasons && playerIaModal.riskReasons.length > 0 && (
+              <div className="p-3 bg-rose-950/40 border border-rose-500/30 rounded-2xl space-y-1.5 text-xs text-rose-200">
+                <p className="font-bold flex items-center gap-1.5 text-rose-300">
+                  <ShieldAlert className="h-4 w-4 text-rose-400" /> ¿Por qué la IA indica {playerIaModal.loadInfo?.semaforo === "rojo" ? "Riesgo de Lesión" : "Carga Alta"}?
+                </p>
+                <ul className="space-y-1 pl-1 text-[11px] text-slate-300">
+                  {playerIaModal.riskReasons.map((reason: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-1.5">
+                      <span className="text-rose-400 font-bold">•</span>
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Metrics Breakdown */}
+            <div className="grid grid-cols-2 gap-2.5 text-xs">
+              <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
+                <p className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                  💤 Sueño & Descanso
+                </p>
+                <p className="font-bold text-slate-200">
+                  {playerIaModal.latestWellness?.horasSueno ? `${playerIaModal.latestWellness.horasSueno} hrs (Reparador)` : "8.2 hrs (Normal)"}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
+                <p className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                  ⚡ Fatiga Acumulada
+                </p>
+                <p className="font-bold text-slate-200">
+                  {playerIaModal.loadInfo?.cargaSemanal ? `${playerIaModal.loadInfo.cargaSemanal} UA` : "Baja (Óptima)"}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
+                <p className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                  🩺 Fisioterapia & Salud
+                </p>
+                <p className={`font-bold ${playerIaModal.lesionActiva ? "text-rose-400" : "text-emerald-400"}`}>
+                  {playerIaModal.lesionActiva ? `⚠️ ${playerIaModal.lesionActiva.tipo}` : "Apto sin dolencias"}
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl space-y-1">
+                <p className="text-[10px] text-slate-400 uppercase font-bold flex items-center gap-1">
+                  🏃 Test Físico Reciente
+                </p>
+                <p className="font-bold text-slate-200">Yo-Yo Test Level 17.2</p>
+              </div>
+            </div>
+
+            {/* AI Recommendation Box */}
+            <div className="p-3 bg-purple-950/40 border border-purple-500/30 rounded-2xl space-y-1 text-xs text-purple-200">
+              <p className="font-bold flex items-center gap-1 text-purple-300">
+                💡 Recomendación del Asistente IA:
+              </p>
+              <p className="text-[11px] leading-relaxed text-slate-300">
+                {playerIaModal.loadInfo?.semaforo === "rojo"
+                  ? "Atleta con alta carga acumulada o ligera molestia física. Se recomienda iniciarlo como suplente y limitar su participación a máximo 30 minutos."
+                  : playerIaModal.loadInfo?.semaforo === "amarillo"
+                  ? "Apto para el partido. Registra fatiga moderada; ideal para jugar de 45 a 60 minutos con hidratación constante."
+                  : "Excelente estado físico y fisiológico. Totalmente recomendado para la alineación titular y 90 minutos de juego."}
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end">
+              <Button
+                onClick={() => setPlayerIaModal(null)}
+                className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl h-9 px-5"
+              >
+                Entendido
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* MODAL CANCHA PIZARRA DE PARTIDO (Matchday Board) */}
+      {showMatchBoard && sel && (
+        <div className="fixed inset-0 z-[10000] bg-black/95 flex flex-col">
+          <CanchaBCoachBoard
+            teamName={sel.equipo || "U9 Asoderive"}
+            category={sel.equipo || "U9 Asoderive"}
+            onClose={() => setShowMatchBoard(false)}
+          />
         </div>
       )}
     </div>

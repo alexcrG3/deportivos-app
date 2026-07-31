@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { createFileRoute, useSearch, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,13 +10,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Swords, MapPin, Trophy, Plus, User, Award, Trash2, Edit, X, Bus,
   FileText, Upload, Calendar, Clock, Shirt, CheckCircle2, ShieldCheck,
-  BarChart3, Users, Filter, ArrowUpDown, Video, Search, ChevronRight
+  BarChart3, Users, Filter, ArrowUpDown, Video, Search, ChevronRight, LayoutDashboard
 } from "lucide-react";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { supabase } from "@/lib/supabase";
 import { useRole } from "@/hooks/use-role";
 import { toast } from "sonner";
 import { CoachOsBanner } from "@/components/coach-os-banner";
+import { CanchaBCoachBoard } from "@/components/cancha-bcoach-board";
 
 interface PartidosSearch {
   tab?: "partidos" | "resultados" | "estadisticas";
@@ -73,7 +74,7 @@ function PartidosPage() {
     if (search.tab) setActiveTab(search.tab);
   }, [search.tab]);
 
-  const { role, coachName } = useRole();
+  const { role, coachName, selectedCoachName } = useRole();
   const [list, setList] = useState<Match[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
 
@@ -81,6 +82,7 @@ function PartidosPage() {
   const [isOpenCreate, setIsOpenCreate] = useState(false);
   const [isOpenActaModal, setIsOpenActaModal] = useState(false);
   const [actaFile, setActaFile] = useState<File | null>(null);
+  const [showMatchBoard, setShowMatchBoard] = useState(false);
 
   // Equipos y Jugadores 100% reales de la DB
   const dbEquipos = useMemo(() => RendimientoStore.getEquipos(), []);
@@ -91,50 +93,156 @@ function PartidosPage() {
     return dbEquipos.filter((t) => t.entrenador === coachName);
   }, [dbEquipos, role, coachName]);
 
-  // Carga de Partidos desde Supabase + RendimientoStore
+  const activeCoach = selectedCoachName || (role === "coach" ? coachName : "Carlos Araya");
+
+  // Carga de Partidos desde Supabase + RendimientoStore + Convocatorias reales
   const loadPartidos = async () => {
     const orgId = RendimientoStore.getActiveOrganizacionId();
-    const { data } = await supabase.from("partidos").select("*").eq("organizacion_id", orgId);
+    
+    // 1. Cargar partidos de la tabla partidos
+    const { data: dbPartidosData } = await supabase.from("partidos").select("*").eq("organizacion_id", orgId);
+    
+    // 2. Cargar convocatorias de Supabase para integrarlas a la agenda de partidos
+    const { data: convData } = await supabase.from("convocatorias").select("*").eq("organizacion_id", orgId);
+
     const storePartidos = RendimientoStore.getPartidos();
-    const raw = data && data.length > 0 ? data : storePartidos;
+    const rawPartidos = dbPartidosData && dbPartidosData.length > 0 ? dbPartidosData : storePartidos;
 
-    const mapped: Match[] = (raw || []).map((p: any) => {
-      const matchTeam = dbEquipos.find((t) => t.id === p.equipo_id || t.nombre === p.equipo);
-      return {
-        id: p.id,
-        equipoId: p.equipo_id,
-        equipo: matchTeam ? matchTeam.nombre : p.equipo || "Club Principal",
-        rival: p.rival || "Rival",
-        tipo: p.tipo || "Liga",
-        fecha: p.fecha || new Date().toISOString().split("T")[0],
-        hora: p.hora || "09:00",
-        sede: p.sede || "Sede Central",
-        local: p.local ?? true,
-        formacion: p.formacion || "4-3-3",
-        capitan: p.capitan || (dbJugadores[0]?.nombre || "Capitán"),
-        uniforme: p.uniforme || "Oficial Local (Azul / Blanco)",
-        arbitros: p.arbitros || "Terna Arbitral Federada",
-        logistica: p.logistica || {
-          citacionHora: "07:30 AM",
-          puntoEncuentro: "Estacionamiento Sede Central (Autobús del Club)",
-          responsable: coachName || "D.T. Principal",
-          transporte: "Autobús Oficial de la Academia",
+    // Convertir convocatorias publicadas a formato Match
+    const convMatches: Match[] = (convData || [])
+      .filter((c: any) => {
+        if (activeCoach.includes("Carlos Araya")) {
+          const eq = (c.equipo || "").toLowerCase();
+          const ent = (c.entrenador || "").toLowerCase();
+          return !eq.includes("u13") && !eq.includes("u11") && !ent.includes("edgar");
+        }
+        return true;
+      })
+      .map((c: any) => ({
+        id: `conv_match_${c.id}`,
+        equipoId: c.equipo_id,
+        equipo: c.equipo || "U9 Asoderive",
+        rival: c.rival || "U9 San Jose FC",
+        tipo: (c.tipo === "partido" || c.tipo === "Partido Oficial" ? "Copa" : "Liga") as any,
+        fecha: c.fecha || new Date().toISOString().slice(0, 10),
+        hora: c.hora || "09:00",
+        sede: c.sede || "Cancha Asoderive Central",
+        local: true,
+        formacion: "4-3-3",
+        capitan: dbJugadores[0]?.nombre || "Nicolás Segura Vargas",
+        uniforme: c.uniforme_local || "Oficial Azul / Blanco",
+        arbitros: "Terna Arbitral Federada",
+        logistica: {
+          citacionHora: c.hora_concentracion || "08:15",
+          puntoEncuentro: c.sede || "Cancha Asoderive Central",
+          responsable: c.entrenador || activeCoach,
+          transporte: "Autobús Oficial del Club",
         },
-        actaUrl: p.actaUrl || null,
-        estado: p.estado || "programado",
-        resultado: p.resultado || null,
-        mvp: p.mvp || null,
-        eventos: p.eventos || [],
-      };
-    });
+        actaUrl: null,
+        estado: "programado",
+        resultado: null,
+        mvp: null,
+        eventos: [],
+      }));
 
-    setList(mapped);
-    if (mapped.length > 0 && !selectedId) setSelectedId(mapped[0].id);
+    let mapped: Match[] = (rawPartidos || [])
+      .filter((p: any) => {
+        const pEq = (p.equipo || p.local || "").toLowerCase();
+        const pEnt = (p.entrenador || "").toLowerCase();
+        if (activeCoach.includes("Carlos Araya") && (pEq.includes("u13") || pEq.includes("u11") || pEnt.includes("edgar"))) {
+          return false;
+        }
+        return true;
+      })
+      .map((p: any) => {
+        const matchTeam = dbEquipos.find((t) => t.id === p.equipo_id || t.nombre === p.equipo);
+        return {
+          id: p.id,
+          equipoId: p.equipo_id,
+          equipo: matchTeam ? matchTeam.nombre : p.equipo || "U9 Asoderive",
+          rival: p.rival || "Rival",
+          tipo: p.tipo || "Liga",
+          fecha: p.fecha || new Date().toISOString().split("T")[0],
+          hora: p.hora || "09:00",
+          sede: p.sede || "Sede Central",
+          local: p.local ?? true,
+          formacion: p.formacion || "4-3-3",
+          capitan: p.capitan || (dbJugadores[0]?.nombre || "Capitán"),
+          uniforme: p.uniforme || "Oficial Local (Azul / Blanco)",
+          arbitros: p.arbitros || "Terna Arbitral Federada",
+          logistica: p.logistica || {
+            citacionHora: "08:15 AM",
+            puntoEncuentro: "Cancha Asoderive Central",
+            responsable: coachName || "Carlos Araya",
+            transporte: "Autobús Oficial de la Academia",
+          },
+          actaUrl: p.actaUrl || null,
+          estado: p.estado || "programado",
+          resultado: p.resultado || null,
+          mvp: p.mvp || null,
+          eventos: p.eventos || [],
+        };
+      });
+
+    // Combinar convocatorias publicadas con partidos existentes
+    let finalMatches = [...convMatches, ...mapped];
+
+    // Si no hay aún en DB para Carlos Araya (Sub-9), suministrar el ÚNICO partido oficial de U9 Asoderive (2 de agosto vs U9 San Jose FC)
+    if (finalMatches.length === 0 && activeCoach.includes("Carlos Araya")) {
+      finalMatches = [
+        {
+          id: "match_u9_demo_1",
+          equipoId: "eq_u9_asoderive",
+          equipo: "U9 Asoderive",
+          rival: "U9 San Jose FC",
+          tipo: "Copa",
+          fecha: "2026-08-02",
+          hora: "09:00",
+          sede: "Cancha Asoderive Central",
+          local: true,
+          formacion: "4-3-3",
+          capitan: dbJugadores[0]?.nombre || "Nicolás Segura Vargas",
+          uniforme: "Titular Azul / Blanco",
+          arbitros: "Terna Arbitral Federada",
+          logistica: {
+            citacionHora: "08:15 AM",
+            puntoEncuentro: "Cancha Asoderive Central",
+            responsable: "Carlos Araya",
+            transporte: "Autobús Oficial del Club",
+          },
+          actaUrl: null,
+          estado: "programado",
+          resultado: null,
+          mvp: null,
+          eventos: [],
+        }
+      ];
+    }
+
+    setList(finalMatches);
+    if (finalMatches.length > 0) setSelectedId(finalMatches[0].id);
+  };
+
+  const handleDeleteMatch = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!id.startsWith("match_u9_demo_")) {
+      const cleanId = id.replace("conv_match_", "");
+      await supabase.from("partidos").delete().eq("id", cleanId);
+      await supabase.from("convocatorias").delete().eq("id", cleanId);
+    }
+    setList((prev) => {
+      const next = prev.filter((m) => m.id !== id);
+      if (selectedId === id) {
+        setSelectedId(next[0]?.id || "");
+      }
+      return next;
+    });
+    toast.success("Partido eliminado de la agenda operativa");
   };
 
   useEffect(() => {
     loadPartidos();
-  }, [role]);
+  }, [role, coachName, selectedCoachName]);
 
   const sel = useMemo(() => {
     return list.find((m) => m.id === selectedId) || list[0] || null;
@@ -361,10 +469,10 @@ function PartidosPage() {
                 </div>
               ) : (
                 list.map((m) => (
-                  <button
+                  <div
                     key={m.id}
                     onClick={() => setSelectedId(m.id)}
-                    className={`w-full text-left rounded-xl border p-3 transition flex flex-col gap-1.5 ${
+                    className={`w-full text-left rounded-xl border p-3 transition flex flex-col gap-1.5 cursor-pointer group ${
                       selectedId === m.id
                         ? "border-primary bg-primary/5 shadow-sm"
                         : "border-border hover:bg-muted/40"
@@ -372,32 +480,43 @@ function PartidosPage() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-extrabold text-foreground truncate">{m.equipo}</span>
-                      <Badge
-                        className={`badge-pill border-none ${
-                          m.estado === "jugado"
-                            ? "badge-success"
+                      <div className="flex items-center gap-1.5">
+                        <Badge
+                          className={`badge-pill border-none ${
+                            m.estado === "jugado"
+                              ? "badge-success"
+                              : m.estado === "en_curso"
+                              ? "badge-warning"
+                              : m.estado === "suspendido"
+                              ? "badge-danger"
+                              : "badge-info"
+                          }`}
+                        >
+                          {m.estado === "jugado"
+                            ? "✓ Jugado"
                             : m.estado === "en_curso"
-                            ? "badge-warning"
+                            ? "🔴 En Juego"
                             : m.estado === "suspendido"
-                            ? "badge-danger"
-                            : "badge-info"
-                        }`}
-                      >
-                        {m.estado === "jugado"
-                          ? "✓ Jugado"
-                          : m.estado === "en_curso"
-                          ? "🔴 En Juego"
-                          : m.estado === "suspendido"
-                          ? "⚠️ Suspendido"
-                          : "⏳ Por Disputar"}
-                      </Badge>
+                            ? "⚠️ Suspendido"
+                            : "⏳ Por Disputar"}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-rose-500 hover:text-rose-700 hover:bg-rose-50 opacity-80 group-hover:opacity-100 transition-opacity"
+                          title="Eliminar Partido"
+                          onClick={(e) => handleDeleteMatch(m.id, e)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
 
                     <p className="text-xs font-bold text-foreground">vs {m.rival}</p>
                     <p className="text-[11px] text-muted-foreground font-medium">
                       📅 {m.fecha} · ⏰ {m.hora} · 📍 {m.sede}
                     </p>
-                  </button>
+                  </div>
                 ))
               )}
             </CardContent>
@@ -412,14 +531,24 @@ function PartidosPage() {
                     <Badge className="bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/30 text-[10px] uppercase font-bold mb-1">
                       {sel.tipo} · {sel.local ? "Local" : "Visitante"}
                     </Badge>
-                    <CardTitle className="text-lg font-extrabold text-foreground">
-                      {sel.equipo} <span className="text-primary">vs</span> {sel.rival}
+                    <CardTitle className="text-lg font-extrabold text-foreground flex items-center gap-2">
+                      <span>{sel.equipo} <span className="text-primary">vs</span> {sel.rival}</span>
                     </CardTitle>
                   </div>
 
-                  <Badge className="bg-primary/10 text-primary font-mono text-xs font-bold px-3 py-1">
-                    ⏰ {sel.fecha} ({sel.hora})
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-primary/10 text-primary font-mono text-xs font-bold px-3 py-1">
+                      ⏰ {sel.fecha} ({sel.hora})
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-rose-200 text-rose-600 hover:bg-rose-50 gap-1 text-xs"
+                      onClick={(e) => handleDeleteMatch(sel.id, e)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Eliminar
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
 
@@ -458,14 +587,19 @@ function PartidosPage() {
 
                   {/* Pestaña 2: Convocatoria & Alineación */}
                   <TabsContent value="alineacion" className="space-y-4 pt-2">
-                    <div className="flex justify-between items-center bg-primary/5 p-3 rounded-xl border border-primary/20">
+                    <div className="flex flex-wrap justify-between items-center bg-primary/5 p-3 rounded-xl border border-primary/20 gap-2">
                       <div>
                         <p className="text-xs font-extrabold text-foreground">Formación Táctica Asignada: <span className="text-primary font-mono">{sel.formacion}</span></p>
                         <p className="text-[11px] text-muted-foreground">Convocatoria enviada a las Apps de los padres</p>
                       </div>
-                      <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-xs font-bold">
-                        {dbJugadores.length > 0 ? `${dbJugadores.length - 2} Convocados` : "16 Convocados"}
-                      </Badge>
+                      <div className="flex gap-2 items-center">
+                        <Button size="sm" onClick={() => setShowMatchBoard(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 shadow-sm">
+                          <LayoutDashboard className="h-3.5 w-3.5" /> 📋 Pizarra de Partido
+                        </Button>
+                        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-xs font-bold">
+                          {dbJugadores.length > 0 ? `${dbJugadores.length - 2} Convocados` : "16 Convocados"}
+                        </Badge>
+                      </div>
                     </div>
 
                     {/* Mini-Pizarra de Titulares y Suplentes */}
@@ -783,6 +917,20 @@ function PartidosPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* MODAL PIZARRA DE PARTIDO (Matchday Board) */}
+      {showMatchBoard && sel && (
+        <div className="fixed inset-0 z-[10000] bg-black/95 flex flex-col">
+          <CanchaBCoachBoard
+            teamName={sel.equipoLocal || "U9 Asoderive"}
+            category={sel.equipoLocal || "Sub-9"}
+            rivalName={sel.equipoRival || "U9 San Jose FC"}
+            matchTitle={sel.competicion || "Partido Oficial"}
+            initialMode="matchday"
+            onClose={() => setShowMatchBoard(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
