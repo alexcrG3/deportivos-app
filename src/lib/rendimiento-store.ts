@@ -1828,16 +1828,26 @@ class RendimientoStore {
   // --- WELLNESS ---
   public static getWellness(): WellnessRegistro[] {
     const list = this.get<WellnessRegistro[]>("wellness", []);
-    const activePlayerIds = this.getJugadores().map(p => p.id);
-    return list.filter(w => activePlayerIds.includes(w.jugadorId));
+    const players = this.getJugadores();
+    if (!players || players.length === 0) return list;
+    const activePlayerIds = new Set(players.map(p => p.id));
+    const activePlayerNames = new Set(players.map(p => p.nombre.toLowerCase().trim()));
+    return list.filter(w => 
+      !w.jugadorId || 
+      activePlayerIds.has(w.jugadorId) || 
+      (w.jugadorNombre && activePlayerNames.has(w.jugadorNombre.toLowerCase().trim())) ||
+      (w.jugador && activePlayerNames.has(w.jugador.toLowerCase().trim()))
+    );
   }
 
   public static addWellness(w: Omit<WellnessRegistro, "id">): WellnessRegistro {
     const list = this.getWellness();
     const wellnessScore = calcWellnessScore(w);
     const hora = new Date().toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" });
+    const cleanFecha = w.fecha && w.fecha.includes("/") ? w.fecha.split("/").reverse().join("-") : (w.fecha || new Date().toISOString().split("T")[0]);
     const newItem: WellnessRegistro = {
       ...w,
+      fecha: cleanFecha,
       id: generateUniqueId("w"),
       hora,
       score: wellnessScore,
@@ -1853,6 +1863,7 @@ class RendimientoStore {
     const wellness  = this.getWellness();
     const sesiones  = this.getSesiones();
     const lesiones  = this.getLesiones();
+    const cargas    = this.get<any[]>("cargas_entrenamiento", []);
 
     const activeOrgId = this.getActiveOrganizacionId();
     const storedPlayers = this.getJugadores().filter(p =>
@@ -1867,14 +1878,26 @@ class RendimientoStore {
     }));
 
     return jugadoresMap.map(j => {
+      const jNameLower = j.nombre.toLowerCase().trim();
+
+      // Match wellness by ID or by player name
       const jugLogs = [...wellness]
-        .filter(l => l.jugadorId === j.id)
+        .filter(l =>
+          l.jugadorId === j.id ||
+          (l.jugadorNombre && l.jugadorNombre.toLowerCase().trim() === jNameLower) ||
+          (l.jugador && l.jugador.toLowerCase().trim() === jNameLower)
+        )
         .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
       const ultimoLog = jugLogs[0];
       const wScore    = ultimoLog?.wellnessScore ?? ultimoLog?.score ?? 50;
       const fatiga    = ultimoLog ? invertScore(ultimoLog.fatiga) : 50;
       const recup     = ultimoLog ? invertScore(ultimoLog.dolorMuscular) : 50;
+
+      // Match cargas by ID or by name
+      const jugCargas = cargas.filter(c =>
+        c.jugadorId === j.id || (c.jugador && c.jugador.toLowerCase().trim() === jNameLower)
+      );
 
       const acwr          = calcACWR(sesiones, j.equipo);
       const lesionActiva  = lesiones.find(l => l.jugadorId === j.id && !l.completada);
@@ -1884,23 +1907,34 @@ class RendimientoStore {
 
       const sportsScore = calcSportsScore(wScore, acwr, fatiga, lesionScore);
 
-      // Carga sesiones
+      // Carga sesiones — use cargas_entrenamiento first, fall back to sesiones
       const hoy   = new Date();
       const hoyStr = hoy.toISOString().split("T")[0];
 
       const getSemanal = () => {
         const start = new Date(hoy); start.setDate(hoy.getDate() - 7);
+        const fromCargas = jugCargas
+          .filter(c => new Date(c.fecha) >= start)
+          .reduce((acc, c) => acc + (c.cargaInterna || 0), 0);
+        if (fromCargas > 0) return fromCargas;
         return sesiones
           .filter(s => s.equipo === j.equipo && new Date(s.fecha) >= start)
           .reduce((acc, s) => acc + (s.carga || 0), 0);
       };
       const getMensual = () => {
         const start = new Date(hoy); start.setDate(hoy.getDate() - 30);
+        const fromCargas = jugCargas
+          .filter(c => new Date(c.fecha) >= start)
+          .reduce((acc, c) => acc + (c.cargaInterna || 0), 0);
+        if (fromCargas > 0) return fromCargas;
         return sesiones
           .filter(s => s.equipo === j.equipo && new Date(s.fecha) >= start)
           .reduce((acc, s) => acc + (s.carga || 0), 0);
       };
-      const cargaHoy = sesiones
+      const cargaHoyFromCargas = jugCargas
+        .filter(c => c.fecha === hoyStr)
+        .reduce((acc, c) => acc + (c.cargaInterna || 0), 0);
+      const cargaHoy = cargaHoyFromCargas > 0 ? cargaHoyFromCargas : sesiones
         .filter(s => s.equipo === j.equipo && s.fecha === hoyStr)
         .reduce((acc, s) => acc + (s.carga || 0), 0);
 
@@ -1909,17 +1943,24 @@ class RendimientoStore {
       const prev   = jugLogs.slice(3, 6).reduce((acc, l) => acc + (l.wellnessScore || l.score || 0), 0) / Math.max(jugLogs.slice(3, 6).length, 1);
       const tendencia: "subiendo" | "estable" | "bajando" = recent > prev + 5 ? "subiendo" : recent < prev - 5 ? "bajando" : "estable";
 
-      const estado: "excelente" | "bueno" | "precaución" | "riesgo" | "sin_registro" = !ultimoLog ? "sin_registro" :
+      // Estado — show as "bueno" if no wellness yet but has session data
+      const estado: "excelente" | "bueno" | "precaución" | "riesgo" | "sin_registro" = !ultimoLog && jugCargas.length === 0 ? "sin_registro" :
         (sportsScore >= 90 ? "excelente" : sportsScore >= 75 ? "bueno" : sportsScore >= 55 ? "precaución" : "riesgo");
 
-      // Historial 7 días
+      // Historial 7 días — merge wellness + cargas
       const historial = jugLogs.slice(0, 7).reverse().map(l => ({
         fecha: l.fecha,
         score: l.wellnessScore ?? l.score ?? 0,
         wellnessScore: l.wellnessScore ?? l.score ?? 0,
-        carga: sesiones
-          .filter(s => s.equipo === j.equipo && s.fecha === l.fecha)
-          .reduce((acc, s) => acc + (s.carga || 0), 0),
+        carga: (() => {
+          const cargaDia = jugCargas
+            .filter(c => c.fecha === l.fecha)
+            .reduce((acc, c) => acc + (c.cargaInterna || 0), 0);
+          if (cargaDia > 0) return cargaDia;
+          return sesiones
+            .filter(s => s.equipo === j.equipo && s.fecha === l.fecha)
+            .reduce((acc, s) => acc + (s.carga || 0), 0);
+        })(),
       }));
 
       return {
@@ -1971,7 +2012,10 @@ class RendimientoStore {
     return jugadoresMap.map(j => {
       const hoy    = new Date();
       const hoyStr = hoy.toISOString().split("T")[0];
-      const jugCargas = playerCargas.filter(c => c.jugadorId === j.id);
+      const jNameLower = j.nombre.toLowerCase().trim();
+      const jugCargas = playerCargas.filter(c => 
+        c.jugadorId === j.id || (c.jugador && c.jugador.toLowerCase().trim() === jNameLower)
+      );
 
       // Carga acumulada total
       const cargaTemporada = jugCargas.reduce((acc, c) => acc + (c.cargaInterna || 0), 0);
@@ -2016,7 +2060,7 @@ class RendimientoStore {
 
       // Último wellness
       const jugLogs = wellness
-        .filter(w => w.jugadorId === j.id)
+        .filter(w => w.jugadorId === j.id || (w.jugadorNombre && w.jugadorNombre.toLowerCase().trim() === jNameLower) || (w.jugador && w.jugador.toLowerCase().trim() === jNameLower))
         .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
       const ultimo = jugLogs[0];
 
@@ -2165,6 +2209,79 @@ class RendimientoStore {
     const newItem: TestFisico = { ...t, id: newDbItem.id };
     testsList.push(newItem);
     this.set("tests", testsList);
+    return newItem;
+  }
+
+  public static addEvaluacion(ev: {
+    jugadorId: string;
+    jugadorNombre: string;
+    fecha: string;
+    equipo?: string;
+    prueba: string;
+    valor: number;
+    unidad: string;
+    calificacion: string;
+    notas?: string;
+  }) {
+    const list = this.get<any[]>("evaluaciones_pruebas", []);
+    const newItem = {
+      id: generateUniqueId("eval"),
+      ...ev,
+      organizacion_id: this.getActiveOrganizacionId() || "00000000-0000-0000-0000-000000000000"
+    };
+    list.push(newItem);
+    this.set("evaluaciones_pruebas", list);
+    return newItem;
+  }
+
+  public static addCargaEntrenamiento(c: {
+    jugadorId: string;
+    jugadorNombre: string;
+    fecha: string;
+    duracion: number;
+    rpe: number;
+    intensidad?: string;
+  }) {
+    const list = this.get<any[]>("cargas_entrenamiento", []);
+    const rpeVal = c.rpe || 6;
+    const durVal = c.duracion || 90;
+    const cargaInt = durVal * rpeVal;
+    const activeOrg = this.getActiveOrganizacionId() || "00000000-0000-0000-0000-000000000000";
+
+    const newItem = {
+      id: generateUniqueId("carga"),
+      jugadorId: c.jugadorId,
+      jugador: c.jugadorNombre,
+      fecha: c.fecha,
+      duracion: durVal,
+      rpe: rpeVal,
+      cargaInterna: cargaInt,
+      cargaExterna: Math.round(durVal * 85),
+      intensidad: c.intensidad || (rpeVal > 7 ? "Alta" : rpeVal > 4 ? "Media" : "Baja"),
+      organizacion_id: activeOrg,
+    };
+    list.push(newItem);
+    this.set("cargas_entrenamiento", list);
+
+    try {
+      supabase.from("cargas_entrenamiento").upsert([{
+        id: newItem.id,
+        jugador_id: c.jugadorId,
+        jugador: c.jugadorNombre,
+        fecha: c.fecha,
+        duracion: durVal,
+        rpe: rpeVal,
+        carga_interna: cargaInt,
+        carga_externa: Math.round(durVal * 85),
+        intensidad: newItem.intensidad,
+        organizacion_id: activeOrg,
+      }]).then(({ error }) => {
+        if (error) console.warn("Nota de inserción en cargas_entrenamiento:", error.message);
+      });
+    } catch (e) {
+      console.warn("Nota de inserción remota cargas_entrenamiento:", e);
+    }
+
     return newItem;
   }
 

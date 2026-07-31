@@ -288,6 +288,89 @@ function EntrenamientosPage() {
       // Cargar notas de cierre/dictado y minutas desde Supabase para fechaSesion
       try {
         const { data: dbSesion } = await supabase
+          .from("minutas_diario")
+          .select("*")
+          .filter("fecha", "eq", fechaSesion)
+          .maybeSingle();
+
+        if (dbSesion) {
+          if (dbSesion.observaciones) setNotasVoz(dbSesion.observaciones);
+          if (dbSesion.proxima_clase) setProximaClase(dbSesion.proxima_clase);
+          if (dbSesion.hay_lesion) {
+            setHayLesion(true);
+            if (dbSesion.jugador_lesionado_id) setJugadorLesionadoId(dbSesion.jugador_lesionado_id);
+            if (dbSesion.gravedad_lesion) setGravedadLesion(dbSesion.gravedad_lesion);
+            if (dbSesion.descripcion_lesion) setDescripcionLesion(dbSesion.descripcion_lesion);
+          }
+        }
+      } catch (e) {}
+
+      // Sincronizar retroactivamente registros de Wellness y Test marcados en sesiones de cancha
+      try {
+        const allSessions = RendimientoStore.getSesiones();
+        const existingWellness = RendimientoStore.getWellness();
+        const existingTests = RendimientoStore.getTests();
+
+        allSessions.forEach((s: any) => {
+          if (s.jugadores && Array.isArray(s.jugadores)) {
+            s.jugadores.forEach((j: any) => {
+              if (j.wellnessColor && (j.wellnessColor as any) !== "ninguno") {
+                const alreadyHasW = existingWellness.some(w => w.jugadorId === j.id && w.fecha === s.fecha);
+                if (!alreadyHasW) {
+                  const wScore = j.wellnessColor === "verde" ? 100 : j.wellnessColor === "amarillo" ? 70 : 40;
+                  RendimientoStore.addWellness({
+                    jugadorId: j.id,
+                    jugadorNombre: j.nombre,
+                    fecha: s.fecha || fechaSesion,
+                    wellnessScore: wScore,
+                    fatiga: j.wellnessColor === "verde" ? 1 : j.wellnessColor === "amarillo" ? 3 : 4,
+                    dolorMuscular: j.wellnessColor === "verde" ? 1 : j.wellnessColor === "amarillo" ? 2 : 4,
+                    suenoHoras: j.wellnessColor === "verde" ? 8 : j.wellnessColor === "amarillo" ? 6.5 : 5,
+                    energia: j.wellnessColor === "verde" ? 5 : j.wellnessColor === "amarillo" ? 3 : 2,
+                    estres: 1,
+                    notas: j.wellnessDetalle || `Registrado en sesión de ${s.equipo || "cancha"}`,
+                  });
+                }
+              }
+
+              if (j.testStatus || j.testValor) {
+                const alreadyHasT = existingTests.some(t => t.jugadorId === j.id && t.fecha === s.fecha);
+                if (!alreadyHasT) {
+                  const testName = j.testNombre || "Sprint 30m";
+                  const val = j.testValor || (j.testStatus === "excelente" ? "4.15s" : j.testStatus === "promedio" ? "4.50s" : "5.10s");
+                  const calif = j.testStatus === "excelente" ? "Excelente" : j.testStatus === "promedio" ? "Promedio" : "Bajo";
+
+                  RendimientoStore.addTest({
+                    jugadorId: j.id,
+                    jugador: j.nombre,
+                    fecha: s.fecha || fechaSesion,
+                    tipo: "Velocidad",
+                    nombreTest: testName,
+                    resultado: String(val),
+                    progreso: 5.0,
+                    estancado: false,
+                  });
+
+                  RendimientoStore.addEvaluacion({
+                    jugadorId: j.id,
+                    jugadorNombre: j.nombre,
+                    fecha: s.fecha || fechaSesion,
+                    equipo: s.equipo || targetCat,
+                    prueba: testName,
+                    valor: parseFloat(String(val)) || 4.2,
+                    unidad: "s",
+                    calificacion: calif,
+                    notas: "Registrado en sesión de cancha",
+                  });
+                }
+              }
+            });
+          }
+        });
+      } catch (e) {}
+
+      try {
+        const { data: dbSesion } = await supabase
           .from("sesiones_entrenamiento")
           .select("*")
           .eq("fecha", fechaSesion)
@@ -298,7 +381,6 @@ function EntrenamientosPage() {
           if (dbSesion.proxima_clase) setProximaClase(dbSesion.proxima_clase);
           if (dbSesion.estado === "completada") setPaso1Concluido(true);
         }
-
         const { data: dbMinuta } = await supabase
           .from("minutas_diario")
           .select("*")
@@ -317,15 +399,38 @@ function EntrenamientosPage() {
         }
       } catch (e) {}
 
-      // Aplicar asistencias/wellness guardados a cada jugador
+      // Aplicar asistencias/wellness/tests guardados a cada jugador
+      const testMapStore = RendimientoStore.getTests();
+      const wellnessMapStore = RendimientoStore.getWellness();
+
       const jugadoresActualizados = realPlayers.map((j) => {
         const estadoGuardado = asistenciasMap[j.id];
         const wellGuardado = wellnessMap[j.id];
+
+        // Buscar si hay wellness guardado para esta fecha en el store o Supabase
+        const wLog = wellnessMapStore.find(w => w.jugadorId === j.id && w.fecha === fechaSesion);
+        const wColor: WellnessColor = wellGuardado 
+          ? wellGuardado.color 
+          : wLog 
+          ? (wLog.wellnessScore >= 90 ? "verde" : wLog.wellnessScore >= 60 ? "amarillo" : "rojo")
+          : j.wellnessColor;
+
+        // Buscar si hay test guardado para esta fecha en el store o Supabase
+        const testLog = testMapStore.find(t => (t.jugadorId === j.id || t.jugador === j.nombre) && t.fecha === fechaSesion);
+        const tVal = testLog ? (testLog.resultado.endsWith("s") ? testLog.resultado : `${testLog.resultado}s`) : j.testValor;
+        const tStatus: "excelente" | "promedio" | "bajo" | undefined = testLog 
+          ? (parseFloat(testLog.resultado) < 4.0 ? "excelente" : parseFloat(testLog.resultado) <= 4.5 ? "promedio" : "bajo")
+          : j.testStatus;
+
         return {
           ...j,
           asistencia: estadoGuardado || j.asistencia,
-          wellnessColor: wellGuardado ? wellGuardado.color : j.wellnessColor,
-          wellnessDetalle: wellGuardado ? wellGuardado.detalle : j.wellnessDetalle,
+          wellnessColor: wColor,
+          wellnessDetalle: wellGuardado ? wellGuardado.detalle : (wLog?.notas || j.wellnessDetalle),
+          testValor: tVal,
+          tiempoTest: testLog ? testLog.resultado.replace("s", "") : j.tiempoTest,
+          testStatus: tStatus,
+          testNombre: testLog ? testLog.nombreTest : j.testNombre,
         };
       });
 
@@ -604,7 +709,7 @@ function EntrenamientosPage() {
       return;
     }
 
-    // 3. Sincronizar Asistencias en RendimientoStore Local
+    // 3. Sincronizar Asistencias, Wellness y Tests en RendimientoStore Local
     try {
       (sesionData.jugadores || []).forEach((j) => {
         RendimientoStore.addAsistencia({
@@ -615,6 +720,65 @@ function EntrenamientosPage() {
           estado: j.asistencia,
           equipo: sesionData.equipo,
         });
+
+        // Guardar Registro de Wellness si fue marcado en la cancha
+        if (j.wellnessColor && (j.wellnessColor as any) !== "ninguno") {
+          const wScore = j.wellnessColor === "verde" ? 100 : j.wellnessColor === "amarillo" ? 70 : 40;
+          RendimientoStore.addWellness({
+            jugadorId: j.id,
+            jugadorNombre: j.nombre,
+            fecha: fechaSesion,
+            wellnessScore: wScore,
+            fatiga: j.wellnessColor === "verde" ? 1 : j.wellnessColor === "amarillo" ? 3 : 4,
+            dolorMuscular: j.wellnessColor === "verde" ? 1 : j.wellnessColor === "amarillo" ? 2 : 4,
+            suenoHoras: j.wellnessColor === "verde" ? 8 : j.wellnessColor === "amarillo" ? 6.5 : 5,
+            energia: j.wellnessColor === "verde" ? 5 : j.wellnessColor === "amarillo" ? 3 : 2,
+            estres: 1,
+            notas: j.wellnessDetalle || `Registrado en sesión de ${sesionData.equipo}`,
+          });
+        }
+
+        // Guardar Evaluación / Test Físico si fue marcado en la cancha
+        if (j.testStatus || j.testValor) {
+          const testName = j.testNombre || "Sprint 30m";
+          const val = j.testValor || (j.testStatus === "excelente" ? "4.15s" : j.testStatus === "promedio" ? "4.50s" : "5.10s");
+          const calif = j.testStatus === "excelente" ? "Excelente" : j.testStatus === "promedio" ? "Promedio" : "Bajo";
+
+          RendimientoStore.addTest({
+            jugadorId: j.id,
+            jugador: j.nombre,
+            fecha: fechaSesion,
+            tipo: "Velocidad",
+            nombreTest: testName,
+            resultado: String(val),
+            progreso: 5.0,
+            estancado: false,
+          });
+
+          RendimientoStore.addEvaluacion({
+            jugadorId: j.id,
+            jugadorNombre: j.nombre,
+            fecha: fechaSesion,
+            equipo: sesionData.equipo,
+            prueba: testName,
+            valor: parseFloat(String(val)) || 4.2,
+            unidad: "s",
+            calificacion: calif,
+            notas: "Registrado en sesión de cancha",
+          });
+        }
+
+        // Guardar Registro de Carga de Entrenamiento (Control de Cargas ACWR) si asistió
+        if (j.asistencia === "presente" || j.asistencia === "tardanza") {
+          RendimientoStore.addCargaEntrenamiento({
+            jugadorId: j.id,
+            jugadorNombre: j.nombre,
+            fecha: fechaSesion,
+            duracion: sesionData.duracionMinutos || 90,
+            rpe: 6,
+            intensidad: "Media",
+          });
+        }
       });
     } catch (e) {
       console.warn("Nota de sincronización local:", e);
@@ -1237,25 +1401,25 @@ function EntrenamientosPage() {
           <div className="max-w-5xl mx-auto space-y-5 pb-24">
             {/* BARRA SUPERIOR DE BLOQUES CON BORDE Y RESALTE VISUAL FUERTE DE ESTADO ACTIVO */}
             <Tabs value={tabBloqueActivo} onValueChange={(val) => handleCambiarBloque(val as any)} className="w-full space-y-4">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <TabsList className="grid grid-cols-3 bg-white p-1.5 rounded-2xl border border-[#E2E8F0] shadow-sm h-13 flex-1">
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                <TabsList className="grid grid-cols-3 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm h-auto min-h-[48px] flex-1">
                   <TabsTrigger
                     value="bloque1"
-                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                    className="rounded-xl text-xs font-black py-2 px-2 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400 truncate"
                   >
-                    🔥 Bloque 1: Calentamiento (15m)
+                    🔥 Bloque 1<span className="hidden xl:inline">: Calentamiento</span> <span className="opacity-90 font-medium">(15m)</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="bloque2"
-                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                    className="rounded-xl text-xs font-black py-2 px-2 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400 truncate"
                   >
-                    ⚽ Bloque 2: Específico (60m)
+                    ⚽ Bloque 2<span className="hidden xl:inline">: Específico</span> <span className="opacity-90 font-medium">(60m)</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="bloque3"
-                    className="rounded-xl text-xs font-black py-2.5 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400"
+                    className="rounded-xl text-xs font-black py-2 px-2 transition-all data-[state=active]:bg-[#2563EB] data-[state=active]:text-white data-[state=active]:shadow-md border-b-4 border-transparent data-[state=active]:border-emerald-400 truncate"
                   >
-                    🧘 Bloque 3: Calma (15m)
+                    🧘 Bloque 3<span className="hidden xl:inline">: Calma</span> <span className="opacity-90 font-medium">(15m)</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -1263,7 +1427,7 @@ function EntrenamientosPage() {
                   size="sm"
                   type="button"
                   onClick={() => setModalPizarraTactica(true)}
-                  className="h-12 px-4 text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl gap-2 shadow-md shrink-0 uppercase tracking-wider active:scale-95 transition"
+                  className="h-11 px-4 text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl gap-2 shadow-md shrink-0 uppercase tracking-wider active:scale-95 transition"
                 >
                   <Sparkles className="h-4 w-4 text-amber-300 animate-pulse" />
                   <span>🎨 Abrir Pizarra Táctica</span>
@@ -2138,38 +2302,69 @@ function EntrenamientosPage() {
                       type="button"
                       variant="outline"
                       onClick={async () => {
-                        const todayStr = new Date().toISOString().split("T")[0];
+                        const todayStr = fechaSesion || new Date().toISOString().split("T")[0];
                         const val = parseFloat(tiempoTestInput) || 0;
                         const status: "excelente" | "promedio" | "bajo" = val < 4.0 ? "excelente" : val <= 4.5 ? "promedio" : "bajo";
+                        const formattedVal = `${val}s`;
+                        const calif = status === "excelente" ? "Excelente" : status === "promedio" ? "Promedio" : "Bajo";
+                        const activeOrg = RendimientoStore.getActiveOrganizacionId() || "00000000-0000-0000-0000-000000000000";
 
                         setSesionData((prev) => ({
                           ...prev,
                           jugadores: prev.jugadores.map((j) => ({
                             ...j,
                             tiempoTest: `${val}`,
+                            testValor: formattedVal,
                             testStatus: status,
+                            testNombre: testType,
                           })),
                         }));
 
+                        // Guardar inmediatamente en RendimientoStore para cada jugador
+                        sesionData.jugadores.forEach((j) => {
+                          RendimientoStore.addTest({
+                            jugadorId: j.id,
+                            jugador: j.nombre,
+                            fecha: todayStr,
+                            tipo: "Velocidad",
+                            nombreTest: testType,
+                            resultado: formattedVal,
+                            progreso: 5.0,
+                            estancado: false,
+                          });
+
+                          RendimientoStore.addEvaluacion({
+                            jugadorId: j.id,
+                            jugadorNombre: j.nombre,
+                            fecha: todayStr,
+                            equipo: sesionData.equipo,
+                            prueba: testType,
+                            valor: val,
+                            unidad: "s",
+                            calificacion: calif,
+                            notas: testNotes || "Prueba masiva de equipo",
+                          });
+                        });
+
                         const records = sesionData.jugadores.map((j) => ({
                           id: `test-${Date.now()}-${j.id}`,
-                          sesion_id: sesionData.id,
                           jugador_id: j.id,
-                          jugador_nombre: j.nombre,
-                          tipo_test: testType,
+                          jugador: j.nombre,
+                          fecha: todayStr,
+                          test_id: testType.toLowerCase().replace(/\s+/g, "-"),
+                          test: testType,
                           resultado: val,
                           unidad: "segundos",
-                          fecha: todayStr,
-                          notas: testNotes || "Prueba masiva de equipo",
+                          organizacion_id: activeOrg,
                         }));
 
                         try {
-                          await supabase.from("resultados_pruebas").insert(records);
+                          await supabase.from("resultados_pruebas_fisicas").upsert(records);
                         } catch (e) {
                           console.warn("Inserción remota test opcional:", e);
                         }
 
-                        toast.success(`🏃 ¡Test (${testType}) registrado para los ${sesionData.jugadores.length} atletas del equipo!`);
+                        toast.success(`🏃 ¡Test (${testType}: ${formattedVal}) registrado para los ${sesionData.jugadores.length} atletas!`);
                         setModalTestSpeed(false);
                       }}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl h-9 px-3 shadow-sm gap-1"
@@ -2178,37 +2373,65 @@ function EntrenamientosPage() {
                     </Button>
 
                     <Button
+                      type="button"
                       onClick={async () => {
-                        const todayStr = new Date().toISOString().split("T")[0];
+                        if (!jugadorObj) return;
+                        const todayStr = fechaSesion || new Date().toISOString().split("T")[0];
                         const val = parseFloat(tiempoTestInput) || 0;
                         const status: "excelente" | "promedio" | "bajo" = val < 4.0 ? "excelente" : val <= 4.5 ? "promedio" : "bajo";
+                        const formattedVal = `${val}s`;
+                        const calif = status === "excelente" ? "Excelente" : status === "promedio" ? "Promedio" : "Bajo";
+                        const activeOrg = RendimientoStore.getActiveOrganizacionId() || "00000000-0000-0000-0000-000000000000";
 
                         setSesionData((prev) => ({
                           ...prev,
                           jugadores: prev.jugadores.map((j) =>
                             j.id === jugadorObj.id
-                              ? { ...j, tiempoTest: `${val}`, testStatus: status }
+                              ? { ...j, tiempoTest: `${val}`, testValor: formattedVal, testStatus: status, testNombre: testType }
                               : j
                           ),
                         }));
 
+                        RendimientoStore.addTest({
+                          jugadorId: jugadorObj.id,
+                          jugador: jugadorObj.nombre,
+                          fecha: todayStr,
+                          tipo: "Velocidad",
+                          nombreTest: testType,
+                          resultado: formattedVal,
+                          progreso: 5.0,
+                          estancado: false,
+                        });
+
+                        RendimientoStore.addEvaluacion({
+                          jugadorId: jugadorObj.id,
+                          jugadorNombre: jugadorObj.nombre,
+                          fecha: todayStr,
+                          equipo: sesionData.equipo,
+                          prueba: testType,
+                          valor: val,
+                          unidad: "s",
+                          calificacion: calif,
+                          notas: testNotes || "Prueba registrada en cancha",
+                        });
+
                         try {
-                          await supabase.from("resultados_pruebas").insert({
+                          await supabase.from("resultados_pruebas_fisicas").upsert([{
                             id: `test-${Date.now()}`,
-                            sesion_id: sesionData.id,
                             jugador_id: jugadorObj.id,
-                            jugador_nombre: jugadorObj.nombre,
-                            tipo_test: testType,
+                            jugador: jugadorObj.nombre,
+                            fecha: todayStr,
+                            test_id: testType.toLowerCase().replace(/\s+/g, "-"),
+                            test: testType,
                             resultado: val,
                             unidad: "segundos",
-                            fecha: todayStr,
-                            notas: testNotes,
-                          });
+                            organizacion_id: activeOrg,
+                          }]);
                         } catch (e) {
                           console.warn("Inserción remota test opcional:", e);
                         }
 
-                        toast.success(`Prueba física (${testType}) registrada para ${jugadorObj.nombre}.`);
+                        toast.success(`Prueba física (${testType}: ${formattedVal}) registrada para ${jugadorObj.nombre}.`);
                         setModalTestSpeed(false);
                       }}
                       className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs rounded-xl h-9 px-3 shadow-sm"

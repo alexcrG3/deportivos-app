@@ -99,7 +99,7 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         id: "coach_os",
         title: "Coach OS",
         icon: Laptop,
-        url: "/coach",
+        url: "/dashboard",
         subLinks: [
           { id: "coach_sesiones", title: "Sesiones", url: "/entrenamientos" },
           { id: "coach_plantillas", title: "Entrenamientos", url: "/plantillas" },
@@ -345,45 +345,23 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" key={`${role}-${coachName}-${activeOrgId}`}>
       <SidebarHeader>
         <div className={cn("flex items-center gap-3 px-2 py-3 overflow-hidden transition-all duration-200", collapsed && "justify-center px-0")}>
+          {/* Logo Mark Container */}
           <div className={cn(
-            "flex shrink-0 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground shadow-elegant overflow-hidden border border-white/10 transition-all duration-200",
-            collapsed ? "h-9 w-9" : "h-14 w-14"
+            "flex shrink-0 items-center justify-center rounded-xl bg-white text-slate-900 shadow-md border border-white/20 transition-all duration-200 overflow-hidden p-1",
+            collapsed ? "h-9 w-9" : "h-11 w-11"
           )}>
-            {activeOrg && activeOrg.logo ? (
-              <img src={activeOrg.logo} className="h-full w-full object-cover animate-fade-in" alt="Logo de la Academia" />
-            ) : (
-              <Trophy className={collapsed ? "h-5 w-5" : "h-7 w-7"} />
-            )}
+            <img src="/favicon.png" className="h-full w-full object-contain" alt="Nexus Sport" />
           </div>
-          {!collapsed && mounted && (
-            <div className="flex flex-col leading-tight text-sidebar-foreground w-full max-w-[170px]">
-              <span className="text-[10px] opacity-60 font-bold uppercase tracking-wider mb-1">Academia Activa</span>
-              {isSuperAdmin ? (
-                <select
-                  value={activeOrgId}
-                  onChange={(e) => handleOrgChange(e.target.value)}
-                  className="w-full text-xs font-semibold bg-sidebar-accent/60 border border-sidebar-border/80 rounded px-1.5 py-0.5 text-sidebar-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-sidebar-ring"
-                >
-                  {orgs.map((o) => (
-                    <option key={o.id} value={o.id} className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
-                      {o.nombre}
-                    </option>
-                  ))}
-                  <option value="__new__" className="text-slate-900 bg-background dark:text-white dark:bg-slate-900">
-                    + Registrar Nuevo Club...
-                  </option>
-                </select>
-              ) : (
-                <span className="text-sm font-extrabold text-white tracking-tight leading-snug break-words">
-                  {activeOrg?.nombre || "Cargando..."}
-                </span>
-              )}
-            </div>
-          )}
-          {!collapsed && !mounted && (
-            <div className="flex flex-col leading-tight text-sidebar-foreground">
-              <span className="text-[10px] opacity-60 font-bold uppercase tracking-wider mb-0.5">Academia Activa</span>
-              <span className="text-xs font-semibold text-muted-foreground animate-pulse">Cargando...</span>
+
+          {!collapsed && (
+            <div className="flex flex-col leading-none text-sidebar-foreground w-full max-w-[170px]">
+              <span className="text-base font-black text-white tracking-wider uppercase font-sans">
+                NEXUS<span className="text-sky-400">SPORT</span>
+              </span>
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full w-fit mt-1 shadow-sm">
+                <span>PREMIUM APP</span>
+                <Sparkles className="h-3 w-3 text-amber-400 animate-pulse fill-amber-400" />
+              </div>
             </div>
           )}
         </div>

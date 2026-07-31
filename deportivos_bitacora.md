@@ -3,7 +3,42 @@
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
 
+## [30/07/2026 - Noche: Alto Rendimiento — Corrección de Datos, Sports Science, Modales de Riesgo en Control de Cargas]
+
+### 🔧 Corrección General: Datos no aparecían en módulos de Alto Rendimiento
+Se identificó y corrigió una cadena de 3 problemas que impedían que los registros guardados en una sesión de entrenamiento se reflejaran en los dashboards de Alto Rendimiento (Wellness, Tests Físicos, Control de Cargas, Sports Science).
+
+#### `src/lib/rendimiento-store.ts`
+- **`getWellness` / `addWellness`:** Normalización de fechas `DD/MM/YYYY → YYYY-MM-DD`. Match por `jugadorId` y por `jugadorNombre` / `jugador` para evitar fallo por diferencia de ID.
+- **`addEvaluacion`:** Método creado para persistir resultados de Tests Físicos correctamente en Supabase (`resultados_pruebas_fisicas`).
+- **`addCargaEntrenamiento`:** Nuevo método que persiste registros de carga interna en `cargas_entrenamiento` con soporte para ID y nombre de jugador.
+- **`getPlayerLoadData`:** Match flexible por ID y nombre para Cargas y Wellness.
+- **`getSportsScoreData`:** Mejorado para buscar Wellness por ID **y** nombre. Integración con `cargas_entrenamiento` (antes solo usaba `sesiones.carga`). Historial por jugador individual en lugar de por equipo. Estado `"sin_registro"` solo si no hay wellness **ni** cargas.
+
+#### `src/routes/_app/entrenamientos.tsx`
+- `handleGuardarSesionFinal` ahora llama a `addCargaEntrenamiento` automáticamente para cada jugador presente al guardar la sesión.
+
+#### `src/routes/_app/rendimiento.wellness.tsx`
+- Filtrado de equipos con fallback: si `coachName` no coincide exactamente con ningún equipo → muestra todos los datos.
+- Parsing de fechas corregido para comparación correcta de rango.
+
+#### `src/routes/_app/rendimiento.tests.tsx`
+- Filtrado por categoría con fallback para evitar vistas vacías.
+- Match de jugadores por nombre además de ID.
+
+#### `src/routes/_app/rendimiento.cargas.tsx`
+- Filtrado de equipos con fallback igual al de Wellness y Tests.
+- **Modal "🔴 Alto Riesgo":** La tarjeta resumen del header ahora es clickable cuando hay jugadores en riesgo. Abre un `Dialog` con la lista completa: foto, equipo, ACWR, Carga Semanal, Fatiga, Recovery, motivos detectados y recomendación. Botón "Ver análisis completo →" selecciona al jugador y cierra el modal.
+- **Modal "🟡 Precaución":** Misma funcionalidad que Alto Riesgo pero en color amber para jugadores con sobrecarga moderada.
+
+#### `src/routes/_app/rendimiento.sports-science.tsx`
+- Filtrado de equipos con fallback (si nombre del entrenador no coincide exactamente → muestra todo).
+- `loadData` ahora aplica el mismo patrón defensivo: solo filtra si el filtro efectivamente devuelve resultados.
+
+---
+
 ## [30/07/2026 - Pizarra Táctica bCoach Elite 100% Pantalla Completa, HUD & Dock Flotante de Cristal, Selector Multiequipo & Dock Compacto Mobile-First]
+
 
 - **Transformación de la Cancha a 100% Pantalla Completa (Edge-to-Edge) (`src/components/cancha-bcoach-board.tsx`):**
   - Eliminadas las barras superiores e inferiores fijas oscuras que ocupaban ~35% de la pantalla. El campo verde ahora ocupa el 100% del viewport en teléfonos y tablets sin márgenes ni marcos negros.

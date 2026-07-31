@@ -122,8 +122,9 @@ function WellnessPage() {
 
   const myTeams = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    if (isAdmin) return all;
-    return all.filter(t => t.entrenador === coachName);
+    if (isAdmin || !coachName) return all;
+    const filtered = all.filter(t => t.entrenador === coachName || (t.entrenador || "").toLowerCase().includes((coachName || "").toLowerCase()));
+    return filtered.length > 0 ? filtered : all;
   }, [isAdmin, coachName]);
 
   const myCategories = useMemo(() => myTeams.map(t => t.categoria), [myTeams]);
@@ -131,7 +132,8 @@ function WellnessPage() {
   const activePlayers = useMemo(() => {
     const raw = RendimientoStore.getJugadores();
     if (isAdmin) return raw;
-    return raw.filter(p => myCategories.includes(p.categoria));
+    const filtered = raw.filter(p => myCategories.includes(p.categoria));
+    return filtered.length > 0 ? filtered : raw;
   }, [isAdmin, myCategories]);
 
   const JUGADORES_MAP = useMemo(() => {
@@ -194,15 +196,15 @@ function WellnessPage() {
   const loadData = () => {
     let w = RendimientoStore.getWellness();
     let a = RendimientoStore.getWellnessAlertas();
-    if (!isAdmin) {
-      w = w.filter(x => {
-        const p = activePlayers.find(pl => pl.id === x.jugadorId);
-        return p !== undefined;
-      });
-      a = a.filter(al => {
-        const p = activePlayers.find(pl => pl.id === al.jugadorId);
-        return p !== undefined;
-      });
+    if (!isAdmin && activePlayers.length > 0) {
+      const activeIds = new Set(activePlayers.map(p => p.id));
+      const activeNames = new Set(activePlayers.map(p => p.nombre.toLowerCase().trim()));
+      const filteredW = w.filter(x => 
+        activeIds.has(x.jugadorId) || 
+        (x.jugadorNombre && activeNames.has(x.jugadorNombre.toLowerCase().trim())) ||
+        (x.jugador && activeNames.has(x.jugador.toLowerCase().trim()))
+      );
+      if (filteredW.length > 0) w = filteredW;
     }
     setLogs(w);
     setAlertas(a);
@@ -242,9 +244,12 @@ function WellnessPage() {
   // Filter logs
   const now = new Date();
   const filteredLogs = logs.filter(l => {
-    const d = new Date(l.fecha);
+    if (!l.fecha) return true;
+    const cleanFecha = l.fecha.includes("/") ? l.fecha.split("/").reverse().join("-") : l.fecha;
+    const d = new Date(cleanFecha);
+    if (isNaN(d.getTime())) return true;
     if (filtro === "hoy") {
-      return l.fecha === now.toISOString().split("T")[0];
+      return cleanFecha === now.toISOString().split("T")[0];
     }
     if (filtro === "semana") {
       const s = new Date(now); s.setDate(now.getDate() - 7);

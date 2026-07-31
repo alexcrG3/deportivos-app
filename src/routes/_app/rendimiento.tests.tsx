@@ -44,8 +44,9 @@ function TestsPage() {
 
   const myTeams = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    if (isAdmin) return all;
-    return all.filter(t => t.entrenador === coachName);
+    if (isAdmin || !coachName) return all;
+    const filtered = all.filter(t => t.entrenador === coachName || (t.entrenador || "").toLowerCase().includes((coachName || "").toLowerCase()));
+    return filtered.length > 0 ? filtered : all;
   }, [isAdmin, coachName]);
 
   const myCategories = useMemo(() => myTeams.map(t => t.categoria), [myTeams]);
@@ -54,7 +55,8 @@ function TestsPage() {
   const dbPlayers = useMemo(() => {
     const raw = RendimientoStore.getJugadores();
     if (isAdmin) return raw;
-    return raw.filter(p => myCategories.includes(p.categoria));
+    const filtered = raw.filter(p => myCategories.includes(p.categoria));
+    return filtered.length > 0 ? filtered : raw;
   }, [isAdmin, myCategories]);
 
   // Load test types dynamically from Banco de Pruebas Físicas
@@ -100,12 +102,15 @@ function TestsPage() {
     const raw = RendimientoStore.getTests();
     let filtered = raw;
 
-    if (!isAdmin) {
+    if (!isAdmin && myCategories.length > 0) {
       const players = RendimientoStore.getJugadores();
-      filtered = filtered.filter(t => {
-        const p = players.find(x => x.id === t.jugadorId);
+      const filteredByCat = filtered.filter(t => {
+        const p = players.find(x => x.id === t.jugadorId || x.nombre.toLowerCase().trim() === (t.jugador || "").toLowerCase().trim());
         return p && myCategories.includes(p.categoria);
       });
+      if (filteredByCat.length > 0) {
+        filtered = filteredByCat;
+      }
     }
 
     if (selectedTeamName !== "all") {
@@ -118,7 +123,7 @@ function TestsPage() {
         const players = RendimientoStore.getJugadores();
         
         filtered = filtered.filter(t => {
-          const p = players.find(x => x.id === t.jugadorId);
+          const p = players.find(x => x.id === t.jugadorId || x.nombre.toLowerCase().trim() === (t.jugador || "").toLowerCase().trim());
           if (!p || !p.categoria) return false;
           const pCat = p.categoria.toLowerCase().trim();
           return pCat === cat || pCat === nom || nom.includes(pCat) || pCat.includes(nom);

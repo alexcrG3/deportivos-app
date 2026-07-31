@@ -1,12 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatCard } from "@/components/stat-card";
 import {
   CalendarClock, Bell, TrendingUp, Brain, AlertTriangle, Plus, CheckCircle2, ChevronRight, Check, Trophy, Wallet, ClipboardCheck, Calendar, Megaphone,
   AlertCircle, FileWarning, Dumbbell, Swords, Stethoscope, Star, UserPlus, Users, ShieldHalf, Activity, Sparkles, ArrowRight, HeartPulse, ShieldAlert, PackageX,
+  ExternalLink, Trash2, X, Zap, Film, CheckSquare, FileText, Eye, MapPin, Clock, ClipboardList, Play,
 } from "lucide-react";
 import {
   jugadores, pagos, formatCRC, trainingSessions, matches, convocatorias,
@@ -17,6 +20,7 @@ import RendimientoStore, { sportsScoreLabel } from "@/lib/rendimiento-store";
 import { useState, useMemo, useEffect } from "react";
 import { useRole } from "@/hooks/use-role";
 import { toast } from "sonner";
+import { AcademyHeaderBanner } from "@/components/AcademyHeaderBanner";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
 
@@ -284,21 +288,39 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            Centro de Operaciones Enterprise 2.0
-            <Badge className="badge-pill badge-info tracking-wider">Executive UI</Badge>
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Visión 360° del club: IA, Finanzas, Deporte, Staff y Operaciones Diarias.</p>
+      {/* Banner Destacado de la Academia Activa */}
+      <AcademyHeaderBanner 
+        badgeText="ACADEMIA ACTIVA"
+        subtitle="PANEL DE GESTIÓN EMPRESARIAL & ALTO RENDIMIENTO MULTIDEPORTIVO"
+      />
+
+      {/* Row 1: Glassmorphic Executive Command Bar */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
+        <div className="flex items-center gap-3.5">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-500/20 shrink-0">
+            👑
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                Centro de Operaciones Enterprise
+              </h2>
+              <Badge className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[10px] font-bold uppercase tracking-wider">
+                Executive UI 2.0
+              </Badge>
+            </div>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Visión 360° de la academia: IA, Finanzas, Deporte, Staff y Operaciones Diarias.
+            </p>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="btn-secondary">
-            <Bell className="h-4 w-4" /> Alertas
+
+        <div className="flex items-center gap-2 self-stretch md:self-auto justify-end">
+          <Button variant="outline" className="btn-secondary h-9 text-xs">
+            <Bell className="h-3.5 w-3.5 mr-1" /> Alertas
           </Button>
-          <Button className="btn-primary">
-            <Plus className="h-4 w-4" /> Nuevo jugador
+          <Button className="btn-primary h-9 text-xs">
+            <Plus className="h-3.5 w-3.5 mr-1" /> Nuevo Jugador
           </Button>
         </div>
       </div>
@@ -899,6 +921,175 @@ function CoachDashboard() {
     return () => window.removeEventListener("organizacionChanged", handleSync);
   }, []);
 
+  // --- DATE PICKER & COACH OS STATE ---
+  const now = new Date();
+  const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const [selectedDate, setSelectedDate] = useState<string>(todayISO);
+
+  const orgTeams = useMemo(() => RendimientoStore.getEquipos(), [updateTrigger]);
+
+  const myTeams = useMemo(() => {
+    if (!greetingName) return orgTeams;
+    const matchCoach = orgTeams.filter(t => (t.entrenador || "").toLowerCase().includes(greetingName.toLowerCase()));
+    return matchCoach.length > 0 ? matchCoach : orgTeams;
+  }, [orgTeams, greetingName]);
+
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (myTeams.length > 0 && (!selectedTeamId || !myTeams.some(t => t.id === selectedTeamId))) {
+      setSelectedTeamId(myTeams[0].id);
+    }
+  }, [myTeams]);
+
+  const activeTeam = useMemo(() => {
+    return myTeams.find(t => t.id === selectedTeamId) || myTeams[0];
+  }, [myTeams, selectedTeamId]);
+
+  const navigate = useNavigate();
+
+  const playersForTeam = (team: any) => {
+    const all = RendimientoStore.getJugadores();
+    if (!team) return all;
+    const safeLower = (v: unknown): string => String(v ?? "").trim().toLowerCase();
+    const normCat = (v: unknown): string => {
+      const s = safeLower(v);
+      const m = s.match(/(?:sub[-_\s]?|u)(\d+)/);
+      return m ? `u${m[1]}` : s;
+    };
+    const catNorm = normCat(team.categoria || team.nombre);
+    const teamNameNorm = safeLower(team.nombre || "");
+
+    const matched = all.filter(p => {
+      const pCatNorm = normCat(p.categoria || (p as any).equipo || "");
+      const pTeamNorm = safeLower((p as any).equipo || p.categoria || "");
+      return pCatNorm === catNorm || pTeamNorm.includes(teamNameNorm) || teamNameNorm.includes(pTeamNorm);
+    });
+
+    return matched.length > 0 ? matched : all.slice(0, 15);
+  };
+
+  const todayMatch = useMemo(() => {
+    const matches = RendimientoStore.getPartidos();
+    return matches.find(m => m.fecha === selectedDate && (!activeTeam || m.equipo === activeTeam.nombre || (m as any).categoria === activeTeam.categoria));
+  }, [selectedDate, activeTeam, updateTrigger]);
+
+  const todaySession = useMemo(() => {
+    const sesiones = RendimientoStore.getSesiones();
+    return sesiones.find(s => s.fecha === selectedDate && (!activeTeam || s.equipo === activeTeam.nombre));
+  }, [selectedDate, activeTeam, updateTrigger]);
+
+  const isSessionCompleted = useMemo(() => {
+    if (todaySession && (todaySession as any).asistenciaCompletada) return true;
+    const asistencias = RendimientoStore.getAsistencias();
+    const todayStr = new Date().toISOString().split("T")[0];
+    const hasAttendance = asistencias.some(a => {
+      const matchDate = a.fecha === selectedDate || a.fecha === todayStr;
+      const matchTeam = !activeTeam || a.equipo === activeTeam.nombre || a.equipo === activeTeam.categoria;
+      return matchDate && matchTeam;
+    });
+    if (hasAttendance) return true;
+
+    if (typeof window !== "undefined" && activeTeam) {
+      const localKey = `completed_session_${selectedDate}_${activeTeam.id}`;
+      if (localStorage.getItem(localKey) === "true") return true;
+    }
+    return false;
+  }, [todaySession, selectedDate, activeTeam, updateTrigger]);
+
+  const academyAgendaGeneral = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    const storeSesiones = RendimientoStore.getSesiones();
+    const storePartidos = RendimientoStore.getPartidos();
+    const coachTeamNames = new Set(myTeams.map(t => (t.nombre || "").toLowerCase()));
+
+    // 1. Map real sessions across all teams in academy
+    const sessionsList = storeSesiones.filter(s => s.fecha && s.fecha >= todayStr).map(s => ({
+      id: s.id,
+      nombre: s.nombre || `Entrenamiento ${s.equipo || ""}`,
+      categoria: s.equipo || s.categoria || "General",
+      entrenador: s.entrenador || greetingName || "Staff Técnico",
+      hora: s.hora || "16:00",
+      fecha: s.fecha,
+      cancha: s.lugar || s.cancha || "Cancha Principal",
+      tipo: "Entrenamiento",
+      isMyTeam: (s.equipo && coachTeamNames.has(s.equipo.toLowerCase())) || (activeTeam && s.equipo === activeTeam.nombre),
+    }));
+
+    // 2. Map real matches across all teams in academy
+    const matchesList = storePartidos.filter(p => p.fecha && p.fecha >= todayStr).map(p => ({
+      id: p.id,
+      nombre: `Partido vs ${p.rival || p.visitante || "Rival FC"}`,
+      categoria: p.categoria || p.equipo || "Competencia",
+      entrenador: p.entrenador || "Staff Técnico",
+      hora: p.hora || "10:00 AM",
+      fecha: p.fecha,
+      cancha: p.sede || p.estadio || p.cancha || "Cancha Principal",
+      tipo: "Partido",
+      isMyTeam: (p.equipo && coachTeamNames.has(p.equipo.toLowerCase())) || (p.local && coachTeamNames.has(p.local.toLowerCase())),
+    }));
+
+    let allAcademyEvents = [...sessionsList, ...matchesList];
+
+    // If fewer than 4 events, generate comprehensive academy schedule covering all org teams & coaches
+    if (allAcademyEvents.length < 4) {
+      const coachesList = ["Carlos Araya", "Manuel Solís", "Roberto Gómez", "Esteban Ramírez"];
+      const canchasList = ["Cancha Principal", "Cancha 2 (Sintética)", "Cancha 3 (Fut 7)", "Estadio Central"];
+
+      orgTeams.forEach((t, idx) => {
+        const d = new Date(today);
+        d.setDate(d.getDate() + (idx % 3));
+        const dateStr = d.toISOString().split("T")[0];
+        const isMatch = idx === 2;
+
+        allAcademyEvents.push({
+          id: `acad_gen_${idx}_${dateStr}`,
+          nombre: isMatch ? `Partido Oficial vs Deportivo San José` : `Entrenamiento Táctico ${t.categoria || t.nombre}`,
+          categoria: t.categoria || t.nombre,
+          entrenador: t.entrenador || coachesList[idx % coachesList.length],
+          hora: idx === 0 ? "16:00" : idx === 1 ? "17:30" : idx === 2 ? "10:00 AM" : "19:00",
+          fecha: dateStr,
+          cancha: canchasList[idx % canchasList.length],
+          tipo: isMatch ? "Partido" : "Entrenamiento",
+          isMyTeam: myTeams.some(mt => mt.id === t.id),
+        });
+      });
+    }
+
+    // Sort chronologically by date and time
+    allAcademyEvents.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora));
+
+    // Deduplicate
+    const seen = new Set();
+    return allAcademyEvents.filter(ev => {
+      const key = `${ev.fecha}_${ev.categoria}_${ev.nombre}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 6);
+  }, [orgTeams, myTeams, activeTeam, greetingName, updateTrigger]);
+
+  const overduePlayers = useMemo(() => {
+    const players = RendimientoStore.getJugadores();
+    const payments = RendimientoStore.getPagos();
+    const overdueMap: Record<string, number> = {};
+    payments.filter(p => p.estado === "pendiente" || p.estado === "atrasado").forEach(p => {
+      overdueMap[p.jugadorId] = (overdueMap[p.jugadorId] || 0) + (p.monto || 15000);
+    });
+    return players
+      .filter(p => overdueMap[p.id])
+      .slice(0, 3)
+      .map(p => ({
+        id: p.id,
+        nombre: p.nombre,
+        encargado: p.encargadoNombre || "Encargado",
+        telefono: (p as any).encargadoTelefono || "88888888",
+        saldo: overdueMap[p.id] || 25000,
+      }));
+  }, [updateTrigger]);
+
   // --- TAREAS Y EQUIPOS DINÁMICOS DE HOY EN EL CLIENTE ---
   const todayDateStr = new Date().toISOString().split("T")[0];
 
@@ -914,13 +1105,31 @@ function CoachDashboard() {
     return RendimientoStore.getResultadosPruebas().some(rp => rp.fecha === todayDateStr);
   }, [todayDateStr, updateTrigger]);
 
-  const [tasks, setTasks] = useState([
-    { id: 1, text: "Tomar asistencia", color: "bg-red-500", done: false },
-    { id: 2, text: "Registrar evaluación", color: "bg-orange-500", done: false },
-    { id: 3, text: "Publicar convocatoria", color: "bg-amber-500", done: false },
-    { id: 4, text: "Revisar wellness", color: "bg-blue-500", done: false },
-    { id: 5, text: "Confirmar jugadores", color: "bg-emerald-500", done: true },
-  ]);
+  const defaultCoachTasks = [
+    { id: 1, text: "Tomar asistencia", color: "bg-red-500", done: false, url: "/asistencia", isCustom: false },
+    { id: 2, text: "Registrar evaluación", color: "bg-orange-500", done: false, url: "/evaluaciones", isCustom: false },
+    { id: 3, text: "Publicar convocatoria", color: "bg-amber-500", done: false, url: "/convocatorias", isCustom: false },
+    { id: 4, text: "Revisar wellness", color: "bg-blue-500", done: false, url: "/rendimiento/wellness", isCustom: false },
+    { id: 5, text: "Confirmar jugadores", color: "bg-emerald-500", done: true, url: "/jugadores", isCustom: false },
+  ];
+
+  const [tasks, setTasks] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedCustom = localStorage.getItem("deportivos_coach_custom_tasks");
+      if (savedCustom) {
+        try {
+          const parsed = JSON.parse(savedCustom);
+          return [...defaultCoachTasks, ...parsed];
+        } catch (e) {
+          // ignore error
+        }
+      }
+    }
+    return defaultCoachTasks;
+  });
+
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newCustomTaskText, setNewCustomTaskText] = useState("");
 
   useEffect(() => {
     setTasks(prev => prev.map(t => {
@@ -931,11 +1140,47 @@ function CoachDashboard() {
     }));
   }, [hasTodayAttendance, hasTodayEvaluation, hasTodayWellness]);
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggleTask = (id: number | string) => {
+    setTasks(prev => {
+      const updated = prev.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      const customOnly = updated.filter(t => t.isCustom);
+      localStorage.setItem("deportivos_coach_custom_tasks", JSON.stringify(customOnly));
+      return updated;
+    });
   };
 
-  const orgTeams = useMemo(() => RendimientoStore.getEquipos(), [updateTrigger]);
+  const handleAddCustomTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustomTaskText.trim()) return;
+    const newTask = {
+      id: `task_${Date.now()}`,
+      text: newCustomTaskText.trim(),
+      color: "bg-purple-500",
+      done: false,
+      isCustom: true,
+    };
+    setTasks(prev => {
+      const updated = [...prev, newTask];
+      const customOnly = updated.filter(t => t.isCustom);
+      localStorage.setItem("deportivos_coach_custom_tasks", JSON.stringify(customOnly));
+      return updated;
+    });
+    setNewCustomTaskText("");
+    setShowAddTask(false);
+    toast.success("Tarea personal agregada a tu jornada diaria");
+  };
+
+  const handleDeleteCustomTask = (id: number | string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTasks(prev => {
+      const updated = prev.filter(t => t.id !== id);
+      const customOnly = updated.filter(t => t.isCustom);
+      localStorage.setItem("deportivos_coach_custom_tasks", JSON.stringify(customOnly));
+      return updated;
+    });
+    toast.info("Tarea eliminada");
+  };
+
   const todayTeams = useMemo(() => {
     const sessions = RendimientoStore.getSesiones();
     const todayStr = new Date().toISOString().split("T")[0];
@@ -1036,15 +1281,127 @@ function CoachDashboard() {
   }, [loadData, injuries]);
 
   const upcomingEvents = useMemo(() => {
-    const list = RendimientoStore.getSesiones();
-    return list.slice(0, 4).map(s => ({
-      title: s.nombre,
-      date: s.fecha,
-      time: s.hora || "3:00 pm",
-      type: (s.tipo || "entrenamiento").toLowerCase(),
-      color: s.tipo === "Competencia" ? "bg-amber-500/10 text-amber-500" : "bg-blue-500/10 text-blue-500"
-    }));
-  }, [updateTrigger]);
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0]; // e.g. "2026-07-30"
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split("T")[0];
+
+    const monthNames = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+
+    // 1. Get real sessions and real matches for current coach's teams safely
+    const storeSesiones = RendimientoStore.getSesiones();
+    const storePartidos = RendimientoStore.getPartidos();
+    const coachTeamIds = new Set(myTeams.map(t => t.id));
+    const coachTeamNames = new Set(myTeams.map(t => (t.nombre || "").toLowerCase()));
+
+    const realSessions = storeSesiones.filter((s) => {
+      const teamStr = typeof s.equipo === "string" ? s.equipo.toLowerCase() : "";
+      const isCoachTeam = (s.equipoId && coachTeamIds.has(s.equipoId)) || 
+                          (teamStr && coachTeamNames.has(teamStr));
+      return isCoachTeam && s.fecha && s.fecha >= todayStr;
+    });
+
+    const realMatches = storePartidos.filter((p) => {
+      const teamStr = typeof p.equipo === "string" ? p.equipo.toLowerCase() : "";
+      const localStr = typeof p.local === "string" ? p.local.toLowerCase() : "";
+      const isCoachTeam = (p.equipoId && coachTeamIds.has(p.equipoId)) ||
+                          (teamStr && coachTeamNames.has(teamStr)) ||
+                          (localStr && coachTeamNames.has(localStr));
+      return isCoachTeam && p.fecha && p.fecha >= todayStr;
+    }).map((m) => {
+      const rivalName = typeof m.rival === "string" ? m.rival : (typeof m.visitante === "string" ? m.visitante : "Rival FC");
+      const localName = typeof m.local === "string" ? m.local : (typeof m.equipo === "string" ? m.equipo : (activeTeam?.nombre || "Mi Equipo"));
+      return {
+        id: m.id,
+        nombre: `Partido vs ${rivalName} (${m.categoria || activeTeam?.categoria || "Sub-9"})`,
+        fecha: m.fecha,
+        hora: m.hora || "17:00",
+        tipo: "Competencia",
+        equipo: localName,
+        asistenciaCompletada: false,
+      };
+    });
+
+    let validEvents: any[] = [...realSessions, ...realMatches];
+
+    // 2. If no real events or fewer than 4, project ONLY routine training sessions (no invented matches!)
+    if (validEvents.length < 4) {
+      const offsets = [0, 1, 3, 5];
+      const generated: typeof storeSesiones = [];
+      const teamsToUse = myTeams.length > 0 ? myTeams : (activeTeam ? [activeTeam] : []);
+
+      offsets.forEach((offset, idx) => {
+        const d = new Date(today);
+        d.setDate(d.getDate() + offset);
+        const dateStr = d.toISOString().split("T")[0];
+
+        const team = teamsToUse[idx % Math.max(1, teamsToUse.length)];
+        const teamName = team ? team.nombre : "Plantel Sub-9";
+        const catName = team ? team.categoria : "Sub-9";
+
+        generated.push({
+          id: `fut_gen_coach_${idx}_${dateStr}`,
+          nombre: `Entrenamiento de Cancha: ${catName}`,
+          fecha: dateStr,
+          hora: "16:00",
+          tipo: "Entrenamiento",
+          equipo: teamName,
+          asistenciaCompletada: false,
+        } as any);
+      });
+
+      validEvents = [...validEvents, ...generated];
+    }
+
+    // Sort chronologically ascending (closest upcoming event first)
+    validEvents.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora || "").localeCompare(b.hora || ""));
+
+    // Deduplicate by id/title+fecha
+    const seen = new Set();
+    const uniqueEvents = validEvents.filter((ev) => {
+      const key = `${ev.fecha}_${ev.nombre}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return uniqueEvents.slice(0, 4).map((s) => {
+      const [year, month, day] = s.fecha.split("-").map(Number);
+      const mLabel = monthNames[(month || 1) - 1] || "JUL";
+      const dayNum = day || 1;
+      const isToday = s.fecha === todayStr;
+      const isTomorrow = s.fecha === tomorrowStr;
+
+      let statusBadge = "PRÓXIMO";
+      let badgeColor = "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
+
+      if (isToday) {
+        statusBadge = "HOY";
+        badgeColor = "bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30";
+      } else if (isTomorrow) {
+        statusBadge = "MAÑANA";
+        badgeColor = "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30";
+      } else if (s.tipo === "Competencia" || s.tipo === "Partido") {
+        statusBadge = "PARTIDO";
+        badgeColor = "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30";
+      }
+
+      return {
+        id: s.id,
+        rawDate: s.fecha,
+        dayNum,
+        monthLabel: mLabel,
+        statusBadge,
+        badgeColor,
+        title: s.nombre || s.titulo || `Entrenamiento (${s.equipo})`,
+        time: s.hora || "16:00",
+        type: s.tipo || "Entrenamiento",
+        equipo: s.equipo || "Plantel Principal",
+      };
+    });
+  }, [updateTrigger, myTeams, activeTeam]);
 
   const aiRecommendations = useMemo(() => {
     const list: Array<{ text: string; subtext: string; icon: string }> = [];
@@ -1089,185 +1446,627 @@ function CoachDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Greetings Block */}
-      <div className="bg-gradient-primary rounded-3xl p-6 md:p-8 text-primary-foreground shadow-elegant relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,white_0%,transparent_50%)]" />
-        <div className="relative z-10 space-y-2">
-          <Badge variant="outline" className="border-white/20 bg-white/10 text-white text-[10px] uppercase font-semibold tracking-wider">Portal del Coach</Badge>
-          <h1 className="text-3xl font-bold tracking-tight">¡Buenos días, {greetingName}!</h1>
-          <p className="text-sm text-primary-foreground/90 max-w-xl">
-            Este es tu escritorio de trabajo operativo. {todayTeams.length > 0 ? `Tienes ${todayTeams.length} sesión${todayTeams.length > 1 ? "es" : ""} asignada${todayTeams.length > 1 ? "es" : ""} para hoy` : "No tienes sesiones programadas para hoy"} y {alerts.length > 0 ? `${alerts.length} alerta${alerts.length > 1 ? "s" : ""} que requiere${alerts.length > 1 ? "n" : ""} revisión.` : "ninguna alerta pendiente."}
+      {/* Banner Destacado de la Academia Activa */}
+      <AcademyHeaderBanner 
+        badgeText="ACADEMIA ACTIVA"
+        subtitle="PANEL DE ENTRENADORES & CUERPO TÉCNICO"
+      />
+
+      {/* Row 1: High-Impact Glassmorphic Greeting Bar */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800 rounded-2xl p-4 md:p-5 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 transition-all">
+        <div className="flex items-center gap-3.5">
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-white font-extrabold text-lg shadow-md shadow-sky-500/20 shrink-0">
+            {greetingName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                ¡Hola, Coach {greetingName}! 👋
+              </h2>
+              <Badge className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[10px] font-bold uppercase tracking-wider">
+                Portal del Coach
+              </Badge>
+            </div>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              {todayTeams.length > 0 
+                ? `Tienes ${todayTeams.length} sesión${todayTeams.length > 1 ? "es" : ""} programada${todayTeams.length > 1 ? "s" : ""} para el día de hoy.` 
+                : "Sin sesiones de entrenamiento programadas para hoy."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 self-stretch lg:self-auto justify-end">
+          {/* Functional Date Picker */}
+          <label className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-1.5 cursor-pointer shadow-xs hover:border-sky-500/50 transition-colors">
+            <Calendar className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={e => e.target.value && setSelectedDate(e.target.value)}
+              className="bg-transparent border-none outline-none text-xs cursor-pointer font-bold text-slate-900 dark:text-slate-100"
+            />
+          </label>
+
+          <Button variant="outline" size="sm" asChild className="h-8 text-xs font-bold gap-1.5 border-slate-200 dark:border-slate-800">
+            <Link to="/planeamiento">
+              <ClipboardList className="w-3.5 h-3.5 text-sky-500" />
+              <span>Planificación</span>
+            </Link>
+          </Button>
+
+          <Button size="sm" asChild className="h-8 text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white gap-1.5 shadow-sm">
+            <Link to="/entrenamientos">
+              <Play className="w-3.5 h-3.5" />
+              <span>Modo Cancha</span>
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* Row 2: Premium 4 Stat Cards */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Sesiones Hoy */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-400 to-blue-600" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Sesiones Hoy
+            </span>
+            <div className="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Dumbbell className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline justify-between">
+            <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              {todayTeams.length}
+            </h3>
+            <Badge className="bg-sky-500/15 text-sky-600 dark:text-sky-300 border-none text-[10px] font-bold">
+              {todayTeams.length > 0 ? "Activas" : "Día Libre"}
+            </Badge>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+            Entrenamientos en plantilla
+          </p>
+        </div>
+
+        {/* Card 2: Convocatorias */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Convocatorias
+            </span>
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Megaphone className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline justify-between">
+            <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              {activeConvocatorias.length}
+            </h3>
+            <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-300 border-none text-[10px] font-bold">
+              Publicadas
+            </Badge>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+            Convocatorias de partido
+          </p>
+        </div>
+
+        {/* Card 3: Enfermería */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-600" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              En Enfermería
+            </span>
+            <div className="h-10 w-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Activity className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline justify-between">
+            <h3 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              {activeInjuriesCount}
+            </h3>
+            <Badge className={cn(
+              "border-none text-[10px] font-bold",
+              activeInjuriesCount > 0 ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 animate-pulse" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+            )}>
+              {activeInjuriesCount > 0 ? "Bajas Médicas" : "Sin Lesionados"}
+            </Badge>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+            Atletas en tratamiento / baja
+          </p>
+        </div>
+
+        {/* Card 4: Score de Rendimiento */}
+        <div className="group relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-600" />
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Rendimiento
+            </span>
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Trophy className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-baseline justify-between">
+            <h3 className="text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
+              {(100 - (alerts.length * 10)).toFixed(0)}%
+            </h3>
+            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-none text-[10px] font-bold">
+              Nivel Élite
+            </Badge>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+            Score operativo óptimo
           </p>
         </div>
       </div>
 
-      {/* Operative Stat Cards Grid (Fusionado del antiguo Panel Coach) */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <div className="bg-card border rounded-2xl p-4 shadow-card hover:shadow-elegant transition flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">Sesiones hoy</span>
-            <Dumbbell className="h-4.5 w-4.5 text-primary" />
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-foreground">{todayTeams.length}</h3>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Entrenamientos activos</p>
-          </div>
-        </div>
-
-        <div className="bg-card border rounded-2xl p-4 shadow-card hover:shadow-elegant transition flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">Convocatorias</span>
-            <Megaphone className="h-4.5 w-4.5 text-blue-500" />
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-foreground">{activeConvocatorias.length}</h3>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Convocatorias publicadas</p>
-          </div>
-        </div>
-
-        <div className="bg-card border rounded-2xl p-4 shadow-card hover:shadow-elegant transition flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">En Enfermería</span>
-            <Activity className="h-4.5 w-4.5 text-red-500" />
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-foreground">{activeInjuriesCount}</h3>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Lesionados / Restricciones</p>
-          </div>
-        </div>
-
-        <div className="bg-card border rounded-2xl p-4 shadow-card hover:shadow-elegant transition flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">Rendimiento</span>
-            <Trophy className="h-4.5 w-4.5 text-amber-500" />
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-bold text-foreground">{(100 - (alerts.length * 10)).toFixed(0)}%</h3>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Score operativo óptimo</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Work Area */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Equipos de Hoy */}
-          <Card className="shadow-card">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Dumbbell className="h-4.5 w-4.5 text-primary" /> Equipos de hoy
+      {/* Row 3: Secciones Principales en 2 COLUMNAS SIDE-BY-SIDE (Columna 1: Agenda, Próximos Eventos, Checklist & Cancha | Columna 2: Mis Equipos, IA, Wellness, Riesgo & Cobros) */}
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
+        {/* COLUMNA 1 (Izquierda): Agenda de Cancha, Eventos, Checklist & Cancha (lg:col-span-6) */}
+        <div className="lg:col-span-6 space-y-4">
+          {/* Card 1: Mi Agenda de Cancha (Hoy) */}
+          <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <Calendar className="w-4.5 h-4.5 text-sky-500" />
+                  Mi Agenda de Cancha (Hoy)
+                  {activeTeam && (
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      · {activeTeam.categoria}
+                    </span>
+                  )}
                 </CardTitle>
-                <Button variant="ghost" size="sm" asChild className="h-7 text-xs font-bold text-primary hover:text-primary bg-primary/5 hover:bg-primary/10 gap-0.5">
-                  <Link to="/equipos">
-                    Ir a Mis Equipos <ChevronRight className="h-3 w-3" />
-                  </Link>
-                </Button>
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Plan de entrenamiento y partidos del día para iniciar en cancha
+                </CardDescription>
               </div>
-              <CardDescription>Sesiones de entrenamiento y partidos programados para hoy</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {todayMatch ? (
+                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 flex flex-col items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-amber-500/20 rounded-xl p-3 shrink-0 text-amber-600 dark:text-amber-400">
+                      <ShieldHalf className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className="bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 border-none">
+                          PARTIDO OFICIAL
+                        </Badge>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+                          <MapPin className="w-3 h-3 text-amber-500" />
+                          {todayMatch.sede || todayMatch.estadio || "Cancha Academia Asoderive"}
+                        </span>
+                      </div>
+                      <p className="font-extrabold text-sm text-slate-900 dark:text-slate-100">
+                        {todayMatch.local || activeTeam?.nombre || "Equipo"} vs {todayMatch.visitante || todayMatch.rival || "Rival FC"}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
+                        <Clock className="w-3 h-3 text-amber-500" />
+                        {todayMatch.hora || "10:00 AM"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button size="sm" asChild className="text-xs font-bold gap-1.5 w-full bg-amber-600 hover:bg-amber-700 text-white shadow-sm">
+                    <Link to="/tactica/pizarra">
+                      <Eye className="w-3.5 h-3.5" /> Ver Táctica
+                    </Link>
+                  </Button>
+                </div>
+              ) : todaySession ? (
+                <div className={`rounded-2xl border p-4 flex flex-col justify-between gap-3 transition-all ${
+                  isSessionCompleted 
+                    ? "border-emerald-500/30 bg-emerald-500/5" 
+                    : "border-sky-500/30 bg-sky-500/5"
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`rounded-xl p-3 shrink-0 ${
+                      isSessionCompleted 
+                        ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
+                        : "bg-sky-500/20 text-sky-600 dark:text-sky-400"
+                    }`}>
+                      <Dumbbell className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`${
+                          isSessionCompleted 
+                            ? "bg-emerald-600 text-white" 
+                            : "bg-sky-600 text-white"
+                        } text-[9px] font-bold px-2 py-0.5 border-none`}>
+                          {isSessionCompleted ? "COMPLETADO" : "SESIÓN EN CANCHA"}
+                        </Badge>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+                          <MapPin className="w-3 h-3 text-sky-500" />
+                          {todaySession.sede || todaySession.instalacion || "Cancha Principal"}
+                        </span>
+                      </div>
+                      <p className="font-extrabold text-sm text-slate-900 dark:text-slate-100">
+                        {todaySession.nombre || `Entrenamiento ${activeTeam?.categoria}`}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 font-medium">
+                        <Clock className="w-3 h-3 text-sky-500" />
+                        {todaySession.hora || "15:00"} ({todaySession.duracion || 90} min)
+                      </p>
+                    </div>
+                  </div>
+                  {isSessionCompleted && (
+                    <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-1.5 flex items-center justify-center gap-1.5 w-full">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> ENTRENAMIENTO TERMINADO
+                    </Badge>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-4 flex flex-col justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-slate-200 dark:bg-slate-800 rounded-xl p-2.5 shrink-0 text-slate-500">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        Día libre para <span className="text-sky-600 dark:text-sky-400">{activeTeam?.categoria || "hoy"}</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">Puedes iniciar una sesión espontánea</p>
+                    </div>
+                  </div>
+                  <Button size="sm" asChild className="text-xs font-bold gap-1.5 w-full bg-sky-600 hover:bg-sky-700 text-white">
+                    <Link to="/entrenamientos" search={{ teamName: activeTeam?.nombre, category: activeTeam?.categoria, fecha: selectedDate, autostart: "true" }}>
+                      <Plus className="w-3.5 h-3.5" /> Nueva Sesión
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Gran Botón de Inicio o Estado de Entrenamiento */}
+              <div className="pt-1">
+                {isSessionCompleted ? (
+                  <Button size="lg" asChild className="w-full h-11 text-xs font-black gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md rounded-xl uppercase tracking-wider">
+                    <Link to="/entrenamientos" search={{ teamName: activeTeam?.nombre, category: activeTeam?.categoria, fecha: selectedDate }}>
+                      <CheckCircle2 className="w-4 h-4" /> ENTRENAMIENTO TERMINADO ({activeTeam?.categoria || "General"})
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" asChild className="w-full h-11 text-xs font-black gap-2 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white shadow-md rounded-xl uppercase tracking-wider">
+                    <Link to="/entrenamientos" search={{ teamName: activeTeam?.nombre, category: activeTeam?.categoria, fecha: selectedDate, autostart: "true" }}>
+                      <Play className="w-4 h-4" /> INICIAR ENTRENAMIENTO ({activeTeam?.categoria || "General"})
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 2: Próximos Eventos */}
+          <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <CalendarClock className="w-4.5 h-4.5 text-sky-500" /> Próximos eventos
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Planificación deportiva y calendario de la academia
+                </CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 gap-1 shrink-0">
+                <Link to="/entrenamientos">
+                  Ver Todo <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {upcomingEvents.length === 0 ? (
+                  <div className="col-span-2 text-center py-4 text-xs text-muted-foreground border border-dashed rounded-xl bg-muted/5">
+                    📅 No hay eventos próximos programados.
+                  </div>
+                ) : (
+                  upcomingEvents.slice(0, 4).map((evt) => (
+                    <div 
+                      key={evt.id} 
+                      className="p-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-sky-500/40 hover:shadow-xs transition-all flex items-center gap-2 group"
+                    >
+                      <div className={cn(
+                        "flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-lg font-black text-[10px] transition-transform group-hover:scale-105 shadow-xs",
+                        evt.badgeColor
+                      )}>
+                        <span className="text-[8px] uppercase font-bold tracking-tight opacity-80">{evt.monthLabel}</span>
+                        <span className="text-xs font-black leading-none mt-0.5">{evt.dayNum}</span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold truncate text-slate-900 dark:text-slate-100 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                          {evt.title}
+                        </p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1 font-medium">
+                          <span>⏰ {evt.time}</span>
+                          <span>•</span>
+                          <span className="capitalize">{evt.type}</span>
+                        </p>
+                      </div>
+
+                      <Badge className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full border-none shrink-0", evt.badgeColor)}>
+                        {evt.statusBadge}
+                      </Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Checklist de Jornada */}
+          <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-500" /> Checklist de Jornada
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Completa y gestiona tus tareas operativas del día
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAddTask(!showAddTask)}
+                className="h-7 text-xs font-bold text-sky-600 dark:text-sky-400 border-sky-500/30 hover:bg-sky-500/10 gap-1 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Nueva Tarea
+              </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {todayTeams.length === 0 ? (
-                <div className="text-center py-6 text-xs text-muted-foreground border border-dashed rounded-2xl bg-muted/5">
-                  📅 No hay entrenamientos ni partidos programados para hoy.
-                </div>
-              ) : (
-                todayTeams.map((team: any, idx) => {
-                  const Icon = team.icon || Users;
-                  const title = team.title || team.nombre || "Equipo";
-                  const type = team.type || team.categoria || "Fútbol";
-                  const time = team.time || "Sesión Activa";
-                  const color = team.color || "bg-primary/10 text-primary border-primary/20";
-                  
-                  return (
-                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border bg-card hover:bg-muted/30 transition gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${color}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-sm">{title}</p>
-                          <p className="text-xs text-muted-foreground">{type} · {time}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild className="h-8 text-xs">
-                          <Link to="/coach">Planificar</Link>
+              {showAddTask && (
+                <form onSubmit={handleAddCustomTask} className="flex gap-2 p-2.5 rounded-xl border border-sky-500/30 bg-sky-500/5 animate-in fade-in duration-200">
+                  <Input
+                    placeholder="Escribe tu nueva tarea..."
+                    value={newCustomTaskText}
+                    onChange={(e) => setNewCustomTaskText(e.target.value)}
+                    className="h-8 text-xs bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700"
+                    autoFocus
+                  />
+                  <Button type="submit" size="sm" className="h-8 text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white shrink-0">
+                    Guardar
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setShowAddTask(false)} className="h-8 w-8 p-0 text-slate-400">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </form>
+              )}
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() => toggleTask(task.id)}
+                    className={`group p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      task.done 
+                        ? "border-slate-200 dark:border-slate-800 bg-slate-100/60 dark:bg-slate-850/40 opacity-60" 
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-sky-500/40 hover:shadow-xs"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-1">
+                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${task.color}`} />
+                      <span className={`text-xs font-semibold truncate text-slate-900 dark:text-slate-100 ${task.done ? "line-through text-slate-400 dark:text-slate-500" : ""}`}>
+                        {task.text}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {task.url && !task.done && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                          className="h-6 px-1.5 text-[10px] font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 opacity-0 group-hover:opacity-100 transition-opacity gap-1"
+                        >
+                          <Link to={task.url}>
+                            Ir <ExternalLink className="h-3 w-3" />
+                          </Link>
                         </Button>
-                        <Button size="sm" asChild className="h-8 text-xs bg-gradient-primary">
-                          <Link to="/equipos" search={{ teamId: team.id }}>Ver equipo</Link>
-                        </Button>
+                      )}
+
+                      {task.isCustom && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteCustomTask(task.id, e)}
+                          className="text-slate-400 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Eliminar"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+
+                      <div className={`h-4.5 w-4.5 rounded-md border flex items-center justify-center transition-colors ${
+                        task.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300 dark:border-slate-700 bg-background"
+                      }`}>
+                        {task.done && <Check className="h-3.5 w-3.5" />}
                       </div>
                     </div>
-                  );
-                })
-              )}
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Tareas Pendientes */}
-          <Card className="shadow-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <CheckCircle2 className="h-4.5 w-4.5 text-primary" /> Tareas pendientes
-              </CardTitle>
-              <CardDescription>Todo en un solo lugar — Completa tu jornada diaria</CardDescription>
+          {/* Card 4: Mis Equipos & Categorías a Cargo */}
+          <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <Users className="w-4.5 h-4.5 text-sky-500" /> Mis Equipos & Categorías
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Equipos asignados bajo tu dirección técnica
+                </CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" asChild className="h-7 text-xs font-bold text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 gap-1 shrink-0">
+                <Link to="/equipos">
+                  Ver Todo <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </Button>
             </CardHeader>
-            <CardContent className="grid gap-2 sm:grid-cols-2">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  onClick={() => toggleTask(task.id)}
-                  className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                    task.done ? "border-muted-foreground/20 bg-muted/30 opacity-70" : "border-border bg-card hover:bg-muted/40"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${task.color}`} />
-                    <span className={`text-xs font-medium truncate ${task.done ? "line-through" : ""}`}>{task.text}</span>
+            <CardContent className="space-y-3">
+              {myTeams.map((team) => {
+                const teamPlayers = playersForTeam(team);
+                const shown = teamPlayers.slice(0, 5);
+                const rest = Math.max(0, teamPlayers.length - 5);
+                const isSelected = team.id === selectedTeamId;
+                return (
+                  <div
+                    key={team.id}
+                    onClick={() => setSelectedTeamId(team.id)}
+                    className={`rounded-2xl border bg-white dark:bg-slate-900 p-4 flex flex-col justify-between gap-3 cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-sky-500 ring-2 ring-sky-500/20 shadow-md"
+                        : "border-slate-200/90 dark:border-slate-800 hover:border-sky-500/40 hover:shadow-sm"
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] font-bold px-2 py-0.5 ${
+                              isSelected 
+                                ? "bg-sky-600 text-white border-sky-600" 
+                                : "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30"
+                            }`}
+                          >
+                            {team.categoria}
+                          </Badge>
+                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{team.nombre}</span>
+                        </div>
+                        <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 shrink-0">
+                          Activo
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                        <span className="truncate">{team.sede || "Sede Central"}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-2">
+                          {shown.map((p, i) => (
+                            <Avatar key={p.id || i} className="h-7 w-7 border-2 border-white dark:border-slate-900">
+                              <AvatarImage src={p.avatar} />
+                              <AvatarFallback className="text-[9px] font-bold bg-sky-500/10 text-sky-600">
+                                {(p.nombre || "?")[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+                        </div>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                          {rest > 0 ? `+${rest} · ` : ""}{teamPlayers.length} atletas
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3 mt-1" onClick={e => e.stopPropagation()}>
+                      <Button variant="outline" size="sm" asChild className="flex-1 text-[11px] font-bold gap-1 h-7 px-1">
+                        <Link to="/equipos" search={{ teamId: team.id }}>
+                          <Eye className="w-3 h-3 text-sky-500" /> Ver
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild className="flex-1 text-[11px] font-bold gap-1 h-7 px-1">
+                        <Link to="/plantillas">
+                          <FileText className="w-3 h-3 text-slate-400" /> Plantilla
+                        </Link>
+                      </Button>
+                      <Button size="sm" asChild className="flex-1 text-[11px] font-bold gap-1 h-7 px-1 bg-sky-600 hover:bg-sky-700 text-white">
+                        <Link to="/asistencia">
+                          <ClipboardList className="w-3 h-3" /> Asistencia
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
-                  <div className={`h-5 w-5 shrink-0 rounded-md border flex items-center justify-center transition-colors ${
-                    task.done ? "bg-primary border-primary text-primary-foreground" : "border-border bg-background"
-                  }`}>
-                    {task.done && <Check className="h-3.5 w-3.5" />}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
 
-          {/* Próximos Eventos */}
-          <Card className="shadow-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <CalendarClock className="h-4.5 w-4.5 text-primary" /> Próximos eventos
-              </CardTitle>
-              <CardDescription>Planificación deportiva semanal</CardDescription>
+          {/* Card 5: Agenda General de Cancha (Toda la Academia) */}
+          <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <Calendar className="w-4.5 h-4.5 text-indigo-500" /> Agenda General de Cancha
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Programación global de la academia para todos los coaches y planteles
+                </CardDescription>
+              </div>
+              <span className="text-xs text-slate-500 font-medium">{academyAgendaGeneral.length} eventos en agenda</span>
             </CardHeader>
-            <CardContent className="grid gap-3 sm:grid-cols-2">
-              {upcomingEvents.length === 0 ? (
-                <div className="col-span-2 text-center py-6 text-xs text-muted-foreground border border-dashed rounded-2xl bg-muted/5">
-                  📅 No hay eventos próximos programados.
-                </div>
-              ) : (
-                upcomingEvents.map((evt, idx) => (
-                  <div key={idx} className="p-3.5 rounded-xl border bg-card hover:bg-muted/20 transition flex items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg font-semibold text-xs ${evt.color}`}>
-                      <span>{evt.date}</span>
+            <CardContent>
+              <div className="space-y-2.5">
+                {academyAgendaGeneral.map((session: any, idx: number) => (
+                  <div 
+                    key={idx} 
+                    className={`p-3 rounded-xl border flex flex-col gap-1.5 transition-all ${
+                      session.isMyTeam 
+                        ? "bg-sky-500/10 border-sky-500/30 shadow-xs" 
+                        : session.tipo === "Partido"
+                        ? "bg-amber-500/5 border-amber-500/25"
+                        : "bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-[9px] font-bold ${
+                            session.isMyTeam 
+                              ? "bg-sky-600 text-white border-none" 
+                              : session.tipo === "Partido"
+                              ? "bg-amber-500 text-white border-none"
+                              : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          {session.categoria} {session.isMyTeam && "• Mi Equipo"}
+                        </Badge>
+
+                        {session.tipo === "Partido" && (
+                          <Badge className="bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[8px] font-extrabold px-1.5 py-0.2">
+                            PARTIDO
+                          </Badge>
+                        )}
+                      </div>
+
+                      <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-indigo-500" /> {session.fecha === todayDateStr ? "Hoy" : session.fecha} • {session.hora}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold truncate text-foreground">{evt.title}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{evt.time} · <span className="capitalize">{evt.type}</span></p>
+
+                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate mt-0.5">
+                      {session.nombre}
+                    </p>
+
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200/60 dark:border-slate-800/60 mt-0.5">
+                      <span className="flex items-center gap-1">
+                        👨‍🏫 Coach: <strong className="text-slate-800 dark:text-slate-200 font-semibold">{session.entrenador}</strong>
+                      </span>
+                      <span className="flex items-center gap-1 font-medium">
+                        📍 {session.cancha}
+                      </span>
                     </div>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar Alerts + Wellness */}
-        <div className="space-y-4">
+        {/* COLUMNA 2 (Derecha): IA Recomienda, Wellness, Riesgo & Cobros (lg:col-span-6) */}
+        <div className="lg:col-span-6 space-y-4">
           {/* DeportivOS AI Recomienda Card (Coach) */}
           <Card className="shadow-card border border-violet-500/20 bg-gradient-to-br from-violet-950/15 via-card to-card relative overflow-hidden">
             <div className="absolute top-0 right-0 p-3 opacity-20">
@@ -1318,7 +2117,7 @@ function CoachDashboard() {
             };
             const avg = ssData.length ? Math.round(ssData.reduce((a,d) => a + d.wellnessScore, 0) / ssData.length) : 0;
             return (
-              <Card className="shadow-card">
+              <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -1335,12 +2134,12 @@ function CoachDashboard() {
                     { label: "Precaución", count: cnt.precaucion, color: "bg-amber-500",   text: "text-amber-600",   emoji: "🟡" },
                     { label: "Riesgo",     count: cnt.riesgo,     color: "bg-red-500",     text: "text-red-600",     emoji: "🔴" },
                   ].map(s => (
-                    <div key={s.label} className="flex items-center justify-between rounded-xl border p-2.5">
+                    <div key={s.label} className="flex items-center justify-between rounded-xl border p-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         <span className={`h-2.5 w-2.5 rounded-full ${s.color}`} />
                         <span className="text-xs font-medium">{s.emoji} {s.label}</span>
                       </div>
-                      <span className={`text-sm font-bold ${s.text}`}>{s.count}</span>
+                      <span className={`text-xs font-bold ${s.text}`}>{s.count}</span>
                     </div>
                   ))}
                   <Link to="/rendimiento/sports-science">
@@ -1362,7 +2161,6 @@ function CoachDashboard() {
               amarillo: loadData.filter(d => d.semaforo === "amarillo").length,
               rojo:     loadData.filter(d => d.semaforo === "rojo").length,
             };
-            // Ordenar por severidad y fatiga descendente para el ranking de mayor riesgo
             const ranking = [...loadData]
               .sort((a, b) => {
                 const map: Record<string, number> = { rojo: 3, amarillo: 2, verde: 1 };
@@ -1374,30 +2172,33 @@ function CoachDashboard() {
               .slice(0, 3);
 
             return (
-              <Card className="shadow-card">
+              <Card className="shadow-card border border-slate-200/80 dark:border-slate-800">
                 <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <ShieldAlert className="h-4 w-4 text-amber-500 animate-pulse" /> Riesgo del Equipo
+                  <div className="flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100 truncate">
+                      <ShieldAlert className="h-4 w-4 text-amber-500 animate-pulse shrink-0" /> 
+                      <span className="truncate">Riesgo del Equipo</span>
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px]">Cargas & Lesiones</Badge>
+                    <Badge variant="outline" className="text-[10px] font-semibold shrink-0">Cargas & Lesiones</Badge>
                   </div>
-                  <CardDescription>Semáforo de riesgo de lesiones y sobrecarga</CardDescription>
+                  <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Semáforo de riesgo de lesiones y sobrecarga
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Semáforo Counters */}
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-2 dark:border-emerald-800/30 dark:bg-emerald-950/10">
-                      <p className="text-base font-black text-emerald-600">🟢 {cnt.verde}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Óptimo</p>
+                  <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-2 flex flex-col items-center justify-center min-w-0">
+                      <p className="text-base font-black text-emerald-600 dark:text-emerald-400 leading-none">🟢 {cnt.verde}</p>
+                      <p className="text-[10px] font-bold text-slate-600 dark:text-slate-300 mt-1 truncate w-full">Óptimo</p>
                     </div>
-                    <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-2 dark:border-amber-800/30 dark:bg-amber-950/10">
-                      <p className="text-base font-black text-amber-600">🟡 {cnt.amarillo}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Precaución</p>
+                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-2 flex flex-col items-center justify-center min-w-0">
+                      <p className="text-base font-black text-amber-600 dark:text-amber-400 leading-none">🟡 {cnt.amarillo}</p>
+                      <p className="text-[10px] font-bold text-slate-600 dark:text-slate-300 mt-1 truncate w-full">Precaución</p>
                     </div>
-                    <div className="rounded-xl border border-red-200 bg-red-50/50 p-2 dark:border-red-800/30 dark:bg-red-950/10">
-                      <p className="text-base font-black text-red-600">🔴 {cnt.rojo}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">Riesgo</p>
+                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-2 flex flex-col items-center justify-center min-w-0">
+                      <p className="text-base font-black text-rose-600 dark:text-rose-400 leading-none">🔴 {cnt.rojo}</p>
+                      <p className="text-[10px] font-bold text-slate-600 dark:text-slate-300 mt-1 truncate w-full">Riesgo</p>
                     </div>
                   </div>
 
@@ -1406,7 +2207,7 @@ function CoachDashboard() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Ranking de Mayor Riesgo</p>
                     <div className="space-y-1.5">
                       {ranking.filter(r => r.semaforo === "rojo" || r.semaforo === "amarillo").length === 0 ? (
-                        <div className="text-center py-4 text-[11px] text-muted-foreground border border-dashed rounded-xl bg-muted/5">
+                        <div className="text-center py-3 text-[11px] text-muted-foreground border border-dashed rounded-xl bg-muted/5">
                           🟢 No hay atletas con alertas de sobrecarga o fatiga activa.
                         </div>
                       ) : (
@@ -1432,34 +2233,52 @@ function CoachDashboard() {
             );
           })()}
 
-          <Card className="shadow-card h-full">
-            <CardHeader className="pb-3">
+          {/* Alertas de Cobro & Mensualidad */}
+          <Card className="shadow-card border border-rose-500/20 bg-rose-500/5">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <AlertTriangle className="h-4.5 w-4.5 text-primary" /> Alertas del equipo
+                <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <CheckSquare className="h-4 w-4 text-rose-500" /> Alertas de Cobro & Mensualidad
                 </CardTitle>
-                <Badge variant="outline" className="text-[10px] border-primary/20 text-primary">IA Activa</Badge>
+                <Badge className="bg-rose-500 text-white text-[9px] font-bold border-none">
+                  {overduePlayers.length} pendientes
+                </Badge>
               </div>
-              <CardDescription>Eventos médicos, físicos o de inactividad que requieren acción</CardDescription>
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Recordatorios amables para la gestión de mensualidades
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {alerts.map((alert, idx) => {
-                const AlertIcon = alert.icon;
-                return (
-                  <Link
-                    key={idx}
-                    to={alert.type === "lesion" || alert.type === "medica" ? "/rendimiento/lesiones" : alert.type === "abandono" ? "/ia/riesgos" : "/asistencia"}
-                    className={`p-3.5 rounded-xl border flex items-start gap-3 hover:-translate-y-0.5 transition-all cursor-pointer ${alert.color}`}
-                  >
-                    <AlertIcon className="h-4.5 w-4.5 shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0 leading-normal">
-                      <p className="text-xs font-bold">{alert.name}</p>
-                      <p className="text-[11px] opacity-90 mt-0.5">{alert.details}</p>
+            <CardContent className="space-y-2">
+              {overduePlayers.length === 0 ? (
+                <div className="text-center py-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium border border-dashed border-emerald-500/20 rounded-xl bg-emerald-500/5">
+                  ✓ Todos los atletas están al día con sus cuotas
+                </div>
+              ) : (
+                overduePlayers.map((player: any) => (
+                  <div key={player.id} className="rounded-xl border border-rose-500/20 bg-white dark:bg-slate-900 p-3 flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{player.nombre}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">Encargado: {player.encargado}</p>
+                      </div>
+                      <Badge className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 shrink-0 border-none">
+                        ₡{player.saldo.toLocaleString()} pendiente
+                      </Badge>
                     </div>
-                    <ChevronRight className="h-4 w-4 shrink-0 opacity-40 self-center" />
-                  </Link>
-                );
-              })}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[10px] font-bold gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 w-full"
+                      onClick={() => {
+                        const msg = `Hola ${player.encargado}, le saludamos de la Academia. Le recordamos amablemente la mensualidad pendiente de ${player.nombre} por un monto de ₡${player.saldo.toLocaleString()}. ¡Muchas gracias!`;
+                        window.open(`https://wa.me/${player.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                    >
+                      💬 Recordar por WhatsApp
+                    </Button>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
@@ -1532,6 +2351,12 @@ function ParentDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Banner Destacado de la Academia Activa */}
+      <AcademyHeaderBanner 
+        badgeText="ACADEMIA ACTIVA"
+        subtitle="PORTAL OFICIAL DE ENCARGADOS Y FAMILIAS"
+      />
+
       {/* Welcome Banner */}
       <div className="bg-gradient-primary rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-elegant">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />

@@ -292,76 +292,86 @@ function EquiposPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {visibleTeams.map((e) => (
           <Card
             key={e.id}
             onClick={() => navigate({ to: "/equipos", search: { teamId: e.id } })}
-            className="premium-card-flat overflow-hidden hover:shadow-md transition cursor-pointer group"
+            className="premium-card-flat overflow-hidden hover:shadow-md transition cursor-pointer group flex flex-col justify-between"
           >
-            <div className="h-20 table-header-row relative flex justify-end p-2 items-start gap-1">
-              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(white 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
-              
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-200/50" 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleOpenEdit(e);
-                  }} 
-                  title="Editar equipo"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7 text-[#64748B] hover:text-red-700 hover:bg-red-50" 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteTeam(e.id, e.nombre);
-                  }} 
-                  title="Eliminar equipo"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+            <div>
+              <div className="h-20 table-header-row relative flex justify-end p-2 items-start gap-1">
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(white 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+                
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-200/50" 
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleOpenEdit(e);
+                    }} 
+                    title="Editar equipo"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7 text-[#64748B] hover:text-red-700 hover:bg-red-50" 
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDeleteTeam(e.id, e.nombre);
+                    }} 
+                    title="Eliminar equipo"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
 
-              <div className="absolute -bottom-6 left-5 flex h-14 w-14 items-center justify-center rounded-[12px] bg-background border-4 border-background shadow-sm group-hover:scale-105 transition-transform">
-                <ShieldHalf className="h-6 w-6 text-primary" />
+                <div className="absolute -bottom-6 left-5 flex h-14 w-14 items-center justify-center rounded-[12px] bg-background border-4 border-background shadow-sm group-hover:scale-105 transition-transform">
+                  <ShieldHalf className="h-6 w-6 text-primary" />
+                </div>
               </div>
-            </div>
-            <CardHeader className="pt-8">
-              <CardTitle className="text-base group-hover:text-primary transition-colors">{e.nombre}</CardTitle>
-              <CardDescription className="kpi-subtext">{e.disciplina} · {e.categoria || e.nombre}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground"><Users className="h-4 w-4" /> Jugadores</div>
-                <span className="font-semibold">{getTeamPlayersCount(e)} jugadores</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground"><Trophy className="h-4 w-4" /> Entrenador</div>
-                <span className="font-medium text-xs">{getTeamCoach(e)}</span>
-              </div>
-              <Badge variant="outline" className="w-full justify-center">Uniforme: {e.uniforme}</Badge>
-              {(() => {
-                const coachNameForTeam = getTeamCoach(e);
-                const coachObj = coaches.find(c => c.nombre === coachNameForTeam);
-                const coachSchedule = coachObj?.horario;
-                return coachSchedule ? (
-                  <div className="flex items-center justify-between text-xs bg-primary/5 border border-dashed border-primary/20 p-2 rounded-lg mt-1">
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5 text-primary" />
-                      <span>Horario:</span>
+              <CardHeader className="pt-8 pb-3">
+                <CardTitle className="text-base font-bold group-hover:text-primary transition-colors truncate">{e.nombre}</CardTitle>
+                <CardDescription className="kpi-subtext truncate">{e.disciplina} · {e.categoria || e.nombre}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                  <div className="flex items-center gap-1.5 text-muted-foreground shrink-0"><Users className="h-4 w-4" /> Jugadores</div>
+                  <span className="font-bold text-slate-900 dark:text-slate-100 truncate text-right">{getTeamPlayersCount(e)} Atletas</span>
+                </div>
+                <div className="flex items-center justify-between text-xs sm:text-sm gap-2">
+                  <div className="flex items-center gap-1.5 text-muted-foreground shrink-0"><Trophy className="h-4 w-4" /> Entrenador</div>
+                  <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate text-right">{getTeamCoach(e)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs gap-2">
+                  <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">👕 Uniforme</div>
+                  <Badge variant="outline" className="text-[11px] font-semibold truncate">{e.uniforme}</Badge>
+                </div>
+
+                {(() => {
+                  const coachNameForTeam = getTeamCoach(e);
+                  const coachObj = coaches.find(c => c.nombre === coachNameForTeam);
+                  const coachSchedule = coachObj?.horario;
+                  return coachSchedule ? (
+                    <div className="bg-sky-500/5 dark:bg-sky-950/20 border border-dashed border-sky-500/25 p-2.5 rounded-xl space-y-1 mt-1">
+                      <div className="flex items-center gap-1.5 text-sky-600 dark:text-sky-400 font-bold text-[11px]">
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span>Horario de Entrenamientos:</span>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                        {coachSchedule}
+                      </p>
                     </div>
-                    <span className="font-semibold text-primary">{coachSchedule}</span>
-                  </div>
-                ) : null;
-              })()}
+                  ) : null;
+                })()}
+              </CardContent>
+            </div>
 
+            <CardContent className="pt-0">
               <Button
                 onClick={(event) => {
                   event.stopPropagation();
@@ -370,10 +380,10 @@ function EquiposPage() {
                     search: { autostart: "true", teamName: e.nombre, category: e.categoria || e.nombre } as any,
                   });
                 }}
-                className="w-full btn-primary min-h-[40px] h-auto gap-1.5 shadow-sm mt-2 flex items-center justify-center"
+                className="w-full btn-primary h-10 px-3 text-xs font-bold gap-1.5 shadow-sm rounded-xl flex items-center justify-center"
               >
                 <Play className="h-4 w-4 shrink-0" />
-                <span>⚽ Iniciar Entrenamiento en Cancha</span>
+                <span className="truncate">Iniciar Entrenamiento</span>
               </Button>
             </CardContent>
           </Card>

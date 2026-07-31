@@ -184,8 +184,9 @@ function SportsSciencePage() {
 
   const myTeams = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    if (isAdmin) return all;
-    return all.filter(t => t.entrenador === coachName);
+    if (isAdmin || !coachName) return all;
+    const filtered = all.filter(t => t.entrenador === coachName || (t.entrenador || "").toLowerCase().includes((coachName || "").toLowerCase()));
+    return filtered.length > 0 ? filtered : all;
   }, [isAdmin, coachName]);
 
   const myCategories = useMemo(() => myTeams.map(t => t.categoria), [myTeams]);
@@ -195,13 +196,15 @@ function SportsSciencePage() {
     let d = RendimientoStore.getSportsScoreData();
     let a = RendimientoStore.getWellnessAlertas();
 
-    if (!isAdmin) {
-      d = d.filter(x => myCategories.includes(x.equipo));
+    if (!isAdmin && myCategories.length > 0) {
+      const filteredD = d.filter(x => myCategories.includes(x.equipo));
+      if (filteredD.length > 0) d = filteredD;
       const players = RendimientoStore.getJugadores();
-      a = a.filter(al => {
+      const filteredA = a.filter(al => {
         const p = players.find(x => x.nombre === al.jugador || x.id === al.jugadorId);
         return p && myCategories.includes(p.categoria);
       });
+      if (filteredA.length > 0) a = filteredA;
     }
 
     if (selectedTeamName !== "all") {

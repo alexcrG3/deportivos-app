@@ -60,13 +60,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Élite Sports — Plataforma SaaS Deportiva" },
-      { name: "description", content: "Plataforma SaaS moderna para academias, escuelas y clubes deportivos." },
+      { title: "Nexus Sports OS — Plataforma SaaS Multideportiva" },
+      { name: "description", content: "Plataforma SaaS moderna para academias, escuelas y clubes multideportivos." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: "/favicon.png" },
-      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico?v=nexus3" },
+      { rel: "icon", type: "image/png", href: "/favicon.png?v=nexus3" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=nexus3" },
     ],
   }),
   shellComponent: RootShell,

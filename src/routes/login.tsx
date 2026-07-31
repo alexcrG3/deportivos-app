@@ -120,11 +120,9 @@ function LoginPage() {
       <div className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-none shadow-none">
           <CardContent className="p-0 space-y-8">
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground shadow-elegant">
-                <Trophy className="h-5 w-5" />
-              </div>
-              <span className="font-semibold">Élite Sports</span>
+            <div className="flex items-center gap-3">
+              <img src="/favicon.png" alt="Nexus Sports" className="h-9 w-9 object-contain" />
+              <span className="font-extrabold text-xl tracking-tight text-primary">Nexus Sports</span>
             </div>
 
             <div className="space-y-2">

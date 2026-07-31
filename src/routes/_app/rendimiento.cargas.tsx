@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
@@ -212,14 +213,17 @@ function CargasPage() {
   const [liveLoad, setLiveLoad]       = useState(0);
   const [filtroHistorial, setFiltroHistorial] = useState<"7" | "14" | "28">("14");
   const [selectedTeamName, setSelectedTeamName] = useState<string>("all");
+  const [showRiesgoModal, setShowRiesgoModal] = useState(false);
+  const [showPrecaucionModal, setShowPrecaucionModal] = useState(false);
 
   const { role, coachName } = useRole();
   const isAdmin = role === "admin";
 
   const myTeams = useMemo(() => {
     const all = RendimientoStore.getEquipos();
-    if (isAdmin) return all;
-    return all.filter(t => t.entrenador === coachName);
+    if (isAdmin || !coachName) return all;
+    const filtered = all.filter(t => t.entrenador === coachName || (t.entrenador || "").toLowerCase().includes((coachName || "").toLowerCase()));
+    return filtered.length > 0 ? filtered : all;
   }, [isAdmin, coachName]);
 
   const myCategories = useMemo(() => myTeams.map(t => t.categoria), [myTeams]);
@@ -228,13 +232,15 @@ function CargasPage() {
     let data  = RendimientoStore.getPlayerLoadData();
     let alerts = RendimientoStore.getSportsAlertas();
 
-    if (!isAdmin) {
-      data = data.filter(d => myCategories.includes(d.equipo));
+    if (!isAdmin && myCategories.length > 0) {
+      const filteredData = data.filter(d => myCategories.includes(d.equipo));
+      if (filteredData.length > 0) data = filteredData;
       const players = RendimientoStore.getJugadores();
-      alerts = alerts.filter(a => {
+      const filteredAlerts = alerts.filter(a => {
         const p = players.find(x => x.nombre === a.jugador || x.id === a.jugadorId);
         return p && myCategories.includes(p.categoria);
       });
+      if (filteredAlerts.length > 0) alerts = filteredAlerts;
     }
 
     if (selectedTeamName !== "all") {
@@ -527,19 +533,210 @@ function CargasPage() {
           {/* Team Overview Banner */}
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             {[
-              { label: "🟢 Óptimo",       value: teamStats.verde,       cls: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/30" },
-              { label: "🟡 Precaución",   value: teamStats.amarillo,    cls: "text-amber-600   bg-amber-50   border-amber-200   dark:bg-amber-950/20   dark:border-amber-800/30"   },
-              { label: "🔴 Alto Riesgo",  value: teamStats.rojo,        cls: "text-red-600     bg-red-50     border-red-200     dark:bg-red-950/20     dark:border-red-700"        },
-              { label: "ACWR Equipo",     value: teamStats.avgAcwr.toFixed(2), cls: "text-violet-600 bg-violet-50 border-violet-200 dark:bg-violet-950/20 dark:border-violet-800/30" },
-              { label: "Fatiga Prom.",    value: `${teamStats.avgFatiga}%`,    cls: "text-sky-600    bg-sky-50    border-sky-200    dark:bg-sky-950/20    dark:border-sky-800/30"    },
-              { label: "Recovery Prom.", value: `${teamStats.avgRecovery}%`,   cls: "text-teal-600   bg-teal-50   border-teal-200   dark:bg-teal-950/20   dark:border-teal-800/30"   },
+              { label: "🟢 Óptimo",       value: teamStats.verde,              cls: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800/30", onClick: undefined },
+              { label: "🟡 Precaución",   value: teamStats.amarillo,           cls: "text-amber-600   bg-amber-50   border-amber-200   dark:bg-amber-950/20   dark:border-amber-800/30",   onClick: teamStats.amarillo > 0 ? () => setShowPrecaucionModal(true) : undefined },
+              { label: "🔴 Alto Riesgo",  value: teamStats.rojo,               cls: "text-red-600     bg-red-50     border-red-200     dark:bg-red-950/20     dark:border-red-700",        onClick: teamStats.rojo > 0 ? () => setShowRiesgoModal(true) : undefined },
+              { label: "ACWR Equipo",     value: teamStats.avgAcwr.toFixed(2), cls: "text-violet-600 bg-violet-50 border-violet-200 dark:bg-violet-950/20 dark:border-violet-800/30",   onClick: undefined },
+              { label: "Fatiga Prom.",    value: `${teamStats.avgFatiga}%`,    cls: "text-sky-600    bg-sky-50    border-sky-200    dark:bg-sky-950/20    dark:border-sky-800/30",        onClick: undefined },
+              { label: "Recovery Prom.", value: `${teamStats.avgRecovery}%`,   cls: "text-teal-600   bg-teal-50   border-teal-200   dark:bg-teal-950/20   dark:border-teal-800/30",      onClick: undefined },
             ].map(c => (
-              <div key={c.label} className={`rounded-2xl border p-3 text-center shadow-card ${c.cls}`}>
+              <div
+                key={c.label}
+                onClick={c.onClick}
+                className={`rounded-2xl border p-3 text-center shadow-card ${c.cls} ${
+                  c.onClick ? "cursor-pointer hover:shadow-elegant hover:-translate-y-0.5 transition-all duration-200 hover:scale-105" : ""
+                }`}
+              >
                 <p className="text-2xl font-black">{c.value}</p>
                 <p className="text-[10px] font-semibold mt-0.5">{c.label}</p>
+                {c.onClick && <p className="text-[9px] opacity-60 mt-0.5">Ver detalle →</p>}
               </div>
             ))}
           </div>
+
+          {/* Modal: Jugadores en Precaución */}
+          <Dialog open={showPrecaucionModal} onOpenChange={setShowPrecaucionModal}>
+            <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-amber-600">
+                  <AlertTriangle className="h-5 w-5" />
+                  Jugadores en Precaución
+                </DialogTitle>
+                <DialogDescription>
+                  {playerLoads.filter(p => p.semaforo === "amarillo").length} jugador(es) con sobrecarga — reducir intensidad
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                {playerLoads
+                  .filter(p => p.semaforo === "amarillo")
+                  .map(p => (
+                    <div
+                      key={p.jugadorId}
+                      className="rounded-2xl border border-amber-200 bg-amber-50/60 dark:bg-amber-950/10 dark:border-amber-800/30 p-4"
+                    >
+                      {/* Header del jugador */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <img src={p.avatar} alt="" className="h-11 w-11 rounded-full ring-2 ring-amber-300" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{p.jugador}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="secondary" className="text-[9px] py-0 px-1.5">{p.equipo}</Badge>
+                            <Badge variant="outline" className="text-[9px] py-0 px-1.5 border-amber-300 text-amber-600 bg-amber-50">
+                              🟡 Precaución
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">ACWR</p>
+                          <p className="text-lg font-black" style={{ color: p.acwr > 1.5 ? "#ef4444" : p.acwr > 1.3 ? "#f59e0b" : "#0ea5e9" }}>
+                            {p.acwr.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Métricas rápidas */}
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-amber-100 dark:border-amber-900/20">
+                          <p className="text-[10px] text-muted-foreground">Carga Semanal</p>
+                          <p className="text-sm font-bold">{p.cargaSemanal} <span className="text-[10px] font-normal">AU</span></p>
+                        </div>
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-amber-100 dark:border-amber-900/20">
+                          <p className="text-[10px] text-muted-foreground">Fatiga</p>
+                          <p className="text-sm font-bold" style={{ color: p.fatigaScore >= 70 ? "#ef4444" : p.fatigaScore >= 50 ? "#f59e0b" : "#10b981" }}>{p.fatigaScore}%</p>
+                        </div>
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-amber-100 dark:border-amber-900/20">
+                          <p className="text-[10px] text-muted-foreground">Recovery</p>
+                          <p className="text-sm font-bold" style={{ color: p.recoveryScore < 50 ? "#ef4444" : p.recoveryScore < 70 ? "#f59e0b" : "#10b981" }}>{p.recoveryScore}%</p>
+                        </div>
+                      </div>
+
+                      {/* Motivos */}
+                      {p.semaforoMotivos.length > 0 && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-600">⚠️ Motivos detectados:</p>
+                          <ul className="space-y-1">
+                            {p.semaforoMotivos.map((m, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
+                                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                                {m}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Recomendación */}
+                      <div className="mt-3 rounded-xl border border-amber-200 bg-white/80 dark:bg-amber-950/20 dark:border-amber-800/30 p-2.5">
+                        <p className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 mb-0.5">Recomendación:</p>
+                        <p className="text-xs text-muted-foreground">{p.semaforoRecomendacion}</p>
+                      </div>
+
+                      {/* Ver detalle */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-3 border-amber-200 text-amber-600 hover:bg-amber-50"
+                        onClick={() => { setShowPrecaucionModal(false); setSelected(p); }}
+                      >
+                        Ver análisis completo →
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modal: Jugadores en Alto Riesgo */}
+          <Dialog open={showRiesgoModal} onOpenChange={setShowRiesgoModal}>
+            <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-red-600">
+                  <Shield className="h-5 w-5" />
+                  Jugadores en Alto Riesgo
+                </DialogTitle>
+                <DialogDescription>
+                  {playerLoads.filter(p => p.semaforo === "rojo").length} jugador(es) requieren atención inmediata
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                {playerLoads
+                  .filter(p => p.semaforo === "rojo")
+                  .map(p => (
+                    <div
+                      key={p.jugadorId}
+                      className="rounded-2xl border border-red-200 bg-red-50/60 dark:bg-red-950/10 dark:border-red-800/30 p-4"
+                    >
+                      {/* Header del jugador */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <img src={p.avatar} alt="" className="h-11 w-11 rounded-full ring-2 ring-red-300" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm truncate">{p.jugador}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="secondary" className="text-[9px] py-0 px-1.5">{p.equipo}</Badge>
+                            <Badge variant="outline" className="text-[9px] py-0 px-1.5 border-red-300 text-red-600 bg-red-50">
+                              🔴 Alto Riesgo
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">ACWR</p>
+                          <p className="text-lg font-black" style={{ color: p.acwr > 1.5 ? "#ef4444" : p.acwr > 1.3 ? "#f59e0b" : "#0ea5e9" }}>
+                            {p.acwr.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Métricas rápidas */}
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-red-100 dark:border-red-900/20">
+                          <p className="text-[10px] text-muted-foreground">Carga Semanal</p>
+                          <p className="text-sm font-bold">{p.cargaSemanal} <span className="text-[10px] font-normal">AU</span></p>
+                        </div>
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-red-100 dark:border-red-900/20">
+                          <p className="text-[10px] text-muted-foreground">Fatiga</p>
+                          <p className="text-sm font-bold" style={{ color: p.fatigaScore >= 70 ? "#ef4444" : "#f59e0b" }}>{p.fatigaScore}%</p>
+                        </div>
+                        <div className="rounded-xl bg-white/60 dark:bg-white/5 p-2 text-center border border-red-100 dark:border-red-900/20">
+                          <p className="text-[10px] text-muted-foreground">Recovery</p>
+                          <p className="text-sm font-bold" style={{ color: p.recoveryScore < 50 ? "#ef4444" : p.recoveryScore < 70 ? "#f59e0b" : "#10b981" }}>{p.recoveryScore}%</p>
+                        </div>
+                      </div>
+
+                      {/* Motivos */}
+                      {p.semaforoMotivos.length > 0 && (
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-red-600">⚠️ Motivos detectados:</p>
+                          <ul className="space-y-1">
+                            {p.semaforoMotivos.map((m, i) => (
+                              <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
+                                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                                {m}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Recomendación */}
+                      <div className="mt-3 rounded-xl border border-red-200 bg-white/80 dark:bg-red-950/20 dark:border-red-800/30 p-2.5">
+                        <p className="text-[10px] font-semibold text-red-700 dark:text-red-400 mb-0.5">Recomendación:</p>
+                        <p className="text-xs text-muted-foreground">{p.semaforoRecomendacion}</p>
+                      </div>
+
+                      {/* Ver detalle */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-3 border-red-200 text-red-600 hover:bg-red-50"
+                        onClick={() => { setShowRiesgoModal(false); setSelected(p); }}
+                      >
+                        Ver análisis completo →
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Athlete Selector */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
