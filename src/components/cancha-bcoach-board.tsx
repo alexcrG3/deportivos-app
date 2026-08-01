@@ -23,8 +23,9 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-type ToolMode = "select" | "draw-solid" | "draw-dashed" | "draw-arrow" | "draw-zone" | "eraser" | "add-player" | "add-item" | "add-cone" | "add-minigoal" | "add-text";
-type StrokeStyle = "solid" | "dashed" | "arrow" | "zone";
+type ToolMode = "select" | "draw-solid" | "draw-dashed" | "draw-arrow" | "draw-curve" | "draw-zone" | "draw-circle-zone" | "eraser" | "add-player" | "add-item" | "add-cone" | "add-minigoal" | "add-text" | "add-dummy" | "add-ladder" | "add-hurdle" | "add-hoop" | "add-pole";
+type StrokeStyle = "solid" | "dashed" | "arrow" | "curve" | "zone" | "circle-zone";
+type PitchLayout = "full-pitch" | "half-pitch";
 
 interface FreePath {
   id: string;
@@ -41,6 +42,7 @@ interface ShadedZone {
   width: number;
   height: number;
   color: string;
+  shape?: "rect" | "circle";
 }
 
 export type PlayerTeamColor = "orange" | "blue" | "red" | "white" | "yellow" | "black" | "green";
@@ -86,6 +88,12 @@ interface BoardMiniGoal {
   rotation?: number;
 }
 
+interface BoardDummy { id: string; x: number; y: number; rotation?: number; }
+interface BoardLadder { id: string; x: number; y: number; rotation?: number; }
+interface BoardHurdle { id: string; x: number; y: number; rotation?: number; }
+interface BoardHoop { id: string; x: number; y: number; color?: string; }
+interface BoardPole { id: string; x: number; y: number; color?: string; }
+
 interface BoardText {
   id: string;
   text: string;
@@ -101,9 +109,15 @@ export interface BoardKeyframe {
   balls: BoardBall[];
   cones: BoardCone[];
   miniGoals: BoardMiniGoal[];
+  dummies?: BoardDummy[];
+  ladders?: BoardLadder[];
+  hurdles?: BoardHurdle[];
+  hoops?: BoardHoop[];
+  poles?: BoardPole[];
   texts: BoardText[];
   zones: ShadedZone[];
   paths: FreePath[];
+  pitchLayout?: PitchLayout;
 }
 
 export interface SavedBoardPreset {
@@ -117,9 +131,15 @@ export interface SavedBoardPreset {
   balls?: BoardBall[];
   cones?: BoardCone[];
   miniGoals?: BoardMiniGoal[];
+  dummies?: BoardDummy[];
+  ladders?: BoardLadder[];
+  hurdles?: BoardHurdle[];
+  hoops?: BoardHoop[];
+  poles?: BoardPole[];
   texts?: BoardText[];
   keyframes?: BoardKeyframe[];
   teamColor?: PlayerTeamColor;
+  pitchLayout?: PitchLayout;
 }
 
 const PRESET_DRILLS: SavedBoardPreset[] = [
@@ -329,6 +349,51 @@ function pointsToD(pts: { x: number; y: number }[]): string {
   return d;
 }
 
+function curvePointsToD(pts: { x: number; y: number }[]): string {
+  if (pts.length < 2) return "";
+  if (pts.length === 2) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const xc = (pts[i].x + pts[i + 1].x) / 2;
+    const yc = (pts[i].y + pts[i + 1].y) / 2;
+    d += ` Q ${pts[i].x} ${pts[i].y}, ${xc} ${yc}`;
+  }
+  d += ` L ${pts[pts.length - 1].x} ${pts[pts.length - 1].y}`;
+  return d;
+}
+
+function FootballHalfField() {
+  return (
+    <g>
+      {/* Striped grass */}
+      {Array.from({ length: 7 }).map((_, i) => (
+        <rect key={i} x={i * 10} y={0} width={10} height={65}
+          fill={i % 2 === 0 ? "#1a5c2a" : "#196028"} />
+      ))}
+      {/* Outer boundary */}
+      <rect x={2} y={2} width={61} height={61} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.4} />
+      {/* Halfway line on the right */}
+      <line x1={63} y1={2} x2={63} y2={63} stroke="rgba(255,255,255,0.85)" strokeWidth={0.4} />
+      {/* Center circle arc */}
+      <path d="M 63,23.35 A 9.15,9.15 0 0,0 63,41.65" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      <circle cx={63} cy={32.5} r={0.5} fill="rgba(255,255,255,0.85)" />
+      {/* Penalty area (left side) */}
+      <rect x={2} y={16.5} width={16.5} height={32} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      {/* Goal area */}
+      <rect x={2} y={24.5} width={5.5} height={16} fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      {/* Goal */}
+      <rect x={0} y={28.5} width={2} height={8} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth={0.5} />
+      {/* Penalty spot */}
+      <circle cx={11} cy={32.5} r={0.4} fill="rgba(255,255,255,0.85)" />
+      {/* Penalty arc */}
+      <path d="M 18.5,24 A 9.15,9.15 0 0,0 18.5,41" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      {/* Corner arcs */}
+      <path d="M 2,3.5 A 1.5,1.5 0 0,1 3.5,2" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      <path d="M 2,61.5 A 1.5,1.5 0 0,0 3.5,63" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+    </g>
+  );
+}
+
 export function CanchaBCoachBoard({
   teamName = "U9 Asoderive",
   category = "Sub-9",
@@ -349,6 +414,9 @@ export function CanchaBCoachBoard({
   const [activePhase, setActivePhase] = useState<"ataque" | "defensa" | "transicion" | "abp">("ataque");
   const [showCamerinoModal, setShowCamerinoModal] = useState<boolean>(false);
   const [substitutionsList, setSubstitutionsList] = useState<Array<{ id: string; outName: string; inName: string; min: string }>>([]);
+
+  // Pitch layout mode: "full-pitch" vs "half-pitch"
+  const [pitchLayout, setPitchLayout] = useState<PitchLayout>("full-pitch");
 
   // Orientation
   const [isPortrait, setIsPortrait] = useState<boolean>(
@@ -384,6 +452,11 @@ export function CanchaBCoachBoard({
   const [balls, setBalls] = useState<BoardBall[]>([]);
   const [cones, setCones] = useState<BoardCone[]>([]);
   const [miniGoals, setMiniGoals] = useState<BoardMiniGoal[]>([]);
+  const [dummies, setDummies] = useState<BoardDummy[]>([]);
+  const [ladders, setLadders] = useState<BoardLadder[]>([]);
+  const [hurdles, setHurdles] = useState<BoardHurdle[]>([]);
+  const [hoops, setHoops] = useState<BoardHoop[]>([]);
+  const [poles, setPoles] = useState<BoardPole[]>([]);
   const [texts, setTexts] = useState<BoardText[]>([]);
 
   // Táctica & Grid State
@@ -436,14 +509,12 @@ export function CanchaBCoachBoard({
 
     setPlayers([...starterPlayers, ...rivalPlayers]);
     setBalls([{ id: "b-match", x: 50, y: 32.5 }]);
-    toast.success(`🏆 Pizarra de Partido cargada con la convocatoria real de ${teamName}`);
   }, [teamName]);
 
+  // La cancha arranca vacía sin jugadores por defecto hasta que el usuario escoja alineación o ejercicio
   useEffect(() => {
-    if (boardMode === "matchday") {
-      loadRealMatchConvocatoria();
-    }
-  }, [boardMode, loadRealMatchConvocatoria]);
+    // No auto-carga jugadores para permitir campo libre por defecto
+  }, [boardMode]);
 
   // Keyframe Animation Engine (Pasos Tácticos Animados)
   const [keyframes, setKeyframes] = useState<BoardKeyframe[]>([]);
@@ -471,7 +542,6 @@ export function CanchaBCoachBoard({
       setActiveFrameIdx(updated.length - 1);
       return updated;
     });
-    toast.success(`🎬 Paso ${frameNum} registrado en la secuencia táctica.`);
   }, [players, balls, cones, miniGoals, texts, zones, paths, keyframes.length]);
 
   // Cargar Fotograma
@@ -502,7 +572,6 @@ export function CanchaBCoachBoard({
       }
       return updated;
     });
-    toast.info(`🗑️ Paso ${activeFrameIdx + 1} eliminado de la animación.`);
   }, [activeFrameIdx, keyframes.length]);
 
   // Smooth Interpolation Animation Loop (Transición fluida a 60 FPS con Easing)
@@ -583,7 +652,6 @@ export function CanchaBCoachBoard({
         } else {
           setActiveFrameIdx(keyframes.length - 1);
           setIsPlayingAnimation(false);
-          toast.success("🎬 Animación táctica completada.");
         }
       }
     };
@@ -687,7 +755,6 @@ export function CanchaBCoachBoard({
       created_at: new Date().toISOString(),
     }).then();
 
-    toast.success(`🎉 Pizarra "${nuevaPizarra.nombre}" guardada en el Banco de Pizarras.`);
     setNombrePizarraInput("");
     setModalGuardarPizarra(false);
   };
@@ -701,7 +768,6 @@ export function CanchaBCoachBoard({
     setTexts(p.texts || []);
     if (p.teamColor) setTeamColor(p.teamColor);
     setModalBancoPizarras(false);
-    toast.success(`⚽ Pizarra "${p.nombre}" cargada en la cancha.`);
   };
 
   const handleEliminarPizarraDeBanco = (id: string, nombre: string) => {
@@ -717,7 +783,6 @@ export function CanchaBCoachBoard({
     } catch (e) {}
 
     setBancoPizarras([...PRESET_DRILLS, ...updatedUserBoards]);
-    toast.info(`🗑️ Pizarra "${nombre}" eliminada del banco.`);
   };
 
   const handleEditarPizarraEnBanco = (p: SavedBoardPreset) => {
@@ -744,7 +809,6 @@ export function CanchaBCoachBoard({
     } catch (e) {}
 
     setBancoPizarras([...PRESET_DRILLS, ...updatedUserBoards]);
-    toast.success(`✏️ Ejercicio renombrado a "${nuevoNombre.trim()}".`);
   };
   const lastPinchDist = useRef<number | null>(null);
   const sheetTouchStartY = useRef<number | null>(null);
@@ -805,12 +869,10 @@ export function CanchaBCoachBoard({
         // Image → use as background (not video mode)
         setBackgroundImageUrl(url);
         setActiveVideoUrl(null);
-        toast.success("🖼️ Imagen de campo cargada como fondo de la pizarra.");
       } else {
         setActiveVideoUrl(url);
         setBackgroundImageUrl(null);
         setIsPlayingVideo(true);
-        toast.success("📹 Video de análisis cargado correctamente.");
       }
     }
     // Reset so same file can be re-selected
@@ -824,7 +886,6 @@ export function CanchaBCoachBoard({
       const url = URL.createObjectURL(file);
       setBackgroundImageUrl(url);
       setActiveVideoUrl(null);
-      toast.success("📸 Foto del campo cargada. ¡Dibuja sobre ella!");
     }
     e.target.value = "";
   };
@@ -854,19 +915,41 @@ export function CanchaBCoachBoard({
 
     if (activeTool === "add-item") {
       setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x, y }]);
-      toast.success("⚽ Balón colocado");
       return;
     }
 
     if (activeTool === "add-cone") {
       setCones((prev) => [...prev, { id: `cone-${Date.now()}`, x, y }]);
-      toast.success("🟧 Cono de entrenamiento colocado");
       return;
     }
 
     if (activeTool === "add-minigoal") {
       setMiniGoals((prev) => [...prev, { id: `mg-${Date.now()}`, x, y, rotation: 0 }]);
-      toast.success("🥅 Mini Arco colocado");
+      return;
+    }
+
+    if (activeTool === "add-dummy") {
+      setDummies((prev) => [...prev, { id: `dum-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-ladder") {
+      setLadders((prev) => [...prev, { id: `lad-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-hurdle") {
+      setHurdles((prev) => [...prev, { id: `hur-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-hoop") {
+      setHoops((prev) => [...prev, { id: `hoop-${Date.now()}`, x, y, color }]);
+      return;
+    }
+
+    if (activeTool === "add-pole") {
+      setPoles((prev) => [...prev, { id: `pole-${Date.now()}`, x, y, color }]);
       return;
     }
 
@@ -876,7 +959,7 @@ export function CanchaBCoachBoard({
       return;
     }
 
-    if (activeTool === "draw-zone") {
+    if (activeTool === "draw-zone" || activeTool === "draw-circle-zone") {
       setIsDrawing(true);
       setZoneStart({ x, y });
       setZoneCurrent({ x, y });
@@ -894,7 +977,7 @@ export function CanchaBCoachBoard({
   const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (isDrawing) {
       const pt = getSVGCoords(e.clientX, e.clientY);
-      if (activeTool === "draw-zone") {
+      if (activeTool === "draw-zone" || activeTool === "draw-circle-zone") {
         setZoneCurrent(pt);
       } else {
         setLivePts((prev) => [...prev, pt]);
@@ -911,6 +994,16 @@ export function CanchaBCoachBoard({
         setCones((prev) => prev.map((c) => (c.id === dragging.id ? { ...c, x, y } : c)));
       else if (dragging.type === "minigoal")
         setMiniGoals((prev) => prev.map((mg) => (mg.id === dragging.id ? { ...mg, x, y } : mg)));
+      else if (dragging.type === "dummy")
+        setDummies((prev) => prev.map((d) => (d.id === dragging.id ? { ...d, x, y } : d)));
+      else if (dragging.type === "ladder")
+        setLadders((prev) => prev.map((ld) => (ld.id === dragging.id ? { ...ld, x, y } : ld)));
+      else if (dragging.type === "hurdle")
+        setHurdles((prev) => prev.map((h) => (h.id === dragging.id ? { ...h, x, y } : h)));
+      else if (dragging.type === "hoop")
+        setHoops((prev) => prev.map((hp) => (hp.id === dragging.id ? { ...hp, x, y } : hp)));
+      else if (dragging.type === "pole")
+        setPoles((prev) => prev.map((pl) => (pl.id === dragging.id ? { ...pl, x, y } : pl)));
       else if (dragging.type === "text")
         setTexts((prev) => prev.map((t) => (t.id === dragging.id ? { ...t, x, y } : t)));
     }
@@ -918,7 +1011,7 @@ export function CanchaBCoachBoard({
 
   const handlePointerUp = useCallback(() => {
     if (isDrawing) {
-      if (activeTool === "draw-zone" && zoneStart && zoneCurrent) {
+      if ((activeTool === "draw-zone" || activeTool === "draw-circle-zone") && zoneStart && zoneCurrent) {
         const x = Math.min(zoneStart.x, zoneCurrent.x);
         const y = Math.min(zoneStart.y, zoneCurrent.y);
         const width = Math.abs(zoneCurrent.x - zoneStart.x);
@@ -926,9 +1019,12 @@ export function CanchaBCoachBoard({
         if (width > 2 && height > 2) {
           setZones((prev) => [
             ...prev,
-            { id: `zone-${Date.now()}`, x, y, width, height, color },
+            {
+              id: `zone-${Date.now()}`,
+              x, y, width, height, color,
+              shape: activeTool === "draw-circle-zone" ? "circle" : "rect"
+            },
           ]);
-          toast.success("🟧 Zona sombreada creada.");
         }
       } else if (livePts.length > 1) {
         setPaths((prev) => [
@@ -949,7 +1045,7 @@ export function CanchaBCoachBoard({
     if (!f) return;
     const targetColor = colorOverride || teamColor;
     setPlayers((prev) => [
-      ...prev,
+      ...prev.filter((p) => p.color !== targetColor),
       ...f.pts.map((c, i) => ({
         id: `fp-${i}-${Date.now()}`,
         number: c.n,
@@ -958,7 +1054,6 @@ export function CanchaBCoachBoard({
         y: c.y,
       })),
     ]);
-    toast.success(`👥 ${f.label} (${TEAM_COLORS_MAP[targetColor].label}) desplegada`);
   }, [teamColor]);
 
   const loadRivalTeam = useCallback((key: string = "4-3-3", rivalColor: PlayerTeamColor = "blue") => {
@@ -971,15 +1066,17 @@ export function CanchaBCoachBoard({
       x: 100 - c.x,
       y: c.y,
     }));
-    setPlayers((prev) => [...prev, ...rivalPts]);
-    toast.success(`🔴 Equipo Rival 11vs11 (${TEAM_COLORS_MAP[rivalColor].label}) desplegado`);
+    setPlayers((prev) => [
+      ...prev.filter((p) => p.color !== rivalColor),
+      ...rivalPts,
+    ]);
   }, []);
 
   const handleClear = () => {
-    setPaths([]); setZones([]); setPlayers([]); setBalls([]); setCones([]); setMiniGoals([]); setTexts([]);
+    setPaths([]); setZones([]); setPlayers([]); setBalls([]); setCones([]); setMiniGoals([]);
+    setDummies([]); setLadders([]); setHurdles([]); setHoops([]); setPoles([]); setTexts([]);
     setSelectedPlayerId(null); setKeyframes([]); setActiveFrameIdx(0); setIsPlayingAnimation(false);
     setBackgroundImageUrl(null); setActiveVideoUrl(null);
-    toast.info("🧹 Pizarra limpiada por completo");
   };
 
   const handleUndo = () => {
@@ -994,7 +1091,6 @@ export function CanchaBCoachBoard({
     } else if (players.length > 0) {
       setPlayers((p) => p.slice(0, -1));
     }
-    toast.info("↩️ Último elemento borrado");
   };
 
   const resetView = () => { setZoom(1); };
@@ -1050,7 +1146,7 @@ export function CanchaBCoachBoard({
       </defs>
 
       <g transform={isPortrait ? "translate(65,0) rotate(90)" : undefined}>
-        {/* Field Background: Photo/Image > Video (handled externally) > Green 2D Pitch */}
+        {/* Field Background: Photo/Image > Video (handled externally) > Green 2D Pitch (Full or Half-Pitch) */}
         {backgroundImageUrl ? (
           // Photo or uploaded image as background for drawing on top
           <image
@@ -1060,8 +1156,8 @@ export function CanchaBCoachBoard({
             preserveAspectRatio="xMidYMid slice"
           />
         ) : !activeVideoUrl ? (
-          // Default green 2D tactical field
-          <SportFieldInner sport="football" />
+          // Green 2D tactical field: Full pitch or Half pitch
+          pitchLayout === "half-pitch" ? <FootballHalfField /> : <SportFieldInner sport="football" />
         ) : null}
 
         {/* Guardiola 5-Corridor Grid Overlay */}
@@ -1078,43 +1174,78 @@ export function CanchaBCoachBoard({
           </g>
         )}
 
-        {/* Shaded Space Zones (Zonas sombreadas transparentes estilo bCoach 00:27) */}
+        {/* Shaded Space Zones (Rectangulares o Circulares estilo bCoach) */}
         {zones.map((z) => (
-          <rect
-            key={z.id}
-            x={z.x}
-            y={z.y}
-            width={z.width}
-            height={z.height}
-            rx={1.5}
-            fill={z.color}
-            fillOpacity={0.35}
-            stroke={z.color}
-            strokeWidth={0.6}
-            strokeDasharray="2,2"
-            onPointerDown={(e) => {
-              if (activeTool === "eraser") {
-                e.stopPropagation();
-                setZones((prev) => prev.filter((item) => item.id !== z.id));
-              }
-            }}
-          />
+          z.shape === "circle" ? (
+            <ellipse
+              key={z.id}
+              cx={z.x + z.width / 2}
+              cy={z.y + z.height / 2}
+              rx={z.width / 2}
+              ry={z.height / 2}
+              fill={z.color}
+              fillOpacity={0.35}
+              stroke={z.color}
+              strokeWidth={0.6}
+              strokeDasharray="2,2"
+              onPointerDown={(e) => {
+                if (activeTool === "eraser") {
+                  e.stopPropagation();
+                  setZones((prev) => prev.filter((item) => item.id !== z.id));
+                }
+              }}
+            />
+          ) : (
+            <rect
+              key={z.id}
+              x={z.x}
+              y={z.y}
+              width={z.width}
+              height={z.height}
+              rx={1.5}
+              fill={z.color}
+              fillOpacity={0.35}
+              stroke={z.color}
+              strokeWidth={0.6}
+              strokeDasharray="2,2"
+              onPointerDown={(e) => {
+                if (activeTool === "eraser") {
+                  e.stopPropagation();
+                  setZones((prev) => prev.filter((item) => item.id !== z.id));
+                }
+              }}
+            />
+          )
         ))}
 
         {/* Live Zone Preview */}
-        {isDrawing && activeTool === "draw-zone" && zoneStart && zoneCurrent && (
-          <rect
-            x={Math.min(zoneStart.x, zoneCurrent.x)}
-            y={Math.min(zoneStart.y, zoneCurrent.y)}
-            width={Math.abs(zoneCurrent.x - zoneStart.x)}
-            height={Math.abs(zoneCurrent.y - zoneStart.y)}
-            rx={1.5}
-            fill={color}
-            fillOpacity={0.35}
-            stroke={color}
-            strokeWidth={0.6}
-            strokeDasharray="2,2"
-          />
+        {isDrawing && (activeTool === "draw-zone" || activeTool === "draw-circle-zone") && zoneStart && zoneCurrent && (
+          activeTool === "draw-circle-zone" ? (
+            <ellipse
+              cx={(zoneStart.x + zoneCurrent.x) / 2}
+              cy={(zoneStart.y + zoneCurrent.y) / 2}
+              rx={Math.abs(zoneCurrent.x - zoneStart.x) / 2}
+              ry={Math.abs(zoneCurrent.y - zoneStart.y) / 2}
+              fill={color}
+              fillOpacity={0.35}
+              stroke={color}
+              strokeWidth={0.6}
+              strokeDasharray="2,2"
+            />
+          ) : (
+            <rect
+              x={Math.min(zoneStart.x, zoneCurrent.x)}
+              y={Math.min(zoneStart.y, zoneCurrent.y)}
+              width={Math.abs(zoneCurrent.x - zoneStart.x)}
+              height={Math.abs(zoneCurrent.y - zoneStart.y)}
+              rx={1.5}
+              fill={color}
+              fillOpacity={0.35}
+              stroke={color}
+              strokeWidth={0.6}
+              strokeDasharray="2,2"
+            />
+          )
         )}
 
         {/* CSS Keyframe animations for flowing passes & pulsing shots */}
@@ -1129,27 +1260,32 @@ export function CanchaBCoachBoard({
           }
         `}</style>
 
-        {/* Saved paths */}
-        {paths.map((p) => (
-          <path key={p.id} d={pointsToD(p.points)} fill="none" stroke={p.color} strokeWidth={p.width}
-            strokeDasharray={p.style === "dashed" ? "3,2" : undefined}
-            strokeLinecap="round" strokeLinejoin="round"
-            markerEnd={p.style === "arrow" ? "url(#bcoach-arrow)" : undefined}
-            style={{
-              animation: isPlayingAnimation
-                ? (p.style === "dashed" ? "bcoachPassFlow 0.6s linear infinite" : "bcoachShotGlow 0.8s ease-in-out infinite")
-                : undefined,
-            }}
-            onPointerDown={(e) => { if (activeTool === "eraser") { e.stopPropagation(); setPaths((prev) => prev.filter((q) => q.id !== p.id)); } }}
-          />
-        ))}
+        {/* Saved paths (Rectos o Curvos Bézier) */}
+        {paths.map((p) => {
+          const dPath = p.style === "curve" ? curvePointsToD(p.points) : pointsToD(p.points);
+          return (
+            <path key={p.id} d={dPath} fill="none" stroke={p.color} strokeWidth={p.width}
+              strokeDasharray={p.style === "dashed" ? "3,2" : undefined}
+              strokeLinecap="round" strokeLinejoin="round"
+              markerEnd={p.style === "arrow" || p.style === "curve" ? "url(#bcoach-arrow)" : undefined}
+              style={{
+                animation: isPlayingAnimation
+                  ? (p.style === "dashed" ? "bcoachPassFlow 0.6s linear infinite" : "bcoachShotGlow 0.8s ease-in-out infinite")
+                  : undefined,
+              }}
+              onPointerDown={(e) => { if (activeTool === "eraser") { e.stopPropagation(); setPaths((prev) => prev.filter((q) => q.id !== p.id)); } }}
+            />
+          );
+        })}
 
         {/* Live path */}
-        {isDrawing && activeTool !== "draw-zone" && livePts.length > 1 && (
-          <path d={pointsToD(livePts)} fill="none" stroke={color} strokeWidth={strokeW}
+        {isDrawing && !activeTool.includes("zone") && livePts.length > 1 && (
+          <path
+            d={strokeType === "curve" ? curvePointsToD(livePts) : pointsToD(livePts)}
+            fill="none" stroke={color} strokeWidth={strokeW}
             strokeDasharray={strokeType === "dashed" ? "3,2" : undefined}
             strokeLinecap="round" strokeLinejoin="round" opacity={0.9}
-            markerEnd={strokeType === "arrow" ? "url(#bcoach-arrow)" : undefined}
+            markerEnd={strokeType === "arrow" || strokeType === "curve" ? "url(#bcoach-arrow)" : undefined}
           />
         )}
 
@@ -1168,7 +1304,6 @@ export function CanchaBCoachBoard({
                 setSelectedPlayerId(p.id);
                 if (activeTool === "eraser") {
                   setPlayers((prev) => prev.filter((q) => q.id !== p.id));
-                  toast.info(`Jugador #${p.number} eliminado`);
                   return;
                 }
                 setDragging({ type: "player", id: p.id });
@@ -1209,34 +1344,6 @@ export function CanchaBCoachBoard({
                 {p.number}
               </text>
 
-              {/* Player Name Pill (Nombres Reales de Convocatoria en Modo Partido) */}
-              {p.label && (
-                <g transform={isPortrait ? "rotate(-90)" : undefined} style={{ pointerEvents: "none" }}>
-                  <rect
-                    x={-(Math.max(4, p.label.length * 0.45))}
-                    y={2.2}
-                    width={Math.max(8, p.label.length * 0.9)}
-                    height={2.2}
-                    rx={0.6}
-                    fill="rgba(15, 23, 42, 0.9)"
-                    stroke={isSelected ? "#38bdf8" : "rgba(255,255,255,0.4)"}
-                    strokeWidth={0.25}
-                  />
-                  <text
-                    x={0}
-                    y={3.3}
-                    textAnchor="middle"
-                    dominantBaseline="central"
-                    fontSize={1.1}
-                    fill="#ffffff"
-                    fontWeight="800"
-                    fontFamily="Inter,sans-serif"
-                  >
-                    {p.label.length > 13 ? p.label.slice(0, 12) + "…" : p.label}
-                  </text>
-                </g>
-              )}
-
               {/* Small accent indicator dot when selected */}
               {isSelected && (
                 <circle
@@ -1247,23 +1354,6 @@ export function CanchaBCoachBoard({
                   stroke="#ffffff"
                   strokeWidth={0.15}
                 />
-              )}
-
-              {/* Optional position/role label under player */}
-              {p.label && (
-                <text
-                  y={2.8}
-                  textAnchor="middle"
-                  fontSize={1.0}
-                  fontWeight="bold"
-                  fill="#38bdf8"
-                  stroke="#0f172a"
-                  strokeWidth={0.15}
-                  transform={isPortrait ? "rotate(-90)" : undefined}
-                  style={{ pointerEvents: "none" }}
-                >
-                  {p.label}
-                </text>
               )}
             </g>
           );
@@ -1299,7 +1389,7 @@ export function CanchaBCoachBoard({
             style={{ cursor: "grab" }}
             onPointerDown={(e) => {
               e.stopPropagation();
-              if (activeTool === "eraser") { setCones((prev) => prev.filter((q) => q.id !== c.id)); toast.info("Cono eliminado"); return; }
+              if (activeTool === "eraser") { setCones((prev) => prev.filter((q) => q.id !== c.id)); return; }
               setDragging({ type: "cone", id: c.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
             }}
@@ -1316,7 +1406,7 @@ export function CanchaBCoachBoard({
             style={{ cursor: "grab" }}
             onPointerDown={(e) => {
               e.stopPropagation();
-              if (activeTool === "eraser") { setMiniGoals((prev) => prev.filter((q) => q.id !== mg.id)); toast.info("Mini arco eliminado"); return; }
+              if (activeTool === "eraser") { setMiniGoals((prev) => prev.filter((q) => q.id !== mg.id)); return; }
               setDragging({ type: "minigoal", id: mg.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
             }}
@@ -1328,6 +1418,91 @@ export function CanchaBCoachBoard({
           </g>
         ))}
 
+        {/* Vector Free Kick Dummies / Muñecos de Barrera (🧍‍♂️) */}
+        {dummies.map((d) => (
+          <g key={d.id} transform={`translate(${d.x},${d.y}) rotate(${d.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setDummies((prev) => prev.filter((q) => q.id !== d.id)); return; }
+              setDragging({ type: "dummy", id: d.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <rect x={-0.8} y={1.2} width={1.6} height={0.5} fill="#334155" rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <path d="M -1.1,-1.2 L 1.1,-1.2 L 0.8,1.2 L -0.8,1.2 Z" fill="#eab308" stroke="#0f172a" strokeWidth={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <circle cx={0} cy={-2.0} r={0.7} fill="#eab308" stroke="#0f172a" strokeWidth={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <line x1={-0.6} y1={-0.2} x2={0.6} y2={-0.2} stroke="#0f172a" strokeWidth={0.25} transform={isPortrait ? "rotate(-90)" : undefined} />
+          </g>
+        ))}
+
+        {/* Vector Agility Ladders / Escaleras de Agilidad (🪜) */}
+        {ladders.map((ld) => (
+          <g key={ld.id} transform={`translate(${ld.x},${ld.y}) rotate(${ld.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setLadders((prev) => prev.filter((q) => q.id !== ld.id)); return; }
+              setDragging({ type: "ladder", id: ld.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <rect x={-6} y={-1.2} width={12} height={2.4} fill="none" stroke="#f59e0b" strokeWidth={0.25} rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
+            {[-4.5, -3, -1.5, 0, 1.5, 3, 4.5].map((xPos) => (
+              <line key={xPos} x1={xPos} y1={-1.2} x2={xPos} y2={1.2} stroke="#f59e0b" strokeWidth={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
+            ))}
+          </g>
+        ))}
+
+        {/* Vector Hurdles / Vallas de Salto (🚧) */}
+        {hurdles.map((h) => (
+          <g key={h.id} transform={`translate(${h.x},${h.y}) rotate(${h.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setHurdles((prev) => prev.filter((q) => q.id !== h.id)); return; }
+              setDragging({ type: "hurdle", id: h.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <rect x={-2.2} y={-0.4} width={4.4} height={0.8} fill="#ef4444" stroke="#ffffff" strokeWidth={0.2} rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <circle cx={-2.2} cy={0} r={0.35} fill="#0f172a" transform={isPortrait ? "rotate(-90)" : undefined} />
+            <circle cx={2.2} cy={0} r={0.35} fill="#0f172a" transform={isPortrait ? "rotate(-90)" : undefined} />
+          </g>
+        ))}
+
+        {/* Vector Hoops / Aros de Agilidad (⭕) */}
+        {hoops.map((hp) => (
+          <g key={hp.id} transform={`translate(${hp.x},${hp.y})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setHoops((prev) => prev.filter((q) => q.id !== hp.id)); return; }
+              setDragging({ type: "hoop", id: hp.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <circle r={1.5} fill="none" stroke={hp.color || "#ec4899"} strokeWidth={0.45} />
+          </g>
+        ))}
+
+        {/* Vector Poles / Picas y Banderines (🚩) */}
+        {poles.map((pl) => (
+          <g key={pl.id} transform={`translate(${pl.x},${pl.y})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setPoles((prev) => prev.filter((q) => q.id !== pl.id)); return; }
+              setDragging({ type: "pole", id: pl.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+          >
+            <circle r={0.5} fill="#334155" stroke="#ffffff" strokeWidth={0.15} />
+            <line x1={0} y1={0} x2={0} y2={-2.2} stroke="#facc15" strokeWidth={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <polygon points="0,-2.2 1.4,-1.6 0,-1.0" fill={pl.color || "#ef4444"} transform={isPortrait ? "rotate(-90)" : undefined} />
+          </g>
+        ))}
+
         {/* Texts (Etiquetas Tácticas estilizadas y centradas sin salir del borde) */}
         {texts.map((t) => {
           const textWidth = Math.max(10, t.text.length * 0.85 + 2.5);
@@ -1336,7 +1511,7 @@ export function CanchaBCoachBoard({
               style={{ cursor: "grab" }}
               onPointerDown={(e) => {
                 e.stopPropagation();
-                if (activeTool === "eraser") { setTexts((prev) => prev.filter((q) => q.id !== t.id)); toast.info("Texto eliminado"); return; }
+                if (activeTool === "eraser") { setTexts((prev) => prev.filter((q) => q.id !== t.id)); return; }
                 setDragging({ type: "text", id: t.id });
                 (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
               }}
@@ -1376,324 +1551,327 @@ export function CanchaBCoachBoard({
   return (
     <div className="flex flex-col w-full h-full bg-[#183b18] text-white overflow-hidden select-none relative">
       {/* ── TOP FLOATING GLASS HUD (HUD Superior Flotante Estilo bCoach & Matchday Board) ───────────────────────── */}
-      <div className="absolute top-2 left-2 right-2 z-30 flex items-center justify-between pointer-events-none gap-2 flex-wrap">
-        {/* Left Floating Pill with Mode Selector */}
-        <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-2xl">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 transition text-xs font-bold"
-              title="Volver"
-            >
-              ←
-            </button>
+      <div className="absolute top-2 left-2 right-2 z-30 flex flex-col items-center gap-1.5 pointer-events-none">
+        {/* ROW 1: Main Header Control Bar */}
+        <div className="w-full flex items-center justify-between gap-2 flex-wrap pointer-events-none">
+          {/* Left Floating Pill with Mode Selector */}
+          <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/90 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-2xl">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 transition text-xs font-bold"
+                title="Volver"
+              >
+                ←
+              </button>
+            )}
+
+            {/* Mode Selector Dropdown */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-black text-white hidden sm:inline">⚽</span>
+              <select
+                value={boardMode}
+                onChange={(e) => {
+                  const nextMode = e.target.value as "training" | "matchday";
+                  setBoardMode(nextMode);
+                }}
+                className="bg-slate-900 text-emerald-400 font-extrabold text-xs border border-emerald-500/40 rounded-lg px-2 py-0.5 outline-none cursor-pointer"
+              >
+                <option value="matchday">🏆 Modo Partido</option>
+                <option value="training">🏋️ Modo Entrenamiento</option>
+              </select>
+            </div>
+
+            <span className="text-[10px] font-bold text-slate-300 hidden md:inline truncate max-w-[180px]">
+              {boardMode === "matchday" ? `${teamName} vs ${rivalName}` : category}
+            </span>
+          </div>
+
+          {/* Center: Phase Selector Bar (Solo visible en Modo Partido) */}
+          {boardMode === "matchday" && (
+            <div className="pointer-events-auto hidden lg:flex items-center gap-1 bg-slate-950/90 backdrop-blur-md border border-white/20 px-2 py-1 rounded-full shadow-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePhase("ataque");
+                  loadFormation("4-3-3", "orange");
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
+                  activePhase === "ataque" ? "bg-emerald-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                🟢 Ataque
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePhase("defensa");
+                  loadFormation("4-4-2", "orange");
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
+                  activePhase === "defensa" ? "bg-rose-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                🔴 Defensa
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePhase("transicion");
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
+                  activePhase === "transicion" ? "bg-amber-500 text-slate-950 shadow" : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                🔄 Transición
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePhase("abp");
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
+                  activePhase === "abp" ? "bg-purple-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                🎯 ABP
+              </button>
+            </div>
           )}
 
-          {/* Mode Selector Dropdown */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-white hidden sm:inline">⚽</span>
-            <select
-              value={boardMode}
-              onChange={(e) => {
-                const nextMode = e.target.value as "training" | "matchday";
-                setBoardMode(nextMode);
-                if (nextMode === "matchday") {
-                  loadRealMatchConvocatoria();
+          {/* Right Floating Quick Tools */}
+          <div className="pointer-events-auto flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2 py-1 rounded-full shadow-2xl flex-wrap">
+            {/* Modo Camerino / Entretiempo */}
+            {boardMode === "matchday" && (
+              <button
+                type="button"
+                onClick={() => setShowCamerinoModal(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black transition shadow-md"
+                title="Ajustes de Entretiempo / Camerino (15 Minutos)"
+              >
+                <span>⏱️</span>
+                <span className="hidden sm:inline">Camerino</span>
+              </button>
+            )}
+
+            {/* Banco de Pizarras Guardadas */}
+            <button
+              type="button"
+              onClick={() => setModalBancoPizarras(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-indigo-600/90 hover:bg-indigo-500 text-[10px] font-bold text-white transition shadow-md shadow-indigo-900/50"
+              title="Abrir Banco de Pizarras Guardadas"
+            >
+              <FolderOpen className="h-3 w-3 text-indigo-200" />
+              <span>Banco ({bancoPizarras.length})</span>
+            </button>
+
+            {/* Guardar Pizarra Actual */}
+            <button
+              type="button"
+              onClick={() => setModalGuardarPizarra(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-[10px] font-bold text-white transition shadow-md shadow-emerald-900/50"
+              title="Guardar Pizarra Actual en el Banco"
+            >
+              <Save className="h-3 w-3 text-emerald-200" />
+              <span className="hidden sm:inline">Guardar</span>
+            </button>
+
+            {/* Photo */}
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-slate-800/80 hover:bg-violet-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+              title="Tomar foto del campo"
+            >
+              <span>📷</span>
+              <span className="hidden sm:inline">Foto</span>
+            </button>
+
+            {/* Video */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 px-2 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+              title="Cargar video"
+            >
+              <Video className="h-3 w-3 text-emerald-400" />
+              <span className="hidden sm:inline">Video</span>
+            </button>
+
+            {/* Formations */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-slate-800/80 hover:bg-blue-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
+                  title="Alineaciones 1-clic"
+                >
+                  <Users className="h-3 w-3 text-blue-400" />
+                  <span className="hidden sm:inline">Alineaciones</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-60 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-1">
+                <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Alineaciones Mi Equipo</span>
+                {Object.entries(FORMATIONS).map(([key, f]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => loadFormation(key)}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-blue-600 hover:text-white transition flex justify-between items-center"
+                  >
+                    <span className="font-black text-xs">{key}</span>
+                    <span className="text-[9px] opacity-70">{f.label}</span>
+                  </button>
+                ))}
+
+                {boardMode === "matchday" && (
+                  <button
+                    type="button"
+                    onClick={() => loadRealMatchConvocatoria()}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-extrabold text-amber-300 hover:bg-amber-600 hover:text-white transition flex justify-between items-center bg-amber-950/40 border border-amber-800/40 my-1"
+                  >
+                    <span>🏆 Convocatoria Real (11v11)</span>
+                  </button>
+                )}
+
+                <div className="h-px bg-white/10 my-1" />
+                <span className="text-[9px] font-bold text-red-400 uppercase px-2 py-0.5 block">Equipo Rival (Campo Contrario)</span>
+                <button
+                  type="button"
+                  onClick={() => loadRivalTeam("4-3-3", "blue")}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:bg-blue-600 hover:text-white transition flex justify-between items-center bg-blue-950/40 border border-blue-800/40"
+                >
+                  <span>🔵 Rival 4-3-3 (Azul)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => loadRivalTeam("4-4-2", "red")}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-600 hover:text-white transition flex justify-between items-center bg-red-950/40 border border-red-800/40"
+                >
+                  <span>🔴 Rival 4-4-2 (Rojo)</span>
+                </button>
+              </PopoverContent>
+            </Popover>
+
+            {/* Fullscreen */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen?.().catch(() => {});
                 } else {
-                  toast.info("🏋️ Modo Entrenamiento (Pizarra libre)");
+                  document.exitFullscreen?.();
                 }
               }}
-              className="bg-slate-900 text-emerald-400 font-extrabold text-xs border border-emerald-500/40 rounded-lg px-2 py-0.5 outline-none cursor-pointer"
+              className="p-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-emerald-400 transition"
+              title="Pantalla Completa"
             >
-              <option value="matchday">🏆 Modo Partido (Plan de Juego)</option>
-              <option value="training">🏋️ Modo Entrenamiento</option>
-            </select>
+              <Maximize2 className="h-3.5 w-3.5" />
+            </button>
           </div>
-
-          <span className="text-[10px] font-bold text-slate-300 hidden md:inline truncate max-w-[180px]">
-            {boardMode === "matchday" ? `${teamName} vs ${rivalName}` : category}
-          </span>
         </div>
 
-        {/* Center: Phase Selector Bar (Solo visible en Modo Partido) */}
-        {boardMode === "matchday" && (
-          <div className="pointer-events-auto hidden lg:flex items-center gap-1 bg-slate-950/90 backdrop-blur-md border border-white/20 px-2 py-1 rounded-full shadow-2xl">
-            <button
-              type="button"
-              onClick={() => {
-                setActivePhase("ataque");
-                loadFormation("4-3-3", "orange");
-                toast.success("🟢 Fase: Ataque Organizado (Salida y Llegada)");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
-                activePhase === "ataque" ? "bg-emerald-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              🟢 Ataque
-            </button>
+        {/* ROW 2: Step Animation & Grid Floating Bar (Placed naturally in flex-col below Row 1) */}
+        <div className="pointer-events-auto flex items-center gap-1 bg-slate-950/90 border border-white/20 px-3 py-1 rounded-full shadow-2xl backdrop-blur-lg max-w-[98vw] overflow-x-auto">
+          {/* Guardar Fotograma Paso */}
+          <button
+            type="button"
+            onClick={handleAddKeyframe}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] active:scale-95 transition shadow shrink-0"
+            title="Capturar posición actual como nuevo paso táctico"
+          >
+            <Sparkles className="h-3 w-3 text-emerald-200" />
+            <span>+ Paso ({keyframes.length})</span>
+          </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActivePhase("defensa");
-                loadFormation("4-4-2", "orange");
-                toast.success("🔴 Fase: Bloque Defensivo (Repliegue y Coberturas)");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
-                activePhase === "defensa" ? "bg-rose-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              🔴 Defensa
-            </button>
+          {keyframes.length > 0 && (
+            <>
+              <div className="w-px h-4 bg-white/20 my-auto mx-1 shrink-0" />
 
-            <button
-              type="button"
-              onClick={() => {
-                setActivePhase("transicion");
-                toast.success("🔄 Fase: Transición (Presión tras Pérdida / Contraataque)");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
-                activePhase === "transicion" ? "bg-amber-500 text-slate-950 shadow" : "text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              🔄 Transición
-            </button>
+              {/* Prev step */}
+              <button
+                type="button"
+                onClick={() => handleSelectKeyframe(Math.max(0, activeFrameIdx - 1))}
+                disabled={activeFrameIdx === 0}
+                className="p-1 text-slate-300 hover:text-white disabled:opacity-30 shrink-0"
+                title="Paso anterior"
+              >
+                <SkipBack className="h-3.5 w-3.5" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActivePhase("abp");
-                toast.success("🎯 Fase: Balón Parado / ABP (Córners y Tiros Libres)");
-              }}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold transition ${
-                activePhase === "abp" ? "bg-purple-600 text-white shadow" : "text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              🎯 ABP
-            </button>
-          </div>
-        )}
+              {/* Play/Pause Animation */}
+              <button
+                type="button"
+                onClick={() => setIsPlayingAnimation((prev) => !prev)}
+                disabled={keyframes.length < 2}
+                className={`flex items-center gap-1 px-3 py-1 rounded-full font-extrabold text-[10px] transition active:scale-95 shrink-0 ${
+                  isPlayingAnimation ? "bg-rose-600 text-white shadow-lg shadow-rose-900/50 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50"
+                }`}
+                title="Reproducir/Pausar animación fluida"
+              >
+                {isPlayingAnimation ? <Pause className="h-3.5 w-3.5 fill-white" /> : <Play className="h-3.5 w-3.5 fill-white" />}
+                <span>{isPlayingAnimation ? "Pausar" : "▶ Animación"}</span>
+              </button>
 
-        {/* Right Floating Quick Tools */}
-        <div className="pointer-events-auto flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2 py-1 rounded-full shadow-2xl">
-          {/* Modo Camerino / Entretiempo */}
-          {boardMode === "matchday" && (
-            <button
-              type="button"
-              onClick={() => setShowCamerinoModal(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black transition shadow-md"
-              title="Ajustes de Entretiempo / Camerino (15 Minutos)"
-            >
-              <span>⏱️</span>
-              <span className="hidden sm:inline">Camerino (15 Min)</span>
-            </button>
+              {/* Next step */}
+              <button
+                type="button"
+                onClick={() => handleSelectKeyframe(Math.min(keyframes.length - 1, activeFrameIdx + 1))}
+                disabled={activeFrameIdx === keyframes.length - 1}
+                className="p-1 text-slate-300 hover:text-white disabled:opacity-30 shrink-0"
+                title="Paso siguiente"
+              >
+                <SkipForward className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Badges para saltar a pasos */}
+              <div className="flex items-center gap-1 ml-1 overflow-x-auto max-w-[200px] shrink-0">
+                {keyframes.map((f, idx) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => handleSelectKeyframe(idx)}
+                    className={`px-2 py-0.5 rounded-full text-[9px] font-black transition active:scale-95 ${
+                      activeFrameIdx === idx ? "bg-amber-400 text-slate-950 ring-2 ring-amber-300 shadow" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    }`}
+                    title={`Saltar al Paso ${idx + 1}`}
+                  >
+                    P{idx + 1}
+                  </button>
+                ))}
+
+                {/* Botón para eliminar el paso actual seleccionado */}
+                <button
+                  type="button"
+                  onClick={handleRemoveActiveKeyframe}
+                  className="p-1 rounded-full text-red-400 hover:text-red-200 hover:bg-red-950/60 transition active:scale-90 ml-0.5 shrink-0"
+                  title={`Eliminar Paso ${activeFrameIdx + 1} actual`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </>
           )}
 
-          {/* Banco de Pizarras Guardadas */}
-          <button
-            type="button"
-            onClick={() => setModalBancoPizarras(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-600/90 hover:bg-indigo-500 text-[10px] font-bold text-white transition shadow-md shadow-indigo-900/50"
-            title="Abrir Banco de Pizarras Guardadas"
-          >
-            <FolderOpen className="h-3 w-3 text-indigo-200" />
-            <span>Banco ({bancoPizarras.length})</span>
-          </button>
-
-          {/* Guardar Pizarra Actual */}
-          <button
-            type="button"
-            onClick={() => setModalGuardarPizarra(true)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600/90 hover:bg-emerald-500 text-[10px] font-bold text-white transition shadow-md shadow-emerald-900/50"
-            title="Guardar Pizarra Actual en el Banco"
-          >
-            <Save className="h-3 w-3 text-emerald-200" />
-            <span className="hidden sm:inline">Guardar</span>
-          </button>
-
-          {/* Photo */}
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-violet-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
-            title="Tomar foto del campo"
-          >
-            <span>📷</span>
-            <span className="hidden sm:inline">Foto</span>
-          </button>
-
-          {/* Video */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-emerald-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
-            title="Cargar video"
-          >
-            <Video className="h-3 w-3 text-emerald-400" />
-            <span className="hidden sm:inline">Video</span>
-          </button>
-
-          {/* Formations */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-blue-700 text-[10px] font-bold text-slate-200 hover:text-white transition"
-                title="Alineaciones 1-clic"
-              >
-                <Users className="h-3 w-3 text-blue-400" />
-                <span className="hidden sm:inline">Alineaciones</span>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-1">
-              <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Alineaciones Mi Equipo</span>
-              {Object.entries(FORMATIONS).map(([key, f]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => loadFormation(key)}
-                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-blue-600 hover:text-white transition flex justify-between items-center"
-                >
-                  <span className="font-black text-xs">{key}</span>
-                  <span className="text-[9px] opacity-70">{f.label}</span>
-                </button>
-              ))}
-
-              <div className="h-px bg-white/10 my-1" />
-              <span className="text-[9px] font-bold text-red-400 uppercase px-2 py-0.5 block">Equipo Rival (Campo Contrario)</span>
-              <button
-                type="button"
-                onClick={() => loadRivalTeam("4-3-3", "blue")}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:bg-blue-600 hover:text-white transition flex justify-between items-center bg-blue-950/40 border border-blue-800/40"
-              >
-                <span>🔵 Rival 4-3-3 (Azul)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => loadRivalTeam("4-4-2", "red")}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-600 hover:text-white transition flex justify-between items-center bg-red-950/40 border border-red-800/40"
-              >
-                <span>🔴 Rival 4-4-2 (Rojo)</span>
-              </button>
-            </PopoverContent>
-          </Popover>
-
-          {/* Fullscreen */}
+          {/* Toggle Guardiola Grid */}
+          <div className="w-px h-4 bg-white/20 my-auto mx-1 shrink-0" />
           <button
             type="button"
             onClick={() => {
-              if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen?.().catch(() => {});
-              } else {
-                document.exitFullscreen?.();
-              }
+              setShowGuardiolaGrid((prev) => !prev);
             }}
-            className="p-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-emerald-400 transition"
-            title="Pantalla Completa"
+            className={`p-1 rounded-full text-[10px] font-bold transition shrink-0 ${
+              showGuardiolaGrid ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
+            }`}
+            title="Mostrar/Ocultar 5 pasillos tácticos (Guardiola Grid)"
           >
-            <Maximize2 className="h-3.5 w-3.5" />
+            <Grid className="h-3.5 w-3.5" />
           </button>
         </div>
-
-      {/* ── BARRA CONTROLADORA DE ANIMACIÓN Y PASOS TÁCTICOS (FOTOGRAMAS 60FPS) ── */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex items-center gap-1 bg-slate-950/90 border border-white/20 px-3 py-1 rounded-full shadow-2xl backdrop-blur-lg">
-        {/* Guardar Fotograma Paso */}
-        <button
-          type="button"
-          onClick={handleAddKeyframe}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] active:scale-95 transition shadow"
-          title="Capturar posición actual como nuevo paso táctico"
-        >
-          <Sparkles className="h-3 w-3 text-emerald-200" />
-          <span>+ Paso ({keyframes.length})</span>
-        </button>
-
-        {keyframes.length > 0 && (
-          <>
-            <div className="w-px h-4 bg-white/20 my-auto mx-1" />
-
-            {/* Prev step */}
-            <button
-              type="button"
-              onClick={() => handleSelectKeyframe(Math.max(0, activeFrameIdx - 1))}
-              disabled={activeFrameIdx === 0}
-              className="p-1 text-slate-300 hover:text-white disabled:opacity-30"
-              title="Paso anterior"
-            >
-              <SkipBack className="h-3.5 w-3.5" />
-            </button>
-
-            {/* Play/Pause Animation */}
-            <button
-              type="button"
-              onClick={() => setIsPlayingAnimation((prev) => !prev)}
-              disabled={keyframes.length < 2}
-              className={`flex items-center gap-1 px-3 py-1 rounded-full font-extrabold text-[10px] transition active:scale-95 ${
-                isPlayingAnimation ? "bg-rose-600 text-white shadow-lg shadow-rose-900/50 animate-pulse" : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/50"
-              }`}
-              title="Reproducir/Pausar animación fluida"
-            >
-              {isPlayingAnimation ? <Pause className="h-3.5 w-3.5 fill-white" /> : <Play className="h-3.5 w-3.5 fill-white" />}
-              <span>{isPlayingAnimation ? "Pausar" : "▶ Animación"}</span>
-            </button>
-
-            {/* Next step */}
-            <button
-              type="button"
-              onClick={() => handleSelectKeyframe(Math.min(keyframes.length - 1, activeFrameIdx + 1))}
-              disabled={activeFrameIdx === keyframes.length - 1}
-              className="p-1 text-slate-300 hover:text-white disabled:opacity-30"
-              title="Paso siguiente"
-            >
-              <SkipForward className="h-3.5 w-3.5" />
-            </button>
-
-            {/* Badges para saltar a pasos */}
-            <div className="flex items-center gap-1 ml-1 overflow-x-auto max-w-[240px]">
-              {keyframes.map((f, idx) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => handleSelectKeyframe(idx)}
-                  className={`px-2 py-0.5 rounded-full text-[9px] font-black transition active:scale-95 ${
-                    activeFrameIdx === idx ? "bg-amber-400 text-slate-950 ring-2 ring-amber-300 shadow" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  }`}
-                  title={`Saltar al Paso ${idx + 1}`}
-                >
-                  P{idx + 1}
-                </button>
-              ))}
-
-              {/* Botón para eliminar el paso actual seleccionado */}
-              <button
-                type="button"
-                onClick={handleRemoveActiveKeyframe}
-                className="p-1 rounded-full text-red-400 hover:text-red-200 hover:bg-red-950/60 transition active:scale-90 ml-0.5 shrink-0"
-                title={`Eliminar Paso ${activeFrameIdx + 1} actual`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Toggle Guardiola Grid */}
-        <div className="w-px h-4 bg-white/20 my-auto mx-1" />
-        <button
-          type="button"
-          onClick={() => {
-            setShowGuardiolaGrid((prev) => !prev);
-            toast.info(showGuardiolaGrid ? "Pasillos tácticos ocultos" : "📐 5 Pasillos tácticos (Guardiola Grid) activados");
-          }}
-          className={`p-1 rounded-full text-[10px] font-bold transition ${
-            showGuardiolaGrid ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
-          }`}
-          title="Mostrar/Ocultar 5 pasillos tácticos (Guardiola Grid)"
-        >
-          <Grid className="h-3.5 w-3.5" />
-        </button>
-      </div>
 
         <input
           ref={fileInputRef}
@@ -1756,242 +1934,311 @@ export function CanchaBCoachBoard({
         )}
       </div>
 
-      {/* ── BOTTOM DOCK: Compact 1-row on mobile, expanded on tablet/desktop ─── */}
+      {/* ── BOTTOM DOCK: Ultra-Clean Floating Pill Bar (bCoach Zero-Clutter UI) ─── */}
       {!isDockMinimized && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto w-full px-3 flex justify-center">
-
-          {/* ── TABLET / DESKTOP: Full 2-row expanded dock (sm and up) ── */}
-          <div className="hidden sm:flex bg-slate-950/85 backdrop-blur-lg border border-white/15 p-2 rounded-2xl shadow-2xl text-white flex-col items-center gap-1.5 max-w-[95vw]">
-            {/* ROW 1: TOOLS + COLORS + THICKNESS */}
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              {/* Tools */}
-              <div className="flex items-center gap-0.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-                <button type="button" onClick={() => { setActiveTool("select"); toast.info("👆 Modo Mover activo."); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "select" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"}`}>
-                  <Hand className="h-3.5 w-3.5" /> <span>Mover</span>
+          {/* Main Floating Category Dock */}
+          <div className="bg-slate-950/90 backdrop-blur-xl border border-white/20 p-1.5 rounded-2xl shadow-2xl text-white flex items-center gap-1.5 flex-wrap justify-center max-w-[98vw]">
+            
+            {/* 1. CATEGORÍA: EQUIPAMIENTO FÍSICO (Muñecos, Escaleras, Vallas, Aros, Picas, Conos, Arcos) */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
+                    ["add-cone", "add-minigoal", "add-dummy", "add-ladder", "add-hurdle", "add-hoop", "add-pole"].includes(activeTool)
+                      ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-900/50 ring-2 ring-amber-300"
+                      : "bg-slate-900/90 text-amber-400 hover:bg-slate-800 border border-slate-800"
+                  }`}
+                  title="Abrir parrilla de equipamiento físico de entrenamiento"
+                >
+                  <span className="text-sm">🏋️</span>
+                  <span>Materiales</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
                 </button>
-                <button type="button" onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-solid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"}`}>
-                  <Pencil className="h-3.5 w-3.5" /> <span>Lápiz</span>
-                </button>
-                <button type="button" onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"}`}>
-                  <span className="font-mono text-emerald-400">┊</span> <span>Pase</span>
-                </button>
-                <button type="button" onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"}`}>
-                  <ArrowRight className="h-3.5 w-3.5 text-amber-400" /> <span>Tiro</span>
-                </button>
-                <button type="button" onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }} className={`px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition ${activeTool === "draw-zone" ? "bg-orange-600 text-white" : "text-slate-400 hover:text-white"}`}>
-                  <Square className="h-3.5 w-3.5 text-orange-400" /> <span>Zona</span>
-                </button>
-                <button type="button" onClick={() => setActiveTool("eraser")} className={`p-1.5 rounded-lg transition ${activeTool === "eraser" ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`}>
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              {/* Colors */}
-              <div className="flex items-center gap-1 bg-slate-900/90 px-2 py-1.5 rounded-xl border border-slate-800">
-                {COLORS.map((c) => (
-                  <button key={c} type="button" onClick={() => setColor(c)} className={`rounded-full border transition-transform ${color === c ? "scale-125 border-white ring-2 ring-emerald-400" : "border-transparent opacity-75 hover:opacity-100"}`} style={{ backgroundColor: c, width: 16, height: 16 }} />
-                ))}
-              </div>
-              {/* Thickness */}
-              <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-1 rounded-xl border border-slate-800">
-                {([["Fina", 0.4, "≤0.5"], ["Media", 0.8, "0.5-1"], ["Gruesa", 1.6, ">1"]] as [string, number, string][]).map(([label, val]) => (
-                  <button key={label} type="button" onClick={() => setStrokeW(val)}
-                    className={`h-6 px-1.5 rounded text-[9px] font-bold border transition ${
-                      (label === "Fina" && strokeW <= 0.5) || (label === "Media" && strokeW > 0.5 && strokeW <= 1.0) || (label === "Gruesa" && strokeW > 1.0)
-                        ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-800 text-slate-300 border-slate-700"
-                    }`}>{label}</button>
-                ))}
-              </div>
-            </div>
-            {/* ROW 2: PLAYERS + ZOOM + ACTIONS */}
-            <div className="flex items-center gap-1.5 justify-between w-full pt-0.5 border-t border-white/10">
-              <div className="flex items-center gap-1.5">
-                <button type="button" onClick={() => setActiveTool("add-player")} className={`h-7 px-2 rounded-lg text-xs font-bold flex items-center gap-1 ${activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-300 border border-slate-800"}`}>
-                  <User className="h-3 w-3 text-amber-400" /><span>+#{currentNextNum}</span>
-                </button>
-                {/* Selector directo de color de equipo (directo en la barra sin popover propenso a errores en touch) */}
-                <div className="flex items-center gap-1 bg-slate-900/90 px-1.5 py-0.5 rounded-lg border border-slate-800">
-                  {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => {
-                        setTeamColor(key as PlayerTeamColor);
-                        setActiveTool("add-player");
-                        toast.success(`Equipo activo: ${item.label}`);
-                      }}
-                      className={`w-5 h-5 rounded-full border border-white/60 transition-transform active:scale-90 flex items-center justify-center ${
-                        teamColor === key ? "scale-125 border-white ring-2 ring-emerald-400 shadow-md" : "opacity-75 hover:opacity-100"
-                      }`}
-                      style={{ backgroundColor: item.bg }}
-                      title={`Equipo ${item.label}`}
-                    >
-                      {teamColor === key && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />}
-                    </button>
-                  ))}
+              </PopoverTrigger>
+              <PopoverContent side="top" className="w-72 p-2 bg-slate-950/95 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+                <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider px-1">Materiales Físicos de Cancha</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-dummy")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-dummy" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🧍‍♂️</span> <span>Muñecos Barrera</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-ladder")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-ladder" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🪜</span> <span>Escalera Agilidad</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-hurdle")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-hurdle" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🚧</span> <span>Vallas Salto</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-hoop")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-hoop" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>⭕</span> <span>Aros Agilidad</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-pole")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-pole" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🚩</span> <span>Picas / Banderines</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-minigoal")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-minigoal" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🥅</span> <span>Mini Arco</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-cone")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-cone" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🔺</span> <span>Cono</span>
+                  </button>
                 </div>
-                <button type="button" onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); }} className="h-7 px-2 rounded-lg text-xs font-bold bg-slate-900 text-slate-300 border border-slate-800">⚽</button>
-                <button type="button" onClick={() => { setCones((prev) => [...prev, { id: `cone-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("🟧 Cono colocado."); }} className="h-7 px-2 rounded-lg text-xs font-bold bg-slate-900 text-orange-400 border border-slate-800 flex items-center gap-1 active:scale-95 transition" title="Colocar cono de entrenamiento">🔺<span className="hidden md:inline text-[10px]">Cono</span></button>
-                <button type="button" onClick={() => setActiveTool("add-text")} className={`h-7 px-2 rounded-lg text-xs font-bold flex items-center ${activeTool === "add-text" ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-300 border border-slate-800"}`}><TextIcon className="h-3 w-3 text-violet-400" /></button>
-              </div>
-              <div className="flex items-center gap-0.5 bg-slate-900/90 px-1 py-0.5 rounded-lg border border-slate-800">
-                <button type="button" onClick={() => setZoom((z) => Math.min(3, parseFloat((z + 0.25).toFixed(2))))} className="p-1 text-slate-300 hover:text-white"><ZoomIn className="h-3.5 w-3.5" /></button>
-                <button type="button" onClick={() => setZoom((z) => Math.max(0.5, parseFloat((z - 0.25).toFixed(2))))} className="p-1 text-slate-300 hover:text-white"><ZoomOut className="h-3.5 w-3.5" /></button>
-                <button type="button" onClick={resetView} className="p-1 text-slate-400 hover:text-white"><RotateCcw className="h-3.5 w-3.5" /></button>
-              </div>
-              <div className="flex items-center gap-1">
-                <button type="button" onClick={handleUndo} disabled={paths.length === 0 && zones.length === 0} className="p-1 text-amber-400 hover:text-amber-200 disabled:opacity-30 text-xs font-bold">↩</button>
-                <button type="button" onClick={handleClear} className="p-1 text-red-400 hover:text-red-300"><Trash2 className="h-3.5 w-3.5" /></button>
-                <button type="button" onClick={() => setIsDockMinimized(true)} className="p-1 text-slate-400 hover:text-white bg-slate-800/80 rounded-lg ml-1"><Eye className="h-3.5 w-3.5 text-slate-300" /></button>
-              </div>
-            </div>
-          </div>
+              </PopoverContent>
+            </Popover>
 
-          {/* ── MOBILE (< sm): Compact 1-row pill bar ── */}
-          <div className="flex sm:hidden items-center gap-1.5 bg-slate-950/95 backdrop-blur-lg border border-white/15 px-2 py-1.5 rounded-2xl shadow-2xl overflow-x-auto max-w-[98vw]">
-
-            {/* Active tool indicator + tool quick-switch pills */}
-            <div className="flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800 shrink-0">
-              {/* Mover (Hand / Pointer) */}
-              <button
-                type="button"
-                onClick={() => { setActiveTool("select"); toast.info("👆 Modo Mover: toca y arrastra los jugadores libremente."); }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "select" ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-900/50" : "text-slate-400"}`}
-                title="Modo Mover (arrastrar objetos sin crear nuevos)"
-              >
-                <Hand className="h-5 w-5" />
-              </button>
-              {/* Lápiz */}
-              <button
-                type="button"
-                onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-solid" ? "bg-blue-600 text-white shadow-md shadow-blue-900/50" : "text-slate-400"}`}
-                title="Lápiz"
-              >
-                <Pencil className="h-5 w-5" />
-              </button>
-              {/* Pase */}
-              <button
-                type="button"
-                onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-dashed" ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/50" : "text-slate-400"}`}
-                title="Pase"
-              >
-                <span className="font-mono text-lg font-black leading-none">┊</span>
-              </button>
-              {/* Tiro */}
-              <button
-                type="button"
-                onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-arrow" ? "bg-amber-600 text-white shadow-md shadow-amber-900/50" : "text-slate-400"}`}
-                title="Tiro con flecha"
-              >
-                <ArrowRight className="h-5 w-5" />
-              </button>
-              {/* Zona */}
-              <button
-                type="button"
-                onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "draw-zone" ? "bg-orange-600 text-white shadow-md shadow-orange-900/50" : "text-slate-400"}`}
-                title="Zona Sombreada"
-              >
-                <Square className="h-5 w-5" />
-              </button>
-              {/* Jugador */}
-              <button
-                type="button"
-                onClick={() => setActiveTool("add-player")}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "add-player" ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/50" : "text-slate-400"}`}
-                title={`Añadir jugador #${currentNextNum}`}
-              >
-                <User className="h-5 w-5" />
-              </button>
-              {/* Borrador + Opciones de Limpieza */}
-              <Popover>
-                <PopoverTrigger asChild>
+            {/* 2. CATEGORÍA: DIBUJO Y TRAZOS (Mover, Lápiz, Pase, Tiro, Curva, Zona Rect, Zona Circ, Texto, Borrador) */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
+                    ["select", "draw-solid", "draw-dashed", "draw-arrow", "draw-curve", "draw-zone", "draw-circle-zone", "eraser", "add-text"].includes(activeTool)
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-900/50 ring-2 ring-blue-400"
+                      : "bg-slate-900/90 text-blue-400 hover:bg-slate-800 border border-slate-800"
+                  }`}
+                  title="Abrir herramientas de dibujo y trayectorias"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  <span>Dibujo & Zonas</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="top" className="w-72 p-2 bg-slate-950/95 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+                <p className="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider px-1">Herramientas Tácticas</p>
+                <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 ${activeTool === "eraser" ? "bg-red-600 text-white shadow-md shadow-red-900/50" : "text-slate-400"}`}
-                    title="Borrador u Opciones de Limpieza"
+                    onClick={() => setActiveTool("select")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "select" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
                   >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="top" className="w-56 p-2 bg-slate-950 border border-slate-800 text-white rounded-2xl shadow-2xl space-y-1 z-[99999]">
-                  <button
-                    type="button"
-                    onClick={() => { handleClear(); toast.success("🧹 Cancha limpiada por completo."); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-red-600 hover:bg-red-500 font-bold text-xs text-white transition active:scale-95"
-                  >
-                    <Trash2 className="h-4 w-4 shrink-0" />
-                    <span>🧹 Borrar Todo (Limpiar)</span>
+                    <Hand className="h-4 w-4 text-amber-400" /> <span>Modo Mover</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setActiveTool("eraser"); toast.info("🧽 Toca un objeto para borrarlo."); }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 font-semibold text-xs text-slate-300 transition active:scale-95"
+                    onClick={() => { setActiveTool("draw-solid"); setStrokeType("solid"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-solid" ? "bg-blue-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
                   >
-                    <Pencil className="h-4 w-4 shrink-0 text-amber-400" />
-                    <span>🧽 Borrador Individual</span>
+                    <Pencil className="h-4 w-4 text-blue-400" /> <span>Lápiz Continuo</span>
                   </button>
-                </PopoverContent>
-              </Popover>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTool("draw-dashed"); setStrokeType("dashed"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-dashed" ? "bg-emerald-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span className="font-mono text-emerald-400 font-bold">┊</span> <span>Línea Pase</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTool("draw-arrow"); setStrokeType("arrow"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-arrow" ? "bg-amber-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <ArrowRight className="h-4 w-4 text-amber-400" /> <span>Tiro / Flecha</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTool("draw-curve"); setStrokeType("curve"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-curve" ? "bg-purple-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>↩️</span> <span>Desmarque Curvo</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-zone" ? "bg-orange-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <Square className="h-4 w-4 text-orange-400" /> <span>Zona Rectangular</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTool("draw-circle-zone"); setStrokeType("circle-zone"); }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "draw-circle-zone" ? "bg-pink-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>⭕</span> <span>Rondo Circular</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-text")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-text" ? "bg-violet-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <TextIcon className="h-4 w-4 text-violet-400" /> <span>Texto Táctico</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("eraser")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold col-span-2 transition active:scale-95 ${activeTool === "eraser" ? "bg-red-600 text-white" : "bg-slate-900 text-red-400 hover:bg-slate-800"}`}
+                  >
+                    <Trash2 className="h-4 w-4" /> <span>🧽 Borrador de Objetos</span>
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
 
-              {/* Botón directo de Limpiar Cancha en 1 tap */}
+            {/* 3. CATEGORÍA: ESTILO & JUGADORES (Colores, Grosor, Colores de Equipo, Balón, +Jugador) */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 bg-slate-900/90 text-slate-200 hover:bg-slate-800 border border-slate-800 transition active:scale-95"
+                  title="Ajustar color de trazo, grosor y equipo"
+                >
+                  <span className="w-3 h-3 rounded-full border border-white" style={{ backgroundColor: color }} />
+                  <span>Estilo & Jugador</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="top" className="w-72 p-3 bg-slate-950/95 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-3">
+                {/* Colores de trazo */}
+                <div>
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Color del trazo</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setColor(c)}
+                        className={`w-7 h-7 rounded-full border-2 transition-transform ${color === c ? "scale-125 border-white ring-2 ring-emerald-400 shadow-md" : "border-transparent opacity-80 hover:opacity-100"}`}
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Grosor */}
+                <div>
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Grosor de línea</p>
+                  <div className="flex gap-1.5">
+                    {([["Fina", 0.4], ["Media", 0.8], ["Gruesa", 1.6]] as [string, number][]).map(([label, val]) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setStrokeW(val)}
+                        className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition ${
+                          (label === "Fina" && strokeW <= 0.5) || (label === "Media" && strokeW > 0.5 && strokeW <= 1.0) || (label === "Gruesa" && strokeW > 1.0)
+                            ? "bg-emerald-600 text-white border-emerald-400" : "bg-slate-900 text-slate-300 border-slate-800"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Color de Equipo */}
+                <div>
+                  <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Color de peto de equipo</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setTeamColor(key as PlayerTeamColor);
+                          setActiveTool("add-player");
+                        }}
+                        className={`w-7 h-7 rounded-full border-2 transition-transform active:scale-90 flex items-center justify-center ${
+                          teamColor === key ? "scale-125 border-white ring-2 ring-emerald-400 shadow-md" : "opacity-75 hover:opacity-100 border-transparent"
+                        }`}
+                        style={{ backgroundColor: item.bg }}
+                        title={item.label}
+                      >
+                        {teamColor === key && <span className="w-1.5 h-1.5 rounded-full bg-white shadow-sm" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Acciones rápidas de Jugador & Balón */}
+                <div className="flex gap-2 pt-1 border-t border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-player")}
+                    className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-player" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 border border-slate-800"}`}
+                  >
+                    <User className="h-3.5 w-3.5 text-amber-400" />
+                    <span>+#{currentNextNum}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); }}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 active:scale-95"
+                  >
+                    ⚽ <span>Balón</span>
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* 4. TOGGLE: CANCHA COMPLETA vs MEDIA CANCHA */}
+            <button
+              type="button"
+              onClick={() => setPitchLayout((prev) => (prev === "full-pitch" ? "half-pitch" : "full-pitch"))}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
+                pitchLayout === "half-pitch"
+                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/50 ring-2 ring-emerald-300"
+                  : "bg-slate-900/90 text-emerald-400 hover:bg-slate-800 border border-slate-800"
+              }`}
+              title="Alternar entre Cancha Completa 11v11 y Media Cancha (Área reducida / rondos)"
+            >
+              <span>🎯</span>
+              <span>{pitchLayout === "half-pitch" ? "Media Cancha" : "Cancha Completa"}</span>
+            </button>
+
+            {/* Acciones Rápidas: Deshacer, Limpiar y Minimizar */}
+            <div className="flex items-center gap-1 ml-1 pl-1.5 border-l border-white/15">
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={paths.length === 0 && zones.length === 0}
+                className="p-1.5 rounded-xl text-amber-400 hover:text-amber-200 disabled:opacity-30 text-xs font-extrabold active:scale-90 transition"
+                title="Deshacer último trazo"
+              >
+                ↩
+              </button>
               <button
                 type="button"
                 onClick={() => setModalConfirmClear(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-950/80 border border-red-800/80 text-red-400 font-bold active:scale-90 transition-all shrink-0"
-                title="Limpiar toda la cancha en 1 tap"
+                className="p-1.5 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-950/60 transition active:scale-90"
+                title="Limpiar toda la cancha"
               >
-                🧹
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsDockMinimized(true)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-slate-900/80 border border-slate-800 ml-0.5 active:scale-90 transition"
+                title="Ocultar barra inferior"
+              >
+                <Eye className="h-4 w-4 text-slate-300" />
               </button>
             </div>
 
-            {/* Team color cycle button — cicla entre colores de equipo en 1 toque */}
-            <button
-              type="button"
-              onClick={() => {
-                const keys = Object.keys(TEAM_COLORS_MAP) as PlayerTeamColor[];
-                const nextIdx = (keys.indexOf(teamColor) + 1) % keys.length;
-                const nextColor = keys[nextIdx];
-                setTeamColor(nextColor);
-                setActiveTool("add-player");
-                toast.success(`Equipo: ${TEAM_COLORS_MAP[nextColor].label}`);
-              }}
-              className="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl bg-slate-900/80 border-2 active:scale-90 transition-all shrink-0"
-              style={{ borderColor: TEAM_COLORS_MAP[teamColor].bg + "99" }}
-              title="Cambiar color de equipo (toca para ciclar)"
-            >
-              <span
-                className="w-5 h-5 rounded-full border-2 border-white/70 shadow-md"
-                style={{ backgroundColor: TEAM_COLORS_MAP[teamColor].bg }}
-              />
-              <span className="text-[8px] font-bold text-slate-400 leading-none">
-                {TEAM_COLORS_MAP[teamColor].label.split(" ")[0]}
-              </span>
-            </button>
-
-            {/* More → opens bottom sheet */}
-            <button
-              type="button"
-              onClick={() => setIsSheetOpen(true)}
-              className="w-10 h-10 rounded-xl flex flex-col items-center justify-center gap-0.5 bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all"
-              title="Más herramientas"
-            >
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-            </button>
-
-            {/* Minimize */}
-            <button
-              type="button"
-              onClick={() => setIsDockMinimized(true)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-900/80 border border-slate-800 shrink-0 active:scale-90 transition-all text-slate-400"
-              title="Ocultar barra"
-            >
-              <Eye className="h-5 w-5" />
-            </button>
           </div>
         </div>
       )}
@@ -2074,7 +2321,6 @@ export function CanchaBCoachBoard({
                     setTeamColor(key as PlayerTeamColor);
                     setActiveTool("add-player");
                     setIsSheetOpen(false);
-                    toast.success(`✅ Equipo ${item.label} — toca la cancha para añadir jugadores`);
                   }}
                   className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-bold border-2 transition active:scale-95 ${teamColor === key ? "text-white shadow-lg scale-105" : "border-slate-800 text-slate-400"}`}
                   style={{
@@ -2093,14 +2339,14 @@ export function CanchaBCoachBoard({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("⚽ Balón colocado."); setIsSheetOpen(false); }}
+                onClick={() => { setBalls((prev) => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }]); setIsSheetOpen(false); }}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-slate-300 active:scale-95"
               >
                 ⚽ <span>Balón</span>
               </button>
               <button
                 type="button"
-                onClick={() => { setCones((prev) => [...prev, { id: `cone-${Date.now()}`, x: 50, y: 32.5 }]); toast.success("🟧 Cono colocado."); setIsSheetOpen(false); }}
+                onClick={() => { setCones((prev) => [...prev, { id: `cone-${Date.now()}`, x: 50, y: 32.5 }]); setIsSheetOpen(false); }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm font-bold text-orange-400 active:scale-95"
               >
                 🔺 <span>Cono</span>

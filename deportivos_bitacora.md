@@ -2,6 +2,63 @@
 
 Este archivo registra de manera agrupada todos los cambios, mejoras, correcciones y ajustes aplicados al software en cada sesión de desarrollo. Los registros más nuevos se añaden siempre al principio.
 
+---
+
+## [31/07/2026 - Noche: Pizarra Táctica bCoach Ultra-Elite — Equipamiento Físico Vectorial, Media Cancha, Trazos Curvos Bézier, Zonas Circulares y UI Zero-Clutter]
+
+### 🏋️ Equipamiento Físico de Entrenamiento (5 nuevos objetos vectoriales SVG)
+Nuevos tipos de datos e interfaces en `cancha-bcoach-board.tsx`: `BoardDummy`, `BoardLadder`, `BoardHurdle`, `BoardHoop`, `BoardPole`. Todos arrastrables, borrables individualmente con la herramienta Borrador y serializables en keyframes.
+
+- **Muñecos de Barrera 🧍:** Cuerpo trapezoidal amarillo + cabeza circular. Ideal para ejercicios de tiro libre y barreras.
+- **Escalera de Agilidad:** Rectángulo dorado con 7 peldaños. Para coordinación, frecuencia y velocidad.
+- **Vallas de Salto:** Barra roja horizontal con bases circulares. Para ejercicios pliometricos.
+- **Aros de Agilidad:** Circulo de color seleccionable. Para circuitos de coordinacion.
+- **Picas / Banderines:** Palo vertical amarillo con banderín triangular. Para zigzag y delimitación.
+
+#### `src/components/cancha-bcoach-board.tsx`
+- Interfaces nuevas: `BoardDummy`, `BoardLadder`, `BoardHurdle`, `BoardHoop`, `BoardPole`.
+- Estados React nuevos: `dummies`, `ladders`, `hurdles`, `hoops`, `poles`.
+- ToolModes nuevos: `add-dummy`, `add-ladder`, `add-hurdle`, `add-hoop`, `add-pole`.
+- `handlePointerDown`: Manejo de los 5 nuevos tipos de equipamiento al hacer tap en la cancha.
+- `handlePointerMove`: Dragging fluido de los 5 nuevos tipos de objetos.
+- `handleClear`: Limpieza de todos los arrays de equipamiento.
+- Renderizado SVG vectorial de cada elemento con soporte de orientacion portrait.
+
+### 🎯 Modo Media Cancha (Half-Pitch View)
+Nueva funcion `FootballHalfField` que renderiza la mitad del campo con penalti, luna, arcos de esquina y media linea.
+
+#### `src/components/cancha-bcoach-board.tsx`
+- Nuevo tipo `PitchLayout = "full-pitch" | "half-pitch"`.
+- Estado `pitchLayout` con valor inicial `"full-pitch"`.
+- Toggle directo en la barra flotante: Cancha Completa ↔ Media Cancha.
+- Renderizado condicional segun `pitchLayout`.
+
+### Trazo Curvo Bezier (Desmarques en Arco)
+Nueva herramienta "Desmarque Curvo" con interpolacion Q-curves para desmarques de ruptura y centros con rosca.
+
+#### `src/components/cancha-bcoach-board.tsx`
+- Nueva funcion `curvePointsToD(pts)`: Genera path SVG con comandos Q para suavizado Bezier cuadratico.
+- Nuevo `StrokeStyle`: `"curve"` y `ToolMode`: `"draw-curve"`.
+- Preview live mientras se dibuja y punta de flecha automatica al guardar.
+
+### Zonas Circulares / Rondos (draw-circle-zone)
+Nueva herramienta de zona circular (elipse) para delimitar rondos y zonas de presion.
+
+#### `src/components/cancha-bcoach-board.tsx`
+- Campo `shape?: "rect" | "circle"` en la interfaz `ShadedZone`.
+- Nuevo `ToolMode`: `"draw-circle-zone"` y `StrokeStyle`: `"circle-zone"`.
+- Renderizado condicional: `shape === "circle"` renderiza `<ellipse>`, sino `<rect>`.
+
+### UI Zero-Clutter — Barra Flotante de Categorias (bCoach-style)
+Reemplaza la barra antigua de 15+ botones expuestos por 4 botones de categoria compactos con Popover.
+
+- **Materiales:** Parrilla 2x4 con Munecos, Escalera, Vallas, Aros, Picas, Mini Arco, Cono.
+- **Dibujo y Zonas:** Mover, Lapiz, Pase, Tiro, Curvo, Zona Rect, Rondo Circular, Texto, Borrador.
+- **Estilo y Jugador:** Paleta de trazos, grosor, petos de equipo, boton jugador y balon.
+- **Toggle Cancha:** Cancha Completa / Media Cancha directo en la barra principal.
+- Acciones rapidas: Deshacer, Limpiar, Ocultar barra.
+
+---
 
 ## [30/07/2026 - Noche: Alto Rendimiento — Corrección de Datos, Sports Science, Modales de Riesgo en Control de Cargas]
 
