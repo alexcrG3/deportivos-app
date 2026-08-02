@@ -390,7 +390,7 @@ function SaasAdminDashboard() {
                 filteredOrgs.map((org) => {
                   const orgTeamsCount = allTeams.filter(t => t.organizacion_id === org.id).length;
                   const orgPlayersCount = allPlayers.filter(p => p.organizacion_id === org.id).length;
-                  const initials = org.nombre.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+                  const initials = org.nombre.split(" ").slice(0, 2).map((w: string) => w[0]).join("").toUpperCase();
                   const isDefaultOrg = org.id === "00000000-0000-0000-0000-000000000000";
 
                   return (
@@ -882,7 +882,6 @@ function SaasAdminDashboard() {
                             <span className="text-[9px] opacity-75">{r.read_by_client ? "Visto por la academia" : "Enviado"}</span>
                             <CheckCheck 
                               className={`h-4 w-4 ${r.read_by_client ? "text-purple-600 dark:text-purple-400" : "text-muted-foreground/60"}`} 
-                              title={r.read_by_client ? "Visto por el cliente" : "Entregado"}
                             />
                           </div>
                         )}

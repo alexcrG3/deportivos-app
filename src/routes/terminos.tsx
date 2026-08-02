@@ -20,7 +20,7 @@ function TerminosPage() {
         
         {/* Navigation Bar */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <Link to="/login">
+          <Link to="/login" search={{}}>
             <Button variant="outline" size="sm" className="gap-2 border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200">
               <ArrowLeft className="h-4 w-4" /> Regresar al Login
             </Button>
@@ -155,7 +155,7 @@ function TerminosPage() {
           <div className="flex items-center justify-center gap-4 text-slate-400">
             <Link to="/privacidad" className="hover:text-blue-400 underline">Políticas de Privacidad (PRODHAB)</Link>
             <span>•</span>
-            <Link to="/login" className="hover:text-blue-400 underline">Iniciar Sesión</Link>
+            <Link to="/login" search={{}} className="hover:text-blue-400 underline">Iniciar Sesión</Link>
           </div>
         </div>
 

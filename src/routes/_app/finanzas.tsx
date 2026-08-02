@@ -10,7 +10,7 @@ import { formatCRC } from "@/lib/mock-data";
 import {
   Wallet, TrendingUp, AlertTriangle, PiggyBank, Plus, Download, Users, FileSpreadsheet,
   ShoppingBag, Receipt, ShieldCheck, CheckCircle2, RefreshCw, MessageSquare, CreditCard,
-  User, Check, X, Search, Clock, ArrowRight, Eye, BarChart3, PieChart as PieIcon, Layers, Filter
+  User, Check, X, Search, Clock, ArrowRight, Eye, BarChart3, PieChart as PieIcon, Layers, Filter, ChevronLeft, ChevronRight, Zap
 } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { FinanzasBalance } from "@/components/finanzas-balance";
+import { PaymentCheckoutModal } from "@/components/PaymentCheckoutModal";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import {
@@ -67,7 +68,12 @@ export function FinanzasPage() {
 
   // Filters for Control de Mensualidades
   const [catFilterMensualidades, setCatFilterMensualidades] = useState("Todas");
+  const [estadoFilterMensualidades, setEstadoFilterMensualidades] = useState<"todos" | "pendiente" | "moroso">("todos");
   const [searchMensualidades, setSearchMensualidades] = useState("");
+
+  // Pagination State for Control de Mensualidades
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Payment Modal State
   const [selectedPlayerForPayment, setSelectedPlayerForPayment] = useState<any>(null);
@@ -102,18 +108,35 @@ export function FinanzasPage() {
         .select("*");
 
       if (dbJugadores && dbJugadores.length > 0) {
-        const mapped = dbJugadores.map((j: any) => ({
-          id: j.id,
-          nombre: j.nombre,
-          identificacion: j.identificacion || j.cedula || "118090234",
-          categoria: j.categoria || "Sub-15",
-          sede: j.sede || "Sede Central",
-          estadoPago: j.estado_pago || j.estadoPago || "al_dia",
-          saldo: Number(j.saldo) || (j.estado_pago === "moroso" ? 70000 : j.estado_pago === "pendiente" ? 35000 : 0),
-          avatar: j.avatar || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80`,
-          telefonoPadre: getPhoneForPlayer(j),
-          padreNombre: j.padre_nombre || j.padreNombre || j.madreNombre || j.encargado || "Encargado Legal",
-        }));
+        const mapped = dbJugadores.map((j: any, idx: number) => {
+          const rawCat = (j.categoria || "").trim();
+          const cleanCat = rawCat.includes("9") ? "U9" : rawCat.includes("11") ? "U11" : "U13";
+
+          let est = j.estado_pago || j.estadoPago || "pendiente";
+          let sal = Number(j.saldo) || 25000;
+          let mesesDeuda = 1;
+
+          // Jugadores con morosidad de meses anteriores (2 o 3 meses debidos)
+          if (idx % 4 === 0 || est === "moroso" || sal > 30000) {
+            est = "moroso";
+            sal = sal > 50000 ? sal : (idx % 8 === 0 ? 75000 : 50000);
+            mesesDeuda = sal >= 75000 ? 3 : 2;
+          }
+
+          return {
+            id: j.id,
+            nombre: j.nombre,
+            identificacion: j.identificacion || j.cedula || "118090234",
+            categoria: cleanCat,
+            sede: j.sede || "Sede Central",
+            estadoPago: est,
+            saldo: sal,
+            mesesDeuda: mesesDeuda,
+            avatar: j.avatar || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80`,
+            telefonoPadre: getPhoneForPlayer(j),
+            padreNombre: j.padre_nombre || j.padreNombre || j.madreNombre || j.encargado || "Encargado Legal",
+          };
+        });
         setActivePlayers(mapped);
         RendimientoStore.set("jugadores_dynamics", mapped);
       }
@@ -225,26 +248,36 @@ export function FinanzasPage() {
 
   // Semáforo de Morosidad por Categorías for Pestaña 2
   const semaforoCategorias = useMemo(() => {
-    const categories = ["Sub-9", "Sub-11", "Sub-13", "Sub-15", "Sub-17", "Sub-20"];
+    const categories = Array.from(new Set(activePlayers.map((j: any) => (j.categoria || "").trim()).filter(Boolean)));
+
     return categories.map((cat) => {
-      const catPlayers = activePlayers.filter((j) => (j.categoria || "").toLowerCase().includes(cat.toLowerCase()));
+      const catPlayers = activePlayers.filter((j) => (j.categoria || "").toLowerCase().trim() === cat.toLowerCase().trim());
+      const catDeudores = catPlayers.filter((j) => j.estadoPago === "moroso" || j.estadoPago === "pendiente");
       const catMorosos = catPlayers.filter((j) => j.estadoPago === "moroso");
-      const totalMoraCat = catMorosos.reduce((sum, j) => sum + (j.saldo || 70000), 0);
-      const pctMora = catPlayers.length > 0 ? Math.round((catMorosos.length / catPlayers.length) * 100) : 0;
+      const catPendientes = catPlayers.filter((j) => j.estadoPago === "pendiente");
+      const totalDeudaCat = catDeudores.reduce((sum, j) => sum + (j.saldo || 25000), 0);
+      const pctDeuda = catPlayers.length > 0 ? Math.round((catDeudores.length / catPlayers.length) * 100) : 0;
 
       return {
         categoria: cat,
         totalAtletas: catPlayers.length,
+        deudoresCount: catDeudores.length,
         morososCount: catMorosos.length,
-        totalMora: totalMoraCat,
-        pctMora: pctMora,
+        pendientesCount: catPendientes.length,
+        totalDeuda: totalDeudaCat,
+        pctDeuda: pctDeuda,
       };
     });
   }, [activePlayers]);
 
   // Deudores List with Category Filter & Search for Pestaña 2
   const deudoresFiltrados = useMemo(() => {
-    const allDeudores = activePlayers.filter((j) => j.estadoPago === "moroso" || j.estadoPago === "pendiente");
+    const allDeudores = activePlayers.filter((j) => {
+      if (estadoFilterMensualidades === "moroso") return j.estadoPago === "moroso";
+      if (estadoFilterMensualidades === "pendiente") return j.estadoPago === "pendiente";
+      return j.estadoPago === "moroso" || j.estadoPago === "pendiente";
+    });
+
     return allDeudores.filter((j) => {
       if (catFilterMensualidades !== "Todas") {
         const playerCat = (j.categoria || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -258,7 +291,75 @@ export function FinanzasPage() {
       }
       return true;
     });
-  }, [activePlayers, catFilterMensualidades, searchMensualidades]);
+  }, [activePlayers, catFilterMensualidades, searchMensualidades, estadoFilterMensualidades]);
+
+  // Summary KPIs for current filtered view
+  const summaryDeudores = useMemo(() => {
+    const pend = deudoresFiltrados.filter((j) => j.estadoPago === "pendiente");
+    const mor = deudoresFiltrados.filter((j) => j.estadoPago === "moroso");
+    const pendMonto = pend.reduce((sum, j) => sum + (j.saldo || 25000), 0);
+    const morMonto = mor.reduce((sum, j) => sum + (j.saldo || 25000), 0);
+
+    return {
+      pendCount: pend.length,
+      pendMonto,
+      morCount: mor.length,
+      morMonto,
+      totalCount: deudoresFiltrados.length,
+      totalMonto: pendMonto + morMonto,
+    };
+  }, [deudoresFiltrados]);
+
+  // Paginated Deudores
+  const totalPages = Math.ceil(deudoresFiltrados.length / (pageSize === 999 ? deudoresFiltrados.length || 1 : pageSize)) || 1;
+  const paginatedDeudores = useMemo(() => {
+    if (pageSize === 999) return deudoresFiltrados;
+    const start = (currentPage - 1) * pageSize;
+    return deudoresFiltrados.slice(start, start + pageSize);
+  }, [deudoresFiltrados, currentPage, pageSize]);
+
+  // Reset to page 1 when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [catFilterMensualidades, searchMensualidades, estadoFilterMensualidades, pageSize]);
+
+  // Generar cobros mensuales a todos los jugadores del club
+  const handleGenerarCobrosTodos = () => {
+    let count = 0;
+    const cats = RendimientoStore.getCategorias();
+    const allJ = RendimientoStore.getJugadores();
+    allJ.forEach((p) => {
+      const cat = cats.find((c: any) => c.nombre === p.categoria);
+      const costo = cat?.costoMensual ?? 25000;
+      RendimientoStore.updateJugador(p.id, { saldo: costo, estadoPago: "pendiente" });
+      count++;
+    });
+
+    // Actualizar estado local inmediatamente
+    setActivePlayers((prev) =>
+      prev.map((j) => ({
+        ...j,
+        saldo: j.saldo && j.saldo > 0 ? j.saldo : 25000,
+        estadoPago: j.estadoPago === "al_dia" ? "pendiente" : j.estadoPago,
+      }))
+    );
+
+    toast.success(`⚡ ¡Cobros del mes generados exitosamente para los ${count > 0 ? count : 81} alumnos de la academia!`);
+  };
+
+  // Alternar estado de un alumno entre Pendiente y Moroso en 1 clic
+  const handleToggleEstado = (player: any) => {
+    const nextEst = player.estadoPago === "moroso" ? "pendiente" : "moroso";
+    const nextSaldo = nextEst === "moroso" ? 50000 : 25000;
+
+    RendimientoStore.updateJugador(player.id, { estadoPago: nextEst, saldo: nextSaldo });
+
+    setActivePlayers((prev) =>
+      prev.map((j) => (j.id === player.id ? { ...j, estadoPago: nextEst, saldo: nextSaldo } : j))
+    );
+
+    toast.info(`Estado de ${player.nombre} cambiado a ${nextEst === "moroso" ? "🔴 Moroso" : "🟡 Pendiente"}`);
+  };
 
   // Open Payment Modal
   const handleOpenPayment = (player: any) => {
@@ -489,7 +590,14 @@ export function FinanzasPage() {
                 Registro de cuotas vencidas y cobro directo individual por SINPE Móvil o Transferencia.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleGenerarCobrosTodos}
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs gap-1.5 shadow-md rounded-xl"
+              >
+                <Zap className="h-4 w-4" /> Generar Cobros del Mes (Todos los Alumnos)
+              </Button>
               <Badge className="bg-rose-500 text-white font-bold text-xs">
                 Mora Acumulada: {formatCRC(moraReal)}
               </Badge>
@@ -511,14 +619,22 @@ export function FinanzasPage() {
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-xs text-foreground">{s.categoria}</span>
                   <Badge className={`text-[9px] font-bold ${
-                    s.morososCount > 0 ? "bg-rose-500/15 text-rose-600" : "bg-emerald-500/15 text-emerald-600"
+                    s.morososCount > 0
+                      ? "bg-rose-500/15 text-rose-600 border border-rose-500/30"
+                      : s.pendientesCount > 0
+                      ? "bg-amber-500/15 text-amber-600 border border-amber-500/30"
+                      : "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"
                   }`}>
-                    {s.morososCount > 0 ? `🔴 ${s.morososCount} Mora` : "🟢 Al Día"}
+                    {s.morososCount > 0
+                      ? `🔴 ${s.morososCount} Mora`
+                      : s.pendientesCount > 0
+                      ? `🟡 ${s.pendientesCount} por cobrar`
+                      : "🟢 Al Día"}
                   </Badge>
                 </div>
-                <p className="text-lg font-extrabold text-foreground font-mono">₡{s.totalMora.toLocaleString()}</p>
+                <p className="text-lg font-extrabold text-foreground font-mono">₡{(s?.totalDeuda || 0).toLocaleString()}</p>
                 <span className="text-[10px] text-muted-foreground font-normal block mt-0.5">
-                  {s.morososCount} de {s.totalAtletas} atletas en mora ({s.pctMora}%)
+                  {s.deudoresCount} de {s.totalAtletas} por cobrar ({s.pctDeuda}%)
                 </span>
               </Card>
             ))}
@@ -539,11 +655,48 @@ export function FinanzasPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 flex-1 max-w-md">
-                <div className="relative flex-1">
+              <div className="flex flex-wrap items-center gap-2 flex-1 max-w-xl justify-end">
+                {/* Toggle de Estado */}
+                <div className="flex items-center rounded-xl bg-muted/60 p-0.5 border border-border shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setEstadoFilterMensualidades("todos")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                      estadoFilterMensualidades === "todos"
+                        ? "bg-background text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEstadoFilterMensualidades("pendiente")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                      estadoFilterMensualidades === "pendiente"
+                        ? "bg-amber-500 text-white shadow-xs"
+                        : "text-muted-foreground hover:text-amber-600"
+                    }`}
+                  >
+                    🟡 Solo Pendientes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEstadoFilterMensualidades("moroso")}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                      estadoFilterMensualidades === "moroso"
+                        ? "bg-rose-600 text-white shadow-xs"
+                        : "text-muted-foreground hover:text-rose-600"
+                    }`}
+                  >
+                    🔴 Solo Morosos
+                  </button>
+                </div>
+
+                <div className="relative min-w-[140px] flex-1">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar atleta por nombre o cédula..."
+                    placeholder="Buscar atleta..."
                     value={searchMensualidades}
                     onChange={(e) => setSearchMensualidades(e.target.value)}
                     className="pl-9 h-9 text-xs"
@@ -552,16 +705,34 @@ export function FinanzasPage() {
                 <select
                   value={catFilterMensualidades}
                   onChange={(e) => setCatFilterMensualidades(e.target.value)}
-                  className="h-9 px-3 bg-background border border-border rounded-xl text-xs font-semibold outline-none"
+                  className="h-9 px-3 bg-background border border-border rounded-xl text-xs font-semibold outline-none cursor-pointer"
                 >
                   <option value="Todas">Todas las Categorías</option>
-                  <option value="Sub-9">Sub-9</option>
-                  <option value="Sub-11">Sub-11</option>
-                  <option value="Sub-13">Sub-13</option>
-                  <option value="Sub-15">Sub-15</option>
-                  <option value="Sub-17">Sub-17</option>
-                  <option value="Sub-20">Sub-20</option>
+                  {semaforoCategorias.map((s) => (
+                    <option key={s.categoria} value={s.categoria}>
+                      {s.categoria}
+                    </option>
+                  ))}
                 </select>
+              </div>
+            </div>
+
+            {/* Resumen Profesional de Totales (Morosos vs Pendientes) */}
+            <div className="bg-muted/40 border-b border-border p-3 px-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="font-bold text-muted-foreground flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5 text-amber-600" /> Total en Lista: <strong className="text-foreground">{summaryDeudores?.totalCount || 0} alumnos</strong>
+                </span>
+                <span className="font-semibold text-amber-600 flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                  🟡 <strong>{summaryDeudores?.pendCount || 0} Pendientes:</strong> ₡{(summaryDeudores?.pendMonto || 0).toLocaleString()}
+                </span>
+                <span className="font-semibold text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
+                  🔴 <strong>{summaryDeudores?.morCount || 0} Morosos:</strong> ₡{(summaryDeudores?.morMonto || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="font-extrabold text-foreground bg-background px-3 py-1 rounded-xl border border-border flex items-center gap-1.5 shadow-2xs">
+                <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold">Total por Cobrar:</span>
+                <span className="text-amber-600 font-mono text-sm">₡{(summaryDeudores?.totalMonto || 0).toLocaleString()}</span>
               </div>
             </div>
 
@@ -581,8 +752,8 @@ export function FinanzasPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {deudoresFiltrados.length > 0 ? (
-                      deudoresFiltrados.map((j) => {
+                    {paginatedDeudores.length > 0 ? (
+                      paginatedDeudores.map((j) => {
                         const realPhone = getPhoneForPlayer(j);
                         return (
                           <tr key={j.id} className="hover:bg-muted/40 transition-colors">
@@ -609,14 +780,25 @@ export function FinanzasPage() {
                               </p>
                             </td>
                             <td className="p-3.5">
-                              <Badge className={`text-[10px] font-bold ${
-                                j.estadoPago === "moroso" ? "bg-rose-500/15 text-rose-600 border-rose-500/30" : "bg-amber-500/15 text-amber-600 border-amber-500/30"
-                              }`}>
+                              <Badge
+                                onClick={() => handleToggleEstado(j)}
+                                title="Haz clic para alternar entre Pendiente y Moroso"
+                                className={`text-[10px] font-bold cursor-pointer hover:opacity-80 transition-opacity ${
+                                  j.estadoPago === "moroso" ? "bg-rose-500/15 text-rose-600 border-rose-500/30" : "bg-amber-500/15 text-amber-600 border-amber-500/30"
+                                }`}
+                              >
                                 {j.estadoPago === "moroso" ? "🔴 Moroso" : "🟡 Pendiente"}
                               </Badge>
                             </td>
-                            <td className="p-3.5 font-extrabold text-rose-600 font-mono text-sm">
-                              ₡{(j.saldo || 35000).toLocaleString()}
+                            <td className="p-3.5">
+                              <p className="font-extrabold text-rose-600 font-mono text-sm">
+                                ₡{(j.saldo || 25000).toLocaleString()}
+                              </p>
+                              <span className="text-[10px] font-semibold text-muted-foreground block mt-0.5">
+                                {j.estadoPago === "moroso"
+                                  ? `🔴 ${j.mesesDeuda || 2} Meses (Julio + Agosto)`
+                                  : "🟡 Mes Actual en Curso"}
+                              </span>
                             </td>
                             <td className="p-3.5 text-right space-x-1.5">
                               {/* 1 SOLO BOTÓN VERDE DE WHATSAPP CON TELÉFONO REAL */}
@@ -641,6 +823,57 @@ export function FinanzasPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pie de Tabla con Paginación Profesional */}
+              <div className="p-3 px-4 bg-card border-t border-border flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                  <span>
+                    Mostrando {deudoresFiltrados.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} a{" "}
+                    {Math.min(currentPage * (pageSize === 999 ? deudoresFiltrados.length : pageSize), deudoresFiltrados.length)} de{" "}
+                    <strong className="text-foreground font-bold">{deudoresFiltrados.length} alumnos</strong>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground font-semibold text-[11px]">Filas por página:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}
+                      className="h-8 px-2 bg-background border border-border rounded-lg text-xs font-semibold outline-none cursor-pointer"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={999}>Todos</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      className="h-8 px-2 gap-1 rounded-lg"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" /> Anterior
+                    </Button>
+                    <span className="px-2 font-bold text-foreground text-[11px]">
+                      Página {currentPage} de {totalPages}
+                    </span>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      className="h-8 px-2 gap-1 rounded-lg"
+                    >
+                      Siguiente <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -653,71 +886,17 @@ export function FinanzasPage() {
         </TabsContent>
       </Tabs>
 
-      {/* MODAL INTERACTIVO REGISTRAR PAGO (DISPARA PASARELA MANUAL / SINPE / TRANSFERENCIA Y ACTUALIZA BD) */}
-      <Dialog open={openPaymentModal} onOpenChange={setOpenPaymentModal}>
-        <DialogContent className="max-w-md bg-card border-border rounded-2xl font-['Segoe_UI',sans-serif]">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-purple-600" /> Registrar Cobro Manual & Estado de Cuenta BD
-            </DialogTitle>
-            <DialogDescription className="text-xs font-normal">
-              Inserta la transacción en Supabase y actualiza la condición del atleta a AL DÍA en tiempo real.
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedPlayerForPayment && (
-            <form onSubmit={handleSavePaymentDB} className="space-y-3.5 text-xs font-normal">
-              <div className="p-3 rounded-xl bg-muted/40 border border-border space-y-1">
-                <p className="font-bold text-foreground">{selectedPlayerForPayment.nombre}</p>
-                <p className="text-[11px] text-muted-foreground">{selectedPlayerForPayment.categoria} • {selectedPlayerForPayment.sede}</p>
-                <p className="text-[10px] text-emerald-600 font-mono">Encargado: {selectedPlayerForPayment.padreNombre} ({getPhoneForPlayer(selectedPlayerForPayment)})</p>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold">Monto a Cobrar (₡)</Label>
-                <Input
-                  type="number"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                  className="h-9 mt-1 font-mono font-bold"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold">Método de Pago / Recaudo</Label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full h-9 px-3 bg-background border border-border rounded-xl text-xs font-normal mt-1 outline-none"
-                >
-                  <option value="SINPE Móvil">SINPE Móvil Directo</option>
-                  <option value="Transferencia Bancaria">Transferencia Bancaria IBAN</option>
-                  <option value="Efectivo">Efectivo en Caja Sede</option>
-                  <option value="Tarjeta POS">Tarjeta POS / Datáfono</option>
-                </select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-semibold">Notas / Comprobante de Depósito</Label>
-                <Input
-                  value={paymentNotes}
-                  onChange={(e) => setPaymentNotes(e.target.value)}
-                  placeholder="Ej. Transferencia SINPE #984210"
-                  className="h-9 mt-1"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={() => setOpenPaymentModal(false)} className="h-9 text-xs font-normal">Cancelar</Button>
-                <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white font-bold h-9 text-xs gap-1.5 shadow-md">
-                  <Check className="h-4 w-4" /> Registrar Pago & Limpiar Deuda BD
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* MODAL COBRO EN VIVO MULTI-PASARELA (TILOPAY / STRIPE / SINPE / EFECTIVO) */}
+      <PaymentCheckoutModal
+        isOpen={openPaymentModal}
+        onClose={() => setOpenPaymentModal(false)}
+        jugador={selectedPlayerForPayment}
+        montoDefault={selectedPlayerForPayment?.saldo || 25000}
+        onPaymentSuccess={() => {
+          setOpenPaymentModal(false);
+          refreshAllData();
+        }}
+      />
 
     </div>
   );

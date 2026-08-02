@@ -97,7 +97,7 @@ function TemporadasPage() {
     const list = RendimientoStore.getTemporadas();
     setTemporadasList(list);
     if (list.length > 0) {
-      setSel(prev => {
+      setSel((prev: any) => {
         const stillExists = list.find(t => t.id === prev?.id);
         return stillExists || list[0];
       });

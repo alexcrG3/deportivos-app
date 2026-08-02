@@ -841,21 +841,8 @@ class RendimientoStore {
 
     this.syncPromise = (async () => {
       try {
-      // Purga total de datos mock locales en localStorage
-      const CACHE_VERSION = "v2026.07.31.pure_supabase";
-      const storedVersion = localStorage.getItem("deportivos_cache_version");
-      if (storedVersion !== CACHE_VERSION) {
-        const mockKeys = [
-          "equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics",
-          "partidos", "objetivos_jugadores", "pagos_dynamics", "lesiones"
-        ];
-        mockKeys.forEach(k => {
-          localStorage.removeItem(`deportivos_cache_${k}`);
-          localStorage.removeItem(`deportivos_hp_${k}`);
-        });
-        localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
-        mockKeys.forEach(k => { delete this.memoryCache[k]; });
-      }
+      // Purga total de la caché en memoria para garantizar datos frescos desde Supabase PostgreSQL
+      this.memoryCache = {};
 
       const org = this.getActiveOrganizacionId();
 
@@ -1334,7 +1321,7 @@ class RendimientoStore {
   public static get<T>(key: string, defaultValue: T): T {
     if (!this.isBrowser()) return defaultValue;
     
-    // Si no se ha sincronizado, iniciar el proceso asíncronamente
+    // Si no se ha sincronizado, iniciar el proceso asíncronamente desde Supabase
     if (!this.isSynced) {
       this.syncFromSupabase();
     }
@@ -1343,47 +1330,17 @@ class RendimientoStore {
       return this.memoryCache[key] as T;
     }
 
-    if (key === "competiciones_dynamics" || key === "temporadas" || key === "resultados_pruebas" || key === "wellness" || key === "asistencias_dynamics") {
-      try {
-        const cached = localStorage.getItem(`deportivos_cache_${key}`);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          this.memoryCache[key] = parsed;
-          return parsed as T;
-        }
-      } catch (e) {}
-    }
-
-    // Si está vacío usar seeded fallback
-    if (seededDb && (seededDb as any)[key] !== undefined) {
-      const fallbackVal = (seededDb as any)[key];
-      this.memoryCache[key] = fallbackVal;
-      return fallbackVal as T;
-    }
-
+    // Retornar valor por defecto mientras Supabase completa la sincronización
     return defaultValue;
   }
 
   public static async set<T>(key: string, value: T): Promise<void> {
     if (!this.isBrowser()) return;
+    
+    // Guardar en la caché en memoria para acceso síncrono ultra-rápido en UI
     this.memoryCache[key] = value;
 
-    if (key === "usuarios") {
-      try {
-        localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(value));
-      } catch (e) {}
-      return;
-    }
-
-    if (key === "competiciones_dynamics" || key === "temporadas" || key === "resultados_pruebas" || key === "wellness" || key === "asistencias_dynamics") {
-      try {
-        localStorage.setItem(`deportivos_cache_${key}`, JSON.stringify(value));
-      } catch (e) {}
-    }
-
-
-
-    // Disparar sincronización asíncrona hacia Supabase en segundo plano
+    // Disparar sincronización asíncrona hacia Supabase PostgreSQL en segundo plano
     const activeOrg = this.getActiveOrganizacionId();
     
     try {
@@ -1762,8 +1719,18 @@ class RendimientoStore {
   // --- SESIONES ---
   public static getSesiones(): Sesion[] {
     const list = this.get<Sesion[]>("sesiones", []);
-    const activeTeams = this.getEquipos().map(e => e.nombre);
-    return list.filter(s => activeTeams.includes(s.equipo));
+    const activeEquipos = this.getEquipos();
+    if (activeEquipos.length === 0) return list;
+
+    const norm = (str: string = "") => str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const activeNorms = new Set(activeEquipos.flatMap(e => [norm(e.nombre), norm(e.categoria)].filter(Boolean)));
+
+    return list.filter(s => {
+      if (!s.equipo) return true;
+      const sNorm = norm(s.equipo);
+      const catNorm = norm(s.categoria || "");
+      return Array.from(activeNorms).some(an => an.includes(sNorm) || sNorm.includes(an) || (catNorm && (an.includes(catNorm) || catNorm.includes(an))));
+    });
   }
 
   public static addSesion(s: Omit<Sesion, "id">): Sesion {

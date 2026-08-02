@@ -1183,11 +1183,21 @@ function CoachDashboard() {
 
   const todayTeams = useMemo(() => {
     const sessions = RendimientoStore.getSesiones();
+    const targetDate = selectedDate || new Date().toISOString().split("T")[0];
     const todayStr = new Date().toISOString().split("T")[0];
-    const activeTeamNames = orgTeams.map(e => e.nombre);
-    
-    // 1. Obtener equipos con sesiones programadas hoy
-    const todaySessions = sessions.filter(s => s.fecha === todayStr && activeTeamNames.includes(s.equipo));
+
+    const norm = (str: string = "") => str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const activeTeamNorms = new Set(orgTeams.flatMap(e => [norm(e.nombre), norm(e.categoria)].filter(Boolean)));
+
+    // 1. Obtener equipos con sesiones programadas o activas hoy/fecha seleccionada
+    const todaySessions = sessions.filter(s => {
+      const matchDate = s.fecha === targetDate || s.fecha === todayStr;
+      if (!matchDate) return false;
+      if (orgTeams.length === 0) return true;
+      const sEqNorm = norm(s.equipo || s.categoria);
+      return Array.from(activeTeamNorms).some(tn => tn.includes(sEqNorm) || sEqNorm.includes(tn));
+    });
+
     const items = todaySessions.map((session, idx) => {
       const colors = [
         "text-blue-500 bg-blue-500/10 border-blue-500/20",
@@ -1195,32 +1205,57 @@ function CoachDashboard() {
         "text-amber-500 bg-blue-500/10 border-blue-500/20"
       ];
       return {
-        id: orgTeams.find(t => t.nombre === session.equipo)?.id,
-        title: session.equipo,
+        id: session.id || `ses-${idx}`,
+        title: session.equipo || session.categoria || "Entrenamiento",
         time: session.hora || "3:00 pm",
-        type: session.nombre,
+        type: session.nombre || "Sesión de Cancha",
         icon: (session.tipo as any) === "Partido" || (session.tipo as any) === "Competencia" ? Trophy : Dumbbell,
         color: colors[idx % colors.length]
       };
     });
 
-    // 2. Obtener equipos que no tienen sesión creada hoy pero sí tienen registros reales de Asistencia, Wellness o Pruebas
-    const activeOrg = RendimientoStore.getActiveOrganizacionId();
-    const teamsWithAttendance = RendimientoStore.getAsistencias().filter(a => a.fecha === todayStr).map(a => a.equipo);
-    const wellnessJugadorIds = RendimientoStore.getWellness().filter(w => w.fecha === todayStr).map(w => w.jugadorId);
-    const testJugadorIds = RendimientoStore.getResultadosPruebas().filter(rp => rp.fecha === todayStr).map(rp => rp.jugadorId);
-    
+    // 2. Incluir la sesión activa/completada de "Mi Agenda de Cancha" si no estuviera ya listada
+    if (todaySession || isSessionCompleted) {
+      const titleName = todaySession?.equipo || activeTeam?.nombre || activeTeam?.categoria || "Plantel";
+      if (!items.some(it => norm(it.title) === norm(titleName))) {
+        items.push({
+          id: todaySession?.id || `ses-agenda-${targetDate}`,
+          title: titleName,
+          time: todaySession?.hora || "15:00",
+          type: todaySession?.nombre || "Sesión de Cancha",
+          icon: Dumbbell,
+          color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+        });
+      }
+    }
+
+    // 3. Obtener equipos que no tienen sesión explícita pero sí registros de Asistencia, Wellness o Pruebas hoy
+    const teamsWithAttendance = RendimientoStore.getAsistencias()
+      .filter(a => a.fecha === targetDate || a.fecha === todayStr)
+      .map(a => norm(a.equipo));
+
+    const wellnessJugadorIds = RendimientoStore.getWellness()
+      .filter(w => w.fecha === targetDate || w.fecha === todayStr)
+      .map(w => w.jugadorId);
+
+    const testJugadorIds = RendimientoStore.getResultadosPruebas()
+      .filter(rp => rp.fecha === targetDate || rp.fecha === todayStr)
+      .map(rp => rp.jugadorId);
+
     const players = RendimientoStore.getJugadores();
     const activePlayerIds = new Set([...wellnessJugadorIds, ...testJugadorIds]);
-    const teamsWithActivity = players.filter(p => activePlayerIds.has(p.id)).map(p => p.categoria || (p as any).equipo);
+    const teamsWithActivity = players
+      .filter(p => activePlayerIds.has(p.id))
+      .map(p => norm(p.categoria || (p as any).equipo));
 
     const activeActivityTeams = new Set([...teamsWithAttendance, ...teamsWithActivity]);
 
-    // Agregar a la lista si no estaban ya incluidos por una sesión
     orgTeams.forEach(t => {
-      const isAlreadyIn = items.some(it => it.title === t.nombre);
-      const hasTodayActivity = activeActivityTeams.has(t.nombre) || activeActivityTeams.has(t.categoria);
-      
+      const tNorm = norm(t.nombre);
+      const catNorm = norm(t.categoria);
+      const isAlreadyIn = items.some(it => norm(it.title) === tNorm || norm(it.title) === catNorm);
+      const hasTodayActivity = activeActivityTeams.has(tNorm) || activeActivityTeams.has(catNorm);
+
       if (!isAlreadyIn && hasTodayActivity) {
         items.push({
           id: t.id,
@@ -1234,7 +1269,7 @@ function CoachDashboard() {
     });
 
     return items;
-  }, [orgTeams, updateTrigger]);
+  }, [orgTeams, selectedDate, todaySession, isSessionCompleted, activeTeam, updateTrigger]);
 
   const loadData = useMemo(() => RendimientoStore.getPlayerLoadData(), [updateTrigger]);
   const injuries = useMemo(() => RendimientoStore.getLesiones(), [updateTrigger]);

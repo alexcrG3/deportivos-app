@@ -94,7 +94,7 @@ function ReportesPage() {
       Nombre: j.nombre,
       Categoría: j.categoria,
       Posición: j.posicion,
-      Estado: j.estado,
+      Estado: (j as any).estado || j.estadoPago || "activo",
       "Fecha Nac.": j.fechaNacimiento ?? "—",
     }));
     const entrenadores = RendimientoStore.getEntrenadores().map(e => ({
@@ -129,7 +129,7 @@ function ReportesPage() {
     toast.loading("Compilando base de datos consolidada...", { id: "export-excel" });
     try {
       const jugadores = RendimientoStore.getJugadores().map(j => ({
-        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: j.estado,
+        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: (j as any).estado || j.estadoPago || "activo",
       }));
       const entrenadores = RendimientoStore.getEntrenadores().map(e => ({
         Nombre: e.nombre, Especialidad: e.especialidad,
@@ -160,7 +160,7 @@ function ReportesPage() {
     toast.loading("Generando informe consolidado...", { id: "export-pdf" });
     try {
       const jugadores = RendimientoStore.getJugadores().map(j => ({
-        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: j.estado,
+        Nombre: j.nombre, Categoría: j.categoria, Posición: j.posicion, Estado: (j as any).estado || j.estadoPago || "activo",
       }));
       const blob = generatePdfBlob("Reporte Global DeportivOS", jugadores);
       triggerDownload(blob, "Reporte_Global_DeportivOS.html");

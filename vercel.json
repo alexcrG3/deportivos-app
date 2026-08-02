@@ -1,6 +1,6 @@
 {
-  "buildCommand": "vite build -c vite-spa.config.ts",
-  "outputDirectory": "dist-static",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",

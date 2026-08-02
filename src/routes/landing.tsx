@@ -109,6 +109,7 @@ function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
+              search={{}}
               className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/5 transition-all border border-white/10"
             >
               Iniciar Sesión

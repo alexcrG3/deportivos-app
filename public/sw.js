@@ -1,7 +1,10 @@
 // Service Worker oficial de DeportivOS PWA
-const CACHE_NAME = "deportivos-pwa-v2";
+const CACHE_NAME = "deportivos-pwa-v4";
 const PRECACHE_URLS = [
   "/favicon.png",
+  "/apple-touch-icon.png",
+  "/pwa-192x192.png",
+  "/pwa-512x512.png",
   "/manifest.json"
 ];
 

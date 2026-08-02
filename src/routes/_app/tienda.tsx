@@ -432,7 +432,7 @@ function TiendaPage() {
     supabase.from("pagos").insert([nuevoPagoTienda]).then(({ error }) => {
       if (error) console.warn("Error inserting tienda pago to DB:", error.message);
     });
-    RendimientoStore.savePago(nuevoPagoTienda);
+    RendimientoStore.addPago(nuevoPagoTienda);
 
     toast.success(`🎉 ¡Pedido #${nuevoPedido.codigo} registrado por ₡${totalCarrito.toLocaleString()} e inyectado al Libro de Caja!`);
   };

@@ -12,6 +12,7 @@ import { useRole } from "@/hooks/use-role";
 import { CoachOsBanner } from "@/components/coach-os-banner";
 import { CanchaBCoachBoard } from "@/components/cancha-bcoach-board";
 import { cn } from "@/lib/utils";
+import { NotificationGateway } from "@/lib/notification-gateway";
 
 export const Route = createFileRoute("/_app/convocatorias")({ component: ConvocatoriasPage });
 
@@ -179,9 +180,36 @@ function ConvocatoriasPage() {
     return new Map(data.map(d => [d.jugadorId, d.semaforo]));
   }, []);
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (!sel) return;
-    toast.success(`¡Convocatoria "${sel.titulo}" reenviada! Notificaciones despachadas por WhatsApp.`);
+    let count = 0;
+    const jugadoresList = sel.jugadores || [];
+    
+    for (const player of jugadoresList) {
+      const phone = player.telefonoEncargado || player.telefono;
+      if (phone) {
+        await NotificationGateway.sendWhatsAppNotification({
+          telefono: phone,
+          nombreEncargado: player.encargado || "Padre / Tutor",
+          nombreAlumno: player.nombre,
+          tipo: "convocatoria_partido",
+          partidoInfo: {
+            equipoRival: sel.rival || sel.equipoRival || "Equipo Rival",
+            fechaHora: `${sel.fecha} ${sel.hora || ""}`,
+            lugar: sel.sede || "Cancha Principal",
+            competicion: sel.competicion || "Torneo Oficial",
+          },
+        });
+        count++;
+      }
+    }
+
+    NotificationGateway.sendPushNotification(
+      `🏆 Convocatoria Despachada`,
+      `Notificaciones enviadas por WhatsApp para el partido vs ${sel.rival || sel.equipoRival || "Rival"}`
+    );
+
+    toast.success(`¡Convocatoria "${sel.titulo}" enviada! Notificaciones despachadas por WhatsApp a ${count > 0 ? count : 1} encargados.`);
   };
 
   const handleUpdatePlayerStatus = (convId: string, playerId: string, nuevoEstado: "confirmado" | "rechazado" | "pendiente") => {

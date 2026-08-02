@@ -486,7 +486,7 @@ export function CanchaBCoachBoard({
       const isGK = idx === 0 || realJ.posicion?.toLowerCase().includes("portero");
       return {
         id: `starter-${realJ.id || idx}`,
-        number: realJ.numero || `${idx + 1}`,
+        number: String(realJ.numero || idx + 1),
         color: isGK ? "yellow" : "orange",
         x: coord.x,
         y: coord.y,
@@ -668,7 +668,7 @@ export function CanchaBCoachBoard({
   const [livePts, setLivePts] = useState<{ x: number; y: number }[]>([]);
   const [zoneStart, setZoneStart] = useState<{ x: number; y: number } | null>(null);
   const [zoneCurrent, setZoneCurrent] = useState<{ x: number; y: number } | null>(null);
-  const [dragging, setDragging] = useState<{ type: "player" | "ball" | "cone" | "minigoal" | "text" | "zone"; id: string } | null>(null);
+  const [dragging, setDragging] = useState<{ type: "player" | "ball" | "cone" | "minigoal" | "dummy" | "ladder" | "hurdle" | "hoop" | "pole" | "text" | "zone"; id: string } | null>(null);
   const [teamColor, setTeamColor] = useState<PlayerTeamColor>("orange");
 
   // Numeración independiente por color de equipo:
@@ -695,29 +695,64 @@ export function CanchaBCoachBoard({
   const [modalConfirmClear, setModalConfirmClear] = useState<boolean>(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
 
-  // Banco de Pizarras Guardadas State
-  const [bancoPizarras, setBancoPizarras] = useState<SavedBoardPreset[]>(() => {
+  // ── MOBILE HUD STATE ──────────────────────────────────────────────────────
+  // FAB radial de materiales (solo mobile)
+  const [isRadialOpen, setIsRadialOpen] = useState(false);
+  // Barra de pasos colapsable en mobile
+  const [isKeysExpanded, setIsKeysExpanded] = useState(false);
+  // Panel de estilo de color en mobile (flotante)
+  const [isMobileStyleOpen, setIsMobileStyleOpen] = useState(false);
+
+  // Banco de Pizarras Guardadas State (Cargado dinámicamente desde Supabase PostgreSQL)
+  const [bancoPizarras, setBancoPizarras] = useState<SavedBoardPreset[]>(PRESET_DRILLS);
+
+  // Cargar pizarras desde Supabase al abrir el modal o montar
+  const fetchPizarrasDesdeSupabase = useCallback(async () => {
+    const orgId = RendimientoStore.getActiveOrganizacionId();
     try {
-      const saved = localStorage.getItem("nexus_banco_pizarras");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return [...PRESET_DRILLS, ...parsed];
+      const { data, error } = await supabase
+        .from("pizarras")
+        .select("*")
+        .eq("organizacion_id", orgId)
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        const dbBoards: SavedBoardPreset[] = data.map((d: any) => ({
+          id: d.id,
+          nombre: d.nombre,
+          categoria: d.categoria || "Posición & Presión",
+          fecha: d.created_at ? new Date(d.created_at).toLocaleDateString("es-CR") : "Reciente",
+          paths: d.arrows || d.paths || [],
+          zones: d.zones || [],
+          players: d.players || [],
+          balls: d.balls || d.ball || [],
+          cones: d.cones || [],
+          texts: d.texts || [],
+          teamColor: d.team_color || "orange",
+        }));
+        setBancoPizarras([...PRESET_DRILLS, ...dbBoards]);
       }
-    } catch (e) {}
-    return PRESET_DRILLS;
-  });
+    } catch (err) {
+      console.warn("[Supabase] Error cargando pizarras:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPizarrasDesdeSupabase();
+  }, [fetchPizarrasDesdeSupabase]);
 
   const [modalGuardarPizarra, setModalGuardarPizarra] = useState<boolean>(false);
   const [modalBancoPizarras, setModalBancoPizarras] = useState<boolean>(false);
   const [nombrePizarraInput, setNombrePizarraInput] = useState<string>("");
   const [categoriaPizarraInput, setCategoriaPizarraInput] = useState<string>("Posición & Presión");
 
-  const handleGuardarPizarraEnBanco = () => {
+  const handleGuardarPizarraEnBanco = async () => {
     if (!nombrePizarraInput.trim()) {
       toast.error("Por favor ingresa un nombre para la pizarra / ejercicio.");
       return;
     }
 
+    const orgId = RendimientoStore.getActiveOrganizacionId();
     const nuevaPizarra: SavedBoardPreset = {
       id: `piz-${Date.now()}`,
       nombre: nombrePizarraInput.trim(),
@@ -732,28 +767,28 @@ export function CanchaBCoachBoard({
       teamColor,
     };
 
-    const userBoards = bancoPizarras.filter((p) => !p.id.startsWith("preset-"));
-    const updatedUserBoards = [nuevaPizarra, ...userBoards];
+    // Actualizar estado local e insertar en Supabase PostgreSQL
+    setBancoPizarras((prev) => [nuevaPizarra, ...prev]);
 
-    try {
-      localStorage.setItem("nexus_banco_pizarras", JSON.stringify(updatedUserBoards));
-    } catch (e) {}
-
-    setBancoPizarras([...PRESET_DRILLS, ...updatedUserBoards]);
-
-    // Async sync to Supabase
-    const orgId = RendimientoStore.getActiveOrganizacionId();
-    supabase.from("pizarras").upsert({
+    const { error } = await supabase.from("pizarras").upsert({
       id: nuevaPizarra.id,
       nombre: nuevaPizarra.nombre,
+      categoria: nuevaPizarra.categoria,
       players: nuevaPizarra.players,
       zones: nuevaPizarra.zones,
       arrows: nuevaPizarra.paths,
-      ball: nuevaPizarra.balls,
+      balls: nuevaPizarra.balls,
       cones: nuevaPizarra.cones,
       organizacion_id: orgId,
       created_at: new Date().toISOString(),
-    }).then();
+    });
+
+    if (error) {
+      console.error("[Supabase Error] Error al guardar pizarra en nube:", error.message);
+      toast.error("Error al guardar en la nube: " + error.message);
+    } else {
+      toast.success("💾 Pizarra guardada correctamente en la nube.");
+    }
 
     setNombrePizarraInput("");
     setModalGuardarPizarra(false);
@@ -770,22 +805,23 @@ export function CanchaBCoachBoard({
     setModalBancoPizarras(false);
   };
 
-  const handleEliminarPizarraDeBanco = (id: string, nombre: string) => {
+  const handleEliminarPizarraDeBanco = async (id: string, nombre: string) => {
     if (id.startsWith("preset-")) {
       toast.error("Las plantillas oficiales del sistema no se pueden eliminar.");
       return;
     }
 
-    const updatedUserBoards = bancoPizarras.filter((p) => !p.id.startsWith("preset-") && p.id !== id);
+    setBancoPizarras((prev) => prev.filter((p) => p.id !== id));
 
-    try {
-      localStorage.setItem("nexus_banco_pizarras", JSON.stringify(updatedUserBoards));
-    } catch (e) {}
-
-    setBancoPizarras([...PRESET_DRILLS, ...updatedUserBoards]);
+    const { error } = await supabase.from("pizarras").delete().eq("id", id);
+    if (error) {
+      toast.error("Error al eliminar pizarra: " + error.message);
+    } else {
+      toast.success(`Pizarra "${nombre}" eliminada.`);
+    }
   };
 
-  const handleEditarPizarraEnBanco = (p: SavedBoardPreset) => {
+  const handleEditarPizarraEnBanco = async (p: SavedBoardPreset) => {
     if (p.id.startsWith("preset-")) {
       toast.error("Las plantillas oficiales del sistema no se pueden modificar.");
       return;
@@ -793,22 +829,17 @@ export function CanchaBCoachBoard({
     const nuevoNombre = window.prompt("Nuevo nombre para el ejercicio:", p.nombre);
     if (!nuevoNombre || !nuevoNombre.trim()) return;
 
-    const userBoards = bancoPizarras.filter((item) => !item.id.startsWith("preset-"));
-    const updatedUserBoards = userBoards.map((item) => {
-      if (item.id === p.id) {
-        return {
-          ...item,
-          nombre: nuevoNombre.trim(),
-        };
-      }
-      return item;
-    });
+    const trimmed = nuevoNombre.trim();
+    setBancoPizarras((prev) =>
+      prev.map((item) => (item.id === p.id ? { ...item, nombre: trimmed } : item))
+    );
 
-    try {
-      localStorage.setItem("nexus_banco_pizarras", JSON.stringify(updatedUserBoards));
-    } catch (e) {}
-
-    setBancoPizarras([...PRESET_DRILLS, ...updatedUserBoards]);
+    const { error } = await supabase.from("pizarras").update({ nombre: trimmed }).eq("id", p.id);
+    if (error) {
+      toast.error("Error al actualizar en nube: " + error.message);
+    } else {
+      toast.success("Nombre actualizado en la nube.");
+    }
   };
   const lastPinchDist = useRef<number | null>(null);
   const sheetTouchStartY = useRef<number | null>(null);
@@ -1548,10 +1579,131 @@ export function CanchaBCoachBoard({
     </svg>
   );
 
+  // Helper: is a drawing tool active?
+  const isDrawTool = ["draw-solid","draw-dashed","draw-arrow","draw-curve","draw-zone","draw-circle-zone"].includes(activeTool);
+
   return (
     <div className="flex flex-col w-full h-full bg-[#183b18] text-white overflow-hidden select-none relative">
+
+      {/* ══════════════════════════════════════════════════════════════════
+          MOBILE TOP BAR — Ultra-slim (< 1024px)
+          Solo visible en phone/tablet. En desktop se oculta.
+      ══════════════════════════════════════════════════════════════════ */}
+      <div className="lg:hidden absolute top-0 left-0 right-0 z-30 flex items-center gap-2 px-2 py-1.5 bg-slate-950/92 backdrop-blur-xl border-b border-white/10 pointer-events-auto">
+        {/* Back */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 text-slate-200 text-sm shrink-0 active:scale-90 transition"
+          >
+            ←
+          </button>
+        )}
+        {/* Mode chip */}
+        <select
+          value={boardMode}
+          onChange={(e) => setBoardMode(e.target.value as "training" | "matchday")}
+          className="bg-slate-800 text-emerald-400 font-extrabold text-[11px] border border-emerald-500/30 rounded-lg px-2 py-1 outline-none cursor-pointer shrink-0"
+        >
+          <option value="matchday">🏆 Partido</option>
+          <option value="training">🏋️ Entreno</option>
+        </select>
+        {/* Title — truncated */}
+        <span className="flex-1 text-[11px] font-bold text-slate-300 truncate min-w-0">
+          {boardMode === "matchday" ? `${teamName} vs ${rivalName}` : category}
+        </span>
+        {/* Icon actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          {boardMode === "matchday" && (
+            <button
+              type="button"
+              onClick={() => setShowCamerinoModal(true)}
+              className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 text-base active:scale-90 transition"
+              title="Camerino"
+            >⏱️</button>
+          )}
+          {/* Formaciones */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 text-blue-400 active:scale-90 transition"
+                title="Alineaciones"
+              >
+                <Users className="h-4 w-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-60 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-[9999] space-y-1">
+              <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Alineaciones</span>
+              {Object.entries(FORMATIONS).map(([key, f]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => loadFormation(key)}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-slate-200 hover:bg-blue-600 hover:text-white transition flex justify-between items-center"
+                >
+                  <span className="font-black text-xs">{key}</span>
+                  <span className="text-[9px] opacity-70">{f.label}</span>
+                </button>
+              ))}
+              {boardMode === "matchday" && (
+                <button
+                  type="button"
+                  onClick={() => loadRealMatchConvocatoria()}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-extrabold text-amber-300 hover:bg-amber-600 hover:text-white transition bg-amber-950/40 border border-amber-800/40"
+                >
+                  🏆 Convocatoria Real
+                </button>
+              )}
+              <div className="h-px bg-white/10 my-1" />
+              <span className="text-[9px] font-bold text-red-400 uppercase px-2 py-0.5 block">Rival</span>
+              <button type="button" onClick={() => loadRivalTeam("4-3-3", "blue")} className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:bg-blue-600 hover:text-white transition bg-blue-950/40 border border-blue-800/40">
+                🔵 Rival 4-3-3
+              </button>
+              <button type="button" onClick={() => loadRivalTeam("4-4-2", "red")} className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-600 hover:text-white transition bg-red-950/40 border border-red-800/40">
+                🔴 Rival 4-4-2
+              </button>
+            </PopoverContent>
+          </Popover>
+          {/* Banco */}
+          <button
+            type="button"
+            onClick={() => setModalBancoPizarras(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-indigo-600/80 text-white active:scale-90 transition"
+            title="Banco de pizarras"
+          >
+            <FolderOpen className="h-4 w-4" />
+          </button>
+          {/* Guardar */}
+          <button
+            type="button"
+            onClick={() => setModalGuardarPizarra(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-emerald-600/80 text-white active:scale-90 transition"
+            title="Guardar pizarra"
+          >
+            <Save className="h-4 w-4" />
+          </button>
+          {/* Fullscreen */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+              else document.exitFullscreen?.();
+            }}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 text-emerald-400 active:scale-90 transition"
+          >
+            <Maximize2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          DESKTOP TOP FLOATING HUD — Solo visible en lg+
+      ══════════════════════════════════════════════════════════════════ */}
       {/* ── TOP FLOATING GLASS HUD (HUD Superior Flotante Estilo bCoach & Matchday Board) ───────────────────────── */}
-      <div className="absolute top-2 left-2 right-2 z-30 flex flex-col items-center gap-1.5 pointer-events-none">
+      <div className="hidden lg:block absolute top-2 left-2 right-2 z-30 pointer-events-none">
+      <div className="flex flex-col items-center gap-1.5 pointer-events-none">
         {/* ROW 1: Main Header Control Bar */}
         <div className="w-full flex items-center justify-between gap-2 flex-wrap pointer-events-none">
           {/* Left Floating Pill with Mode Selector */}
@@ -1775,7 +1927,7 @@ export function CanchaBCoachBoard({
           </div>
         </div>
 
-        {/* ROW 2: Step Animation & Grid Floating Bar (Placed naturally in flex-col below Row 1) */}
+        {/* ROW 2: Step Animation & Grid Floating Bar — DESKTOP only */}
         <div className="pointer-events-auto flex items-center gap-1 bg-slate-950/90 border border-white/20 px-3 py-1 rounded-full shadow-2xl backdrop-blur-lg max-w-[98vw] overflow-x-auto">
           {/* Guardar Fotograma Paso */}
           <button
@@ -1889,11 +2041,15 @@ export function CanchaBCoachBoard({
           className="hidden"
         />
       </div>
+      </div> {/* end desktop top HUD */}
 
       {/* ── 100% CANVAS FIELD AREA (Cancha Verde Edge-to-Edge) ────────────────── */}
+      {/* Mobile: padding-top 48px (topbar) + padding-bottom 60px (rail). Desktop: padding normal. */}
       <div
         ref={containerRef}
-        className="w-full h-full flex-1 relative bg-[#183b18] overflow-auto flex items-center justify-center"
+        className="w-full flex-1 relative bg-[#183b18] overflow-auto flex items-center justify-center
+          lg:h-full
+          pt-[48px] pb-[60px] lg:pt-0 lg:pb-0"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -1934,9 +2090,337 @@ export function CanchaBCoachBoard({
         )}
       </div>
 
+      {/* ══════════════════════════════════════════════════════════════════
+          MOBILE BOTTOM HUD — Quick-Rail + FAB Radial (< 1024px)
+      ══════════════════════════════════════════════════════════════════ */}
+
+      {/* ── MOBILE: Keyframes collapsible strip ── */}
+      {/* top-[48px] = justo debajo del topbar mobile */}
+      <div className="lg:hidden absolute top-[48px] left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setIsKeysExpanded(p => !p)}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] shadow active:scale-95 transition"
+        >
+          <Sparkles className="h-3 w-3 text-emerald-200" />
+          <span>+ Paso ({keyframes.length})</span>
+          <ChevronDown className={`h-3 w-3 opacity-60 transition-transform ${isKeysExpanded ? 'rotate-180' : ''}`} />
+        </button>
+        {isKeysExpanded && (
+          <div className="flex items-center gap-1 bg-slate-950/90 backdrop-blur-xl border border-white/20 px-2 py-1 rounded-full shadow-xl">
+            <button
+              type="button"
+              onClick={handleAddKeyframe}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-700 text-white font-bold text-[10px] active:scale-95 transition shrink-0"
+            >
+              <Sparkles className="h-3 w-3" />
+              <span>Guardar</span>
+            </button>
+            {keyframes.length > 0 && (
+              <>
+                <div className="w-px h-4 bg-white/20 mx-1 shrink-0" />
+                <button
+                  type="button"
+                  onClick={() => handleSelectKeyframe(Math.max(0, activeFrameIdx - 1))}
+                  disabled={activeFrameIdx === 0}
+                  className="p-1 text-slate-300 disabled:opacity-30 shrink-0"
+                ><SkipBack className="h-3.5 w-3.5" /></button>
+                <button
+                  type="button"
+                  onClick={() => setIsPlayingAnimation(p => !p)}
+                  disabled={keyframes.length < 2}
+                  className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-extrabold text-[10px] transition shrink-0 ${isPlayingAnimation ? 'bg-rose-600 text-white animate-pulse' : 'bg-indigo-600 text-white'}`}
+                >
+                  {isPlayingAnimation ? <Pause className="h-3 w-3 fill-white" /> : <Play className="h-3 w-3 fill-white" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectKeyframe(Math.min(keyframes.length - 1, activeFrameIdx + 1))}
+                  disabled={activeFrameIdx === keyframes.length - 1}
+                  className="p-1 text-slate-300 disabled:opacity-30 shrink-0"
+                ><SkipForward className="h-3.5 w-3.5" /></button>
+                <div className="flex items-center gap-1 overflow-x-auto max-w-[140px] shrink-0">
+                  {keyframes.map((f, idx) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => handleSelectKeyframe(idx)}
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-black shrink-0 transition active:scale-95 ${activeFrameIdx === idx ? 'bg-amber-400 text-slate-950 ring-2 ring-amber-300' : 'bg-slate-800 text-slate-300'}`}
+                    >
+                      P{idx + 1}
+                    </button>
+                  ))}
+                  <button type="button" onClick={handleRemoveActiveKeyframe} className="p-1 text-red-400 hover:bg-red-950/60 rounded-full transition active:scale-90 ml-0.5 shrink-0">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowGuardiolaGrid(p => !p)}
+                  className={`p-1 rounded-full text-[10px] font-bold transition shrink-0 ${showGuardiolaGrid ? 'bg-amber-500 text-slate-950' : 'text-slate-400'}`}
+                ><Grid className="h-3.5 w-3.5" /></button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── MOBILE: FAB Radial para Materiales Físicos ── */}
+      {/* Solo visible cuando la barra no está minimizada */}
+      {!isDockMinimized && (
+      <div className="lg:hidden absolute right-3 bottom-[68px] z-40 pointer-events-auto">
+        {/* Radial items — aparecen cuando FAB está abierto */}
+        {isRadialOpen && (
+          <div className="absolute bottom-14 right-0 flex flex-col-reverse gap-2 items-end">
+            {/* Backdrop para cerrar */}
+            <div className="fixed inset-0 z-[-1]" onPointerDown={() => setIsRadialOpen(false)} />
+            {([
+              ["add-dummy",    "🧍", "Muñeco",   "#f59e0b"],
+              ["add-ladder",   "🪜", "Escalera", "#a855f7"],
+              ["add-hurdle",   "🚧", "Valla",    "#ef4444"],
+              ["add-hoop",     "⭕", "Aro",      "#22c55e"],
+              ["add-pole",     "🚩", "Pica",     "#3b82f6"],
+              ["add-minigoal", "🥅", "Mini Arco","#64748b"],
+            ] as [ToolMode, string, string, string][]).map(([tool, emoji, label, col]) => (
+              <button
+                key={tool}
+                type="button"
+                onClick={() => { setActiveTool(tool); setIsRadialOpen(false); }}
+                className={`flex items-center gap-2 pl-3 pr-4 py-2 rounded-full text-sm font-bold shadow-lg active:scale-95 transition ${
+                  activeTool === tool ? 'ring-2 ring-white/60' : ''
+                }`}
+                style={{ backgroundColor: col + "cc", backdropFilter: "blur(8px)" }}
+              >
+                <span className="text-base">{emoji}</span>
+                <span className="text-white text-[11px]">{label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {/* FAB principal */}
+        <button
+          type="button"
+          onClick={() => setIsRadialOpen(p => !p)}
+          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-2xl text-2xl font-black transition-all active:scale-90 ${
+            isRadialOpen
+              ? 'bg-slate-700 border-2 border-amber-400 rotate-45'
+              : ['add-dummy','add-ladder','add-hurdle','add-hoop','add-pole','add-minigoal'].includes(activeTool)
+                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
+                : 'bg-slate-900/95 border border-white/20 text-amber-400'
+          }`}
+          style={{ backdropFilter: "blur(10px)" }}
+        >
+          {isRadialOpen ? <X className="h-5 w-5 text-white" /> : <span>🏋️</span>}
+        </button>
+      </div>
+      )} {/* end FAB radial */}
+
+      {/* ── MOBILE: Style Chip flotante — solo cuando hay herramienta de dibujo activa y barra visible ── */}
+      {isDrawTool && !isDockMinimized && (
+        <div className="lg:hidden absolute bottom-[64px] left-2 z-30 pointer-events-auto">
+          <div className="flex items-center gap-2 bg-slate-950/90 backdrop-blur-xl border border-white/15 px-3 py-1.5 rounded-full shadow-xl">
+            {/* Colores frecuentes */}
+            {COLORS.slice(0, 5).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                className={`w-5 h-5 rounded-full border-2 transition-transform active:scale-90 ${color === c ? 'border-white scale-125 ring-2 ring-emerald-400' : 'border-transparent opacity-70'}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+            <div className="w-px h-4 bg-white/20 mx-0.5" />
+            {/* Grosor */}
+            {([['F',0.4],['M',0.8],['G',1.6]] as [string,number][]).map(([lbl,val]) => (
+              <button
+                key={lbl}
+                type="button"
+                onClick={() => setStrokeW(val)}
+                className={`w-7 h-5 rounded-lg text-[10px] font-black border transition ${
+                  (lbl==='F' && strokeW<=0.5)||(lbl==='M' && strokeW>0.5 && strokeW<=1.0)||(lbl==='G' && strokeW>1.0)
+                    ? 'bg-emerald-600 text-white border-emerald-400'
+                    : 'bg-slate-900 text-slate-300 border-slate-800'
+                }`}
+              >{lbl}</button>
+            ))}
+            {/* Más colores */}
+            <button
+              type="button"
+              onClick={() => setIsMobileStyleOpen(p => !p)}
+              className="w-6 h-5 rounded-lg bg-slate-800 text-slate-300 text-[10px] font-bold border border-slate-700 transition active:scale-90"
+            >···</button>
+          </div>
+          {/* Panel expandido de colores */}
+          {isMobileStyleOpen && (
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-slate-950/95 border border-slate-800 rounded-2xl shadow-2xl p-3 flex flex-col gap-2 min-w-[220px]">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Todos los colores</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => { setColor(c); setIsMobileStyleOpen(false); }}
+                    className={`w-8 h-8 rounded-full border-2 transition-transform active:scale-90 ${color === c ? 'border-white scale-125 ring-2 ring-emerald-400' : 'border-transparent opacity-80'}`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── MOBILE: Quick-Rail de herramientas directas (barra inferior) ── */}
+      {/* Solo se muestra cuando NO está minimizada */}
+      {!isDockMinimized && (
+      <div className="lg:hidden absolute bottom-0 left-0 right-0 z-30 pointer-events-auto bg-slate-950/95 backdrop-blur-xl border-t border-white/10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="flex items-center gap-1 px-2 py-2 overflow-x-auto no-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+
+          {/* Acciones rápidas izquierda */}
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={paths.length === 0 && zones.length === 0}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-amber-400 text-lg font-extrabold disabled:opacity-30 active:scale-90 transition shrink-0"
+            title="Deshacer"
+          >↩</button>
+          <button
+            type="button"
+            onClick={() => setModalConfirmClear(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-red-400 active:scale-90 transition shrink-0"
+            title="Limpiar"
+          ><Trash2 className="h-4 w-4" /></button>
+
+          {/* Separador */}
+          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
+
+          {/* HERRAMIENTAS DE DIBUJO — iconos directos */}
+          {([
+            ["select",           <Hand className="h-4 w-4" />,        "Mover",           "bg-amber-500 text-slate-950",  "bg-slate-900 text-amber-300"],
+            ["draw-solid",       <Pencil className="h-4 w-4" />,      "Lápiz",           "bg-blue-600 text-white",       "bg-slate-900 text-blue-400"],
+            ["draw-dashed",      <span className="font-mono font-black text-sm">┊</span>, "Pase", "bg-emerald-600 text-white", "bg-slate-900 text-emerald-400"],
+            ["draw-arrow",       <ArrowRight className="h-4 w-4" />,  "Flecha",          "bg-amber-600 text-white",      "bg-slate-900 text-amber-400"],
+            ["draw-curve",       <span className="text-base">↩️</span>, "Curva",         "bg-purple-600 text-white",     "bg-slate-900 text-purple-400"],
+            ["draw-zone",        <Square className="h-4 w-4" />,      "Zona",            "bg-orange-600 text-white",     "bg-slate-900 text-orange-400"],
+            ["draw-circle-zone", <span className="text-base">⭕</span>, "Rondo",          "bg-pink-600 text-white",       "bg-slate-900 text-pink-400"],
+            ["add-text",         <TextIcon className="h-4 w-4" />,    "Texto",           "bg-violet-600 text-white",     "bg-slate-900 text-violet-400"],
+            ["eraser",           <Trash2 className="h-4 w-4" />,      "Borrar",          "bg-red-600 text-white",        "bg-slate-900 text-red-400"],
+          ] as [ToolMode, React.ReactNode, string, string, string][]).map(([tool, icon, label, activeClass, inactiveClass]) => (
+            <button
+              key={tool}
+              type="button"
+              onClick={() => {
+                setActiveTool(tool);
+                if (tool === "draw-solid") setStrokeType("solid");
+                if (tool === "draw-dashed") setStrokeType("dashed");
+                if (tool === "draw-arrow") setStrokeType("arrow");
+                if (tool === "draw-curve") setStrokeType("curve");
+                if (tool === "draw-zone") setStrokeType("zone");
+                if (tool === "draw-circle-zone") setStrokeType("circle-zone");
+              }}
+              className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                activeTool === tool ? activeClass + ' border-transparent shadow-md' : inactiveClass + ' border-slate-800'
+              }`}
+              title={label}
+            >
+              {icon}
+              {/* Active dot */}
+              {activeTool === tool && (
+                <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-white/80" />
+              )}
+            </button>
+          ))}
+
+          {/* Separador */}
+          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
+
+          {/* JUGADORES: color chips + add player */}
+          <div className="flex items-center gap-1 shrink-0">
+            {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => { setTeamColor(key as PlayerTeamColor); setActiveTool("add-player"); }}
+                className={`w-6 h-6 rounded-full border-2 transition-transform active:scale-90 shrink-0 ${
+                  teamColor === key && activeTool === 'add-player' ? 'border-white scale-125 ring-2 ring-emerald-400' : 'border-transparent opacity-70'
+                }`}
+                style={{ backgroundColor: item.bg }}
+                title={item.label}
+              />
+            ))}
+          </div>
+
+          {/* Separador */}
+          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
+
+          {/* OBJETOS DIRECTOS: Balón, Cono */}
+          <button
+            type="button"
+            onClick={() => setBalls(prev => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }])}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-xl active:scale-90 transition shrink-0"
+            title="Añadir balón"
+          >⚽</button>
+          <button
+            type="button"
+            onClick={() => { setActiveTool('add-cone'); }}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border text-xl active:scale-90 transition shrink-0 ${
+              activeTool === 'add-cone' ? 'bg-amber-500 text-slate-950 border-transparent' : 'bg-slate-900 border-slate-800'
+            }`}
+            title="Cono"
+          >🔺</button>
+
+          {/* Separador */}
+          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
+
+          {/* LAYOUT: Cancha completa / media, Grid */}
+          <button
+            type="button"
+            onClick={() => setPitchLayout(prev => prev === "full-pitch" ? "half-pitch" : "full-pitch")}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border text-xl active:scale-90 transition shrink-0 ${
+              pitchLayout === 'half-pitch' ? 'bg-emerald-600 text-white border-transparent ring-2 ring-emerald-300' : 'bg-slate-900 border-slate-800 text-emerald-400'
+            }`}
+            title={pitchLayout === 'half-pitch' ? 'Media Cancha' : 'Cancha Completa'}
+          >🎯</button>
+          <button
+            type="button"
+            onClick={() => setShowGuardiolaGrid(p => !p)}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition active:scale-90 shrink-0 ${
+              showGuardiolaGrid ? 'bg-amber-500 text-slate-950 border-transparent' : 'bg-slate-900 border-slate-800 text-slate-400'
+            }`}
+            title="Grid táctico"
+          ><Grid className="h-4 w-4" /></button>
+
+          {/* Ocultar barra */}
+          <button
+            type="button"
+            onClick={() => setIsDockMinimized(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 active:scale-90 transition shrink-0 ml-1"
+            title="Minimizar barra"
+          ><Eye className="h-4 w-4" /></button>
+        </div>
+      </div>
+      )} {/* end Quick-Rail */}
+
+      {/* ── MOBILE: Restore pill cuando la barra está minimizada ── */}
+      {isDockMinimized && (
+        <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => setIsDockMinimized(false)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-950/95 border border-white/20 text-white font-bold text-sm shadow-2xl backdrop-blur-md active:scale-95 transition-all"
+          >
+            <Pencil className="h-4 w-4 text-emerald-400" />
+            <span>Herramientas</span>
+          </button>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          DESKTOP BOTTOM DOCK — Solo visible en lg+ (sin cambios)
+      ══════════════════════════════════════════════════════════════════ */}
       {/* ── BOTTOM DOCK: Ultra-Clean Floating Pill Bar (bCoach Zero-Clutter UI) ─── */}
       {!isDockMinimized && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto w-full px-3 flex justify-center">
+        <div className="hidden lg:flex absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-auto w-full px-3 justify-center">
           {/* Main Floating Category Dock */}
           <div className="bg-slate-950/90 backdrop-blur-xl border border-white/20 p-1.5 rounded-2xl shadow-2xl text-white flex items-center gap-1.5 flex-wrap justify-center max-w-[98vw]">
             
@@ -2243,21 +2727,21 @@ export function CanchaBCoachBoard({
         </div>
       )}
 
-      {/* Floating restore pill when minimized */}
+      {/* Floating restore pill when minimized — DESKTOP ONLY */}
       {isDockMinimized && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="hidden lg:block absolute bottom-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
           <button
             type="button"
             onClick={() => setIsDockMinimized(false)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-950/90 border border-white/20 text-white font-bold text-sm shadow-2xl backdrop-blur-md active:scale-95 transition-all"
           >
             <Pencil className="h-4 w-4 text-emerald-400" />
-            <span className="hidden sm:inline">Herramientas</span>
+            <span>Herramientas</span>
           </button>
         </div>
       )}
 
-      {/* ── MOBILE BOTTOM SHEET (drawer) — portado encima de todo ── */}
+      {/* ── MOBILE BOTTOM SHEET (drawer) — solo para acciones avanzadas ── */}
       {isSheetOpen && (
         <>
           {/* Backdrop: cierra el sheet al tocar fuera */}

@@ -77,7 +77,8 @@ function SoporteAcademiaPage() {
       prioridad,
       estado: "abierto",
       creadorNombre,
-      creadorEmail: authEmail
+      creadorEmail: authEmail,
+      organizacion_nombre: "Academia Activa"
     });
 
     toast.success("¡Ticket enviado a Soporte Central exitosamente!");

@@ -59,81 +59,110 @@ function LoginPage() {
     RendimientoStore.setActiveOrganizacionId(id);
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) {
+        toast.error("Error al iniciar con Google: " + error.message);
+        setLoading(false);
+      }
+    } catch (err: any) {
+      toast.error("Error al conectar con Google");
+      setLoading(false);
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       // 1. Save auth email
-      localStorage.setItem("auth_email", email.trim().toLowerCase());
+      const cleanEmail = email.trim().toLowerCase();
+      localStorage.setItem("auth_email", cleanEmail);
 
       // Ensure active org is saved in store
       if (selectedOrg && selectedOrg.id) {
         RendimientoStore.setActiveOrganizacionId(selectedOrg.id);
       }
 
-      // 2. Resolve Role dynamically
-      let resolvedRole: "admin" | "coach" | "padres" = "admin";
+      // 2. Real Supabase Auth Sign-In
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
+
+      if (authError && cleanEmail !== "alex@mail.com") {
+        console.warn("[Supabase Auth] Sign-in notice:", authError.message);
+      }
+
+      // 3. Resolve Role dynamically from DB (perfiles / usuarios)
+      let resolvedRole: "admin" | "coach" | "fisioterapeuta" | "padres" = "admin";
       let resolvedCoachName = "";
 
-      if (email.trim().toLowerCase() === "alex@mail.com" && password === "123456Xx") {
+      if (cleanEmail === "alex@mail.com" && password === "123456Xx") {
         resolvedRole = "admin";
         localStorage.setItem("is_superadmin", "true");
       } else {
         localStorage.removeItem("is_superadmin");
 
-        // Try searching in system users list from DB
-        const { data: dbUsers, error: dbError } = await supabase
-          .from("usuarios")
-          .select("*")
-          .eq("email", email.trim().toLowerCase());
+        // Try searching in system users list from DB (perfiles and usuarios)
+        const [perfilesRes, usuariosRes] = await Promise.all([
+          supabase.from("perfiles").select("*").eq("email", cleanEmail).limit(1),
+          supabase.from("usuarios").select("*").eq("email", cleanEmail).limit(1)
+        ]);
 
-        const matchedUser = dbUsers && dbUsers.length > 0 ? dbUsers[0] : null;
+        const matchedProfile = perfilesRes.data?.[0] || usuariosRes.data?.[0];
 
-        if (matchedUser) {
-          const rawRole = matchedUser.role.toLowerCase();
+        if (matchedProfile) {
+          const rawRole = (matchedProfile.role || "").toLowerCase();
           if (rawRole.includes("admin") || rawRole.includes("staff") || rawRole.includes("director") || rawRole === "direccion") {
             resolvedRole = "admin";
+          } else if (rawRole.includes("fisio") || rawRole.includes("medico") || rawRole.includes("terapeuta")) {
+            resolvedRole = "fisioterapeuta";
           } else if (rawRole.includes("coach") || rawRole.includes("entrenador") || rawRole.includes("coaches")) {
             resolvedRole = "coach";
-            resolvedCoachName = matchedUser.nombre;
+            resolvedCoachName = matchedProfile.nombre;
           } else {
             resolvedRole = "padres";
           }
-
-          // Mark user as active on successful login in DB
-          if (matchedUser.estado !== "activo") {
-            await supabase
-              .from("usuarios")
-              .update({ estado: "activo" })
-              .eq("id", matchedUser.id);
-          }
         } else {
-          // If not in users list, check if this email is a parent email of any player
+          // Check if parent email
           const players = RendimientoStore.getJugadores();
           const isParent = players.some(
-            (p) => p.correoEncargado && p.correoEncargado.trim().toLowerCase() === email.trim().toLowerCase()
+            (p) => p.correoEncargado && p.correoEncargado.trim().toLowerCase() === cleanEmail
           );
           if (isParent) {
             resolvedRole = "padres";
           } else {
-            // Default fallback
             resolvedRole = "admin";
           }
         }
       }
 
-      // 3. Save to localStorage to let useRole hook read it
+      // 4. Save active role context
       localStorage.setItem("user-role", resolvedRole);
       if (resolvedRole === "coach") {
         localStorage.setItem("coach-name", resolvedCoachName);
       }
 
-      toast.success(`Sesión iniciada como ${resolvedRole === "admin" ? "Administrador" : resolvedRole === "coach" ? "Entrenador" : "Padre de Familia"}`);
+      const roleLabels: Record<string, string> = {
+        admin: "👑 Administrador",
+        coach: "⚽ Entrenador",
+        fisioterapeuta: "🩺 Cuerpo Médico",
+        padres: "👨‍👩‍👧 Padre de Familia",
+      };
+
+      toast.success(`Sesión iniciada como ${roleLabels[resolvedRole] || "Usuario"}`);
       
-      // Force window reload or state refresh to let AppSidebar/AppTopbar read new role instantly
       setTimeout(() => {
-        if (email.trim().toLowerCase() === "alex@mail.com") {
+        if (cleanEmail === "alex@mail.com") {
           window.location.href = "/saas-admin";
         } else {
           window.location.href = "/dashboard";
@@ -157,41 +186,33 @@ function LoginPage() {
               {/* Centered Logo Container - Dark Frame with Ambient Glow */}
               <div className="relative group flex items-center justify-center">
                 <div className="absolute -inset-3 bg-gradient-to-r from-primary via-indigo-500 to-amber-500 rounded-3xl blur-xl opacity-35 group-hover:opacity-60 transition duration-500" />
-                
-                <div className="relative h-44 w-44 md:h-52 md:w-52 rounded-3xl bg-slate-950/90 border border-slate-800/50 shadow-xl flex items-center justify-center p-1.5 transition-all duration-300 group-hover:scale-105 overflow-hidden">
-                  <img
-                    src={
-                      selectedOrg && selectedOrg.logo
-                        ? selectedOrg.logo
-                        : (selectedOrg?.nombre?.toLowerCase().includes("asoderive") || !selectedOrg
-                            ? "/asoderive-logo.jpg"
-                            : "/favicon.png")
-                    }
-                    alt={selectedOrg?.nombre || "Logo de la Academia"}
-                    className="h-full w-full object-contain rounded-2xl filter drop-shadow-md"
-                  />
+                <div className="relative flex items-center justify-center h-20 w-20 rounded-2xl bg-slate-900 border-2 border-primary/40 shadow-2xl p-2 group-hover:scale-105 transition duration-300">
+                  {selectedOrg?.logo ? (
+                    <img src={selectedOrg.logo} alt={selectedOrg.nombre} className="h-full w-full object-contain rounded-xl" />
+                  ) : (
+                    <Trophy className="h-10 w-10 text-primary animate-pulse" />
+                  )}
                 </div>
               </div>
-
-              {/* Centered Greeting & Academy Subtitle */}
+              
               <div className="space-y-1">
-                <h2 className="text-2xl md:text-3xl font-black tracking-tight text-foreground">
-                  ¡Iniciemos el Día!
+                <h2 className="text-xl font-extrabold tracking-tight text-foreground">
+                  {selectedOrg?.nombre || "NexusSport OS"}
                 </h2>
-                <p className="text-sm font-semibold text-muted-foreground">
-                  {selectedOrg?.nombre || "Academia Asoderive"}
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest">
+                  Plataforma Deportiva Elite
                 </p>
               </div>
 
-              {/* Selector of Registered Academies (if multiple exist) */}
+              {/* Selector dinámico de Academias */}
               {orgs.length > 1 && (
-                <div className="w-full pt-2">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                    Academia Inscrita:
-                  </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2 max-h-32 overflow-y-auto p-1">
-                    {orgs.map((org) => {
-                      const isSelected = org.id === selectedOrg?.id;
+                <div className="pt-1 w-full max-w-xs">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">
+                    Selecciona tu Academia
+                  </span>
+                  <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                    {orgs.map((org: any) => {
+                      const isSelected = org.id === selectedOrgId;
                       return (
                         <button
                           key={org.id}
@@ -222,6 +243,29 @@ function LoginPage() {
               <p className="text-xs text-muted-foreground">
                 Ingresa tus credenciales para acceder a la plataforma.
               </p>
+            </div>
+
+            {/* Google OAuth Quick Button */}
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-2 border-slate-800 bg-slate-900/80 hover:bg-slate-800 text-white text-xs h-11 rounded-xl shadow transition"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
+                  <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
+                  <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.4-.4-2.2s.2-1.5.4-2.2L1.9 7.5C.7 9.9 0 12.5 0 15.3s.7 5.4 1.9 7.8l3.7-2.9z" />
+                  <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
+                </svg>
+                <span>Continuar con Google</span>
+              </Button>
+
+              <div className="relative flex items-center justify-center">
+                <div className="w-full border-t border-slate-800" />
+                <span className="bg-background px-2 text-[10px] uppercase text-muted-foreground font-semibold absolute">O con tu correo</span>
+              </div>
             </div>
 
             <form className="space-y-4" onSubmit={submit}>

@@ -13,12 +13,19 @@ export function AcademyHeaderBanner({
   subtitle = "PANEL DE GESTIÓN EMPRESARIAL & ALTO RENDIMIENTO",
   badgeText = "ACADEMIA ACTIVA",
 }: AcademyHeaderBannerProps) {
-  const { isSuperAdmin, activeOrgId, handleOrgChange, orgs } = useRole();
+  const { role } = useRole();
+  const isSuperAdmin = typeof window !== "undefined" && localStorage.getItem("is_superadmin") === "true";
+  const activeOrgId = RendimientoStore.getActiveOrganizacionId();
+  const orgs = useMemo(() => RendimientoStore.getOrganizaciones(), []);
 
-  const currentOrgs = useMemo(() => RendimientoStore.getOrganizaciones(), []);
+  const handleOrgChange = (id: string) => {
+    RendimientoStore.setActiveOrganizacionId(id);
+    window.location.reload();
+  };
+
   const activeOrg = useMemo(() => {
-    return currentOrgs.find((o) => o.id === activeOrgId) || currentOrgs[0];
-  }, [currentOrgs, activeOrgId]);
+    return orgs.find((o: any) => o.id === activeOrgId) || orgs[0];
+  }, [orgs, activeOrgId]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-slate-950 text-white shadow-2xl border border-slate-800/80 mb-6 p-5 md:p-7 transition-all duration-300">

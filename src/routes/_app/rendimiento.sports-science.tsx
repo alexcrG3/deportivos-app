@@ -574,7 +574,7 @@ function SportsSciencePage() {
                   key={d.jugadorId}
                   onClick={() => setSelected(d)}
                   className={`rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-elegant hover:-translate-y-0.5 ${
-                    selected.jugadorId === d.jugadorId ? "border-primary bg-primary/5" : "bg-card"
+                    selected?.jugadorId === d.jugadorId ? "border-primary bg-primary/5" : "bg-card"
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-4">

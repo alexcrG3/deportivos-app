@@ -59,14 +59,14 @@ function WorkflowsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-semibold text-sm">{w.nombre}</p>
-                        <Badge variant="secondary" className={estadoStyle[w.estado]}>{w.estado}</Badge>
+                        <Badge variant="secondary" className={estadoStyle[w.estado as keyof typeof estadoStyle]}>{w.estado}</Badge>
                       </div>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <span className="font-medium">Si:</span>
                         <Badge variant="outline" className="font-normal">{w.trigger}</Badge>
                         <ChevronRight className="h-3 w-3" />
                         <span className="font-medium">Entonces:</span>
-                        {w.acciones.map((a) => (
+                        {w.acciones.map((a: string) => (
                           <Badge key={a} variant="outline" className="font-normal">{a}</Badge>
                         ))}
                       </div>

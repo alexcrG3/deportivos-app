@@ -201,8 +201,8 @@ function WellnessPage() {
       const activeNames = new Set(activePlayers.map(p => p.nombre.toLowerCase().trim()));
       const filteredW = w.filter(x => 
         activeIds.has(x.jugadorId) || 
-        (x.jugadorNombre && activeNames.has(x.jugadorNombre.toLowerCase().trim())) ||
-        (x.jugador && activeNames.has(x.jugador.toLowerCase().trim()))
+        ((x as any).jugadorNombre && activeNames.has((x as any).jugadorNombre.toLowerCase().trim())) ||
+        ((x as any).jugador && activeNames.has((x as any).jugador.toLowerCase().trim()))
       );
       if (filteredW.length > 0) w = filteredW;
     }
@@ -513,7 +513,7 @@ function WellnessPage() {
             const { label: lbl, color } = sportsScoreLabel(score);
             const players = RendimientoStore.getJugadores();
             const playerRec = players.find(p => p.id === l.jugadorId);
-            const avatarUrl = l.avatar || playerRec?.avatar || `https://i.pravatar.cc/100?u=${l.jugadorId}`;
+            const avatarUrl = (l as any).avatar || playerRec?.avatar || `https://i.pravatar.cc/100?u=${l.jugadorId}`;
             return (
               <div key={l.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border bg-card p-4 hover:shadow-elegant transition-all hover:-translate-y-0.5">

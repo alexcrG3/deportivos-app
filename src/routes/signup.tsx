@@ -242,7 +242,7 @@ function SignUpPage() {
 
             <div className="text-center text-sm text-muted-foreground pt-2">
               <p>
-                ¿Ya tienes una cuenta? <Link to="/login" className="text-primary hover:underline font-medium">Inicia Sesión</Link>
+                ¿Ya tienes una cuenta? <Link to="/login" search={{}} className="text-primary hover:underline font-medium">Inicia Sesión</Link>
               </p>
             </div>
           </CardContent>

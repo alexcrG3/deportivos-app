@@ -35,6 +35,36 @@ function AppLayout() {
     return window.innerWidth >= 1024 && !isTouch;
   });
 
+  // RBAC Route Guard Enforcement
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const role = (localStorage.getItem("user-role") || "admin").toLowerCase();
+    
+    // Restricted paths for Coach (Entrenador)
+    if (role === "coach") {
+      const forbiddenForCoach = ["/finanzas", "/configuracion", "/saas-admin", "/personal", "/crm", "/caja", "/facturacion"];
+      if (forbiddenForCoach.some(p => currentPath.startsWith(p))) {
+        window.location.href = "/dashboard";
+      }
+    }
+
+    // Restricted paths for Fisioterapeuta (Cuerpo Médico)
+    if (role === "fisioterapeuta") {
+      const forbiddenForFisio = ["/finanzas", "/configuracion", "/saas-admin", "/personal", "/crm", "/tactica/pizarra", "/caja"];
+      if (forbiddenForFisio.some(p => currentPath.startsWith(p))) {
+        window.location.href = "/medico/citas";
+      }
+    }
+
+    // Restricted paths for Padres / Jugadores
+    if (role === "padres") {
+      const forbiddenForPadres = ["/finanzas", "/configuracion", "/saas-admin", "/personal", "/crm", "/tactica", "/medico", "/caja", "/instalaciones", "/inventario"];
+      if (forbiddenForPadres.some(p => currentPath.startsWith(p))) {
+        window.location.href = "/convocatorias";
+      }
+    }
+  }, [currentPath]);
+
   useEffect(() => {
     const update = () => {
       const isTouch = window.matchMedia("(pointer: coarse)").matches;

@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import RendimientoStore, { StoreJugador } from "@/lib/rendimiento-store";
 import { toast } from "sonner";
+import { PaymentCheckoutModal } from "@/components/PaymentCheckoutModal";
+import { printOrDownloadReceipt } from "@/lib/receipt-generator";
+import { NotificationGateway } from "@/lib/notification-gateway";
+import { CreditCard, FileText, Send } from "lucide-react";
 
 export const Route = createFileRoute("/_app/pagos")({ component: PagosPage });
 
@@ -50,8 +54,9 @@ function PagosPage() {
   const [metodoPago, setMetodoPago] = useState("Sinpe Móvil");
   const [refMasiva, setRefMasiva] = useState("");
 
-  // Modal exportar
-  const [openExport, setOpenExport] = useState(false);
+  // Modal checkout en vivo (Tilopay / SINPE / Card)
+  const [openCheckoutModal, setOpenCheckoutModal] = useState(false);
+  const [checkoutPlayer, setCheckoutPlayer] = useState<StoreJugador | null>(null);
 
   // Modal revertir pago
   const [revertTarget, setRevertTarget] = useState<{ id: string; nombre: string; monto: number } | null>(null);
@@ -85,7 +90,7 @@ function PagosPage() {
     });
 
     if (changed) {
-      localStorage.setItem("pagos_dynamics", JSON.stringify(patched));
+      RendimientoStore.set("pagos_dynamics", patched);
       setPagosList(RendimientoStore.getPagos());
     }
   }, []);
@@ -370,6 +375,17 @@ function PagosPage() {
           <p className="text-sm text-muted-foreground">Gestión de cobros, tarifas y estados de cuenta.</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              const fresh = RendimientoStore.getJugadores();
+              if (fresh.length > 0) setCheckoutPlayer(fresh[0]);
+              setOpenCheckoutModal(true);
+            }}
+            className="bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-extrabold shadow-lg rounded-xl"
+            size="sm"
+          >
+            <CreditCard className="h-4 w-4 mr-1.5" /> Cobrar en Vivo (Tilopay/SINPE)
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setOpenExport(true)}>
             <Download className="h-4 w-4 mr-1" /> Exportar
           </Button>
@@ -379,13 +395,6 @@ function PagosPage() {
             onClick={() => setOpenGenerar(true)}
           >
             <Zap className="h-4 w-4 mr-1" /> Generar Cobros del Mes
-          </Button>
-          <Button
-            variant="outline" size="sm"
-            className="btn-secondary"
-            onClick={openModalMasivo}
-          >
-            <CheckSquare className="h-4 w-4 mr-1" /> Cobro Masivo
           </Button>
           <Button onClick={openModalIndividual} className="btn-primary" size="sm">
             <Plus className="h-4 w-4 mr-1" /> Pago Individual
@@ -535,15 +544,36 @@ function PagosPage() {
                     </TableCell>
                     <TableCell className="text-right font-semibold">{fmt(p.monto)}</TableCell>
                     <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => handleRevertPago(p.id, p.jugador, p.monto)}
-                        title="Revertir Pago"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300"
+                          onClick={() => printOrDownloadReceipt({
+                            id: p.id,
+                            consecutivo: `FE-CR-${p.referencia || p.id.slice(-8).toUpperCase()}`,
+                            fecha: p.fecha,
+                            alumnoNombre: p.jugador,
+                            categoria: p.categoria || "Fútbol Base",
+                            monto: p.monto,
+                            concepto: p.concepto || "Mensualidad del Mes",
+                            metodoPago: p.metodo,
+                            referencia: p.referencia || p.id,
+                          })}
+                          title="Emitir Recibo PDF"
+                        >
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleRevertPago(p.id, p.jugador, p.monto)}
+                          title="Revertir Pago"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                   ))}
@@ -900,6 +930,14 @@ function PagosPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* MODAL COBRO EN VIVO (TILOPAY / STRIPE / SINPE) */}
+      <PaymentCheckoutModal
+        isOpen={openCheckoutModal}
+        onClose={() => setOpenCheckoutModal(false)}
+        jugador={checkoutPlayer}
+        onPaymentSuccess={refreshData}
+      />
 
     </div>
   );
