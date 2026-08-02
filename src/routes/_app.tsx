@@ -21,11 +21,8 @@ function AppLayout() {
   const currentPath = routerState.location.pathname;
   const hiddenAIRoutes = ["/muro"];
   const showFloatAI = !hiddenAIRoutes.some(r => currentPath.startsWith(r));
-  // Initialize isSyncing based on store status to prevent the empty dashboard flash
-  const [isSyncing, setIsSyncing] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !RendimientoStore.isStoreSynced();
-  });
+  // Non-blocking sync state for instant rendering
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // On mobile/tablet (< 1024px or touch devices) the sidebar starts closed.
   // On desktop (≥ 1024px and mouse device) it starts open.
@@ -75,35 +72,17 @@ function AppLayout() {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
-    const safetyTimer = setTimeout(() => {
-      if (mounted) setIsSyncing(false);
-    }, 2000);
-
     if (!RendimientoStore.isStoreSynced()) {
-      setIsSyncing(true);
       Promise.all([
         RendimientoStore.syncFromSupabase().catch((err) => console.warn("Rendimiento sync warning:", err)),
         TacticalStore.syncFromSupabase().catch((err) => console.warn("Tactical sync warning:", err))
       ]).finally(() => {
-        if (mounted) {
-          clearTimeout(safetyTimer);
-          setIsSyncing(false);
-          try { 
-            seedEjemploPaso5(); 
-            ensureStaffDBDataSeeded();
-          } catch {}
-        }
+        try { 
+          seedEjemploPaso5(); 
+          ensureStaffDBDataSeeded();
+        } catch {}
       });
-    } else {
-      clearTimeout(safetyTimer);
-      setIsSyncing(false);
     }
-
-    return () => {
-      mounted = false;
-      clearTimeout(safetyTimer);
-    };
   }, []);
 
   if (isSyncing) {
