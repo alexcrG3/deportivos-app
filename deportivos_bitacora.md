@@ -4,6 +4,42 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 
 ---
 
+## [01/08/2026 - Noche: Pasarelas de Pago en Vivo, Recibos PDF con QR, Iconos PWA 4K HD, Finanzas Dinámicas por Categoría (U9, U11, U13) & Paginación Profesional]
+
+### 💳 Pasarelas de Pago en Vivo & Modal de Checkout Multi-Método
+- **Integración de `PaymentCheckoutModal` (`src/components/PaymentCheckoutModal.tsx`):**
+  - Sustituido el modal antiguo de 4 campos estáticos por la pasarela multi-método (Tilopay, SINPE Móvil, Stripe y Efectivo) en `/finanzas` y `/pagos`.
+  - **Sincronización de Monto Real:** El modal detecta y sincroniza automáticamente el saldo pendiente exacto del alumno seleccionado en la tabla (ej: ₡25,000 cuota normal o ₡50,000/₡75,000 para morosos de 2 o 3 meses acumulados).
+  - **Recibos PDF Oficiales con QR (`src/lib/receipt-generator.ts`):** Generación e impresión en tiempo real de comprobantes fiscales descargables con consecutivo único (`FE-CR-XXXX`), desglose de subtotal + IVA 13% y código QR de verificación.
+
+### 📊 Módulo de Finanzas & Semáforo por Categorías Reales de Asoderive (`src/routes/_app/finanzas.tsx`)
+- **Restricción a Equipos Reales de Asoderive:** Eliminación de tarjetas estáticas genéricas o categorías fantasma (Sub-15, Sub-20). Ahora se muestran exclusivamente las 3 categorías activas del club: **U9, U11 y U13**.
+- **Resumen Ejecutivo de Totales (Barra KPI):** Implementación de mini-panel superior que contabiliza la cantidad exacta de alumnos y saldos monetarios de **Pendientes**, **Morosos** y **Total Consolidado por Cobrar**.
+- **Desglose de Meses Vencidos:** Subtítulo descriptivo en la celda de saldo pendiente (`🔴 2 Meses: Julio + Agosto` vs `🟡 Mes Actual en Curso`).
+- **Botón `⚡ Generar Cobros del Mes (Todos)`:** Carga automática de la mensualidad del nuevo mes a los 81 alumnos activos de la academia.
+- **Paginación Profesional:** Pie de tabla con selector de filas por página (`10`, `25`, `50`, `Todos`) y controles de navegación fluida `Anterior`/`Siguiente`.
+- **Cambio de Estado Interactivo en 1 Clic:** Posibilidad de alternar el estado de cualquier alumno entre `Pendiente 🟡` y `Moroso 🔴` haciendo clic directamente en la etiqueta de su fila.
+
+### 📱 Iconos PWA Ultra HD 4K (`public/`, `scripts/resize_icons.ps1`)
+- Script en PowerShell (`scripts/resize_icons.ps1`) que genera imágenes PNG en ultra alta definición desde el logo vectorial 4K:
+  - `public/pwa-512x512.png` (Splash screen)
+  - `public/pwa-192x192.png` (Pantalla de inicio)
+  - `public/apple-touch-icon.png` (iOS Safari)
+  - `public/favicon.png` (Favicon del navegador)
+- Incremento de versión de caché PWA a `deportivos-pwa-v4` en `public/sw.js` e `index.html`.
+
+### 🧹 Limpieza Técnica & Build de Producción
+- Corregidos todos los errores de TypeScript (`npx tsc --noEmit` y `npm run build` sin errores).
+- Configuración de despliegue en Vercel (`vercel.json`).
+
+---
+
+**📌 Notas y Agenda para la Sesión de Mañana:**
+- [ ] **Revisión a Fondo del Flujo de Cobros:** Inspección detallada del proceso de cobranza y pasarelas en vivo.
+- [ ] **Inteligencia Artificial Copiloto por Rol:** Potenciación y afinamiento de las capacidades de IA personalizadas para cada rol (*Administrador, Entrenador DT, Preparador Físico, Médico, Tutor/Padre*).
+
+---
+
 ## [31/07/2026 - Noche: Pizarra Táctica bCoach Ultra-Elite — Equipamiento Físico Vectorial, Media Cancha, Trazos Curvos Bézier, Zonas Circulares y UI Zero-Clutter]
 
 ### 🏋️ Equipamiento Físico de Entrenamiento (5 nuevos objetos vectoriales SVG)
