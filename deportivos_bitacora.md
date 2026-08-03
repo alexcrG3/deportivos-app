@@ -1022,3 +1022,18 @@ Una academia deportiva maneja inventario físico constante: uniformes, balones, 
     - Remoción de Liga Deportiva Alajuelense U9, dejando como único partido agendado el encuentro del 2 de agosto vs **U9 San Jose FC**.
     - Adición de botones de eliminación directa (CRUD Delete con ícono `Trash2`) en Expedientes de Rivales (`/tactica/rivales`) y Agenda de Partidos (`/partidos`).
 
+## [03/08/2026]
+* **Aislamiento Multi-Tenant SaaS Estricto y Eliminación de `localStorage`:**
+  - **Aislamiento 100% Garantizado**: Remoción de los fallbacks y fallbacks de datos demo en el store (`RendimientoStore`) que causaban fugas cruzadas de datos entre academias (`getJugadores`, `getEquipos`, `getEntrenadores`, `getCategorias`, `getPartidos`, `getSedes`).
+  - **Arreglo de Creación de Academias**: `addOrganizacion` ahora ejecuta un `INSERT` directo en la base de datos de Supabase PostgreSQL (`organizaciones`), evitando depender de almacenamiento local efímero. Las nuevas academias (ej. *Baloncesto CR*) arrancan limpias e independizadas desde la DB.
+  - **Eliminación Total de `localStorage` en el Store**: Remoción completa de lecturas/escrituras a `localStorage` en `RendimientoStore`. Todos los datos del cliente se gestionan directamente a través del motor `memoryCache` sincronizado en tiempo real con Supabase PostgreSQL.
+* **Consistencia de Navegación e Identidad de Academia (Centro de Mando & Banner):**
+  - **Centro de Mando (`/saas-admin`)**: Carga del listado de organizaciones directamente desde la base de datos Supabase en tiempo de montaje.
+  - **Banner Superior (`AcademyHeaderBanner`) y Barra Lateral (`AppSidebar`)**: Consulta reactiva a la base de datos de Supabase por el `activeOrgId` activo, eliminando la recaída o "fallback" automático en la academia por defecto (*Academia Asoderive*).
+  - **Acciones CRUD de Academias en Centro de Mando**: Adición de botones de **Editar** (diálogo con edición de Nombre, Correo, País y Plan), **Desactivar / Activar** (toggle de estado `activo`/`suspendido`), y **Eliminar** (diálogo de confirmación con borrado en cascada en Supabase).
+* **Corrección de Errores de Compilación y Renderizado SSR (Fix Error 500):**
+  - **Resolución de Error 500 en `/entrenamientos`**: Corrección de una declaración de variable duplicada (`dbOrgs`) en el store durante la sincronización, asegurando compilación limpia en esbuild/Vite y la vista de entrenamientos.
+  - **Exportación Default en Rutas**: Adición de `export default EntrenadoresPage` en `entrenadores.index.tsx` para corregir la importación en la ruta `/personal`.
+  - **Verificación de Build**: Verificación de compilación de producción limpia (`npm run build`) con 0 errores.
+* **Mantenimiento y Control de Versiones**:
+  - Actualización del árbol de rutas generado (`src/routeTree.gen.ts`) y sincronización completa con el repositorio remoto de GitHub (`main`).
