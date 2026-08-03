@@ -50,9 +50,31 @@ function SaasAdminDashboard() {
     setTickets(RendimientoStore.getSupportTickets());
   };
 
+  // Carga las organizaciones DIRECTO de Supabase — no del memoryCache
+  const loadOrgsFromDB = async () => {
+    const { data, error } = await supabase.from("organizaciones").select("*").order("fecha_creacion", { ascending: true });
+    if (error) {
+      console.error("[SaasAdmin] Error cargando academias:", error.message);
+      // Fallback al memoryCache si Supabase falla
+      setOrgs(RendimientoStore.getOrganizaciones());
+    } else if (data) {
+      setOrgs(data.map((o: any) => ({
+        id: o.id,
+        nombre: o.nombre,
+        slug: o.slug,
+        correo: o.correo_admin || o.correo,
+        pais: o.pais,
+        moneda: o.moneda,
+        logo: o.logo,
+        estado: o.estado,
+        plan_suscripcion: o.plan_suscripcion,
+      })));
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
-    setOrgs(RendimientoStore.getOrganizaciones());
+    loadOrgsFromDB();
     refreshTickets();
     // Always stamp the superadmin session so logout can detect it reliably
     localStorage.setItem("auth_email", "alex@mail.com");
@@ -159,8 +181,8 @@ function SaasAdminDashboard() {
   };
 
   const handleRefresh = () => {
-    setOrgs(RendimientoStore.getOrganizaciones());
-    toast.success("Listado actualizado");
+    loadOrgsFromDB();
+    toast.success("Listado actualizado desde la base de datos");
   };
 
   if (!mounted) {
@@ -187,7 +209,7 @@ function SaasAdminDashboard() {
         estado: "activo"
       });
 
-      setOrgs(RendimientoStore.getOrganizaciones());
+      await loadOrgsFromDB();
       setNewNombre("");
       setNewEmail("");
       setOpenCreate(false);
