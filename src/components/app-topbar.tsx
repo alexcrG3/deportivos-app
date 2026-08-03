@@ -58,14 +58,20 @@ export function AppTopbar() {
 
   useEffect(() => {
     setMounted(true);
-    const updateCoaches = () => {
-      const list = RendimientoStore.getEntrenadores() || [];
-      const names = Array.from(new Set(list.map((e: any) => e.nombre as string))).filter(Boolean).sort();
-      if (names.length > 0) {
-        setAllCoaches(names);
-      } else {
-        setAllCoaches(["Carlos Araya", "Tiffany Eduarte", "Eduardo Villa"]);
+    const updateCoaches = async () => {
+      try {
+        const { data } = await supabase.from("entrenadores").select("nombre").order("nombre");
+        if (data && data.length > 0) {
+          const names = Array.from(new Set(data.map((e: any) => e.nombre as string))).filter(Boolean);
+          setAllCoaches(names);
+          return;
+        }
+      } catch (e) {
+        console.error("Error fetching coaches from DB:", e);
       }
+      const storeCoaches = RendimientoStore.getEntrenadores() || [];
+      const names = Array.from(new Set(storeCoaches.map((e: any) => e.nombre as string))).filter(Boolean);
+      setAllCoaches(names);
     };
 
     updateCoaches();

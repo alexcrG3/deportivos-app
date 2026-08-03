@@ -258,16 +258,25 @@ export function AppSidebar() {
     return orgs.find(o => o.id === activeOrgId);
   }, [orgs, activeOrgId]);
 
-  // Load coaches from Supabase for admin coach selector
+  // Load coaches from Supabase DB for admin coach selector
   const loadCoaches = async () => {
     if (role !== "admin" || coachesList.length > 0) return;
     setLoadingCoaches(true);
-    const orgId = RendimientoStore.getActiveOrganizacionId();
+    const orgId = RendimientoStore.getActiveOrganizacionId() || "org_asoderive_master";
     const { data } = await supabase
       .from("entrenadores")
       .select("id, nombre, identificacion")
-      .eq("organizacion_id", orgId);
-    if (data) setCoachesList(data);
+      .or(`organizacion_id.eq.${orgId},organizacion_id.eq.org_asoderive_master,organizacion_id.is.null`)
+      .order("nombre");
+    if (data && data.length > 0) {
+      setCoachesList(data);
+    } else {
+      const { data: allData } = await supabase
+        .from("entrenadores")
+        .select("id, nombre, identificacion")
+        .order("nombre");
+      if (allData) setCoachesList(allData);
+    }
     setLoadingCoaches(false);
   };
 
