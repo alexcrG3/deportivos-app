@@ -13,7 +13,7 @@ import {
   BookOpen, Globe, Heart, Award, Sparkles, Trophy,
   LifeBuoy, MessageSquare, Clock, CheckCircle2, AlertCircle,
   HelpCircle, Send, FileText, Filter, ShieldAlert,
-  Lock, CheckCheck
+  Lock, CheckCheck, Pencil, Trash2, Power, AlertTriangle
 } from "lucide-react";
 import RendimientoStore, { StoreSupportTicket } from "@/lib/rendimiento-store";
 import { toast } from "sonner";
@@ -45,6 +45,16 @@ function SaasAdminDashboard() {
   const [newEmail, setNewEmail] = useState("");
   const [newPais, setNewPais] = useState("Costa Rica");
   const [newPlan, setNewPlan] = useState("basic");
+
+  // Edit modal state
+  const [editingOrg, setEditingOrg] = useState<any | null>(null);
+  const [editNombre, setEditNombre] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPais, setEditPais] = useState("Costa Rica");
+  const [editPlan, setEditPlan] = useState("basic");
+
+  // Delete modal state
+  const [deletingOrg, setDeletingOrg] = useState<any | null>(null);
 
   const refreshTickets = () => {
     setTickets(RendimientoStore.getSupportTickets());
@@ -219,32 +229,91 @@ function SaasAdminDashboard() {
     }
   };
 
-  const handleToggleStatus = (id: string, currentStatus: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const list = RendimientoStore.getOrganizaciones();
-    const updated = list.map(o => {
-      if (o.id === id) {
-        return { ...o, estado: currentStatus === "suspendido" ? "activo" : "suspendido" };
-      }
-      return o;
-    });
-    RendimientoStore.set("organizaciones_dynamics", updated);
-    setOrgs(updated);
-    toast.success(currentStatus === "suspendido" ? "Academia activada" : "Academia suspendida");
+  const handleToggleStatus = async (id: string, currentStatus: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const nextStatus = currentStatus === "suspendido" ? "activo" : "suspendido";
+    const { error } = await supabase.from("organizaciones").update({ estado: nextStatus }).eq("id", id);
+    if (error) {
+      toast.error("Error al actualizar el estado: " + error.message);
+      return;
+    }
+    toast.success(nextStatus === "suspendido" ? "Academia desactivada / suspendida" : "Academia activada correctamente");
+    await loadOrgsFromDB();
   };
 
-  const handleChangePlan = (id: string, plan: string, e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChangePlan = async (id: string, newPlan: string, e?: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e) e.stopPropagation();
+    const { error } = await supabase.from("organizaciones").update({ plan_suscripcion: newPlan }).eq("id", id);
+    if (error) {
+      toast.error("Error al cambiar plan: " + error.message);
+      return;
+    }
+    toast.success(`Plan de suscripción actualizado a ${newPlan.toUpperCase()}`);
+    await loadOrgsFromDB();
+  };
+
+  const handleOpenEdit = (org: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    const list = RendimientoStore.getOrganizaciones();
-    const updated = list.map(o => {
-      if (o.id === id) {
-        return { ...o, plan_suscripcion: e.target.value };
-      }
-      return o;
-    });
-    RendimientoStore.set("organizaciones_dynamics", updated);
-    setOrgs(updated);
-    toast.success(`Plan actualizado a ${e.target.value.toUpperCase()}`);
+    setEditingOrg(org);
+    setEditNombre(org.nombre || "");
+    setEditEmail(org.correo || org.correo_admin || "");
+    setEditPais(org.pais || "Costa Rica");
+    setEditPlan(org.plan_suscripcion || "basic");
+  };
+
+  const handleSaveEditOrg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrg || !editNombre || !editEmail) return;
+
+    const { error } = await supabase.from("organizaciones").update({
+      nombre: editNombre,
+      correo_admin: editEmail,
+      pais: editPais,
+      plan_suscripcion: editPlan,
+    }).eq("id", editingOrg.id);
+
+    if (error) {
+      toast.error("Error al guardar cambios: " + error.message);
+      return;
+    }
+
+    toast.success(`Academia "${editNombre}" actualizada en la base de datos.`);
+    setEditingOrg(null);
+    await loadOrgsFromDB();
+  };
+
+  const handleOpenDelete = (org: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (org.id === "00000000-0000-0000-0000-000000000000") {
+      toast.error("No es posible eliminar la academia principal (Asoderive).");
+      return;
+    }
+    setDeletingOrg(org);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingOrg) return;
+
+    const { error } = await supabase.from("organizaciones").delete().eq("id", deletingOrg.id);
+    if (error) {
+      toast.error("Error al eliminar la academia de la base de datos: " + error.message);
+      return;
+    }
+
+    // Clean up related org data in Supabase tables in parallel
+    await Promise.allSettled([
+      supabase.from("jugadores").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("equipos").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("entrenadores").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("sedes").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("categorias").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("pagos").delete().eq("organizacion_id", deletingOrg.id),
+      supabase.from("partidos").delete().eq("organizacion_id", deletingOrg.id),
+    ]);
+
+    toast.success(`Academia "${deletingOrg.nombre}" eliminada definitivamente.`);
+    setDeletingOrg(null);
+    await loadOrgsFromDB();
   };
 
   const handleImpersonate = (id: string, nombre: string) => {
@@ -450,9 +519,9 @@ function SaasAdminDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between sm:justify-end gap-3.5" onClick={e => e.stopPropagation()}>
+                      <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5" onClick={e => e.stopPropagation()}>
                         {/* Metrics columns */}
-                        <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-semibold">
+                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold mr-1">
                           <div className="flex flex-col items-center">
                             <span className="text-foreground font-bold text-xs">{isDefaultOrg ? 12 : orgTeamsCount}</span>
                             <span>EQUIPOS</span>
@@ -463,15 +532,46 @@ function SaasAdminDashboard() {
                           </div>
                         </div>
 
-                        {/* Active/Suspended status badge */}
-                        {org.estado === "suspendido" ? (
-                          <Badge variant="destructive" className="h-7 text-[10px] font-semibold gap-1 px-2.5">
-                            • SUSPENDIDO
-                          </Badge>
-                        ) : (
-                          <Badge className="h-7 text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border border-emerald-200 gap-1 px-2.5">
-                            • ACTIVO
-                          </Badge>
+                        {/* Active/Suspended status badge (Clickable to toggle) */}
+                        <button 
+                          type="button"
+                          onClick={(e) => handleToggleStatus(org.id, org.estado, e)}
+                          title="Haz clic para activar/desactivar la academia"
+                          className="cursor-pointer transition hover:opacity-80"
+                        >
+                          {org.estado === "suspendido" ? (
+                            <Badge variant="destructive" className="h-7 text-[10px] font-semibold gap-1 px-2.5">
+                              • SUSPENDIDO
+                            </Badge>
+                          ) : (
+                            <Badge className="h-7 text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 gap-1 px-2.5 dark:bg-emerald-950/40 dark:text-emerald-300">
+                              • ACTIVO
+                            </Badge>
+                          )}
+                        </button>
+
+                        {/* Edit Button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleOpenEdit(org, e)}
+                          title="Editar información de la academia"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                        </Button>
+
+                        {/* Delete Button (disabled for preinstalled org) */}
+                        {!isDefaultOrg && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => handleOpenDelete(org, e)}
+                            title="Eliminar esta academia definitivamente"
+                            className="h-8 w-8 p-0 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/40 dark:hover:bg-red-950/30"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         )}
 
                         {/* Impersonate button */}
@@ -1042,6 +1142,95 @@ function SaasAdminDashboard() {
               <Button type="submit" className="bg-gradient-primary">Crear Entorno</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog open={!!editingOrg} onOpenChange={(open) => !open && setEditingOrg(null)}>
+        <DialogContent className="sm:max-w-[420px] bg-background border shadow-elegant text-foreground">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Pencil className="h-5 w-5 text-primary" /> Editar Academia
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Modifica los datos de la academia en la base de datos de Supabase.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveEditOrg} className="space-y-4 pt-2">
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold">Nombre de la Academia *</Label>
+              <Input 
+                value={editNombre} 
+                onChange={e => setEditNombre(e.target.value)} 
+                placeholder="Ej. Baloncesto CR" 
+                required 
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold">Correo de la Administración *</Label>
+              <Input 
+                type="email" 
+                value={editEmail} 
+                onChange={e => setEditEmail(e.target.value)} 
+                placeholder="Ej. admin@baloncestocr.com" 
+                required 
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold">País</Label>
+              <Input 
+                value={editPais} 
+                onChange={e => setEditPais(e.target.value)} 
+                placeholder="Ej. Costa Rica" 
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-xs font-semibold">Plan de Suscripción</Label>
+              <select
+                value={editPlan}
+                onChange={e => setEditPlan(e.target.value)}
+                className="h-10 px-3 rounded-md border bg-card text-sm cursor-pointer"
+              >
+                <option value="basic">Básico</option>
+                <option value="premium">Premium</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setEditingOrg(null)}>Cancelar</Button>
+              <Button type="submit" className="bg-gradient-primary">Guardar Cambios</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!deletingOrg} onOpenChange={(open) => !open && setDeletingOrg(null)}>
+        <DialogContent className="sm:max-w-[420px] bg-background border shadow-elegant text-foreground">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-red-600">
+              <AlertTriangle className="h-5 w-5 text-red-600" /> Eliminar Academia
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Esta acción eliminará permanentemente la academia y sus registros de la base de datos Supabase.
+            </DialogDescription>
+          </DialogHeader>
+          {deletingOrg && (
+            <div className="space-y-4 pt-2">
+              <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-xs space-y-1">
+                <p className="font-bold text-red-800 dark:text-red-300">
+                  {deletingOrg.nombre}
+                </p>
+                <p className="text-red-600 dark:text-red-400 text-[11px]">
+                  {deletingOrg.correo} • {deletingOrg.pais || "Costa Rica"}
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setDeletingOrg(null)}>Cancelar</Button>
+                <Button type="button" variant="destructive" onClick={handleConfirmDelete}>Eliminar Definitivamente</Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
