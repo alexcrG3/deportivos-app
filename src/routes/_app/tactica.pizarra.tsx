@@ -689,7 +689,7 @@ function PizarraTactica() {
                     : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
-                ⚡ Pizarra bCoach Élite
+                ⚡ Pizarra Táctica Élite
               </button>
               <button
                 onClick={() => setSuiteMode("clasica")}

@@ -418,6 +418,7 @@ export function CanchaBCoachBoard({
   // Mode Selector: "training" vs "matchday" (Plan de Juego)
   const [boardMode, setBoardMode] = useState<"training" | "matchday">(initialMode);
   const [currentSport, setCurrentSport] = useState<SportType>(initialSport);
+  const [isFullScreenMode, setIsFullScreenMode] = useState<boolean>(false);
   const [activePhase, setActivePhase] = useState<"ataque" | "defensa" | "transicion" | "abp">("ataque");
   const [showCamerinoModal, setShowCamerinoModal] = useState<boolean>(false);
   const [substitutionsList, setSubstitutionsList] = useState<Array<{ id: string; outName: string; inName: string; min: string }>>([]);
@@ -1841,7 +1842,7 @@ export function CanchaBCoachBoard({
   const isDrawTool = ["draw-solid","draw-dashed","draw-arrow","draw-curve","draw-zone","draw-circle-zone"].includes(activeTool);
 
   return (
-    <div className="flex flex-col w-full h-full bg-[#183b18] text-white overflow-hidden select-none relative">
+    <div className={`flex flex-col w-full h-full bg-[#183b18] text-white overflow-hidden select-none relative ${isFullScreenMode ? "fixed inset-0 z-[100] w-screen h-screen p-0 m-0" : ""}`}>
 
       {/* ══════════════════════════════════════════════════════════════════
           MOBILE TOP BAR — Ultra-slim (< 1024px)
@@ -2125,6 +2126,49 @@ export function CanchaBCoachBoard({
             >
               <Save className="h-3 w-3 text-emerald-200" />
               <span className="hidden sm:inline">Guardar</span>
+            </button>
+
+            {/* Controles de Zoom directo en pantalla */}
+            <div className="flex items-center gap-0.5 bg-slate-900/90 border border-slate-700/80 rounded-full px-1 py-0.5">
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.max(0.6, parseFloat((z - 0.25).toFixed(2))))}
+                className="p-1 rounded-full hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Alejar Cancha (Zoom -)"
+              >
+                <ZoomOut className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={resetView}
+                className="px-1.5 py-0.5 rounded-md bg-slate-800 text-[10px] font-black text-amber-300 hover:bg-slate-700 transition"
+                title="Restablecer Zoom a 100%"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoom((z) => Math.min(3.5, parseFloat((z + 0.25).toFixed(2))))}
+                className="p-1 rounded-full hover:bg-slate-800 text-slate-300 hover:text-white transition"
+                title="Acercar Cancha (Zoom +)"
+              >
+                <ZoomIn className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Maximizar / Pantalla Completa Inmersiva */}
+            <button
+              type="button"
+              onClick={() => setIsFullScreenMode(prev => !prev)}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold transition shadow-md ${
+                isFullScreenMode
+                  ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                  : "bg-blue-600/90 hover:bg-blue-500 text-white"
+              }`}
+              title={isFullScreenMode ? "Salir de Pantalla Completa" : "Modo Pantalla Completa / Ampliar Pizarra"}
+            >
+              <Maximize2 className="h-3 w-3" />
+              <span className="hidden sm:inline">{isFullScreenMode ? "Salir" : "Ampliar"}</span>
             </button>
 
             {/* Photo */}
