@@ -2581,6 +2581,16 @@ function EntrenamientosPage() {
               <CanchaBCoachBoard
                 teamName={sesionData.equipo}
                 category={sesionData.categoria}
+                initialSport={
+                  (sesionData.disciplina?.toLowerCase().includes("balon") || sesionData.disciplina?.toLowerCase().includes("basket")) ? "basketball" :
+                  (sesionData.disciplina?.toLowerCase().includes("volei") || sesionData.disciplina?.toLowerCase().includes("volley")) ? "volleyball" :
+                  (sesionData.disciplina?.toLowerCase().includes("futsal") || sesionData.disciplina?.toLowerCase().includes("sala")) ? "futsal" :
+                  (sesionData.disciplina?.toLowerCase().includes("rugby")) ? "rugby" :
+                  (sesionData.disciplina?.toLowerCase().includes("tenis")) ? "tennis" :
+                  (sesionData.disciplina?.toLowerCase().includes("natac")) ? "swimming" :
+                  (sesionData.disciplina?.toLowerCase().includes("marcial")) ? "martial-arts" :
+                  (sesionData.disciplina?.toLowerCase().includes("atletis")) ? "athletics" : "football"
+                }
                 onClose={() => setModalPizarraTactica(false)}
               />
             </div>
