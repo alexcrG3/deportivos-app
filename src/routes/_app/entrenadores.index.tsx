@@ -1504,3 +1504,5 @@ function PieChartIcon(props: any) {
     </svg>
   );
 }
+
+export default EntrenadoresPage;

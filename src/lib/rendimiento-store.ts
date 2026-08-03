@@ -1200,23 +1200,7 @@ class RendimientoStore {
         this.memoryCache["org_config"] = dbOrg[0];
       }
 
-      // 24. ORGANIZACIONES LIST
-      const dbOrgs = dbOrgsRes.data;
-      const dbOrgsErr = dbOrgsRes.error;
-      if (dbOrgsErr) {
-        console.warn("[Supabase] Error cargando organizaciones:", dbOrgsErr.message);
-      } else if (dbOrgs && dbOrgs.length > 0) {
-        this.memoryCache["organizaciones_dynamics"] = dbOrgs.map((o: any) => ({
-          id: o.id,
-          nombre: o.nombre,
-          slug: o.slug,
-          correo: o.correo_admin || o.correo,
-          pais: o.pais,
-          moneda: o.moneda,
-          logo: o.logo,
-          estado: o.estado
-        }));
-      }
+
 
       this.memoryCache["equipos_dynamics"] = dbEquipos.map((eq: any) => ({
         id: eq.id,
