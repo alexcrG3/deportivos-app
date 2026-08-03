@@ -166,7 +166,7 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         id: "personal",
         title: "Personal",
         icon: UserCheck,
-        url: "/entrenadores",
+        url: "/personal",
       },
       {
         id: "finanzas",
