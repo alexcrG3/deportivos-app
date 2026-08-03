@@ -884,6 +884,21 @@ class RendimientoStore {
         fetchOrganizaciones(),
       ]);
 
+      const dbOrgs = dbOrgsRes.data;
+      if (dbOrgs && dbOrgs.length > 0) {
+        this.memoryCache["organizaciones_dynamics"] = dbOrgs.map((o: any) => ({
+          id: o.id,
+          nombre: o.nombre,
+          slug: o.slug,
+          correo: o.correo_admin || o.correo,
+          pais: o.pais,
+          moneda: o.moneda,
+          logo: o.logo,
+          estado: o.estado,
+          plan_suscripcion: o.plan_suscripcion,
+        }));
+      }
+
       // Marcar como sincronizado con datos mínimos — la UI puede arrancar YA
       this.isSynced = true;
       window.dispatchEvent(new Event("rendimientoStoreUpdated"));

@@ -231,27 +231,35 @@ function ConfigPage() {
   const [selectedPlanType, setSelectedPlanType] = useState<"mensual" | "anual">("anual");
 
   // Organization settings state variables
-  const activeOrgId = useMemo(() => RendimientoStore.getActiveOrganizacionId(), []);
-  const [allOrgs, setAllOrgs] = useState(() => RendimientoStore.getOrganizaciones());
+  const [activeOrgId, setActiveOrgId] = useState(() => RendimientoStore.getActiveOrganizacionId());
+  const [allOrgs, setAllOrgs] = useState<any[]>([]);
+
+  const loadOrgsConfig = async () => {
+    const currentId = RendimientoStore.getActiveOrganizacionId();
+    setActiveOrgId(currentId);
+    const { data } = await supabase.from("organizaciones").select("*");
+    if (data && data.length > 0) {
+      setAllOrgs(data);
+    } else {
+      setAllOrgs(RendimientoStore.getOrganizaciones());
+    }
+  };
 
   useEffect(() => {
+    loadOrgsConfig();
     const handleSync = () => {
-      setAllOrgs(RendimientoStore.getOrganizaciones());
+      loadOrgsConfig();
     };
     window.addEventListener("organizacionChanged", handleSync);
-    return () => window.removeEventListener("organizacionChanged", handleSync);
+    window.addEventListener("rendimientoStoreUpdated", handleSync);
+    return () => {
+      window.removeEventListener("organizacionChanged", handleSync);
+      window.removeEventListener("rendimientoStoreUpdated", handleSync);
+    };
   }, []);
 
   const currentOrg = useMemo(() => {
-    return allOrgs.find(o => o.id === activeOrgId) || allOrgs[0] || {
-      id: "00000000-0000-0000-0000-000000000000",
-      nombre: "Academia Deportiva Élite",
-      correo: "admin@elite.com",
-      pais: "Costa Rica",
-      telefono: "+50622223333",
-      moneda: "CRC",
-      logo: ""
-    };
+    return allOrgs.find(o => o.id === activeOrgId) || null;
   }, [allOrgs, activeOrgId]);
 
   const [orgNombre, setOrgNombre] = useState("");

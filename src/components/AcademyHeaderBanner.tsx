@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Shield, Sparkles, Trophy, ChevronDown } from "lucide-react";
+import { Shield, Sparkles, Trophy, ChevronDown } from "lucide-react";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { useRole } from "@/hooks/use-role";
+import { supabase } from "@/lib/supabase";
 
 interface AcademyHeaderBannerProps {
   subtitle?: string;
@@ -15,17 +16,50 @@ export function AcademyHeaderBanner({
 }: AcademyHeaderBannerProps) {
   const { role } = useRole();
   const isSuperAdmin = typeof window !== "undefined" && localStorage.getItem("is_superadmin") === "true";
-  const activeOrgId = RendimientoStore.getActiveOrganizacionId();
-  const orgs = useMemo(() => RendimientoStore.getOrganizaciones(), []);
+  const [activeOrgId, setActiveOrgId] = useState<string>(() => RendimientoStore.getActiveOrganizacionId());
+  const [orgs, setOrgs] = useState<any[]>([]);
+  const [activeOrg, setActiveOrg] = useState<any | null>(null);
+
+  const loadOrgData = async () => {
+    const currentId = RendimientoStore.getActiveOrganizacionId();
+    setActiveOrgId(currentId);
+
+    // Fetch organizations directly from Supabase
+    const { data, error } = await supabase.from("organizaciones").select("*");
+    if (!error && data && data.length > 0) {
+      setOrgs(data);
+      const found = data.find((o: any) => o.id === currentId);
+      if (found) {
+        setActiveOrg(found);
+      } else {
+        // Fetch specific organization by ID if not in bulk response
+        const { data: single } = await supabase.from("organizaciones").select("*").eq("id", currentId).single();
+        if (single) setActiveOrg(single);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadOrgData();
+
+    const handleUpdate = () => {
+      loadOrgData();
+    };
+
+    window.addEventListener("organizacionChanged", handleUpdate);
+    window.addEventListener("rendimientoStoreUpdated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("organizacionChanged", handleUpdate);
+      window.removeEventListener("rendimientoStoreUpdated", handleUpdate);
+    };
+  }, []);
 
   const handleOrgChange = (id: string) => {
     RendimientoStore.setActiveOrganizacionId(id);
+    setActiveOrgId(id);
     window.location.reload();
   };
-
-  const activeOrg = useMemo(() => {
-    return orgs.find((o: any) => o.id === activeOrgId) || orgs[0];
-  }, [orgs, activeOrgId]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-slate-950 text-white shadow-2xl border border-slate-800/80 mb-6 p-5 md:p-7 transition-all duration-300">

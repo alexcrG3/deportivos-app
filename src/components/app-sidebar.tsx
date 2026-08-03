@@ -286,21 +286,32 @@ export function AppSidebar() {
   const searchObj = useRouterState({ select: (r) => r.location.search }) as Record<string, any>;
   const isActive = (p: string) => pathname === p || (p !== "/" && pathname.startsWith(p + "/"));
 
+  const loadOrgsData = async () => {
+    setActiveOrgId(RendimientoStore.getActiveOrganizacionId());
+    const { data } = await supabase.from("organizaciones").select("*");
+    if (data && data.length > 0) {
+      setOrgs(data);
+    } else {
+      setOrgs(RendimientoStore.getOrganizaciones());
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
-    setActiveOrgId(RendimientoStore.getActiveOrganizacionId());
-    setOrgs(RendimientoStore.getOrganizaciones());
+    loadOrgsData();
 
     const handleSync = () => {
-      setOrgs(RendimientoStore.getOrganizaciones());
-      setActiveOrgId(RendimientoStore.getActiveOrganizacionId());
+      loadOrgsData();
     };
     window.addEventListener("organizacionChanged", handleSync);
+    window.addEventListener("rendimientoStoreUpdated", handleSync);
+
     if (role === "admin") {
       loadCoaches();
     }
     return () => {
       window.removeEventListener("organizacionChanged", handleSync);
+      window.removeEventListener("rendimientoStoreUpdated", handleSync);
     };
   }, [role]);
 
