@@ -174,23 +174,27 @@ function SaasAdminDashboard() {
     );
   }
 
-  const handleCreateOrg = (e: React.FormEvent) => {
+  const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNombre || !newEmail) return;
 
-    const newOrg = RendimientoStore.addOrganizacion({
-      nombre: newNombre,
-      correo: newEmail,
-      pais: newPais,
-      plan_suscripcion: newPlan,
-      estado: "activo"
-    });
+    try {
+      const newOrg = await RendimientoStore.addOrganizacion({
+        nombre: newNombre,
+        correo: newEmail,
+        pais: newPais,
+        plan_suscripcion: newPlan,
+        estado: "activo"
+      });
 
-    setOrgs(RendimientoStore.getOrganizaciones());
-    setNewNombre("");
-    setNewEmail("");
-    setOpenCreate(false);
-    toast.success(`Academia "${newOrg.nombre}" creada exitosamente`);
+      setOrgs(RendimientoStore.getOrganizaciones());
+      setNewNombre("");
+      setNewEmail("");
+      setOpenCreate(false);
+      toast.success(`Academia "${newOrg.nombre}" creada y registrada en la base de datos.`);
+    } catch (err: any) {
+      toast.error(err.message || "Error al crear la academia. Verifica la conexión a la base de datos.");
+    }
   };
 
   const handleToggleStatus = (id: string, currentStatus: string, e: React.MouseEvent) => {

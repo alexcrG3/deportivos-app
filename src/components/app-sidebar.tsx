@@ -314,18 +314,22 @@ export function AppSidebar() {
     window.location.reload();
   };
 
-  const handleCreateOrg = (e: React.FormEvent) => {
+  const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newOrgName || !newOrgEmail) return;
-    const newOrg = RendimientoStore.addOrganizacion({
-      nombre: newOrgName,
-      correo: newOrgEmail,
-      pais: newOrgCountry
-    });
-    toast.success(`Club "${newOrgName}" registrado con éxito`);
-    setOpenNewOrg(false);
-    RendimientoStore.setActiveOrganizacionId(newOrg.id);
-    window.location.reload();
+    try {
+      const newOrg = await RendimientoStore.addOrganizacion({
+        nombre: newOrgName,
+        correo: newOrgEmail,
+        pais: newOrgCountry
+      });
+      toast.success(`Academia "${newOrgName}" registrada en la base de datos.`);
+      setOpenNewOrg(false);
+      RendimientoStore.setActiveOrganizacionId(newOrg.id);
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || "Error al crear la academia.");
+    }
   };
 
   const navSections = useMemo(() => {

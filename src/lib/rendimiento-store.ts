@@ -3342,22 +3342,52 @@ class RendimientoStore {
 
   // --- ORGANIZACIONES (TENANTS) ---
   public static getOrganizaciones(): any[] {
-    const defaultOrgs = [
+    // Lee del memoryCache (llenado desde Supabase en la sincronización).
+    // Solo cae al hardcode de Asoderive si todavía no se ha sincronizado nada.
+    const cached = this.memoryCache["organizaciones_dynamics"];
+    if (cached && cached.length > 0) return cached;
+    return [
       { id: "00000000-0000-0000-0000-000000000000", nombre: "Academia Asoderive", slug: "asoderive", correo: "admin@asoderive.com", pais: "Costa Rica", logo: "/asoderive-logo.jpg" }
     ];
-    return this.get<any[]>("organizaciones_dynamics", defaultOrgs);
   }
 
-  public static addOrganizacion(org: any): any {
-    const list = this.getOrganizaciones();
+  public static async addOrganizacion(org: any): Promise<any> {
     const newOrg = {
-      ...org,
       id: typeof crypto !== "undefined" && (crypto as any).randomUUID ? (crypto as any).randomUUID() : generateUniqueId("org"),
+      nombre: org.nombre,
       slug: org.nombre.toLowerCase().trim().replace(/\s+/g, "-"),
+      correo_admin: org.correo,
+      pais: org.pais || "Costa Rica",
+      moneda: org.moneda || "CRC",
+      plan_suscripcion: org.plan_suscripcion || "basico",
       estado: "activo",
+      logo: org.logo || null,
     };
-    list.push(newOrg);
-    this.set("organizaciones_dynamics", list);
+
+    // INSERT directo a Supabase — la fuente de verdad es la DB, no localStorage
+    const { error } = await supabase.from("organizaciones").insert([newOrg]);
+    if (error) {
+      console.error("[Supabase] Error creando organización:", error.message);
+      throw new Error("No se pudo crear la academia en la base de datos: " + error.message);
+    }
+
+    // Actualizar el memoryCache local para que la lista refleje el cambio sin esperar resync
+    if (!this.memoryCache["organizaciones_dynamics"]) {
+      this.memoryCache["organizaciones_dynamics"] = [];
+    }
+    this.memoryCache["organizaciones_dynamics"].push({
+      id: newOrg.id,
+      nombre: newOrg.nombre,
+      slug: newOrg.slug,
+      correo: newOrg.correo_admin,
+      pais: newOrg.pais,
+      moneda: newOrg.moneda,
+      logo: newOrg.logo,
+      estado: newOrg.estado,
+      plan_suscripcion: newOrg.plan_suscripcion,
+    });
+
+    window.dispatchEvent(new Event("organizacionChanged"));
     return newOrg;
   }
 
