@@ -64,7 +64,7 @@ export function AppTopbar() {
       if (names.length > 0) {
         setAllCoaches(names);
       } else {
-        setAllCoaches(["Carlos Araya", "Carlos Méndez", "Andrés Pérez", "Tiffany Eduarte", "Eduardo Villa"]);
+        setAllCoaches(["Carlos Araya", "Tiffany Eduarte", "Eduardo Villa"]);
       }
     };
 
