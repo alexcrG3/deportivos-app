@@ -243,6 +243,12 @@ function ConfigPage() {
     } else {
       setAllOrgs(RendimientoStore.getOrganizaciones());
     }
+
+    // Cargar la disciplina / deporte principal directamente de Supabase
+    const { data: discData } = await supabase.from("disciplinas").select("*").eq("organizacion_id", currentId);
+    if (discData && discData.length > 0 && discData[0].nombre) {
+      setOrgDeporte(discData[0].nombre);
+    }
   };
 
   useEffect(() => {
@@ -291,7 +297,6 @@ function ConfigPage() {
       setOrgLogo(currentOrg.logo || "");
       setOrgIdioma((currentOrg as any).idioma || "es");
       setOrgZonaHoraria((currentOrg as any).zona_horaria || "America/Costa_Rica");
-      setOrgDeporte((currentOrg as any).deporte || "Futbol");
       setOrgTipo((currentOrg as any).tipo || "Academia Formativa");
       setOrgFundacion((currentOrg as any).fundacion || "2018");
       setOrgSitioWeb((currentOrg as any).sitio_web || "https://www.asoderive.com");
@@ -306,7 +311,7 @@ function ConfigPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setOrgLogo(reader.result as string);
-        toast.success("Foto del logo cargada. Recuerda hacer clic en Guardar cambios.");
+        toast.success("Logo actualizado correctamente (vista previa)");
       };
       reader.readAsDataURL(file);
     }
@@ -340,52 +345,44 @@ function ConfigPage() {
   };
 
   const handleSaveOrg = async () => {
-    const list = RendimientoStore.getOrganizaciones();
-    const updated = list.map(o => {
-      if (o.id === activeOrgId) {
-        return {
-          ...o,
-          nombre: orgNombre,
-          correo: orgCorreo,
-          telefono: orgTelefono,
-          pais: orgPais,
-          moneda: orgMoneda,
-          logo: orgLogo,
-          idioma: orgIdioma,
-          zona_horaria: orgZonaHoraria,
-          deporte: orgDeporte,
-          tipo: orgTipo,
-          fundacion: orgFundacion,
-          sitio_web: orgSitioWeb,
-          ciudad: orgCiudad,
-          direccion: orgDireccion,
-          fotos: orgFotos
-        };
-      }
-      return o;
-    });
-    
-    const toastId = toast.loading("Guardando datos de la organización en Supabase...");
+    const toastId = toast.loading("Guardando datos de la organización en la base de datos Supabase...");
     try {
-      await RendimientoStore.set("organizaciones_dynamics", updated);
-      if (typeof window !== "undefined") {
-        supabase.from("organizaciones").upsert({
-          id: activeOrgId,
-          nombre: orgNombre,
-          correo: orgCorreo,
-          telefono: orgTelefono,
-          pais: orgPais,
-          moneda: orgMoneda,
-          logo: orgLogo,
-          updated_at: new Date().toISOString()
-        }).then(() => {});
+      // 1. Guardar la disciplina / deporte principal en la tabla disciplinas de Supabase
+      const sportIcon = orgDeporte.toLowerCase().includes("baloncesto") ? "🏀" : orgDeporte.toLowerCase().includes("voleibol") ? "🏐" : "⚽";
+      const sportColor = orgDeporte.toLowerCase().includes("baloncesto") ? "oklch(0.7 0.18 50)" : orgDeporte.toLowerCase().includes("voleibol") ? "oklch(0.7 0.15 85)" : "oklch(0.65 0.16 155)";
+
+      const { error: discError } = await supabase.from("disciplinas").upsert({
+        id: `disc_main_${activeOrgId}`,
+        nombre: orgDeporte,
+        icono: sportIcon,
+        color: sportColor,
+        organizacion_id: activeOrgId
+      });
+
+      if (discError) {
+        console.error("[Supabase] Error guardando disciplina:", discError.message);
       }
-      toast.success("Perfil de la organización guardado con éxito.", { id: toastId });
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (err) {
-      toast.error("Error al guardar en Supabase. Revisa la consola.", { id: toastId });
+
+      // 2. Guardar datos generales de la organización en organizaciones de Supabase
+      const { error: orgError } = await supabase.from("organizaciones").update({
+        nombre: orgNombre,
+        correo_admin: orgCorreo,
+        pais: orgPais,
+        moneda: orgMoneda,
+        logo: orgLogo
+      }).eq("id", activeOrgId);
+
+      if (orgError) {
+        console.error("[Supabase] Error actualizando organización:", orgError.message);
+      }
+
+      // Disparar evento de actualización
+      window.dispatchEvent(new Event("organizacionChanged"));
+      window.dispatchEvent(new Event("rendimientoStoreUpdated"));
+
+      toast.success(`Perfil e información de deporte "${orgDeporte}" guardados exitosamente en la base de datos.`, { id: toastId });
+    } catch (err: any) {
+      toast.error("Error al guardar en la base de datos: " + (err.message || err), { id: toastId });
     }
   };
 

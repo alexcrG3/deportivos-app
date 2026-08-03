@@ -24,17 +24,21 @@ export function AcademyHeaderBanner({
     const currentId = RendimientoStore.getActiveOrganizacionId();
     setActiveOrgId(currentId);
 
+    // Fetch sport category for this organization from Supabase disciplinas table
+    const { data: discData } = await supabase.from("disciplinas").select("*").eq("organizacion_id", currentId);
+    const mainDeporte = discData && discData.length > 0 && discData[0].nombre ? discData[0].nombre : null;
+
     // Fetch organizations directly from Supabase
     const { data, error } = await supabase.from("organizaciones").select("*");
     if (!error && data && data.length > 0) {
       setOrgs(data);
       const found = data.find((o: any) => o.id === currentId);
       if (found) {
-        setActiveOrg(found);
+        setActiveOrg({ ...found, deporte: mainDeporte || found.deporte || "Multideporte" });
       } else {
         // Fetch specific organization by ID if not in bulk response
         const { data: single } = await supabase.from("organizaciones").select("*").eq("id", currentId).single();
-        if (single) setActiveOrg(single);
+        if (single) setActiveOrg({ ...single, deporte: mainDeporte || single.deporte || "Multideporte" });
       }
     }
   };

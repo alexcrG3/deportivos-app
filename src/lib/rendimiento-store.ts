@@ -3309,6 +3309,19 @@ class RendimientoStore {
       throw new Error("No se pudo crear la academia en la base de datos: " + error.message);
     }
 
+    // Insertar la disciplina / deporte principal en Supabase para la nueva academia
+    const sportName = org.deporte || (org.nombre.toLowerCase().includes("baloncesto") ? "Baloncesto" : org.nombre.toLowerCase().includes("voleibol") ? "Voleibol" : "Fútbol");
+    const sportIcon = sportName.toLowerCase().includes("baloncesto") ? "🏀" : sportName.toLowerCase().includes("voleibol") ? "🏐" : "⚽";
+    const sportColor = sportName.toLowerCase().includes("baloncesto") ? "oklch(0.7 0.18 50)" : sportName.toLowerCase().includes("voleibol") ? "oklch(0.7 0.15 85)" : "oklch(0.65 0.16 155)";
+
+    await supabase.from("disciplinas").upsert([{
+      id: `disc_main_${newOrg.id}`,
+      nombre: sportName,
+      icono: sportIcon,
+      color: sportColor,
+      organizacion_id: newOrg.id
+    }]);
+
     // Actualizar el memoryCache local para que la lista refleje el cambio sin esperar resync
     if (!this.memoryCache["organizaciones_dynamics"]) {
       this.memoryCache["organizaciones_dynamics"] = [];
@@ -3323,6 +3336,7 @@ class RendimientoStore {
       logo: newOrg.logo,
       estado: newOrg.estado,
       plan_suscripcion: newOrg.plan_suscripcion,
+      deporte: sportName,
     });
 
     window.dispatchEvent(new Event("organizacionChanged"));
