@@ -164,6 +164,21 @@ export function AppTopbar() {
           <LifeBuoy className="h-4 w-4 text-primary" />
         </Button>
 
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggle}
+          aria-label="Cambiar tema"
+          title={`Cambiar a modo ${theme === "dark" ? "claro" : "oscuro"}`}
+          className="h-9 w-9 shrink-0 text-foreground hover:bg-muted"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4.5 w-4.5 text-amber-400 fill-amber-400/20" />
+          ) : (
+            <Moon className="h-4.5 w-4.5 text-slate-700 dark:text-slate-200" />
+          )}
+        </Button>
+
         <NotificationCenterPopover />
 
         <InteractiveGuidesModal open={openGuides} onOpenChange={setOpenGuides} />
@@ -240,8 +255,12 @@ export function AppTopbar() {
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Perfil</DropdownMenuItem>
-          <DropdownMenuItem>Configuración</DropdownMenuItem>
+          <DropdownMenuItem onClick={toggle} className="cursor-pointer">
+            {theme === "dark" ? <Sun className="mr-2 h-4 w-4 text-amber-400" /> : <Moon className="mr-2 h-4 w-4 text-slate-600" />}
+            <span>Modo {theme === "dark" ? "Claro" : "Oscuro"}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate({ to: "/configuracion" })}>Perfil</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate({ to: "/configuracion" })}>Configuración</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive cursor-pointer"
