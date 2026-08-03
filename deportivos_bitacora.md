@@ -4,6 +4,35 @@ Este archivo registra de manera agrupada todos los cambios, mejoras, correccione
 
 ---
 
+## [02/08/2026 - Noche: Sincronización Real del Muro Social con Supabase, Redactor IA Periodístico de Crónicas & Dictado de Voz por Micrófono]
+
+### 🌐 Sincronización Real del Muro Social en Supabase (`src/routes/_app/muro.tsx`, `src/routes/_app/competiciones.tsx`)
+- **Creación e Integración de Tablas Faltantes en Supabase:**
+  - Ejecución de migraciones SQL para crear las tablas `muro_posts`, `sedes`, `asistencias_staff`, `solicitudes_permisos`, `certificaciones_staff`, `evaluaciones_staff` y `nominas_entrenadores`.
+  - Ajuste de la columna `organizacion_id` a tipo `TEXT` para permitir IDs de organizaciones tanto estándar como personalizados (`org_asoderive_master`).
+  - Adición de las columnas `categoria` (texto) y `comentarios` (JSONB) en la tabla `muro_posts`.
+- **Eliminación de Borrados Automáticos:**
+  - Eliminación de consultas antiguas en `muro.tsx` que borraban entradas recientes que contenían etiquetas temporales `tiempo: "Ahora"`.
+- **Filtro Inclusivo de Organización:**
+  - La consulta de publicaciones en `muro.tsx` utiliza una cláusula `.or(...)` para cargar publicaciones tanto de la organización activa como de la organización por defecto.
+
+### 🎙️ Asistente de Voz y Dictado con Micrófono (`src/routes/_app/competiciones.tsx`)
+- **Solicitud Explícita de Permisos (`getUserMedia`):**
+  - Implementación de solicitud de permisos del navegador antes de iniciar el servicio `SpeechRecognition`.
+  - Actualización del código de idioma a `es-ES` para mejorar la tasa de precisión del dictado de voz en Chrome.
+
+### 🤖 Redactor IA de Crónicas Periodísticas Inteligente (`src/routes/_app/competiciones.tsx`)
+- **Redacción Periodística Adaptativa (`generateAICronica`):**
+  - La IA redacta de forma inteligente la crónica del partido tomando los datos reales ingresados en el modal:
+    - **Figuras y Goleadores:** Muestra los nombres reales y número de goles anotados por jugador (ej: `Aaron Pacheco (2 goles)`, `Andrés Soto (Figura)`).
+    - **Cita Técnica del Entrenador (`notaDt`):** Incorpora de forma destacada las palabras exactas del DT y genera un análisis sintético periodístico.
+    - **Tono según Resultado:** La narrativa, el titular y la introducción cambian según si el partido fue Victoria, Empate o Derrota.
+- **Flujo y Cierre de Modal:**
+  - Corrección de la llamada de cierre del modal (`setIsOpenScoreModal(false)`).
+  - Estado `isPublishing` con indicador `⏳ Publicando...` para evitar publicaciones duplicadas por clics repetidos.
+
+---
+
 ## [01/08/2026 - Noche: Pasarelas de Pago en Vivo, Recibos PDF con QR, Iconos PWA 4K HD, Finanzas Dinámicas por Categoría (U9, U11, U13) & Paginación Profesional]
 
 ### 💳 Pasarelas de Pago en Vivo & Modal de Checkout Multi-Método

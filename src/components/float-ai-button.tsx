@@ -194,15 +194,25 @@ export function FloatAIButton() {
     ? ["¿Cómo está el equipo Sub-17?", "¿Quién tiene mayor riesgo de lesión?", "Genera el informe mensual del Sub-15"]
     : ["¿Cómo está el rendimiento de Sofía?", "¿Y qué recomiendas?"];
 
+  // Iniciar Nueva Conversación guardando el historial anterior
+  const handleNewChat = () => {
+    const newConv = AIStore.createConversation(role, "Consulta " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    setActiveConv(newConv);
+    setMessages([]);
+    toast.success("Nueva conversación iniciada. El historial anterior quedó guardado en el archivo ✓");
+  };
+
   return (
     <>
-      {/* Permanent floating button */}
+      {/* Permanent floating button (Se oculta suavemente al abrir el chat para no tapar el botón Enviar) */}
       <button
         onClick={() => setIsOpen(prev => !prev)}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[90] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-amber-500 text-white shadow-[0_8px_30px_rgb(139,92,246,0.3)] hover:shadow-[0_8px_30px_rgb(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all duration-300"
-        title="Abrir Athletix AI Copiloto"
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[70] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 via-purple-600 to-amber-500 text-white shadow-[0_8px_30px_rgb(139,92,246,0.3)] hover:shadow-[0_8px_30px_rgb(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 ${
+          isOpen ? "opacity-0 pointer-events-none scale-75" : "opacity-100 scale-100"
+        }`}
+        title="Abrir Asistente IA Athletix"
       >
-        {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />}
+        <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 animate-pulse" />
       </button>
 
       {/* Slide Sidebar */}
@@ -219,14 +229,25 @@ export function FloatAIButton() {
             </div>
             <div>
               <h2 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-                DeportivOS AI <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full border border-amber-500/30">Copilot</span>
+                DeportivOS AI <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full border border-amber-500/30">Agente IA</span>
               </h2>
               <p className="text-[10px] text-muted-foreground">Tu asistente deportivo inteligente</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8 text-muted-foreground hover:text-white">
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleNewChat}
+              className="text-[11px] font-bold text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 h-8 px-2 rounded-lg gap-1"
+              title="Iniciar nuevo chat en blanco (guarda el historial)"
+            >
+              ✨ Nuevo Chat
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8 text-muted-foreground hover:text-white">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Chat message area */}
@@ -234,7 +255,7 @@ export function FloatAIButton() {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-4 space-y-3">
               <Bot className="h-10 w-10 text-violet-500/80 animate-bounce" />
-              <h3 className="text-sm font-semibold text-white">¡Hola! Soy tu Copiloto Deportivo</h3>
+              <h3 className="text-sm font-semibold text-white">¡Hola! Soy tu Agente IA Deportivo</h3>
               <p className="text-xs text-muted-foreground max-width-[280px]">
                 Conozco el estado de toda la academia: atletas, wellness, lesiones, competiciones y más.
               </p>

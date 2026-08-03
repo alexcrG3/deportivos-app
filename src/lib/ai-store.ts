@@ -141,6 +141,7 @@ export interface AIConfig {
   automationMorosidad: boolean;
   automationRTP: boolean;
   webhookUrl: string;
+  systemPrompt?: string;
 }
 
 // ─── INITIAL SEED DATA ───────────────────────────────────────────────────────
@@ -275,7 +276,8 @@ const DEFAULT_CONFIG: AIConfig = {
   automationWellness: true,
   automationMorosidad: false,
   automationRTP: true,
-  webhookUrl: "https://n8n.deportivos.os/webhooks/ai"
+  webhookUrl: "https://n8n.deportivos.os/webhooks/ai",
+  systemPrompt: "1. Para consultas de montos por cobrar o deudas, entregar prioritariamente la cifra consolidada en colones (₡) en lugar de listas extensas de nombres salvo que lo soliciten explícitamente.\n2. Las cuotas de mensualidad vencen los días 5 de cada mes.\n3. Mantener un lenguaje respetuoso, técnico y directo enfocado en el rendimiento y salud del atleta."
 };
 
 // ─── CLASS AI STORE ──────────────────────────────────────────────────────────
@@ -685,24 +687,72 @@ export class AIStore {
         answerText = "¡Buenas noticias! En este momento no hay atletas registrados con nivel de riesgo de lesión Alto o en Precaución. Todos se encuentran en rango seguro.";
       }
     }
-    // 7. FINANZAS / MOROSIDAD
-    else if (lower.includes("moroso") || lower.includes("deuda") || lower.includes("pago pendiente")) {
+    // 7. FINANZAS / MOROSIDAD / POR COBRAR
+    else if (lower.includes("acumulado") || lower.includes("por cobrar") || lower.includes("recaudar") || lower.includes("moroso") || lower.includes("deuda") || lower.includes("pago pendiente") || lower.includes("julio") || lower.includes("agosto") || lower.includes("cuota") || lower.includes("cobro") || lower.includes("cuanto") || lower.includes("cuánto") || lower.includes("monto") || lower.includes("cantidad")) {
       assumedRole = "Analista Financiero";
       agentName = "Finance AI";
-      const morosos = pagos.filter(p => p.estado === "pendiente" || p.estado === "vencido");
-      if (morosos.length > 0) {
-        answerText = `Actualmente existen **${morosos.length} mensualidades pendientes o vencidas**:\n\n` +
-          morosos.map(m => {
-            const jugadorObj = jugadores.find(jug => jug.nombre === m.jugador);
-            const encargadoObj = encargados.find(e => e.jugador === m.jugador);
-            const jugadorId = jugadorObj?.id ?? 'j1';
-            const cuotaText = `₡${m.monto.toLocaleString("es-CR")}`;
-            const encargadoText = encargadoObj?.nombre ?? 'Padre de Familia';
-            const telefonoText = encargadoObj?.telefono ?? '+506 8888-8888';
-            return `• **[${m.jugador}](/jugadores/${jugadorId})** - Cuota: **${cuotaText}** (Estado: *${m.estado.toUpperCase()}*)\n  *Encargado*: ${encargadoText} · Teléfono: ${telefonoText}`;
-          }).join("\n\n");
+      
+      const allPlayers = RendimientoStore.getJugadores();
+      const morososOnly = allPlayers.filter((j) => j.estadoPago === "moroso");
+      const pendOnly = allPlayers.filter((j) => j.estadoPago === "pendiente" || ((j.saldo || 0) > 0 && j.estadoPago !== "al_dia"));
+      const deudoresTotal = allPlayers.filter((j) => j.estadoPago === "moroso" || j.estadoPago === "pendiente" || (j.saldo && j.saldo > 0));
+
+      const totalPorCobrar = deudoresTotal.reduce((sum, j) => sum + (j.saldo || 25000), 0);
+      const moraAcumulada = morososOnly.reduce((sum, j) => sum + (j.saldo || 50000), 0);
+      const pendAcumulado = pendOnly.reduce((sum, j) => sum + (j.saldo || 25000), 0);
+
+      const isExplicitNamesRequest = (
+        (lower.includes("quienes") || lower.includes("quiénes") || lower.includes("lista de morosos") || lower.includes("nombres de morosos")) &&
+        !lower.includes("no quienes") &&
+        !lower.includes("no me des") &&
+        !lower.includes("solo la cantidad") &&
+        !lower.includes("solo el monto") &&
+        !lower.includes("saber la")
+      );
+
+      const isAmountRequest = (
+        lower.includes("cuanto") ||
+        lower.includes("cuánto") ||
+        lower.includes("monto") ||
+        lower.includes("cantidad") ||
+        lower.includes("cantdiad") ||
+        lower.includes("acumulado") ||
+        lower.includes("por cobrar") ||
+        lower.includes("total") ||
+        lower.includes("suma") ||
+        lower.includes("no quienes") ||
+        lower.includes("saber la")
+      );
+
+      if (isAmountRequest || !isExplicitNamesRequest) {
+        answerText = `💰 **Resumen de Montos por Cobrar (Mes de Julio / Agosto)**:\n\n` +
+          `• **Monto Total Pendiente:** **₡${totalPorCobrar.toLocaleString("es-CR")} CRC** (${deudoresTotal.length} alumnos en total)\n` +
+          `• **🔴 Mora Acumulada (2+ Meses Vencidos):** **₡${moraAcumulada.toLocaleString("es-CR")} CRC** (${morososOnly.length} morosos)\n` +
+          `• **🟡 Cuotas del Mes en Curso:** **₡${pendAcumulado.toLocaleString("es-CR")} CRC** (${pendOnly.length} pendientes)\n\n` +
+          `*Si deseas ver los nombres de los deportistas deudores, pregúntame: "¿Quiénes son los morosos?"*.`;
+      } else if (deudoresTotal.length > 0) {
+        let textResult = `🔴 **Informe de Morosidad & Cobros Pendientes**: Se detectan **${deudoresTotal.length} alumnos** con saldos pendientes por un monto total de **₡${totalPorCobrar.toLocaleString("es-CR")} CRC**:\n\n`;
+
+        if (morososOnly.length > 0) {
+          textResult += `🚨 **Atletas Morosos con 2+ Meses Vencidos (${morososOnly.length}):**\n` +
+            morososOnly.slice(0, 10).map((j) => {
+              const phone = j.telefono_padre || j.padreTelefono || j.telefonoPadre || j.telefono || "+506 8888-0000";
+              const tutor = j.padre_nombre || j.padreNombre || j.encargado || "Encargado Legal";
+              return `• **[${j.nombre}](/jugadores/${j.id})** (${j.categoria || "U13"}) - Deuda: **₡${(j.saldo || 50000).toLocaleString("es-CR")}** (Julio + Agosto)\n  *Tutor*: ${tutor} · 📱 Tel: ${phone}`;
+            }).join("\n\n");
+        }
+
+        if (pendOnly.length > 0) {
+          if (morososOnly.length > 0) textResult += `\n\n`;
+          textResult += `🟡 **Atletas con Cuota Pendiente del Mes (${pendOnly.length}):**\n` +
+            pendOnly.slice(0, 5).map((j) => {
+              return `• **[${j.nombre}](/jugadores/${j.id})** (${j.categoria || "U13"}) - Saldo: ₡${(j.saldo || 25000).toLocaleString("es-CR")}`;
+            }).join("\n");
+        }
+
+        answerText = textResult;
       } else {
-        answerText = "El estado de facturación está al día. No se detectan saldos vencidos ni familias con morosidad activa.";
+        answerText = "¡Excelente! El estado de facturación está 100% al día. Todos los deportistas de la academia tienen sus cuotas saldadas sin morosidad activa.";
       }
     }
     // 8. CRM / PROSPECTOS
@@ -728,7 +778,8 @@ export class AIStore {
     }
     // DEFAULT GENERIC RESPONDER
     else {
-      answerText = "Hola Carlos. Entiendo tu consulta. Como copiloto inteligente de DeportivOS puedo ayudarte con el estado deportivo del plantel, riesgos de lesión (ACWR), finanzas pendientes, morosos, control de asistencia y agendar evaluaciones físicas de tus atletas. ¿Deseas analizar algún jugador o equipo en específico?";
+      const activeUserName = (typeof window !== "undefined" ? (localStorage.getItem("user-name") || localStorage.getItem("coach-name")) : null) || "Director";
+      answerText = `Hola ${activeUserName}. Entiendo tu consulta. Como **Agente IA** de Athletix OS puedo ayudarte con la facturación y acumulados por cobrar, morosidad por categoría, estado físico del plantel, riesgos de lesión (ACWR), asistencia y convocatorias. ¿Deseas analizar algún dato o deportista en específico?`;
     }
 
     // Context tracking update

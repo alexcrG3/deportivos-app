@@ -128,6 +128,31 @@ function ConvocatoriasPage() {
       });
     }
 
+    // Auto-sincronizar los partidos convocados en RendimientoStore para que aparezcan en Fixture / Calendario de Competiciones
+    const existingPartidos = RendimientoStore.getPartidos();
+    mapped.forEach((c: any) => {
+      if (c.tipo === "partido" || !c.tipo) {
+        const found = existingPartidos.find(p => p.convocatoriaId === c.id || p.id === `partido_${c.id}`);
+        if (!found) {
+          RendimientoStore.addPartido({
+            id: `partido_${c.id}`,
+            convocatoriaId: c.id,
+            fecha: c.fecha,
+            hora: c.hora,
+            equipo: c.equipo || "U9 Asoderive",
+            rival: c.rival || "U9 San José",
+            competicion: c.titulo || "Liga U9 Asoderive",
+            competicionId: "comp_u9_asoderive",
+            sede: c.sede || "Cancha Asoderive Central",
+            local: true,
+            estado: "programado",
+            convocadosCount: (c.jugadores || []).length,
+            jugadores: c.jugadores || [],
+          });
+        }
+      }
+    });
+
     setList(mapped);
     if (mapped.length > 0) {
       setSelectedId(mapped[0].id);
@@ -440,21 +465,23 @@ Soporte: soporte@asoderive.com`;
 
   const previewMessageEvaluated = useMemo(() => {
     const sp = samplePlayer as any;
-    const apoderado = sp.encargadoLegal || sp.madreNombre || sp.padreNombre || "Patricia Fonseca";
-    const alumno = samplePlayer.nombre || "Aaron Pacheco Fonseca";
-    const apellido = alumno.split(" ").slice(1).join(" ") || "Pacheco";
-    const team = dynamicEquipos.find(e => e.id === newForm.equipoId) || dynamicEquipos[0];
-    const categoria = team?.categoria || samplePlayer.categoria || "Sub-13";
-    const entrenador = team?.entrenador || coachName || "Edgar Calderón";
-    const torneo = "Torneo Apertura 2026";
-    const rival = newForm.rival || "Liga Deportiva Alajuelense";
-    const fecha = newForm.fecha || "25/07/2026";
-    const hora = newForm.hora || "09:00 AM";
-    const horaCitacion = newForm.horaCitacion || "08:15 AM";
-    const cancha = newForm.sede || "Estadio Asoderive Central";
+    const apoderado = sp.encargadoLegal || sp.madreNombre || sp.padreNombre || "Padre / Tutor";
+    const alumno = samplePlayer.nombre || "Jugador Convocado";
+    const apellido = alumno.split(" ").slice(1).join(" ") || "";
+    const team = dynamicEquipos.find(e => e.id === (isOpenCreate ? newForm.equipoId : sel?.equipoId)) || dynamicEquipos[0];
+    const categoria = team?.categoria || samplePlayer.categoria || "Sub-9";
+    const entrenador = sel?.entrenador || team?.entrenador || coachName || "Carlos Araya";
+    
+    // Extraer datos reales de la convocatoria seleccionada en la lista (sel) si no se está en modo creación
+    const rival = (isOpenCreate ? newForm.rival : (sel?.rival || sel?.equipoRival || newForm.rival)) || "Equipo Rival";
+    const torneo = (isOpenCreate ? newForm.titulo : (sel?.titulo || sel?.competicion || newForm.titulo)) || "Torneo Oficial";
+    const fecha = (isOpenCreate ? newForm.fecha : (sel?.fecha || newForm.fecha)) || new Date().toISOString().slice(0, 10);
+    const hora = (isOpenCreate ? newForm.hora : (sel?.hora || newForm.hora)) || "09:00 AM";
+    const horaCitacion = (isOpenCreate ? newForm.horaCitacion : (sel?.horaConcentracion || sel?.horaCitacion || newForm.horaCitacion)) || "08:15 AM";
+    const cancha = (isOpenCreate ? newForm.sede : (sel?.sede || newForm.sede)) || "Estadio Asoderive Central";
     const mapsLink = "https://waze.com/ul?q=Asoderive";
-    const titular = newForm.uniformeTitular || "Local Azul & Oro";
-    const alterno = newForm.uniformeAlterno || "Visitante Blanco Pro";
+    const titular = (isOpenCreate ? newForm.uniformeTitular : (sel?.uniformeLocal || sel?.uniformeTitular || newForm.uniformeTitular)) || "Titular Azul/Oro";
+    const alterno = (isOpenCreate ? newForm.uniformeAlterno : (sel?.uniformeAlterno || newForm.uniformeAlterno)) || "Alterno Blanco";
 
     const targetTemplate = templateChannel === "whatsapp" ? mensajeTemplate : emailTemplate;
 
@@ -474,7 +501,7 @@ Soporte: soporte@asoderive.com`;
       .replace(/\{Hora_Partido\}/g, hora)
       .replace(/\{Uniforme_Color_Titular\}/g, titular)
       .replace(/\{Uniforme_Color_Alterno\}/g, alterno);
-  }, [mensajeTemplate, emailTemplate, templateChannel, samplePlayer, dynamicEquipos, newForm]);
+  }, [mensajeTemplate, emailTemplate, templateChannel, samplePlayer, dynamicEquipos, newForm, sel, isOpenCreate, coachName]);
 
   const [editingConv, setEditingConv] = useState<any | null>(null);
   const [convToDelete, setConvToDelete] = useState<any | null>(null);
@@ -504,15 +531,15 @@ Soporte: soporte@asoderive.com`;
   const handleOpenEditModal = (conv: any) => {
     setEditingConv(conv);
     setNewForm({
-      titulo: conv.titulo || "",
+      titulo: conv.titulo || "partido de Copa",
       tipo: conv.tipo || "partido",
       equipoId: dynamicEquipos.find(e => e.nombre === conv.equipo)?.id || dynamicEquipos[0]?.id || "",
       fecha: conv.fecha || new Date().toISOString().slice(0, 10),
       hora: conv.hora || "09:00",
       horaCitacion: conv.horaConcentracion || conv.horaCitacion || "08:15",
-      rival: conv.rival || "",
-      sede: conv.sede || "",
-      uniformeTitular: conv.uniformeLocal || conv.uniformeTitular || "Titular Azul",
+      rival: conv.rival || conv.equipoRival || "U9 San José",
+      sede: conv.sede || conv.lugar || "Sede por definir",
+      uniformeTitular: conv.uniformeLocal || conv.uniformeTitular || "Titular Azul/Oro",
       uniformeAlterno: conv.uniformeAlterno || "Alterno Blanco",
       notas: conv.notas || "",
     });
@@ -958,7 +985,7 @@ Soporte: soporte@asoderive.com`;
             <Card className="bg-card border-border w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
               <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between border-b border-border shrink-0">
                 <CardTitle className="text-base text-foreground flex items-center gap-2">
-                  <Megaphone className="h-5 w-5 text-primary" /> Nueva Convocatoria
+                  <Megaphone className="h-5 w-5 text-primary" /> {editingConv ? "Editar Convocatoria Guardada" : "Nueva Convocatoria"}
                 </CardTitle>
                 <button 
                   onClick={() => setIsOpenCreate(false)} 
@@ -974,7 +1001,7 @@ Soporte: soporte@asoderive.com`;
                     type="text" 
                     value={newForm.titulo}
                     onChange={e => setNewForm(f => ({ ...f, titulo: e.target.value }))}
-                    placeholder="E.g. Convocatoria Jornada 5 vs Saprissa FC"
+                    placeholder="E.g. Partido de Copa vs U9 San José"
                     className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
@@ -1012,7 +1039,7 @@ Soporte: soporte@asoderive.com`;
                       type="text" 
                       value={newForm.rival}
                       onChange={e => setNewForm(f => ({ ...f, rival: e.target.value }))}
-                      placeholder="Ej. Saprissa FC"
+                      placeholder="Ej. U9 San José"
                       className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary font-semibold"
                     />
                   </div>

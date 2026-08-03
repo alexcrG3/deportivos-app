@@ -232,13 +232,11 @@ function MuroPage() {
       }
     }
 
-    await supabase.from("muro_posts").delete().eq("autor", "Carlos Gómez");
-    await supabase.from("muro_posts").delete().eq("tiempo", "Ahora");
-
+    // Fetch posts for active organization from Supabase
     const { data, error } = await supabase
       .from("muro_posts")
       .select("*")
-      .eq("organizacion_id", orgId)
+      .or(`organizacion_id.eq.${orgId},organizacion_id.eq.00000000-0000-0000-0000-000000000000,organizacion_id.eq.org_asoderive_master,organizacion_id.is.null`)
       .order("created_at", { ascending: false });
 
     if (error) {

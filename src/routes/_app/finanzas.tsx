@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import RendimientoStore from "@/lib/rendimiento-store";
 import { FinanzasBalance } from "@/components/finanzas-balance";
 import { PaymentCheckoutModal } from "@/components/PaymentCheckoutModal";
+import { printOrDownloadReceipt } from "@/lib/receipt-generator";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 import {
@@ -99,6 +100,54 @@ export function FinanzasPage() {
       window.history.replaceState({}, "", url.toString());
     }
   };
+
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
+  const [openMassPaymentModal, setOpenMassPaymentModal] = useState<boolean>(false);
+  const [massPaymentMethod, setMassPaymentMethod] = useState<string>("SINPE Móvil");
+  const [massPaymentRef, setMassPaymentRef] = useState<string>("");
+
+  // Filtros para la pestaña de Historial de Recibos
+  const [searchRecibos, setSearchRecibos] = useState<string>("");
+  const [fechaDesdeRecibos, setFechaDesdeRecibos] = useState<string>("");
+  const [fechaHastaRecibos, setFechaHastaRecibos] = useState<string>("");
+  const [metodoRecibosFilter, setMetodoRecibosFilter] = useState<string>("Todos");
+
+  const filteredRecibos = useMemo(() => {
+    return pagosRealizados.filter((p) => {
+      // 1. Buscador de Texto por Nombre, Apellido, Referencia, Categoría
+      if (searchRecibos.trim()) {
+        const q = searchRecibos.toLowerCase().trim();
+        const nombre = (p.jugador_nombre || p.jugador || "").toLowerCase();
+        const ref = (p.referencia || p.id || "").toLowerCase();
+        const cat = (p.categoria || "").toLowerCase();
+        const met = (p.metodo || "").toLowerCase();
+        if (!nombre.includes(q) && !ref.includes(q) && !cat.includes(q) && !met.includes(q)) {
+          return false;
+        }
+      }
+
+      // 2. Método de Pago
+      if (metodoRecibosFilter !== "Todos") {
+        const pMet = (p.metodo || "").toLowerCase();
+        if (!pMet.includes(metodoRecibosFilter.toLowerCase())) {
+          return false;
+        }
+      }
+
+      // 3. Rango de Fechas
+      if (p.fecha) {
+        const pFechaStr = p.fecha.includes("T") ? p.fecha.split("T")[0] : p.fecha;
+        if (fechaDesdeRecibos && pFechaStr < fechaDesdeRecibos) return false;
+        if (fechaHastaRecibos && pFechaStr > fechaHastaRecibos) return false;
+      }
+
+      return true;
+    });
+  }, [pagosRealizados, searchRecibos, metodoRecibosFilter, fechaDesdeRecibos, fechaHastaRecibos]);
+
+  const totalFilteredRecibosMonto = useMemo(() => {
+    return filteredRecibos.reduce((acc, p) => acc + Number(p.monto || 0), 0);
+  }, [filteredRecibos]);
 
   // Fetch strictly from Supabase Database for 100% data integrity
   const fetchFinanzasDataFromDB = async () => {
@@ -347,6 +396,54 @@ export function FinanzasPage() {
     toast.success(`⚡ ¡Cobros del mes generados exitosamente para los ${count > 0 ? count : 81} alumnos de la academia!`);
   };
 
+  // Registrar cobro en masa de todos los alumnos seleccionados con casilla
+  const handleConfirmMassPayment = async () => {
+    if (selectedPlayerIds.length === 0) return;
+    const count = selectedPlayerIds.length;
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const orgId = RendimientoStore.getActiveOrganizacionId() || "org_asoderive_master";
+    const ref = massPaymentRef.trim() || `MASIVO-${Date.now().toString().slice(-6)}`;
+
+    const newPagos = selectedPlayerIds.map((id) => {
+      const player = activePlayers.find((j) => j.id === id);
+      return {
+        id: `pago_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        jugador_id: id,
+        jugador_nombre: player?.nombre || "Atleta",
+        monto: player?.saldo || 25000,
+        concepto: `Pago Masivo Mensualidad - ${player?.nombre || "Atleta"}`,
+        categoria: player?.categoria || "Mensualidad",
+        sede: player?.sede || "Sede Central",
+        metodo: massPaymentMethod,
+        fecha: todayStr,
+        estado: "completado",
+        organizacion_id: orgId,
+        referencia: ref,
+      };
+    });
+
+    try {
+      await supabase.from("pagos").insert(newPagos);
+      for (const id of selectedPlayerIds) {
+        await supabase.from("jugadores").update({ estado_pago: "al_dia", saldo: 0 }).eq("id", id);
+        RendimientoStore.updateJugador(id, { estadoPago: "al_dia", saldo: 0 });
+      }
+
+      setActivePlayers((prev) =>
+        prev.map((j) => (selectedPlayerIds.includes(j.id) ? { ...j, estadoPago: "al_dia", saldo: 0 } : j))
+      );
+
+      toast.success(`✅ ¡Pago masivo registrado con éxito para los ${count} alumnos seleccionados!`);
+      setSelectedPlayerIds([]);
+      setOpenMassPaymentModal(false);
+      setMassPaymentRef("");
+    } catch (err) {
+      console.error("Error en pago masivo:", err);
+      toast.error("Hubo un detalle procesando el pago masivo.");
+    }
+  };
+
   // Alternar estado de un alumno entre Pendiente y Moroso en 1 clic
   const handleToggleEstado = (player: any) => {
     const nextEst = player.estadoPago === "moroso" ? "pendiente" : "moroso";
@@ -462,6 +559,14 @@ export function FinanzasPage() {
               className="data-[state=active]:bg-primary data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
             >
               📉 Balance y Libro de Caja
+            </TabsTrigger>
+
+            {/* 🧾 PESTAÑA 4: HISTORIAL DE RECIBOS Y PAGOS */}
+            <TabsTrigger
+              value="recibos"
+              className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white px-5 py-2.5 text-[14px] font-semibold font-['Segoe_UI',sans-serif] rounded-xl shadow-xs transition-all"
+            >
+              🧾 Historial de Recibos ({pagosRealizados.length})
             </TabsTrigger>
           </TabsList>
         </div>
@@ -717,7 +822,7 @@ export function FinanzasPage() {
               </div>
             </div>
 
-            {/* Resumen Profesional de Totales (Morosos vs Pendientes) */}
+            {/* Resumen Profesional de Totales (Morosos vs Pendientes) + Botón Masivo */}
             <div className="bg-muted/40 border-b border-border p-3 px-4 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex flex-wrap items-center gap-4">
                 <span className="font-bold text-muted-foreground flex items-center gap-1.5">
@@ -730,9 +835,20 @@ export function FinanzasPage() {
                   🔴 <strong>{summaryDeudores?.morCount || 0} Morosos:</strong> ₡{(summaryDeudores?.morMonto || 0).toLocaleString()}
                 </span>
               </div>
-              <div className="font-extrabold text-foreground bg-background px-3 py-1 rounded-xl border border-border flex items-center gap-1.5 shadow-2xs">
-                <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold">Total por Cobrar:</span>
-                <span className="text-amber-600 font-mono text-sm">₡{(summaryDeudores?.totalMonto || 0).toLocaleString()}</span>
+              <div className="flex items-center gap-2">
+                {selectedPlayerIds.length > 0 && (
+                  <Button
+                    size="xs"
+                    onClick={() => setOpenMassPaymentModal(true)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-1 shadow-md animate-in fade-in"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Registrar Pago Masivo ({selectedPlayerIds.length} Alumnos)
+                  </Button>
+                )}
+                <div className="font-extrabold text-foreground bg-background px-3 py-1 rounded-xl border border-border flex items-center gap-1.5 shadow-2xs">
+                  <span className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold">Total por Cobrar:</span>
+                  <span className="text-amber-600 font-mono text-sm">₡{(summaryDeudores?.totalMonto || 0).toLocaleString()}</span>
+                </div>
               </div>
             </div>
 
@@ -741,6 +857,23 @@ export function FinanzasPage() {
                 <table className="w-full text-left text-xs font-normal">
                   <thead className="bg-muted/50 text-muted-foreground uppercase text-[11px] font-semibold tracking-wider border-b border-border">
                     <tr>
+                      <th className="p-3.5 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={paginatedDeudores.length > 0 && paginatedDeudores.every((j) => selectedPlayerIds.includes(j.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const allIds = paginatedDeudores.map((j) => j.id);
+                              setSelectedPlayerIds((prev) => Array.from(new Set([...prev, ...allIds])));
+                            } else {
+                              const pageIds = paginatedDeudores.map((j) => j.id);
+                              setSelectedPlayerIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+                            }
+                          }}
+                          className="rounded border-border w-4 h-4 cursor-pointer accent-emerald-500"
+                          title="Seleccionar / Deseleccionar todos de esta página"
+                        />
+                      </th>
                       <th className="p-3.5">Atleta / Jugador</th>
                       <th className="p-3.5">Cédula / Identificación</th>
                       <th className="p-3.5">Categoría</th>
@@ -755,8 +888,23 @@ export function FinanzasPage() {
                     {paginatedDeudores.length > 0 ? (
                       paginatedDeudores.map((j) => {
                         const realPhone = getPhoneForPlayer(j);
+                        const isSelected = selectedPlayerIds.includes(j.id);
                         return (
-                          <tr key={j.id} className="hover:bg-muted/40 transition-colors">
+                          <tr key={j.id} className={`hover:bg-muted/40 transition-colors ${isSelected ? "bg-amber-500/10" : ""}`}>
+                            <td className="p-3.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedPlayerIds((prev) => [...prev, j.id]);
+                                  } else {
+                                    setSelectedPlayerIds((prev) => prev.filter((id) => id !== j.id));
+                                  }
+                                }}
+                                className="rounded border-border w-4 h-4 cursor-pointer accent-emerald-500"
+                              />
+                            </td>
                             <td className="p-3.5">
                               <div className="flex items-center gap-2.5">
                                 <Avatar className="h-8 w-8 border">
@@ -815,7 +963,7 @@ export function FinanzasPage() {
                       })
                     ) : (
                       <tr>
-                        <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                        <td colSpan={9} className="p-8 text-center text-muted-foreground">
                           No se encontraron atletas deudores para la categoría o filtro seleccionado.
                         </td>
                       </tr>
@@ -884,6 +1032,179 @@ export function FinanzasPage() {
         <TabsContent value="balance" className="mt-0">
           <FinanzasBalance />
         </TabsContent>
+
+        {/* ========================================================================= */}
+        {/* 🧾 PESTAÑA 4: HISTORIAL DE RECIBOS Y PAGOS EMITIDOS */}
+        {/* ========================================================================= */}
+        <TabsContent value="recibos" className="mt-0 space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl">
+            <div>
+              <h3 className="text-base font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-emerald-600" /> Historial de Pagos & Recibos Fiscales Emitidos
+              </h3>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-normal">
+                Consulta todos los comprobantes generados, reimprime recibos oficiales PDF con código QR y administra transacciones.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link to="/pagos">
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 shadow-md rounded-xl">
+                  <Receipt className="h-4 w-4" /> Módulo Completo /pagos ➔
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* BARRA DE BÚSQUEDA Y FILTRO DE RANGO DE FECHAS */}
+          <div className="bg-card border border-border p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
+            <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+              {/* Buscador de Texto (Nombre, Apellido, Consecutivo) */}
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nombre, apellido, recibo..."
+                  value={searchRecibos}
+                  onChange={(e) => setSearchRecibos(e.target.value)}
+                  className="pl-9 h-9 text-xs"
+                />
+              </div>
+
+              {/* Rango de Fechas: Desde */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-muted-foreground">Desde:</span>
+                <input
+                  type="date"
+                  value={fechaDesdeRecibos}
+                  onChange={(e) => setFechaDesdeRecibos(e.target.value)}
+                  className="h-9 px-2 bg-background border border-border rounded-xl text-xs outline-none cursor-pointer"
+                />
+              </div>
+
+              {/* Rango de Fechas: Hasta */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-muted-foreground">Hasta:</span>
+                <input
+                  type="date"
+                  value={fechaHastaRecibos}
+                  onChange={(e) => setFechaHastaRecibos(e.target.value)}
+                  className="h-9 px-2 bg-background border border-border rounded-xl text-xs outline-none cursor-pointer"
+                />
+              </div>
+
+              {/* Método de Pago */}
+              <select
+                value={metodoRecibosFilter}
+                onChange={(e) => setMetodoRecibosFilter(e.target.value)}
+                className="h-9 px-3 bg-background border border-border rounded-xl text-xs font-semibold outline-none cursor-pointer"
+              >
+                <option value="Todos">Todos los Métodos</option>
+                <option value="SINPE Móvil">📱 SINPE Móvil</option>
+                <option value="Transferencia">🏦 Transferencia</option>
+                <option value="Tilopay">💳 Tilopay / Tarjeta</option>
+                <option value="Efectivo">💵 Efectivo</option>
+              </select>
+
+              {(searchRecibos || fechaDesdeRecibos || fechaHastaRecibos || metodoRecibosFilter !== "Todos") && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchRecibos("");
+                    setFechaDesdeRecibos("");
+                    setFechaHastaRecibos("");
+                    setMetodoRecibosFilter("Todos");
+                  }}
+                  className="text-muted-foreground hover:text-foreground text-xs gap-1"
+                >
+                  <X className="h-3.5 w-3.5" /> Limpiar
+                </Button>
+              )}
+            </div>
+
+            {/* Contador & Total Filtrado */}
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-xs font-bold py-1 px-3 border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
+                {filteredRecibos.length} recibos encontrados
+              </Badge>
+              <div className="font-extrabold text-foreground bg-background px-3 py-1 rounded-xl border border-border flex items-center gap-1.5 shadow-2xs font-mono">
+                <span className="text-muted-foreground text-[10px] uppercase font-semibold">Total Filtrado:</span>
+                <span className="text-emerald-600 text-sm">₡{totalFilteredRecibosMonto.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <Card className="border-border shadow-sm rounded-2xl overflow-hidden p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-normal">
+                <thead className="bg-muted/50 text-muted-foreground uppercase text-[11px] font-semibold tracking-wider border-b border-border">
+                  <tr>
+                    <th className="p-3.5">Ref / Consecutivo</th>
+                    <th className="p-3.5">Alumno / Deportista</th>
+                    <th className="p-3.5">Categoría</th>
+                    <th className="p-3.5">Método de Pago</th>
+                    <th className="p-3.5">Fecha</th>
+                    <th className="p-3.5">Estado</th>
+                    <th className="p-3.5 text-right">Monto</th>
+                    <th className="p-3.5 text-center">Acción / Recibo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredRecibos.length > 0 ? (
+                    filteredRecibos.map((p) => (
+                      <tr key={p.id} className="hover:bg-muted/40 transition-colors">
+                        <td className="p-3.5 font-mono text-[11px] font-bold text-foreground">
+                          {p.referencia || `FE-CR-${p.id.slice(-8).toUpperCase()}`}
+                        </td>
+                        <td className="p-3.5 font-bold text-foreground">{p.jugador_nombre || p.jugador || "Atleta"}</td>
+                        <td className="p-3.5">
+                          <Badge variant="outline" className="text-[10px] font-bold">
+                            {p.categoria || "Mensualidad"}
+                          </Badge>
+                        </td>
+                        <td className="p-3.5 text-muted-foreground font-semibold">{p.metodo || "SINPE Móvil"}</td>
+                        <td className="p-3.5 text-muted-foreground">{p.fecha}</td>
+                        <td className="p-3.5">
+                          <Badge className="bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 text-[10px] font-bold">
+                            ✓ Completado
+                          </Badge>
+                        </td>
+                        <td className="p-3.5 text-right font-mono font-extrabold text-emerald-600 text-sm">
+                          ₡{Number(p.monto || 0).toLocaleString()}
+                        </td>
+                        <td className="p-3.5 text-center">
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => printOrDownloadReceipt({
+                              id: p.id,
+                              consecutivo: `FE-CR-${p.referencia || p.id.slice(-8).toUpperCase()}`,
+                              fecha: p.fecha,
+                              alumnoNombre: p.jugador_nombre || p.jugador || "Atleta",
+                              categoria: p.categoria || "Fútbol Base",
+                              monto: Number(p.monto || 0),
+                              concepto: p.concepto || "Mensualidad del Mes",
+                              metodoPago: p.metodo || "SINPE Móvil",
+                              referencia: p.referencia || p.id,
+                            })}
+                            className="border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 font-bold gap-1 shadow-2xs"
+                          >
+                            <Receipt className="h-3 w-3" /> 📄 Recibo PDF
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                        No hay pagos ni recibos registrados aún. Utiliza el módulo de cobros para generar comprobantes.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* MODAL COBRO EN VIVO MULTI-PASARELA (TILOPAY / STRIPE / SINPE / EFECTIVO) */}
@@ -897,6 +1218,62 @@ export function FinanzasPage() {
           refreshAllData();
         }}
       />
+
+      {/* MODAL 2: REGISTRO DE PAGOS EN MASA (BULK CHECKOUT) */}
+      <Dialog open={openMassPaymentModal} onOpenChange={setOpenMassPaymentModal}>
+        <DialogContent className="max-w-md bg-slate-950 border border-slate-800 text-white rounded-2xl shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-400 font-bold">
+              <CheckCircle2 className="h-5 w-5" /> Registrar Pagos en Masa ({selectedPlayerIds.length} Alumnos)
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 text-xs">
+              Se marcarán como <strong className="text-emerald-400 font-bold">🟢 Al Día</strong> y saldo <strong className="text-emerald-400 font-bold">₡0</strong> a todos los deportistas seleccionados.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Método de Pago Consolidado:</label>
+              <select
+                value={massPaymentMethod}
+                onChange={(e) => setMassPaymentMethod(e.target.value)}
+                className="w-full h-10 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white outline-none cursor-pointer"
+              >
+                <option value="SINPE Móvil">📱 SINPE Móvil</option>
+                <option value="Transferencia Bancaria">🏦 Transferencia Bancaria</option>
+                <option value="Efectivo">💵 Efectivo</option>
+                <option value="Tilopay">💳 Pasarela Tilopay / Tarjeta</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300 block mb-1">Comprobante / Referencia Masiva:</label>
+              <Input
+                placeholder="Ej: Transferencia BN Grupal #984120"
+                value={massPaymentRef}
+                onChange={(e) => setMassPaymentRef(e.target.value)}
+                className="bg-slate-900 border-slate-800 text-white text-xs h-10"
+              />
+            </div>
+
+            <div className="bg-emerald-950/60 border border-emerald-800/60 p-3 rounded-xl text-xs text-emerald-200">
+              <p className="font-bold text-[11px] uppercase tracking-wider text-emerald-400">Total a Saldar en Grupo:</p>
+              <p className="text-xl font-black font-mono text-emerald-300 mt-1">
+                ₡{activePlayers.filter(j => selectedPlayerIds.includes(j.id)).reduce((acc, j) => acc + (j.saldo || 25000), 0).toLocaleString()} CRC
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" onClick={() => setOpenMassPaymentModal(false)} className="text-slate-400 text-xs">
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmMassPayment} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs gap-1.5 shadow-md">
+              <CheckCircle2 className="h-4 w-4" /> Confirmar Pago ({selectedPlayerIds.length})
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );

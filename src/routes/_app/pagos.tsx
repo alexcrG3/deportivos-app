@@ -227,13 +227,28 @@ function PagosPage() {
     refreshData();
   };
 
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState("");
+
   const filtered = pagosList.filter(p => {
-    if (!q) return true;
-    const s = q.toLowerCase().trim();
-    return (
-      (p.jugador || "").toLowerCase().includes(s) ||
-      (p.categoria || "").toLowerCase().includes(s)
-    );
+    if (q) {
+      const s = q.toLowerCase().trim();
+      const match = (
+        (p.jugador || "").toLowerCase().includes(s) ||
+        (p.categoria || "").toLowerCase().includes(s) ||
+        (p.referencia || "").toLowerCase().includes(s) ||
+        (p.metodo || "").toLowerCase().includes(s)
+      );
+      if (!match) return false;
+    }
+
+    if (p.fecha) {
+      const pFechaStr = p.fecha.includes("T") ? p.fecha.split("T")[0] : p.fecha;
+      if (fechaDesde && pFechaStr < fechaDesde) return false;
+      if (fechaHasta && pFechaStr > fechaHasta) return false;
+    }
+
+    return true;
   });
 
   // ── Revertir Pago ──
@@ -499,9 +514,27 @@ function PagosPage() {
           <CardTitle className="text-base font-bold">Historial de Pagos</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0 space-y-3">
-          <div className="relative max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar jugador..." value={q} onChange={e => setQ(e.target.value)} className="pl-9" />
+          <div className="flex flex-wrap items-center gap-3 pb-1">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="Buscar por nombre, apellido, recibo..." value={q} onChange={e => setQ(e.target.value)} className="pl-9 h-9 text-xs" />
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground font-semibold">Desde:</span>
+              <input type="date" value={fechaDesde} onChange={e => setFechaDesde(e.target.value)} className="h-9 px-2 bg-background border border-border rounded-xl text-xs outline-none cursor-pointer" />
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground font-semibold">Hasta:</span>
+              <input type="date" value={fechaHasta} onChange={e => setFechaHasta(e.target.value)} className="h-9 px-2 bg-background border border-border rounded-xl text-xs outline-none cursor-pointer" />
+            </div>
+
+            {(q || fechaDesde || fechaHasta) && (
+              <Button size="xs" variant="ghost" onClick={() => { setQ(""); setFechaDesde(""); setFechaHasta(""); }} className="text-muted-foreground hover:text-foreground text-xs gap-1">
+                <X className="h-3.5 w-3.5" /> Limpiar
+              </Button>
+            )}
           </div>
           <div className="rounded-lg border overflow-hidden">
             <Table>

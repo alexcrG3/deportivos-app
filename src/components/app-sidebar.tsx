@@ -11,7 +11,7 @@ import {
   Package, ShoppingBag, HelpCircle, GitFork, Laptop, Presentation,
   Filter, UserCheck, LineChart, HeartPulse, ChevronRight, ChevronDown, ChevronUp, Command,
   CalendarDays, ScanLine, MessageSquare, ShieldHalf, UserRound, User, Calendar, CheckSquare,
-  CalendarCheck, Folder, GraduationCap, Star, TrendingUp, Palmtree, Banknote, Pill, ClipboardCheck, Ambulance, Hospital
+  CalendarCheck, Folder, GraduationCap, Star, TrendingUp, Palmtree, Banknote, Pill, ClipboardCheck, Ambulance, Hospital, BarChart3, CreditCard, Receipt
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
@@ -173,6 +173,12 @@ const ADMIN_NAV_SECTIONS: SidebarSection[] = [
         title: "Finanzas y Caja",
         icon: Wallet,
         url: "/finanzas",
+        subLinks: [
+          { id: "fin_graficas", title: "Dashboard & Gráficas", url: "/finanzas", search: { tab: "graficas" }, icon: BarChart3 },
+          { id: "fin_mensualidades", title: "Control de Mensualidades", url: "/finanzas", search: { tab: "mensualidades" }, icon: CreditCard },
+          { id: "fin_recibos", title: "Historial de Pagos & Recibos", url: "/pagos", icon: Receipt },
+          { id: "fin_caja", title: "Libro de Caja & Balance", url: "/finanzas", search: { tab: "balance" }, icon: Wallet },
+        ],
       },
       {
         id: "area_medica",

@@ -3376,13 +3376,13 @@ class RendimientoStore {
         ciudad: "San José",
         telefono: "+506 2222-0000",
         contacto: "Administración General",
-        canchasCount: 4,
-        canchas: [
+        canchas_count: 4,
+        canchas: JSON.stringify([
           "Cancha Principal (Grama Natural 11v11)",
           "Cancha Sintética 1 (Fútbol 9)",
           "Cancha 2 (Fútbol 7)",
           "Gimnasio de Alto Rendimiento"
-        ],
+        ]),
         estado: "activo",
         organizacion_id: activeOrg,
       },
@@ -3390,16 +3390,19 @@ class RendimientoStore {
 
     if (!stored || stored.length === 0) {
       this.memoryCache["sedes_dynamics"] = defaultSedes;
-      this.set("sedes_dynamics", defaultSedes);
-      supabase.from("sedes").upsert(defaultSedes).then(() => {});
+      // Guardar en Supabase
+      supabase.from("sedes").upsert(defaultSedes).then(({ error }) => {
+        if (error) console.error("[Supabase] Error creando sede por defecto:", error.message);
+      });
       return defaultSedes;
     }
 
     const filtered = stored.filter(s => s.organizacion_id === activeOrg || !s.organizacion_id);
     if (filtered.length === 0) {
       this.memoryCache["sedes_dynamics"] = defaultSedes;
-      this.set("sedes_dynamics", defaultSedes);
-      supabase.from("sedes").upsert(defaultSedes).then(() => {});
+      supabase.from("sedes").upsert(defaultSedes).then(({ error }) => {
+        if (error) console.error("[Supabase] Error upsert sede filtrada:", error.message);
+      });
       return defaultSedes;
     }
 

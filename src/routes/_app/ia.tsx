@@ -702,71 +702,71 @@ ${learning}
             <CardContent className="p-5 space-y-4 flex-1">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Rival del Encuentro</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Rival del Encuentro</label>
                   <input 
                     type="text" 
                     value={cgRival} 
                     onChange={e => setCgRival(e.target.value)}
                     placeholder="Ej. Deportivo Alajuelense"
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-3 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-primary font-medium"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Resultado del Partido</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Resultado del Partido</label>
                   <select 
                     value={cgResultado} 
                     onChange={e => setCgResultado(e.target.value as any)}
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-2.5 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-2.5 text-xs text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-primary font-medium"
                   >
-                    <option value="victoria">Victoria (Ganamos)</option>
-                    <option value="derrota">Derrota (Perdimos)</option>
-                    <option value="empate">Empate</option>
+                    <option value="victoria" className="bg-background text-foreground">Victoria (Ganamos)</option>
+                    <option value="derrota" className="bg-background text-foreground">Derrota (Perdimos)</option>
+                    <option value="empate" className="bg-background text-foreground">Empate</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Goles Propios</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Goles Propios</label>
                   <input 
                     type="number" 
                     value={cgMarcadorPropio} 
                     onChange={e => setCgMarcadorPropio(e.target.value === "" ? "" : Number(e.target.value))}
                     placeholder="Ej. 2"
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-3 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-primary font-medium"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Goles Rival</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Goles Rival</label>
                   <input 
                     type="number" 
                     value={cgMarcadorRival} 
                     onChange={e => setCgMarcadorRival(e.target.value === "" ? "" : Number(e.target.value))}
                     placeholder="Ej. 1"
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-3 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-primary font-medium"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Figuras / Goleadores</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Figuras / Goleadores</label>
                   <input 
                     type="text" 
                     value={cgDestacados} 
                     onChange={e => setCgDestacados(e.target.value)}
                     placeholder="Ej. Doblete de Juan, atajadas de Sofía"
-                    className="w-full h-9 rounded-lg border border-white/10 bg-[#0f111a] px-3 text-xs text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full h-9 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-3 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-primary font-medium"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Nota rápida del Entrenador (DT)</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Nota rápida del Entrenador (DT)</label>
                   <button 
                     type="button"
                     onClick={startListening}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border ${
                       isListening 
-                        ? "bg-red-500/20 border-red-500 text-red-400 animate-pulse" 
+                        ? "bg-red-500/20 border-red-500 text-red-600 dark:text-red-400 animate-pulse" 
                         : "bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
@@ -785,7 +785,7 @@ ${learning}
                   value={cgNotaDT} 
                   onChange={e => setCgNotaDT(e.target.value)}
                   placeholder="Detalles sobre el esfuerzo del equipo, errores a corregir en la semana, etc."
-                  className="w-full h-16 rounded-lg border border-white/10 bg-[#0f111a] px-3 py-2 text-xs text-white outline-none resize-none focus:ring-1 focus:ring-primary"
+                  className="w-full h-20 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none resize-none focus:ring-1 focus:ring-primary font-medium"
                 />
               </div>
 
@@ -1324,7 +1324,7 @@ ${learning}
                     ))}
                     {logs.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="text-center py-6 text-xs">Sin registros de auditoría aún. Inicia un chat para poblar la bitácora.</td>
+                        <td colSpan={7} className="text-center py-6 text-xs text-muted-foreground">Sin registros de auditoría aún. Inicia un chat para poblar la bitácora.</td>
                       </tr>
                     )}
                   </tbody>
@@ -1338,23 +1338,23 @@ ${learning}
       {/* TAB CONTENT: CONFIGURACIÓN IA */}
       {activeTab === "configuracion-ia" && (
         <div className="space-y-6">
-          <Card className="bg-card">
-            <CardHeader className="pb-3 flex flex-row items-center justify-between border-b border-white/5">
+          <Card className="bg-card border border-slate-200 dark:border-white/10 shadow-sm">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between border-b border-slate-100 dark:border-white/5">
               <div>
-                <CardTitle className="text-base flex items-center gap-1.5"><Sliders className="h-4.5 w-4.5 text-primary" /> Parámetros del Motor IA</CardTitle>
-                <CardDescription>Ajusta el comportamiento, tono y automatizaciones de DeportivOS AI.</CardDescription>
+                <CardTitle className="text-base flex items-center gap-1.5 text-slate-900 dark:text-white font-bold"><Sliders className="h-4.5 w-4.5 text-primary" /> Parámetros del Motor IA</CardTitle>
+                <CardDescription className="text-slate-500 dark:text-slate-400">Ajusta el comportamiento, tono y automatizaciones de DeportivOS AI.</CardDescription>
               </div>
-              <Button size="sm" onClick={handleSaveConfig} className="bg-gradient-primary text-white font-bold text-xs">Guardar Cambios</Button>
+              <Button size="sm" onClick={handleSaveConfig} className="bg-gradient-primary text-white font-bold text-xs shadow-md">Guardar Cambios</Button>
             </CardHeader>
             <CardContent className="space-y-6 pt-5">
               {/* Models and Language Settings */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-white">Modelo LLM de Orquestación</label>
+                  <label className="text-xs font-bold text-slate-800 dark:text-white">Modelo LLM de Orquestación</label>
                   <select
                     value={config.model}
                     onChange={(e) => setLocalConfig({ ...config, model: e.target.value })}
-                    className="w-full bg-[#0f111a] border border-white/10 rounded-lg text-xs p-2 text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-slate-50 dark:bg-[#0f111a] border border-slate-200 dark:border-white/10 rounded-lg text-xs p-2 text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-primary font-medium"
                   >
                     <option value="gpt-4o">GPT-4o (Recomendado - Mayor precisión comercial)</option>
                     <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Recomendado - Explicaciones detalladas)</option>
@@ -1363,11 +1363,11 @@ ${learning}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-white">Tono de Respuestas</label>
+                  <label className="text-xs font-bold text-slate-800 dark:text-white">Tono de Respuestas</label>
                   <select
                     value={config.tone}
                     onChange={(e) => setLocalConfig({ ...config, tone: e.target.value })}
-                    className="w-full bg-[#0f111a] border border-white/10 rounded-lg text-xs p-2 text-white outline-none focus:ring-1 focus:ring-primary"
+                    className="w-full bg-slate-50 dark:bg-[#0f111a] border border-slate-200 dark:border-white/10 rounded-lg text-xs p-2 text-slate-900 dark:text-white outline-none focus:ring-1 focus:ring-primary font-medium"
                   >
                     <option value="Profesional">Profesional & Técnico (Médico y Fisiológico)</option>
                     <option value="Cercano">Cercano & Motivacional</option>
@@ -1376,14 +1376,32 @@ ${learning}
                 </div>
               </div>
 
+              {/* System Prompt / Custom Rules for Agente IA */}
+              <div className="space-y-2 border-t border-slate-100 dark:border-white/5 pt-4">
+                <label className="text-xs font-bold text-slate-800 dark:text-white flex items-center justify-between">
+                  <span className="flex items-center gap-1.5"><Brain className="h-4 w-4 text-amber-500" /> Reglas de la Academia e Instrucciones de Comportamiento (System Prompt)</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/20">Entrenamiento de Reglas</span>
+                </label>
+                <textarea
+                  rows={5}
+                  value={config.systemPrompt || ""}
+                  onChange={(e) => setLocalConfig({ ...config, systemPrompt: e.target.value })}
+                  className="w-full bg-slate-50 dark:bg-[#0f111a] border border-slate-200 dark:border-white/10 rounded-xl text-xs p-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 outline-none focus:ring-1 focus:ring-amber-500 font-mono leading-relaxed shadow-inner"
+                  placeholder="Escribe las reglas personalizadas del club (ej. 'Las cuotas vencen el 5', 'Entregar montos en colones', 'El SINPE es 8888-8888')..."
+                />
+                <p className="text-[10px] text-slate-500 dark:text-muted-foreground">
+                  El Agente IA obedecerá estrictamente estas instrucciones al responder consultas a los entrenadores, administradores y familias.
+                </p>
+              </div>
+
               {/* Toggles for Automations */}
-              <div className="space-y-3 border-t border-b border-white/5 py-4">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">Automatizaciones en Segundo Plano</h4>
+              <div className="space-y-3 border-t border-b border-slate-100 dark:border-white/5 py-4">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">Automatizaciones en Segundo Plano</h4>
                 
                 <div className="flex items-center justify-between text-xs">
                   <div>
-                    <p className="font-bold text-white">Alertas de Wellness Crítico</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Analizar wellness cada 24 horas y notificar al cuerpo médico si es menor a 50.</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Alertas de Wellness Crítico</p>
+                    <p className="text-[10px] text-slate-500 dark:text-muted-foreground mt-0.5">Analizar wellness cada 24 horas y notificar al cuerpo médico si es menor a 50.</p>
                   </div>
                   <Switch 
                     checked={config.automationWellness} 
@@ -1393,8 +1411,8 @@ ${learning}
 
                 <div className="flex items-center justify-between text-xs">
                   <div>
-                    <p className="font-bold text-white">Recordatorios de Morosidad automáticos</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Enviar WhatsApp de cobranza al tutor el día 5 de cada mes si tiene atraso.</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Recordatorios de Morosidad automáticos</p>
+                    <p className="text-[10px] text-slate-500 dark:text-muted-foreground mt-0.5">Enviar WhatsApp de cobranza al tutor el día 5 de cada mes si tiene atraso.</p>
                   </div>
                   <Switch 
                     checked={config.automationMorosidad} 
@@ -1404,8 +1422,8 @@ ${learning}
 
                 <div className="flex items-center justify-between text-xs">
                   <div>
-                    <p className="font-bold text-white">Notificaciones de Alta Médica (RTP)</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Notificar al entrenador en el Coach OS apenas el médico firme la reincorporación.</p>
+                    <p className="font-bold text-slate-900 dark:text-white">Notificaciones de Alta Médica (RTP)</p>
+                    <p className="text-[10px] text-slate-500 dark:text-muted-foreground mt-0.5">Notificar al entrenador en el Coach OS apenas el médico firme la reincorporación.</p>
                   </div>
                   <Switch 
                     checked={config.automationRTP} 
@@ -1416,21 +1434,21 @@ ${learning}
 
               {/* n8n Integration Webhook */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-white flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-primary" /> Webhook de Integración n8n / Make</label>
+                <label className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1"><Zap className="h-3.5 w-3.5 text-primary" /> Webhook de Integración n8n / Make</label>
                 <Input
                   value={config.webhookUrl}
                   onChange={(e) => setLocalConfig({ ...config, webhookUrl: e.target.value })}
-                  className="bg-white/5 border-white/10 text-white placeholder-white/30 text-xs rounded-xl"
+                  className="bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/30 text-xs rounded-xl"
                   placeholder="https://n8n.deportivos.os/webhooks/ai"
                 />
-                <p className="text-[9px] text-muted-foreground mt-1">DeportivOS AI disparará flujos a este endpoint para enviar emails, sincronizar Google Calendar y actualizar Google Drive.</p>
+                <p className="text-[9px] text-slate-500 dark:text-muted-foreground mt-1">DeportivOS AI disparará flujos a este endpoint para enviar emails, sincronizar Google Calendar y actualizar Google Drive.</p>
               </div>
 
               {/* Safety auditing disclaimer */}
-              <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-xl p-3.5 flex gap-2 text-xs text-emerald-300 leading-normal">
-                <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-500 mt-0.5" />
+              <div className="border border-emerald-500/30 bg-emerald-500/10 rounded-xl p-3.5 flex gap-2 text-xs text-emerald-800 dark:text-emerald-300 leading-normal">
+                <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-500 mt-0.5" />
                 <div>
-                  <p className="font-bold text-white">Cumplimiento RGPD & LOPD</p>
+                  <p className="font-bold text-slate-900 dark:text-white">Cumplimiento RGPD & LOPD</p>
                   El almacenamiento de configuración no procesa información médica o financiera fuera del entorno encriptado de la sede. DeportivOS respeta los roles asignados por el administrador de la academia.
                 </div>
               </div>

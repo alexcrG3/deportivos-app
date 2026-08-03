@@ -23,7 +23,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-type ToolMode = "select" | "draw-solid" | "draw-dashed" | "draw-arrow" | "draw-curve" | "draw-zone" | "draw-circle-zone" | "eraser" | "add-player" | "add-item" | "add-cone" | "add-minigoal" | "add-text" | "add-dummy" | "add-ladder" | "add-hurdle" | "add-hoop" | "add-pole";
+type ToolMode = "select" | "draw-solid" | "draw-dashed" | "draw-arrow" | "draw-curve" | "draw-zone" | "draw-circle-zone" | "eraser" | "add-player" | "add-item" | "add-cone" | "add-minigoal" | "add-text" | "add-dummy" | "add-ladder" | "add-hurdle" | "add-hoop" | "add-pole" | "add-wall" | "add-corner-flag" | "add-zigzag" | "add-dumbbell";
 type StrokeStyle = "solid" | "dashed" | "arrow" | "curve" | "zone" | "circle-zone";
 type PitchLayout = "full-pitch" | "half-pitch";
 
@@ -89,6 +89,10 @@ interface BoardMiniGoal {
 }
 
 interface BoardDummy { id: string; x: number; y: number; rotation?: number; }
+interface BoardWall { id: string; x: number; y: number; rotation?: number; }
+interface BoardCornerFlag { id: string; x: number; y: number; rotation?: number; }
+interface BoardZigzag { id: string; x: number; y: number; rotation?: number; }
+interface BoardDumbbell { id: string; x: number; y: number; rotation?: number; }
 interface BoardLadder { id: string; x: number; y: number; rotation?: number; }
 interface BoardHurdle { id: string; x: number; y: number; rotation?: number; }
 interface BoardHoop { id: string; x: number; y: number; color?: string; }
@@ -453,6 +457,10 @@ export function CanchaBCoachBoard({
   const [cones, setCones] = useState<BoardCone[]>([]);
   const [miniGoals, setMiniGoals] = useState<BoardMiniGoal[]>([]);
   const [dummies, setDummies] = useState<BoardDummy[]>([]);
+  const [walls, setWalls] = useState<BoardWall[]>([]);
+  const [cornerFlags, setCornerFlags] = useState<BoardCornerFlag[]>([]);
+  const [zigzags, setZigzags] = useState<BoardZigzag[]>([]);
+  const [dumbbells, setDumbbells] = useState<BoardDumbbell[]>([]);
   const [ladders, setLadders] = useState<BoardLadder[]>([]);
   const [hurdles, setHurdles] = useState<BoardHurdle[]>([]);
   const [hoops, setHoops] = useState<BoardHoop[]>([]);
@@ -668,7 +676,7 @@ export function CanchaBCoachBoard({
   const [livePts, setLivePts] = useState<{ x: number; y: number }[]>([]);
   const [zoneStart, setZoneStart] = useState<{ x: number; y: number } | null>(null);
   const [zoneCurrent, setZoneCurrent] = useState<{ x: number; y: number } | null>(null);
-  const [dragging, setDragging] = useState<{ type: "player" | "ball" | "cone" | "minigoal" | "dummy" | "ladder" | "hurdle" | "hoop" | "pole" | "text" | "zone"; id: string } | null>(null);
+  const [dragging, setDragging] = useState<{ type: "player" | "ball" | "cone" | "minigoal" | "dummy" | "wall" | "corner-flag" | "zigzag" | "dumbbell" | "ladder" | "hurdle" | "hoop" | "pole" | "text" | "zone"; id: string } | null>(null);
   const [teamColor, setTeamColor] = useState<PlayerTeamColor>("orange");
 
   // Numeración independiente por color de equipo:
@@ -694,6 +702,22 @@ export function CanchaBCoachBoard({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [modalConfirmClear, setModalConfirmClear] = useState<boolean>(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [selectedBoardItem, setSelectedBoardItem] = useState<{ type: string; id: string } | null>(null);
+
+  // Helper para girar cualquier objeto de la cancha en 90°
+  const rotateSelectedItem = useCallback((type: string, id: string) => {
+    if (type === "wall") setWalls((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "dummy") setDummies((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "minigoal") setMiniGoals((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "corner-flag") setCornerFlags((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "zigzag") setZigzags((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "dumbbell") setDumbbells((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "ladder") setLadders((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "hurdle") setHurdles((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "hoop") setHoops((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "pole") setPoles((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+    else if (type === "cone") setCones((prev) => prev.map((item) => (item.id === id ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)));
+  }, []);
 
   // ── MOBILE HUD STATE ──────────────────────────────────────────────────────
   // FAB radial de materiales (solo mobile)
@@ -964,6 +988,26 @@ export function CanchaBCoachBoard({
       return;
     }
 
+    if (activeTool === "add-wall") {
+      setWalls((prev) => [...prev, { id: `wall-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-corner-flag") {
+      setCornerFlags((prev) => [...prev, { id: `cf-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-zigzag") {
+      setZigzags((prev) => [...prev, { id: `zz-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
+    if (activeTool === "add-dumbbell") {
+      setDumbbells((prev) => [...prev, { id: `db-${Date.now()}`, x, y, rotation: 0 }]);
+      return;
+    }
+
     if (activeTool === "add-ladder") {
       setLadders((prev) => [...prev, { id: `lad-${Date.now()}`, x, y, rotation: 0 }]);
       return;
@@ -1027,6 +1071,14 @@ export function CanchaBCoachBoard({
         setMiniGoals((prev) => prev.map((mg) => (mg.id === dragging.id ? { ...mg, x, y } : mg)));
       else if (dragging.type === "dummy")
         setDummies((prev) => prev.map((d) => (d.id === dragging.id ? { ...d, x, y } : d)));
+      else if (dragging.type === "wall")
+        setWalls((prev) => prev.map((w) => (w.id === dragging.id ? { ...w, x, y } : w)));
+      else if (dragging.type === "corner-flag")
+        setCornerFlags((prev) => prev.map((cf) => (cf.id === dragging.id ? { ...cf, x, y } : cf)));
+      else if (dragging.type === "zigzag")
+        setZigzags((prev) => prev.map((zz) => (zz.id === dragging.id ? { ...zz, x, y } : zz)));
+      else if (dragging.type === "dumbbell")
+        setDumbbells((prev) => prev.map((db) => (db.id === dragging.id ? { ...db, x, y } : db)));
       else if (dragging.type === "ladder")
         setLadders((prev) => prev.map((ld) => (ld.id === dragging.id ? { ...ld, x, y } : ld)));
       else if (dragging.type === "hurdle")
@@ -1416,18 +1468,29 @@ export function CanchaBCoachBoard({
 
         {/* Realistic Vector Training Cones (Conos Naranja de Entrenamiento) */}
         {cones.map((c) => (
-          <g key={c.id} transform={`translate(${c.x},${c.y})`}
+          <g key={c.id} transform={`translate(${c.x},${c.y}) rotate(${c.rotation || 0})`}
             style={{ cursor: "grab" }}
             onPointerDown={(e) => {
               e.stopPropagation();
               if (activeTool === "eraser") { setCones((prev) => prev.filter((q) => q.id !== c.id)); return; }
+              setSelectedBoardItem({ type: "cone", id: c.id });
               setDragging({ type: "cone", id: c.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("cone", c.id);
             }}
           >
             <ellipse cx={0} cy={1.1} rx={1.5} ry={0.6} fill="#ea580c" stroke="#0f172a" strokeWidth={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
             <polygon points="-1.2,1.0 0,-1.8 1.2,1.0" fill="#f97316" stroke="#0f172a" strokeWidth={0.25} transform={isPortrait ? "rotate(-90)" : undefined} />
             <polygon points="-0.55,0.0 0,-0.8 0.55,0.0" fill="#ffffff" opacity={0.9} transform={isPortrait ? "rotate(-90)" : undefined} />
+            {selectedBoardItem?.id === c.id && (
+              <g transform="translate(0, -3.0)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("cone", c.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
           </g>
         ))}
 
@@ -1438,32 +1501,202 @@ export function CanchaBCoachBoard({
             onPointerDown={(e) => {
               e.stopPropagation();
               if (activeTool === "eraser") { setMiniGoals((prev) => prev.filter((q) => q.id !== mg.id)); return; }
+              setSelectedBoardItem({ type: "minigoal", id: mg.id });
               setDragging({ type: "minigoal", id: mg.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("minigoal", mg.id);
             }}
           >
             <rect x={-2.4} y={-1.2} width={4.8} height={2.4} fill="rgba(255,255,255,0.25)" stroke="#ffffff" strokeWidth={0.25} rx={0.4} strokeDasharray="0.6,0.6" transform={isPortrait ? "rotate(-90)" : undefined} />
             <circle cx={-2.4} cy={-1.2} r={0.4} fill="#ef4444" stroke="#ffffff" strokeWidth={0.15} transform={isPortrait ? "rotate(-90)" : undefined} />
             <circle cx={2.4} cy={-1.2} r={0.4} fill="#ef4444" stroke="#ffffff" strokeWidth={0.15} transform={isPortrait ? "rotate(-90)" : undefined} />
             <line x1={-2.4} y1={-1.2} x2={2.4} y2={-1.2} stroke="#ffffff" strokeWidth={0.4} transform={isPortrait ? "rotate(-90)" : undefined} />
+            {selectedBoardItem?.id === mg.id && (
+              <g transform="translate(0, -2.8)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("minigoal", mg.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
           </g>
         ))}
 
-        {/* Vector Free Kick Dummies / Muñecos de Barrera (🧍‍♂️) */}
+        {/* Vector Free Kick Dummies / Muñecos de Barrera Individual (🧍‍♂️) */}
         {dummies.map((d) => (
           <g key={d.id} transform={`translate(${d.x},${d.y}) rotate(${d.rotation || 0})`}
             style={{ cursor: "grab" }}
             onPointerDown={(e) => {
               e.stopPropagation();
               if (activeTool === "eraser") { setDummies((prev) => prev.filter((q) => q.id !== d.id)); return; }
+              setSelectedBoardItem({ type: "dummy", id: d.id });
               setDragging({ type: "dummy", id: d.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
             }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("dummy", d.id);
+            }}
           >
-            <rect x={-0.8} y={1.2} width={1.6} height={0.5} fill="#334155" rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
-            <path d="M -1.1,-1.2 L 1.1,-1.2 L 0.8,1.2 L -0.8,1.2 Z" fill="#eab308" stroke="#0f172a" strokeWidth={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
-            <circle cx={0} cy={-2.0} r={0.7} fill="#eab308" stroke="#0f172a" strokeWidth={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
-            <line x1={-0.6} y1={-0.2} x2={0.6} y2={-0.2} stroke="#0f172a" strokeWidth={0.25} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <rect x={-0.7} y={1.2} width={1.4} height={0.4} fill="#334155" stroke="#0f172a" strokeWidth={0.15} rx={0.1} />
+            <path d="M -1.0,-0.8 L 1.0,-0.8 L 0.7,1.2 L -0.7,1.2 Z" fill="#eab308" stroke="#0f172a" strokeWidth={0.25} />
+            <circle cx={0} cy={-1.8} r={0.7} fill="#eab308" stroke="#0f172a" strokeWidth={0.25} />
+            <line x1={-0.4} y1={0.2} x2={0.4} y2={0.2} stroke="#0f172a" strokeWidth={0.3} strokeLinecap="round" />
+            {selectedBoardItem?.id === d.id && (
+              <g transform="translate(0, -3.2)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("dummy", d.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
+          </g>
+        ))}
+
+        {/* Vector 5-Dummy Free Kick Wall / Barrera Completa de 5 Muñecos Horizontal (🧍‍♂️🧍‍♂️🧍‍♂️🧍‍♂️🧍‍♂️) */}
+        {walls.map((w) => (
+          <g key={w.id} transform={`translate(${w.x},${w.y}) rotate(${w.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setWalls((prev) => prev.filter((q) => q.id !== w.id)); return; }
+              setSelectedBoardItem({ type: "wall", id: w.id });
+              setDragging({ type: "wall", id: w.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("wall", w.id);
+            }}
+          >
+            {/* Dashed Selection Ring */}
+            {selectedBoardItem?.id === w.id && (
+              <rect x={-4.2} y={-2.6} width={8.4} height={4.4} fill="none" stroke="#0284c7" strokeWidth={0.25} strokeDasharray="0.6,0.6" rx={0.4} />
+            )}
+            {[-3.2, -1.6, 0, 1.6, 3.2].map((xOffset) => (
+              <g key={xOffset} transform={`translate(${xOffset}, 0)`}>
+                <rect x={-0.65} y={1.2} width={1.3} height={0.4} fill="#334155" stroke="#0f172a" strokeWidth={0.12} rx={0.1} />
+                <path d="M -0.95,-0.8 L 0.95,-0.8 L 0.65,1.2 L -0.65,1.2 Z" fill="#eab308" stroke="#0f172a" strokeWidth={0.2} />
+                <circle cx={0} cy={-1.7} r={0.65} fill="#eab308" stroke="#0f172a" strokeWidth={0.2} />
+                <line x1={-0.4} y1={0.2} x2={0.4} y2={0.2} stroke="#0f172a" strokeWidth={0.25} strokeLinecap="round" />
+              </g>
+            ))}
+            {/* Floating Rotation Handle */}
+            {selectedBoardItem?.id === w.id && (
+              <g transform="translate(0, -3.6)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("wall", w.id); }}>
+                <rect x={-2.2} y={-0.8} width={4.4} height={1.6} rx={0.8} fill="#0284c7" stroke="#ffffff" strokeWidth={0.25} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.9" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
+          </g>
+        ))}
+
+        {/* Vector Checkered Corner Flag / Banderín de Córner Cuadriculado (🚩) */}
+        {cornerFlags.map((cf) => (
+          <g key={cf.id} transform={`translate(${cf.x},${cf.y}) rotate(${cf.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setCornerFlags((prev) => prev.filter((q) => q.id !== cf.id)); return; }
+              setSelectedBoardItem({ type: "corner-flag", id: cf.id });
+              setDragging({ type: "corner-flag", id: cf.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("corner-flag", cf.id);
+            }}
+          >
+            <circle cx={0} cy={0} r={0.35} fill="#334155" stroke="#ffffff" strokeWidth={0.15} />
+            <line x1={0} y1={0} x2={0} y2={-4.0} stroke="#ffffff" strokeWidth={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <g transform={isPortrait ? "rotate(-90)" : undefined}>
+              <rect x={0} y={-4.0} width={1.2} height={0.8} fill="#eab308" />
+              <rect x={1.2} y={-4.0} width={1.2} height={0.8} fill="#b91c1c" />
+              <rect x={0} y={-3.2} width={1.2} height={0.8} fill="#b91c1c" />
+              <rect x={1.2} y={-3.2} width={1.2} height={0.8} fill="#eab308" />
+              <rect x={0} y={-4.0} width={2.4} height={1.6} fill="none" stroke="#0f172a" strokeWidth={0.15} />
+            </g>
+            {selectedBoardItem?.id === cf.id && (
+              <g transform="translate(0, -4.8)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("corner-flag", cf.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
+          </g>
+        ))}
+
+        {/* Vector Zig-Zag Agility Circuit / Circuito Zig-Zag (⚡) */}
+        {zigzags.map((zz) => (
+          <g key={zz.id} transform={`translate(${zz.x},${zz.y}) rotate(${zz.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setZigzags((prev) => prev.filter((q) => q.id !== zz.id)); return; }
+              setSelectedBoardItem({ type: "zigzag", id: zz.id });
+              setDragging({ type: "zigzag", id: zz.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("zigzag", zz.id);
+            }}
+          >
+            <polyline
+              points="-2.5,-3.0 1.5,-1.8 -1.5,0.2 1.5,2.2 4.0,2.2"
+              fill="none"
+              stroke="#b91c1c"
+              strokeWidth={0.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              transform={isPortrait ? "rotate(-90)" : undefined}
+            />
+            {[{x: -2.5, y: -3.0}, {x: 1.5, y: -1.8}, {x: -1.5, y: 0.2}, {x: 1.5, y: 2.2}].map((pt, idx) => (
+              <circle
+                key={idx}
+                cx={pt.x}
+                cy={pt.y}
+                r={0.45}
+                fill="#0f172a"
+                stroke="#ffffff"
+                strokeWidth={0.15}
+                transform={isPortrait ? "rotate(-90)" : undefined}
+              />
+            ))}
+            {selectedBoardItem?.id === zz.id && (
+              <g transform="translate(0, -4.2)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("zigzag", zz.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
+          </g>
+        ))}
+
+        {/* Vector Dumbbell / Pesa / Mancuerna (🏋️‍♂️) */}
+        {dumbbells.map((db) => (
+          <g key={db.id} transform={`translate(${db.x},${db.y}) rotate(${db.rotation || 0})`}
+            style={{ cursor: "grab" }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              if (activeTool === "eraser") { setDumbbells((prev) => prev.filter((q) => q.id !== db.id)); return; }
+              setSelectedBoardItem({ type: "dumbbell", id: db.id });
+              setDragging({ type: "dumbbell", id: db.id });
+              (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("dumbbell", db.id);
+            }}
+          >
+            <rect x={-1.6} y={-0.3} width={3.2} height={0.6} fill="#475569" stroke="#0f172a" strokeWidth={0.1} rx={0.1} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <rect x={-2.4} y={-1.4} width={0.8} height={2.8} fill="#e2e8f0" stroke="#475569" strokeWidth={0.15} rx={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <rect x={-1.9} y={-1.0} width={0.3} height={2.0} fill="#cbd5e1" stroke="#475569" strokeWidth={0.1} rx={0.15} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <rect x={1.6} y={-1.4} width={0.8} height={2.8} fill="#e2e8f0" stroke="#475569" strokeWidth={0.15} rx={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
+            <rect x={1.6} y={-1.0} width={0.3} height={2.0} fill="#cbd5e1" stroke="#475569" strokeWidth={0.1} rx={0.15} transform={isPortrait ? "rotate(-90)" : undefined} />
+            {selectedBoardItem?.id === db.id && (
+              <g transform="translate(0, -2.6)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("dumbbell", db.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
           </g>
         ))}
 
@@ -1474,14 +1707,25 @@ export function CanchaBCoachBoard({
             onPointerDown={(e) => {
               e.stopPropagation();
               if (activeTool === "eraser") { setLadders((prev) => prev.filter((q) => q.id !== ld.id)); return; }
+              setSelectedBoardItem({ type: "ladder", id: ld.id });
               setDragging({ type: "ladder", id: ld.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("ladder", ld.id);
             }}
           >
             <rect x={-6} y={-1.2} width={12} height={2.4} fill="none" stroke="#f59e0b" strokeWidth={0.25} rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
             {[-4.5, -3, -1.5, 0, 1.5, 3, 4.5].map((xPos) => (
               <line key={xPos} x1={xPos} y1={-1.2} x2={xPos} y2={1.2} stroke="#f59e0b" strokeWidth={0.3} transform={isPortrait ? "rotate(-90)" : undefined} />
             ))}
+            {selectedBoardItem?.id === ld.id && (
+              <g transform="translate(0, -2.6)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("ladder", ld.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
           </g>
         ))}
 
@@ -1492,13 +1736,24 @@ export function CanchaBCoachBoard({
             onPointerDown={(e) => {
               e.stopPropagation();
               if (activeTool === "eraser") { setHurdles((prev) => prev.filter((q) => q.id !== h.id)); return; }
+              setSelectedBoardItem({ type: "hurdle", id: h.id });
               setDragging({ type: "hurdle", id: h.id });
               (e.currentTarget.ownerSVGElement as SVGSVGElement)?.setPointerCapture(e.pointerId);
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              rotateSelectedItem("hurdle", h.id);
             }}
           >
             <rect x={-2.2} y={-0.4} width={4.4} height={0.8} fill="#ef4444" stroke="#ffffff" strokeWidth={0.2} rx={0.2} transform={isPortrait ? "rotate(-90)" : undefined} />
             <circle cx={-2.2} cy={0} r={0.35} fill="#0f172a" transform={isPortrait ? "rotate(-90)" : undefined} />
             <circle cx={2.2} cy={0} r={0.35} fill="#0f172a" transform={isPortrait ? "rotate(-90)" : undefined} />
+            {selectedBoardItem?.id === h.id && (
+              <g transform="translate(0, -2.2)" className="pointer-events-auto" onPointerDown={(e) => { e.stopPropagation(); rotateSelectedItem("hurdle", h.id); }}>
+                <rect x={-2.0} y={-0.7} width={4.0} height={1.4} rx={0.7} fill="#0284c7" stroke="#ffffff" strokeWidth={0.2} />
+                <text x={0} y={0.3} textAnchor="middle" fill="#ffffff" fontSize="0.8" fontWeight="900" style={{ pointerEvents: 'none' }}>🔄 90°</text>
+              </g>
+            )}
           </g>
         ))}
 
@@ -2165,6 +2420,59 @@ export function CanchaBCoachBoard({
         )}
       </div>
 
+      {/* ── FLOATING SELECTION CONTROL PILL (Girar / Rotar objeto activo) ── */}
+      {selectedBoardItem && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 pointer-events-auto bg-slate-950/95 border border-sky-500/50 shadow-2xl backdrop-blur-xl px-4 py-2 rounded-full flex items-center gap-3 text-white text-xs font-bold animate-in fade-in slide-in-from-top-3">
+          <div className="flex items-center gap-1.5 text-sky-400 font-extrabold uppercase text-[10px]">
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Objeto Seleccionado</span>
+          </div>
+          
+          <div className="w-px h-4 bg-white/20" />
+
+          <button
+            type="button"
+            onClick={() => rotateSelectedItem(selectedBoardItem.type, selectedBoardItem.id)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-600 hover:bg-sky-500 text-white font-extrabold transition active:scale-95 shadow-md shadow-sky-900/50"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Girar 90°</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const { type, id } = selectedBoardItem;
+              if (type === "wall") setWalls((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "dummy") setDummies((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "minigoal") setMiniGoals((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "corner-flag") setCornerFlags((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "zigzag") setZigzags((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "dumbbell") setDumbbells((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "ladder") setLadders((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "hurdle") setHurdles((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "hoop") setHoops((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "pole") setPoles((prev) => prev.filter((item) => item.id !== id));
+              else if (type === "cone") setCones((prev) => prev.filter((item) => item.id !== id));
+              setSelectedBoardItem(null);
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 hover:bg-red-500 text-white font-bold transition active:scale-95"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Borrar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedBoardItem(null)}
+            className="p-1 text-slate-400 hover:text-white transition active:scale-90 ml-1"
+            title="Cerrar selección"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {/* ── MOBILE: FAB Radial para Materiales Físicos ── */}
       {/* Solo visible cuando la barra no está minimizada */}
       {!isDockMinimized && (
@@ -2294,107 +2602,362 @@ export function CanchaBCoachBoard({
           {/* Separador */}
           <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
 
-          {/* HERRAMIENTAS DE DIBUJO — iconos directos */}
-          {([
-            ["select",           <Hand className="h-4 w-4" />,        "Mover",           "bg-amber-500 text-slate-950",  "bg-slate-900 text-amber-300"],
-            ["draw-solid",       <Pencil className="h-4 w-4" />,      "Lápiz",           "bg-blue-600 text-white",       "bg-slate-900 text-blue-400"],
-            ["draw-dashed",      <span className="font-mono font-black text-sm">┊</span>, "Pase", "bg-emerald-600 text-white", "bg-slate-900 text-emerald-400"],
-            ["draw-arrow",       <ArrowRight className="h-4 w-4" />,  "Flecha",          "bg-amber-600 text-white",      "bg-slate-900 text-amber-400"],
-            ["draw-curve",       <span className="text-base">↩️</span>, "Curva",         "bg-purple-600 text-white",     "bg-slate-900 text-purple-400"],
-            ["draw-zone",        <Square className="h-4 w-4" />,      "Zona",            "bg-orange-600 text-white",     "bg-slate-900 text-orange-400"],
-            ["draw-circle-zone", <span className="text-base">⭕</span>, "Rondo",          "bg-pink-600 text-white",       "bg-slate-900 text-pink-400"],
-            ["add-text",         <TextIcon className="h-4 w-4" />,    "Texto",           "bg-violet-600 text-white",     "bg-slate-900 text-violet-400"],
-            ["eraser",           <Trash2 className="h-4 w-4" />,      "Borrar",          "bg-red-600 text-white",        "bg-slate-900 text-red-400"],
-          ] as [ToolMode, React.ReactNode, string, string, string][]).map(([tool, icon, label, activeClass, inactiveClass]) => (
-            <button
-              key={tool}
-              type="button"
-              onClick={() => {
-                setActiveTool(tool);
-                if (tool === "draw-solid") setStrokeType("solid");
-                if (tool === "draw-dashed") setStrokeType("dashed");
-                if (tool === "draw-arrow") setStrokeType("arrow");
-                if (tool === "draw-curve") setStrokeType("curve");
-                if (tool === "draw-zone") setStrokeType("zone");
-                if (tool === "draw-circle-zone") setStrokeType("circle-zone");
-              }}
-              className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
-                activeTool === tool ? activeClass + ' border-transparent shadow-md' : inactiveClass + ' border-slate-800'
-              }`}
-              title={label}
-            >
-              {icon}
-              {/* Active dot */}
-              {activeTool === tool && (
-                <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-white/80" />
-              )}
-            </button>
-          ))}
+          {/* ── MOBILE CATEGORY POPOVERS (Zero-clutter mobile bar) ── */}
 
-          {/* Separador */}
-          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
-
-          {/* JUGADORES: color chips + add player */}
-          <div className="flex items-center gap-1 shrink-0">
-            {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+          {/* MENÚ 1: ✏️ DIBUJO Y TRAZOS */}
+          <Popover>
+            <PopoverTrigger asChild>
               <button
-                key={key}
                 type="button"
-                onClick={() => { setTeamColor(key as PlayerTeamColor); setActiveTool("add-player"); }}
-                className={`w-6 h-6 rounded-full border-2 transition-transform active:scale-90 shrink-0 ${
-                  teamColor === key && activeTool === 'add-player' ? 'border-white scale-125 ring-2 ring-emerald-400' : 'border-transparent opacity-70'
+                className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                  ["select", "draw-solid", "draw-dashed", "draw-arrow", "draw-curve", "add-text", "eraser"].includes(activeTool)
+                    ? 'bg-blue-600 text-white border-transparent shadow-md ring-2 ring-blue-400/50'
+                    : 'bg-slate-900 text-blue-400 border-slate-800'
                 }`}
-                style={{ backgroundColor: item.bg }}
-                title={item.label}
-              />
-            ))}
-          </div>
+                title="Herramientas de Dibujo"
+              >
+                {activeTool === "select" ? <Hand className="h-4 w-4" /> :
+                 activeTool === "draw-dashed" ? <span className="font-mono font-black text-sm">┊</span> :
+                 activeTool === "draw-arrow" ? <ArrowRight className="h-4 w-4" /> :
+                 activeTool === "draw-curve" ? <span className="text-xs">↩️</span> :
+                 activeTool === "add-text" ? <TextIcon className="h-4 w-4" /> :
+                 activeTool === "eraser" ? <Trash2 className="h-4 w-4" /> :
+                 <Pencil className="h-4 w-4" />}
+                <span className="text-[8px] font-bold mt-0.5 leading-none">Dibujo</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-72 p-2.5 bg-slate-950/98 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+              <p className="text-[10px] font-extrabold text-blue-400 uppercase tracking-wider px-1">✏️ Trazos y Anotaciones</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {([
+                  ["select",           <Hand className="h-4 w-4" />,        "Mover Objeto",    "bg-amber-500 text-slate-950"],
+                  ["draw-solid",       <Pencil className="h-4 w-4" />,      "Lápiz continuo",  "bg-blue-600 text-white"],
+                  ["draw-dashed",      <span className="font-mono font-black text-sm">┊</span>, "Pase punteado", "bg-emerald-600 text-white"],
+                  ["draw-arrow",       <ArrowRight className="h-4 w-4" />,  "Flecha acción",   "bg-amber-600 text-white"],
+                  ["draw-curve",       <span className="text-base">↩️</span>, "Línea curva",    "bg-purple-600 text-white"],
+                  ["add-text",         <TextIcon className="h-4 w-4" />,    "Texto / Nota",    "bg-violet-600 text-white"],
+                  ["eraser",           <Trash2 className="h-4 w-4" />,      "Borrador táctico","bg-red-600 text-white"],
+                ] as [ToolMode, React.ReactNode, string, string][]).map(([tool, icon, label, activeStyle]) => (
+                  <button
+                    key={tool}
+                    type="button"
+                    onClick={() => {
+                      setActiveTool(tool);
+                      if (tool === "draw-solid") setStrokeType("solid");
+                      if (tool === "draw-dashed") setStrokeType("dashed");
+                      if (tool === "draw-arrow") setStrokeType("arrow");
+                      if (tool === "draw-curve") setStrokeType("curve");
+                    }}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${
+                      activeTool === tool ? activeStyle : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
+                    }`}
+                  >
+                    {icon}
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* MENÚ 2: 🟧 FORMAS Y ZONAS */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                  ["draw-zone", "draw-circle-zone"].includes(activeTool)
+                    ? 'bg-orange-600 text-white border-transparent shadow-md ring-2 ring-orange-400/50'
+                    : 'bg-slate-900 text-orange-400 border-slate-800'
+                }`}
+                title="Formas y Zonas"
+              >
+                {activeTool === "draw-circle-zone" ? <span className="text-xs">⭕</span> : <Square className="h-4 w-4" />}
+                <span className="text-[8px] font-bold mt-0.5 leading-none">Zonas</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-64 p-2.5 bg-slate-950/98 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+              <p className="text-[10px] font-extrabold text-orange-400 uppercase tracking-wider px-1">🟧 Zonas Tácticas & Rondos</p>
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-zone"); setStrokeType("zone"); }}
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                    activeTool === "draw-zone" ? "bg-orange-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  <Square className="h-4 w-4 text-orange-400" />
+                  <div className="text-left">
+                    <div>Zona Rectangular</div>
+                    <div className="text-[10px] opacity-70 font-normal">Sombra para delimitar espacios</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setActiveTool("draw-circle-zone"); setStrokeType("circle-zone"); }}
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                    activeTool === "draw-circle-zone" ? "bg-pink-600 text-white" : "bg-slate-900 text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  <span className="text-sm">⭕</span>
+                  <div className="text-left">
+                    <div>Rondo Circular</div>
+                    <div className="text-[10px] opacity-70 font-normal">Área circular para rondos</div>
+                  </div>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* MENÚ 3: 👥 AÑADIR JUGADORES (Con Muñequito / Users Icon) */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={`w-12 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                  activeTool === "add-player"
+                    ? 'bg-emerald-600 text-white border-transparent shadow-md ring-2 ring-emerald-400/60'
+                    : 'bg-slate-900 text-emerald-400 border-slate-800'
+                }`}
+                title="Añadir Jugadores"
+              >
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  <span
+                    className="w-2.5 h-2.5 rounded-full border border-white/50 shadow-xs"
+                    style={{ backgroundColor: TEAM_COLORS_MAP[teamColor]?.bg || '#f97316' }}
+                  />
+                </div>
+                <span className="text-[8px] font-black mt-0.5 leading-none uppercase tracking-tight">Fichas</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-72 p-3 bg-slate-950/98 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2.5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-black text-white">👥 Añadir Jugadores</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">
+                  {TEAM_COLORS_MAP[teamColor]?.label || 'Equipo'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">Toca el color del equipo y luego presiona la cancha para ubicar la ficha táctica:</p>
+              
+              <div className="grid grid-cols-2 gap-1.5">
+                {Object.entries(TEAM_COLORS_MAP).map(([key, item]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setTeamColor(key as PlayerTeamColor);
+                      setActiveTool("add-player");
+                    }}
+                    className={`flex items-center gap-2.5 p-2 rounded-xl border text-xs font-bold transition active:scale-95 ${
+                      teamColor === key && activeTool === "add-player"
+                        ? 'border-emerald-400 bg-slate-800 text-white ring-2 ring-emerald-400/40'
+                        : 'border-slate-800 bg-slate-900/90 text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full border border-white/40 shrink-0 shadow-sm"
+                      style={{ backgroundColor: item.bg }}
+                    />
+                    <span className="truncate">{item.label.replace(/^[^a-zA-ZáéíóúÁÉÍÓÚ]+/, '').trim()}</span>
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* MENÚ 4: 🏋️ MATERIALES DE ENTRENO */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                  ["add-cone", "add-minigoal", "add-dummy", "add-wall", "add-corner-flag", "add-zigzag", "add-dumbbell", "add-ladder", "add-hurdle", "add-hoop", "add-pole"].includes(activeTool)
+                    ? 'bg-amber-500 text-slate-950 border-transparent shadow-md ring-2 ring-amber-300'
+                    : 'bg-slate-900 text-amber-400 border-slate-800'
+                }`}
+                title="Materiales de Entreno"
+              >
+                <span className="text-base leading-none">🏋️</span>
+                <span className="text-[8px] font-bold mt-0.5 leading-none">Objetos</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-80 p-2.5 bg-slate-950/98 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+              <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider px-1">🏋️ Materiales Físicos de Cancha</p>
+              <div className="grid grid-cols-2 gap-1.5 max-h-72 overflow-y-auto pr-0.5">
+                <button
+                  type="button"
+                  onClick={() => setBalls(prev => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }])}
+                  className="flex items-center gap-2 p-2 rounded-xl bg-slate-900 text-slate-200 hover:bg-slate-800 text-xs font-bold transition active:scale-95"
+                >
+                  <span className="text-base">⚽</span>
+                  <span>Balón Oficial</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-wall")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-wall" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🧍‍♂️x5</span>
+                  <span>Barrera (5 Muñecos)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-corner-flag")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-corner-flag" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🚩</span>
+                  <span>Banderín Córner</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-zigzag")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-zigzag" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">⚡</span>
+                  <span>Circuito Zig-Zag</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-dumbbell")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-dumbbell" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🏋️‍♂️</span>
+                  <span>Pesa / Mancuerna</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-cone")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-cone" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🔺</span>
+                  <span>Cono Naranja</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-dummy")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-dummy" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🧍‍♂️</span>
+                  <span>Muñeco Individual</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-hurdle")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-hurdle" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🚧</span>
+                  <span>Valla de Salto</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-ladder")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-ladder" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🪜</span>
+                  <span>Escalera Agilidad</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-hoop")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-hoop" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">⭕</span>
+                  <span>Aro de Salto</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-pole")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-pole" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">📍</span>
+                  <span>Pica / Poste</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTool("add-minigoal")}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-minigoal" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                >
+                  <span className="text-base">🥅</span>
+                  <span>Mini Arco</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* MENÚ 5: 🎯 CAMPO Y GRID */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={`w-10 h-10 flex flex-col items-center justify-center rounded-xl border transition active:scale-95 shrink-0 relative ${
+                  pitchLayout === "half-pitch" || showGuardiolaGrid
+                    ? 'bg-sky-600 text-white border-transparent shadow-md ring-2 ring-sky-400/50'
+                    : 'bg-slate-900 text-sky-400 border-slate-800'
+                }`}
+                title="Cancha y Grid"
+              >
+                <Grid className="h-4 w-4" />
+                <span className="text-[8px] font-bold mt-0.5 leading-none">Campo</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-64 p-2.5 bg-slate-950/98 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+              <p className="text-[10px] font-extrabold text-sky-400 uppercase tracking-wider px-1">🎯 Vista de Cancha & Cuadrícula</p>
+              <div className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPitchLayout(prev => prev === "full-pitch" ? "half-pitch" : "full-pitch")}
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                    pitchLayout === 'half-pitch' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <span className="text-sm">🎯</span>
+                  <div className="text-left">
+                    <div>{pitchLayout === 'half-pitch' ? 'Media Cancha (Activa)' : 'Cancha Completa'}</div>
+                    <div className="text-[10px] opacity-70 font-normal">Cambia entre vista completa o medio campo</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowGuardiolaGrid(p => !p)}
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                    showGuardiolaGrid ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <Grid className="h-4 w-4" />
+                  <div className="text-left">
+                    <div>Grid Táctico {showGuardiolaGrid ? '(ON)' : '(OFF)'}</div>
+                    <div className="text-[10px] opacity-70 font-normal">Líneas de canales y subcanales de Guardiola</div>
+                  </div>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {/* Separador */}
-          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
-
-          {/* OBJETOS DIRECTOS: Balón, Cono */}
-          <button
-            type="button"
-            onClick={() => setBalls(prev => [...prev, { id: `ball-${Date.now()}`, x: 50, y: 32.5 }])}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-xl active:scale-90 transition shrink-0"
-            title="Añadir balón"
-          >⚽</button>
-          <button
-            type="button"
-            onClick={() => { setActiveTool('add-cone'); }}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl border text-xl active:scale-90 transition shrink-0 ${
-              activeTool === 'add-cone' ? 'bg-amber-500 text-slate-950 border-transparent' : 'bg-slate-900 border-slate-800'
-            }`}
-            title="Cono"
-          >🔺</button>
-
-          {/* Separador */}
-          <div className="w-px h-6 bg-white/15 mx-1 shrink-0" />
-
-          {/* LAYOUT: Cancha completa / media, Grid */}
-          <button
-            type="button"
-            onClick={() => setPitchLayout(prev => prev === "full-pitch" ? "half-pitch" : "full-pitch")}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl border text-xl active:scale-90 transition shrink-0 ${
-              pitchLayout === 'half-pitch' ? 'bg-emerald-600 text-white border-transparent ring-2 ring-emerald-300' : 'bg-slate-900 border-slate-800 text-emerald-400'
-            }`}
-            title={pitchLayout === 'half-pitch' ? 'Media Cancha' : 'Cancha Completa'}
-          >🎯</button>
-          <button
-            type="button"
-            onClick={() => setShowGuardiolaGrid(p => !p)}
-            className={`w-10 h-10 flex items-center justify-center rounded-xl border transition active:scale-90 shrink-0 ${
-              showGuardiolaGrid ? 'bg-amber-500 text-slate-950 border-transparent' : 'bg-slate-900 border-slate-800 text-slate-400'
-            }`}
-            title="Grid táctico"
-          ><Grid className="h-4 w-4" /></button>
+          <div className="w-px h-6 bg-white/15 mx-0.5 shrink-0" />
 
           {/* Ocultar barra */}
           <button
             type="button"
             onClick={() => setIsDockMinimized(true)}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 active:scale-90 transition shrink-0 ml-1"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 active:scale-90 transition shrink-0"
             title="Minimizar barra"
           ><Eye className="h-4 w-4" /></button>
         </div>
@@ -2424,13 +2987,13 @@ export function CanchaBCoachBoard({
           {/* Main Floating Category Dock */}
           <div className="bg-slate-950/90 backdrop-blur-xl border border-white/20 p-1.5 rounded-2xl shadow-2xl text-white flex items-center gap-1.5 flex-wrap justify-center max-w-[98vw]">
             
-            {/* 1. CATEGORÍA: EQUIPAMIENTO FÍSICO (Muñecos, Escaleras, Vallas, Aros, Picas, Conos, Arcos) */}
+            {/* 1. CATEGORÍA: EQUIPAMIENTO FÍSICO (Muñecos, Barrera 5, Banderín Córner, Zigzag, Pesa, Escaleras, Vallas, Aros, Picas, Conos, Arcos) */}
             <Popover>
               <PopoverTrigger asChild>
                 <button
                   type="button"
                   className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition active:scale-95 ${
-                    ["add-cone", "add-minigoal", "add-dummy", "add-ladder", "add-hurdle", "add-hoop", "add-pole"].includes(activeTool)
+                    ["add-cone", "add-minigoal", "add-dummy", "add-wall", "add-corner-flag", "add-zigzag", "add-dumbbell", "add-ladder", "add-hurdle", "add-hoop", "add-pole"].includes(activeTool)
                       ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-900/50 ring-2 ring-amber-300"
                       : "bg-slate-900/90 text-amber-400 hover:bg-slate-800 border border-slate-800"
                   }`}
@@ -2441,15 +3004,43 @@ export function CanchaBCoachBoard({
                   <ChevronDown className="h-3 w-3 opacity-60" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="top" className="w-72 p-2 bg-slate-950/95 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
+              <PopoverContent side="top" className="w-80 p-2.5 bg-slate-950/95 border border-slate-800 text-white rounded-2xl shadow-2xl z-[99999] space-y-2">
                 <p className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider px-1">Materiales Físicos de Cancha</p>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-2 gap-1.5 max-h-72 overflow-y-auto pr-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-wall")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-wall" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🧍‍♂️x5</span> <span>Barrera (5 Muñecos)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-corner-flag")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-corner-flag" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🚩</span> <span>Banderín Córner</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-zigzag")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-zigzag" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>⚡</span> <span>Circuito Zig-Zag</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool("add-dumbbell")}
+                    className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-dumbbell" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
+                  >
+                    <span>🏋️‍♂️</span> <span>Pesa / Mancuerna</span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => setActiveTool("add-dummy")}
                     className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-dummy" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
                   >
-                    <span>🧍‍♂️</span> <span>Muñecos Barrera</span>
+                    <span>🧍‍♂️</span> <span>Muñeco Individual</span>
                   </button>
                   <button
                     type="button"
@@ -2477,7 +3068,7 @@ export function CanchaBCoachBoard({
                     onClick={() => setActiveTool("add-pole")}
                     className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition active:scale-95 ${activeTool === "add-pole" ? "bg-amber-500 text-slate-950" : "bg-slate-900 text-slate-200 hover:bg-slate-800"}`}
                   >
-                    <span>🚩</span> <span>Picas / Banderines</span>
+                    <span>📍</span> <span>Picas / Banderines</span>
                   </button>
                   <button
                     type="button"
