@@ -812,22 +812,10 @@ class RendimientoStore {
   private static isSynced = false;
   private static syncPromise: Promise<void> | null = null;
 
-  // ⚡ Cache buster: Se ejecuta INMEDIATAMENTE al cargar el módulo.
-  // Limpia memoryCache Y localStorage si detecta datos mock de sesiones anteriores.
+  // Limpia el memoryCache al cargar el módulo para forzar fetch desde Supabase.
   private static _bustStaleMockData = (() => {
     if (typeof window === "undefined") return;
-    const CACHE_VERSION = "v2026.07.31.v100_no_localstorage";
-    const MOCK_KEYS = [
-      "equipos_dynamics", "entrenadores_dynamics", "jugadores_dynamics", "sesiones_dynamics",
-      "partidos", "partidos_dynamics", "objetivos_jugadores", "pagos_dynamics", "lesiones",
-      "evaluaciones_rapidas", "wellness", "resultados_pruebas"
-    ];
-    // Forzar limpieza completa de localStorage
-    MOCK_KEYS.forEach(k => {
-      localStorage.removeItem(`deportivos_cache_${k}`);
-      localStorage.removeItem(`deportivos_hp_${k}`);
-    });
-    localStorage.setItem("deportivos_cache_version", CACHE_VERSION);
+    // Solo aseguramos que el memoryCache arranque vacío (se pobla desde Supabase)
   })();
 
   public static isStoreSynced(): boolean {
@@ -1061,15 +1049,8 @@ class RendimientoStore {
         categoria: p.categoria, disciplina: p.disciplina, arbitros: p.arbitros,
         estado: p.estado, resultado: p.resultado, organizacion_id: p.organizacion_id,
       }));
-      // Preserve locally-added partidos (e.g. demo seeds) not yet in Supabase
-      let localCachedPartidos: any[] = [];
-      try {
-        const lc = localStorage.getItem("deportivos_cache_partidos");
-        if (lc) localCachedPartidos = JSON.parse(lc);
-      } catch { /* ignore */ }
-      const dbIds = new Set(dbMappedPartidos.map((p: any) => p.id));
-      const localOnly = localCachedPartidos.filter((p: any) => !dbIds.has(p.id));
-      this.memoryCache["partidos"] = [...dbMappedPartidos, ...localOnly];
+      // Solo datos de Supabase — no localStorage
+      this.memoryCache["partidos"] = dbMappedPartidos;
 
       // 9. CARGAS DE JUGADORES (carga individual)
       this.memoryCache["player_load_data"] = dbCargasJugadores.map((c: any) => ({
@@ -1265,27 +1246,8 @@ class RendimientoStore {
         ? dbPlanificaciones
         : (cachedPlans.length > 0 ? cachedPlans : dbPlanificaciones || []);
 
-      // Guardar en localStorage cache para cargas instantáneas al recargar la app
-      const cacheKeys = [
-        "jugadores_dynamics",
-        "pagos_dynamics",
-        "categorias_dynamics",
-        "sedes_dynamics",
-        "entrenadores_dynamics",
-        "equipos_dynamics",
-        "organizaciones_dynamics",
-        "asistencias_dynamics",
-        "planificaciones_dynamics",
-        "wellness",
-        "resultados_pruebas"
-      ];
-      for (const k of cacheKeys) {
-        if (this.memoryCache[k] !== undefined) {
-          try {
-            localStorage.setItem(`deportivos_cache_${k}`, JSON.stringify(this.memoryCache[k]));
-          } catch (err) {}
-        }
-      }
+      // Los datos viven SOLO en memoryCache (poblado desde Supabase).
+      // NO se escribe nada a localStorage — la DB es la única fuente de verdad.
 
       // ──────────────────────────────────────────────────────────────────────
       // ASEGURAR EQUIPOS Y ENTRENADORES REALES PARA LA ORGANIZACIÓN
@@ -1320,24 +1282,24 @@ class RendimientoStore {
 
   public static get<T>(key: string, defaultValue: T): T {
     if (!this.isBrowser()) return defaultValue;
-    
-    // Si no se ha sincronizado, iniciar el proceso asíncronamente desde Supabase
+
+    // Si no se ha sincronizado aún, disparar el proceso desde Supabase
     if (!this.isSynced) {
       this.syncFromSupabase();
     }
 
+    // Solo memoryCache — NUNCA localStorage
     if (this.memoryCache[key] !== undefined) {
       return this.memoryCache[key] as T;
     }
 
-    // Retornar valor por defecto mientras Supabase completa la sincronización
     return defaultValue;
   }
 
   public static async set<T>(key: string, value: T): Promise<void> {
     if (!this.isBrowser()) return;
-    
-    // Guardar en la caché en memoria para acceso síncrono ultra-rápido en UI
+
+    // Solo memoryCache — NO localStorage
     this.memoryCache[key] = value;
 
     // Disparar sincronización asíncrona hacia Supabase PostgreSQL en segundo plano
@@ -2796,30 +2758,16 @@ class RendimientoStore {
 
   // --- SYSTEM USERS ---
   public static getUsuarios(): SistemaUsuario[] {
-    const USERS_MIGRATION_VERSION = "v2-alex-only";
     const superAdmin: SistemaUsuario = { id: "u-1", nombre: "Alex", email: "alex@mail.com", role: "superadmin", sedeId: "s1", sede: "Sede Central", estado: "activo", fechaCreacion: "2026-01-01", organizacion_id: "00000000-0000-0000-0000-000000000000" };
 
     if (!this.isBrowser()) return [superAdmin];
 
-    const migrationDone = localStorage.getItem("deportivos_usuarios_migration");
-    if (migrationDone !== USERS_MIGRATION_VERSION) {
-      localStorage.removeItem("deportivos_hp_usuarios");
-      localStorage.setItem("deportivos_usuarios_migration", USERS_MIGRATION_VERSION);
-      localStorage.setItem("deportivos_hp_usuarios", JSON.stringify([superAdmin]));
-    }
+    // Usuarios en memoryCache — NUNCA localStorage
+    let list: SistemaUsuario[] = this.memoryCache["usuarios"] || [superAdmin];
 
-    let list: SistemaUsuario[] = [];
-    try {
-      const stored = localStorage.getItem("deportivos_hp_usuarios");
-      list = stored ? JSON.parse(stored) : [superAdmin];
-    } catch (e) {
-      list = [superAdmin];
-    }
-
-    // Always ensure alex is in the list
     if (!list.some(u => u.email === "alex@mail.com")) {
-      list.unshift(superAdmin);
-      localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(list));
+      list = [superAdmin, ...list];
+      this.memoryCache["usuarios"] = list;
     }
 
     const activeOrgId = this.getActiveOrganizacionId();
@@ -2827,12 +2775,7 @@ class RendimientoStore {
   }
 
   public static addUsuario(u: Omit<SistemaUsuario, "id" | "estado" | "codigoAcceso" | "fechaCreacion">): SistemaUsuario {
-    let list: SistemaUsuario[] = [];
-    try {
-      const stored = localStorage.getItem("deportivos_hp_usuarios");
-      list = stored ? JSON.parse(stored) : [];
-    } catch (e) {}
-
+    const list: SistemaUsuario[] = this.memoryCache["usuarios"] || [];
     const sedeName = sedes.find(s => s.id === u.sedeId)?.nombre ?? "Sede Central";
     const randomCode = `ATH-${Math.floor(1000 + Math.random() * 9000)}`;
     const activeOrgId = this.getActiveOrganizacionId();
@@ -2842,7 +2785,7 @@ class RendimientoStore {
       organizacion_id: activeOrgId
     };
     list.push(newUser);
-    localStorage.setItem("deportivos_hp_usuarios", JSON.stringify(list));
+    this.memoryCache["usuarios"] = list;
     return newUser;
   }  // --- JUGADORES DYNAMICS ---
   public static getJugadores(): StoreJugador[] {
@@ -3265,17 +3208,13 @@ class RendimientoStore {
     return stored.filter(p => p.organizacion_id === activeOrg);
   }
 
-  /** Inserta un partido nuevo directamente en memoryCache + localStorage cache */
+  /** Inserta un partido nuevo directamente en memoryCache y Supabase */
   public static addPartido(partido: any): any {
     if (!this.isBrowser()) return partido;
     const activeOrg = this.getActiveOrganizacionId();
     const newPartido = { ...partido, organizacion_id: activeOrg };
-    // Initialize memoryCache["partidos"] if not present
     if (!this.memoryCache["partidos"]) this.memoryCache["partidos"] = [];
     this.memoryCache["partidos"] = [newPartido, ...this.memoryCache["partidos"]];
-    try {
-      localStorage.setItem("deportivos_cache_partidos", JSON.stringify(this.memoryCache["partidos"]));
-    } catch (e) { /* ignore */ }
     return newPartido;
   }
 
