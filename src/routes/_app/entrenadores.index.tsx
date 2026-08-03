@@ -526,7 +526,7 @@ function EntrenadoresPage() {
           <Button onClick={() => setOpenCreateCoach(true)} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-[8px] px-4 py-2 text-sm font-medium gap-1.5">
             <Plus className="h-4 w-4" /> Nuevo Colaborador
           </Button>
-          <Button variant="outline" onClick={fetchAllDataFromDB} className="text-xs font-normal h-9 rounded-xl border-border gap-1.5">
+          <Button variant="outline" onClick={load} className="text-xs font-normal h-9 rounded-xl border-border gap-1.5">
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Sincronizar
           </Button>
         </div>
