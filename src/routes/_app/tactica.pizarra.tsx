@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TacticalBoard } from "@/components/tactical-board";
+import { CanchaBCoachBoard } from "@/components/cancha-bcoach-board";
 import { supabase } from "@/lib/supabase";
 import {
   TacticalStore, SportType, sportLabels, BoardSession,
@@ -200,6 +201,7 @@ function PizarraTactica() {
     if (saved && saved.id !== "board-default") return saved.formationId;
     return "f-433";
   });
+  const [suiteMode, setSuiteMode] = useState<"bcoach" | "clasica">("bcoach");
   const [viewTab, setViewTab] = useState<"dashboard" | "lienzo">("dashboard");
   const [dashboardSearch, setDashboardSearch] = useState("");
   const [dashboardTag, setDashboardTag] = useState<string | null>(null);
@@ -675,6 +677,33 @@ function PizarraTactica() {
         </div>
 
         <div className="flex flex-wrap gap-3 items-end">
+          {/* Suite Selector: bCoach vs Clásica */}
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-bold text-violet-500 tracking-wider mb-1">Tipo de Pizarra</span>
+            <div className="flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 h-9 items-center">
+              <button
+                onClick={() => setSuiteMode("bcoach")}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-7 flex items-center gap-1 ${
+                  suiteMode === "bcoach"
+                    ? "bg-violet-600 text-white shadow-sm font-extrabold"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+                }`}
+              >
+                ⚡ Pizarra bCoach Élite
+              </button>
+              <button
+                onClick={() => setSuiteMode("clasica")}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all h-7 flex items-center gap-1 ${
+                  suiteMode === "clasica"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+                }`}
+              >
+                📊 Pizarra Clásica
+              </button>
+            </div>
+          </div>
+
           {/* Mode Switcher */}
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Modo de Pizarra</span>
@@ -871,18 +900,28 @@ function PizarraTactica() {
         </Card>
       )}
 
-      {/* Main Layout: Board above, sidebar below on mobile/tablet */}
-      <div className="flex flex-col xl:flex-row gap-5">
-        {/* Canvas */}
-        <div className="flex-1 min-w-0 w-full order-1">
-          <TacticalBoard
-            sport={selectedSport}
-            slots={selectedFormation?.slots ?? []}
-            readonly={false}
-            onSessionChange={handleSessionChange}
-            initialSession={boardSession}
+      {/* Main Layout: bCoach Suite or Clásica Board */}
+      {suiteMode === "bcoach" ? (
+        <div className="w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 min-h-[680px]">
+          <CanchaBCoachBoard
+            category={selectedTeam?.categoria || "Sub-13"}
+            matchTitle={selectedMatch ? `${selectedMatch.equipo} vs ${selectedMatch.rival}` : "Plan Táctico Élite"}
+            initialSport={selectedSport}
+            initialMode={boardMode === "partido" ? "matchday" : "training"}
           />
         </div>
+      ) : (
+        <div className="flex flex-col xl:flex-row gap-5">
+          {/* Canvas */}
+          <div className="flex-1 min-w-0 w-full order-1">
+            <TacticalBoard
+              sport={selectedSport}
+              slots={selectedFormation?.slots ?? []}
+              readonly={false}
+              onSessionChange={handleSessionChange}
+              initialSession={boardSession}
+            />
+          </div>
 
 
         {/* Right sidebar */}
@@ -1153,6 +1192,7 @@ function PizarraTactica() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

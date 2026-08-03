@@ -403,7 +403,8 @@ export function CanchaBCoachBoard({
   category = "Sub-9",
   rivalName = "U9 San Jose FC",
   matchTitle = "Partido Oficial",
-  initialMode = "matchday",
+  initialMode = "training",
+  initialSport = "football",
   onClose,
 }: {
   teamName?: string;
@@ -411,10 +412,12 @@ export function CanchaBCoachBoard({
   rivalName?: string;
   matchTitle?: string;
   initialMode?: "training" | "matchday";
+  initialSport?: SportType;
   onClose?: () => void;
 }) {
   // Mode Selector: "training" vs "matchday" (Plan de Juego)
   const [boardMode, setBoardMode] = useState<"training" | "matchday">(initialMode);
+  const [currentSport, setCurrentSport] = useState<SportType>(initialSport);
   const [activePhase, setActivePhase] = useState<"ataque" | "defensa" | "transicion" | "abp">("ataque");
   const [showCamerinoModal, setShowCamerinoModal] = useState<boolean>(false);
   const [substitutionsList, setSubstitutionsList] = useState<Array<{ id: string; outName: string; inName: string; min: string }>>([]);
@@ -1240,7 +1243,7 @@ export function CanchaBCoachBoard({
           />
         ) : !activeVideoUrl ? (
           // Green 2D tactical field: Full pitch or Half pitch
-          pitchLayout === "half-pitch" ? <FootballHalfField /> : <SportFieldInner sport="football" />
+          pitchLayout === "half-pitch" ? <FootballHalfField /> : <SportFieldInner sport={currentSport} />
         ) : null}
 
         {/* Guardiola 5-Corridor Grid Overlay */}
@@ -2052,6 +2055,43 @@ export function CanchaBCoachBoard({
 
           {/* Right Floating Quick Tools */}
           <div className="pointer-events-auto flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2 py-1 rounded-full shadow-2xl flex-wrap">
+            {/* Selector de Deporte / Cancha */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-600/90 hover:bg-violet-500 text-[10px] font-extrabold text-white transition shadow-md shadow-violet-900/50"
+                  title="Cambiar Cancha / Deporte"
+                >
+                  <Grid className="h-3 w-3 text-violet-200" />
+                  <span className="capitalize">{currentSport === "football" ? "⚽ Fútbol" : currentSport === "basketball" ? "🏀 Baloncesto" : currentSport === "volleyball" ? "🏐 Voleibol" : currentSport === "futsal" ? "⚽ Fútsal" : currentSport === "rugby" ? "🏉 Rugby" : currentSport === "tennis" ? "🎾 Tenis" : currentSport === "swimming" ? "🏊 Natación" : currentSport === "martial-arts" ? "🥋 Tatami" : currentSport === "athletics" ? "🏃 Atletismo" : currentSport}</span>
+                  <ChevronDown className="h-3 w-3 opacity-70" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-52 bg-slate-950/95 border-slate-800 text-white p-2 rounded-2xl shadow-2xl z-50 space-y-1">
+                <span className="text-[9px] font-bold text-slate-400 uppercase px-2 py-0.5 block">Cancha / Disciplina</span>
+                {[
+                  { id: "football", label: "⚽ Fútbol (11v11)" },
+                  { id: "futsal", label: "⚽ Fútsal (5v5)" },
+                  { id: "basketball", label: "🏀 Baloncesto" },
+                  { id: "volleyball", label: "🏐 Voleibol" },
+                  { id: "rugby", label: "🏉 Rugby" },
+                  { id: "tennis", label: "🎾 Tenis / Pádel" },
+                  { id: "swimming", label: "🏊 Natación (Piscina)" },
+                  { id: "martial-arts", label: "🥋 Artes Marciales (Tatami)" },
+                  { id: "athletics", label: "🏃 Atletismo (Pista)" },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setCurrentSport(s.id as SportType)}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl text-xs font-bold transition flex justify-between items-center ${currentSport === s.id ? "bg-violet-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+                  >
+                    <span>{s.label}</span>
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
             {/* Modo Camerino / Entretiempo */}
             {boardMode === "matchday" && (
               <button
