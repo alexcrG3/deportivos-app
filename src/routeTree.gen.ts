@@ -34,6 +34,7 @@ import { Route as AppProspectosRouteImport } from './routes/_app/prospectos'
 import { Route as AppPosicionesRouteImport } from './routes/_app/posiciones'
 import { Route as AppPlantillasRouteImport } from './routes/_app/plantillas'
 import { Route as AppPlaneamientoRouteImport } from './routes/_app/planeamiento'
+import { Route as AppPersonalRouteImport } from './routes/_app/personal'
 import { Route as AppPartidosRouteImport } from './routes/_app/partidos'
 import { Route as AppPagosRouteImport } from './routes/_app/pagos'
 import { Route as AppOperacionRouteImport } from './routes/_app/operacion'
@@ -234,6 +235,11 @@ const AppPlantillasRoute = AppPlantillasRouteImport.update({
 const AppPlaneamientoRoute = AppPlaneamientoRouteImport.update({
   id: '/planeamiento',
   path: '/planeamiento',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPersonalRoute = AppPersonalRouteImport.update({
+  id: '/personal',
+  path: '/personal',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPartidosRoute = AppPartidosRouteImport.update({
@@ -673,6 +679,7 @@ export interface FileRoutesByFullPath {
   '/operacion': typeof AppOperacionRoute
   '/pagos': typeof AppPagosRoute
   '/partidos': typeof AppPartidosRoute
+  '/personal': typeof AppPersonalRoute
   '/planeamiento': typeof AppPlaneamientoRoute
   '/plantillas': typeof AppPlantillasRoute
   '/posiciones': typeof AppPosicionesRoute
@@ -775,6 +782,7 @@ export interface FileRoutesByTo {
   '/operacion': typeof AppOperacionRoute
   '/pagos': typeof AppPagosRoute
   '/partidos': typeof AppPartidosRoute
+  '/personal': typeof AppPersonalRoute
   '/planeamiento': typeof AppPlaneamientoRoute
   '/plantillas': typeof AppPlantillasRoute
   '/posiciones': typeof AppPosicionesRoute
@@ -878,6 +886,7 @@ export interface FileRoutesById {
   '/_app/operacion': typeof AppOperacionRoute
   '/_app/pagos': typeof AppPagosRoute
   '/_app/partidos': typeof AppPartidosRoute
+  '/_app/personal': typeof AppPersonalRoute
   '/_app/planeamiento': typeof AppPlaneamientoRoute
   '/_app/plantillas': typeof AppPlantillasRoute
   '/_app/posiciones': typeof AppPosicionesRoute
@@ -983,6 +992,7 @@ export interface FileRouteTypes {
     | '/operacion'
     | '/pagos'
     | '/partidos'
+    | '/personal'
     | '/planeamiento'
     | '/plantillas'
     | '/posiciones'
@@ -1085,6 +1095,7 @@ export interface FileRouteTypes {
     | '/operacion'
     | '/pagos'
     | '/partidos'
+    | '/personal'
     | '/planeamiento'
     | '/plantillas'
     | '/posiciones'
@@ -1187,6 +1198,7 @@ export interface FileRouteTypes {
     | '/_app/operacion'
     | '/_app/pagos'
     | '/_app/partidos'
+    | '/_app/personal'
     | '/_app/planeamiento'
     | '/_app/plantillas'
     | '/_app/posiciones'
@@ -1430,6 +1442,13 @@ declare module '@tanstack/react-router' {
       path: '/planeamiento'
       fullPath: '/planeamiento'
       preLoaderRoute: typeof AppPlaneamientoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/personal': {
+      id: '/_app/personal'
+      path: '/personal'
+      fullPath: '/personal'
+      preLoaderRoute: typeof AppPersonalRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/partidos': {
@@ -2113,6 +2132,7 @@ interface AppRouteChildren {
   AppOperacionRoute: typeof AppOperacionRoute
   AppPagosRoute: typeof AppPagosRoute
   AppPartidosRoute: typeof AppPartidosRoute
+  AppPersonalRoute: typeof AppPersonalRoute
   AppPlaneamientoRoute: typeof AppPlaneamientoRoute
   AppPlantillasRoute: typeof AppPlantillasRoute
   AppPosicionesRoute: typeof AppPosicionesRoute
@@ -2178,6 +2198,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppOperacionRoute: AppOperacionRoute,
   AppPagosRoute: AppPagosRoute,
   AppPartidosRoute: AppPartidosRoute,
+  AppPersonalRoute: AppPersonalRoute,
   AppPlaneamientoRoute: AppPlaneamientoRoute,
   AppPlantillasRoute: AppPlantillasRoute,
   AppPosicionesRoute: AppPosicionesRoute,
