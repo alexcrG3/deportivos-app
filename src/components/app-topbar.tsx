@@ -27,6 +27,9 @@ import { NotificationCenterPopover } from "@/components/NotificationCenterPopove
 import { InteractiveGuidesModal } from "@/components/InteractiveGuidesModal";
 import { BookOpen, Rocket } from "lucide-react";
 
+import { supabase } from "@/lib/supabase";
+import { ensureStaffDBDataSeeded } from "@/lib/seed-staff-db";
+
 export function AppTopbar() {
   const navigate = useNavigate();
   const { theme, toggle } = useTheme();
@@ -53,25 +56,34 @@ export function AppTopbar() {
   const displayRole = role === "admin" ? "Administrador" : role === "coach" ? "Coach Deportivo" : "Padre de Familia";
   const initials = displayName.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase();
 
-  const [allCoaches, setAllCoaches] = useState<string[]>([]);
+  const DEFAULT_COACHES = ["Tiffany Eduarte", "Carlos Araya", "Edgar Calderón", "Eduardo Villa"];
+  const [allCoaches, setAllCoaches] = useState<string[]>(DEFAULT_COACHES);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const updateCoaches = async () => {
+      let coachNames: string[] = [];
       try {
+        await ensureStaffDBDataSeeded();
         const { data } = await supabase.from("entrenadores").select("nombre").order("nombre");
         if (data && data.length > 0) {
-          const names = Array.from(new Set(data.map((e: any) => e.nombre as string))).filter(Boolean);
-          setAllCoaches(names);
-          return;
+          coachNames = Array.from(new Set(data.map((e: any) => e.nombre as string))).filter(Boolean);
         }
       } catch (e) {
         console.error("Error fetching coaches from DB:", e);
       }
-      const storeCoaches = RendimientoStore.getEntrenadores() || [];
-      const names = Array.from(new Set(storeCoaches.map((e: any) => e.nombre as string))).filter(Boolean);
-      setAllCoaches(names);
+
+      if (coachNames.length === 0) {
+        const storeCoaches = RendimientoStore.getEntrenadores() || [];
+        coachNames = Array.from(new Set(storeCoaches.map((e: any) => e.nombre as string))).filter(Boolean);
+      }
+
+      if (coachNames.length === 0) {
+        coachNames = DEFAULT_COACHES;
+      }
+
+      setAllCoaches(coachNames);
     };
 
     updateCoaches();
