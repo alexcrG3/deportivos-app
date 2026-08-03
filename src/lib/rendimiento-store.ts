@@ -2847,24 +2847,26 @@ class RendimientoStore {
   }  // --- JUGADORES DYNAMICS ---
   public static getJugadores(): StoreJugador[] {
     if (!this.isBrowser()) return [];
-    
+
+    const activeOrg = this.getActiveOrganizacionId();
+    const isDemoOrg = !activeOrg || activeOrg === "00000000-0000-0000-0000-000000000000";
+
     let stored = this.get<StoreJugador[]>("jugadores_dynamics", null as any);
-    
-    if (stored === null || stored.length === 0) {
-      // Inyectar datos iniciales
+
+    // Solo inyectar datos demo si es la org por defecto y no hay datos
+    if ((stored === null || stored.length === 0) && isDemoOrg) {
       const defaultPlayers = jugadores && jugadores.length > 0 ? jugadores : [];
       this.set("jugadores_dynamics", defaultPlayers);
       stored = defaultPlayers;
+    } else if (stored === null) {
+      stored = [];
     }
 
     let hasUpdates = false;
     const processed = stored.map(j => {
-      if (!j.madreNombre || !j.padreNombre) {
-        hasUpdates = true;
-      }
+      if (!j.madreNombre || !j.padreNombre) hasUpdates = true;
       return ensureParentData(j);
     });
-
     if (hasUpdates) {
       this.set("jugadores_dynamics", processed);
       stored = processed;
@@ -2872,13 +2874,8 @@ class RendimientoStore {
       stored = processed;
     }
 
-    const activeOrg = this.getActiveOrganizacionId();
-    const isRealOrg = activeOrg && activeOrg !== "00000000-0000-0000-0000-000000000000";
-    let filtered = stored.filter(j => j.organizacion_id === activeOrg || (!j.organizacion_id && isRealOrg));
-    if (filtered.length === 0 && stored.length > 0) {
-      filtered = stored.map(j => ({ ...j, organizacion_id: activeOrg }));
-      this.set("jugadores_dynamics", filtered);
-    }
+    // ISOLACIÓN ESTRICTA: cada org solo ve sus propios jugadores
+    const filtered = stored.filter(j => j.organizacion_id === activeOrg);
     return filtered.sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
   }
 
@@ -2999,8 +2996,9 @@ class RendimientoStore {
     if (!this.isBrowser()) return [];
     const activeOrg = this.getActiveOrganizacionId();
     const stored = this.get<StoreEntrenador[]>("entrenadores_dynamics", []);
-    return stored.filter(e => 
-      (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
+    // ISOLACIÓN ESTRICTA: cada org ve solo sus propios entrenadores
+    return stored.filter(e =>
+      e.organizacion_id === activeOrg &&
       !e.id?.startsWith("t_main_") && !e.id?.startsWith("t_carlos_")
     );
   }
@@ -3106,15 +3104,15 @@ class RendimientoStore {
   // --- CATEGORIAS DYNAMICS ---
   public static getCategorias(): any[] {
     if (!this.isBrowser()) return [];
-    const stored = this.get<any[]>("categorias_dynamics", categorias);
     const activeOrg = this.getActiveOrganizacionId();
+    const isDemoOrg = !activeOrg || activeOrg === "00000000-0000-0000-0000-000000000000";
+    // Solo carga datos demo para la org por defecto
+    const stored = this.get<any[]>("categorias_dynamics", isDemoOrg ? categorias : []);
     const filtered = stored.map(cat => {
       const val = cat.costo_mensual !== undefined && cat.costo_mensual !== null ? cat.costo_mensual : cat.costoMensual;
-      return {
-        ...cat,
-        costoMensual: val !== undefined && val !== null ? Number(val) : 30000
-      };
-    }).filter(c => c.organizacion_id === activeOrg || (!c.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+      return { ...cat, costoMensual: val !== undefined && val !== null ? Number(val) : 30000 };
+    // ISOLACIÓN ESTRICTA
+    }).filter(c => c.organizacion_id === activeOrg);
 
     return filtered.sort((a, b) => this.parseCategoryAge(a.nombre || a.categoria) - this.parseCategoryAge(b.nombre || b.categoria));
   }
@@ -3239,21 +3237,21 @@ class RendimientoStore {
   }
   // --- EQUIPOS DYNAMICS ---
   public static getEquipos(): any[] {
-    if (!this.isBrowser()) return equipos;
+    if (!this.isBrowser()) return [];
     const activeOrg = this.getActiveOrganizacionId();
-    
-    // Purga de localStorage para evitar que datos cacheados corrompan la UI
-    localStorage.removeItem("deportivos_cache_equipos_dynamics");
-    localStorage.removeItem("deportivos_hp_equipos_dynamics");
+    const isDemoOrg = !activeOrg || activeOrg === "00000000-0000-0000-0000-000000000000";
 
+    // Para la org demo carga los equipos mock; para orgs nuevas parte de cero
     let source = this.memoryCache["equipos_dynamics"];
     if (!source || source.length === 0) {
-      source = equipos;
-      this.memoryCache["equipos_dynamics"] = equipos;
+      const stored = this.get<any[]>("equipos_dynamics", isDemoOrg ? equipos : []);
+      source = stored;
+      this.memoryCache["equipos_dynamics"] = stored;
     }
 
-    const filtered = (source || []).filter((e: any) => 
-      (e.organizacion_id === activeOrg || (!e.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000")) &&
+    // ISOLACIÓN ESTRICTA: solo equipos de la org activa
+    const filtered = (source || []).filter((e: any) =>
+      e.organizacion_id === activeOrg &&
       !e.nombre?.includes("U5") && e.categoria !== "Sub-5"
     );
     return filtered.sort((a: any, b: any) => this.parseCategoryAge(a.categoria || a.nombre) - this.parseCategoryAge(b.categoria || b.nombre));
@@ -3263,7 +3261,8 @@ class RendimientoStore {
     if (!this.isBrowser()) return [];
     const activeOrg = this.getActiveOrganizacionId();
     const stored = this.get<any[]>("partidos", []);
-    return stored.filter(p => p.organizacion_id === activeOrg || (!p.organizacion_id && activeOrg === "00000000-0000-0000-0000-000000000000"));
+    // ISOLACIÓN ESTRICTA
+    return stored.filter(p => p.organizacion_id === activeOrg);
   }
 
   /** Inserta un partido nuevo directamente en memoryCache + localStorage cache */
@@ -3368,45 +3367,11 @@ class RendimientoStore {
     const activeOrg = this.getActiveOrganizacionId();
     const stored = this.get<any[] | null>("sedes_dynamics", []);
 
-    const defaultSedes = [
-      {
-        id: `sede_central_${activeOrg.slice(0, 8)}`,
-        nombre: "Sede Central — Campus Deportivo",
-        direccion: "Campus Deportivo Principal de la Academia",
-        ciudad: "San José",
-        telefono: "+506 2222-0000",
-        contacto: "Administración General",
-        canchas_count: 4,
-        canchas: JSON.stringify([
-          "Cancha Principal (Grama Natural 11v11)",
-          "Cancha Sintética 1 (Fútbol 9)",
-          "Cancha 2 (Fútbol 7)",
-          "Gimnasio de Alto Rendimiento"
-        ]),
-        estado: "activo",
-        organizacion_id: activeOrg,
-      },
-    ];
+    if (!stored || stored.length === 0) return [];
 
-    if (!stored || stored.length === 0) {
-      this.memoryCache["sedes_dynamics"] = defaultSedes;
-      // Guardar en Supabase
-      supabase.from("sedes").upsert(defaultSedes).then(({ error }) => {
-        if (error) console.error("[Supabase] Error creando sede por defecto:", error.message);
-      });
-      return defaultSedes;
-    }
-
-    const filtered = stored.filter(s => s.organizacion_id === activeOrg || !s.organizacion_id);
-    if (filtered.length === 0) {
-      this.memoryCache["sedes_dynamics"] = defaultSedes;
-      supabase.from("sedes").upsert(defaultSedes).then(({ error }) => {
-        if (error) console.error("[Supabase] Error upsert sede filtrada:", error.message);
-      });
-      return defaultSedes;
-    }
-
-    return filtered.map(s => ({ ...s, organizacion_id: activeOrg }));
+    // ISOLACIÓN ESTRICTA: solo sedes de la org activa
+    const filtered = stored.filter(s => s.organizacion_id === activeOrg);
+    return filtered;
   }
 
   public static addSede(sede: any): any {
