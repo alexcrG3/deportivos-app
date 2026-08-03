@@ -2,19 +2,20 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=nexus4" />
+    <link rel="icon" type="image/png" href="/favicon.png?v=nexus4" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=nexus4" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <meta name="theme-color" content="#2563eb" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DeportivOS" />
-    <meta name="application-name" content="DeportivOS" />
-    <title>DeportivOS - Academia Deportiva Élite Sports</title>
-    <script type="module" crossorigin src="/assets/index-B1-HDtYh.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/styles-DQsm8eCQ.css">
+    <meta name="apple-mobile-web-app-title" content="NexusSport" />
+    <meta name="application-name" content="NexusSport" />
+    <title>NexusSport OS - Academia Deportiva Élite Sports</title>
+    <script type="module" crossorigin src="/assets/index-DmD9sEtI.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/styles-CpCgjUQp.css">
   </head>
   <body>
     <div id="root"></div>
@@ -22,7 +23,7 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then((reg) => {
-            console.log('DeportivOS PWA SW registrado con éxito:', reg.scope);
+            console.log('NexusSport PWA SW registrado con éxito:', reg.scope);
           }).catch((err) => {
             console.log('Error registrando PWA SW:', err);
           });

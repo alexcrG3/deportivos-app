@@ -129,10 +129,10 @@ function ConvocatoriasPage() {
     }
 
     // Auto-sincronizar los partidos convocados en RendimientoStore para que aparezcan en Fixture / Calendario de Competiciones
-    const existingPartidos = RendimientoStore.getPartidos();
+    const existingPartidos = RendimientoStore.getPartidos() || [];
     mapped.forEach((c: any) => {
       if (c.tipo === "partido" || !c.tipo) {
-        const found = existingPartidos.find(p => p.convocatoriaId === c.id || p.id === `partido_${c.id}`);
+        const found = existingPartidos.find((p: any) => p && (p.convocatoriaId === c.id || p.id === `partido_${c.id}`));
         if (!found) {
           RendimientoStore.addPartido({
             id: `partido_${c.id}`,

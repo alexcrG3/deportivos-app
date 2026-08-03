@@ -13,12 +13,14 @@ export function CoachOsBanner() {
   // Only show for admins viewing a coach
   if (role !== "admin" || !selectedCoachId || !selectedCoachName) return null;
 
-  const initials = selectedCoachName
-    .split(" ")
-    .map((n) => n[0])
+  const safeName = String(selectedCoachName || "").trim();
+  const initials = safeName
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((n) => n[0] || "")
     .slice(0, 2)
     .join("")
-    .toUpperCase();
+    .toUpperCase() || "CO";
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 mb-4 shadow-sm">

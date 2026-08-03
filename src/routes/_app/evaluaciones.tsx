@@ -38,8 +38,12 @@ function EvaluacionesPage() {
     let relevantPlayers = allPlayers;
 
     if (effectiveCoachName) {
+      const activeCoachLower = String(effectiveCoachName).toLowerCase().trim();
       const coachTeams = RendimientoStore.getEquipos()
-        .filter((e: any) => e.entrenador === effectiveCoachName);
+        .filter((e: any) => {
+          const ent = String(e.entrenador || e.entrenador_nombre || "").toLowerCase().trim();
+          return ent && (ent.includes(activeCoachLower) || activeCoachLower.includes(ent));
+        });
       if (coachTeams.length > 0) {
         const cats = coachTeams.map((t: any) => (t.categoria || t.nombre || "").toLowerCase());
         relevantPlayers = allPlayers.filter(p => {
@@ -47,8 +51,8 @@ function EvaluacionesPage() {
           return cats.some(c => pCat.includes(c) || c.includes(pCat));
         });
       } else {
-        // If coach has no teams, they have no players to evaluate
-        relevantPlayers = [];
+        // Fallback: if no specific team filter matches, display all players instead of crashing/clearing
+        relevantPlayers = allPlayers;
       }
     }
 

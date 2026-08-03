@@ -85,15 +85,15 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
             const matchedUser = dbUsers && dbUsers.length > 0 ? dbUsers[0] : null;
 
-            if (matchedUser) {
-              const rawRole = matchedUser.role.toLowerCase();
+            if (matchedUser && matchedUser.role) {
+              const rawRole = String(matchedUser.role).toLowerCase();
               if (rawRole.includes("admin") || rawRole.includes("staff") || rawRole.includes("director") || rawRole === "direccion") {
                 resolvedRole = "admin";
               } else if (rawRole.includes("fisio") || rawRole.includes("medico") || rawRole.includes("terapeuta")) {
                 resolvedRole = "fisioterapeuta";
               } else if (rawRole.includes("coach") || rawRole.includes("entrenador") || rawRole.includes("coaches")) {
                 resolvedRole = "coach";
-                resolvedCoachName = matchedUser.nombre;
+                resolvedCoachName = matchedUser.nombre || "";
               } else {
                 resolvedRole = "padres";
               }
@@ -108,8 +108,8 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
             } else {
               // Fallback to check if it's a parent email of any player
               const players = RendimientoStore.getJugadores();
-              const isParent = players.some(
-                (p) => p.correoEncargado && p.correoEncargado.trim().toLowerCase() === authEmail.trim().toLowerCase()
+              const isParent = (players || []).some(
+                (p) => p && p.correoEncargado && String(p.correoEncargado).trim().toLowerCase() === authEmail.trim().toLowerCase()
               );
               if (isParent) {
                 resolvedRole = "padres";
@@ -122,13 +122,13 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
 
         // Prioritize manually simulated role in localStorage first to support simulator toggles.
         const storedRole = (localStorage.getItem("user-role") as UserRole | null) || resolvedRole;
-        if (storedRole === "admin" || storedRole === "coach" || storedRole === "padres") {
+        if (storedRole === "admin" || storedRole === "coach" || storedRole === "padres" || storedRole === "fisioterapeuta") {
           setRoleState(storedRole);
           localStorage.setItem("user-role", storedRole);
         }
 
         const finalCoachName = resolvedCoachName || localStorage.getItem("coach-name");
-        if (finalCoachName) {
+        if (finalCoachName && finalCoachName !== "undefined" && finalCoachName !== "null") {
           setCoachNameState(finalCoachName);
           localStorage.setItem("coach-name", finalCoachName);
         }
@@ -157,7 +157,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
       const storedCoachId = sessionStorage.getItem("selected_coach_id");
       const storedCoachName = sessionStorage.getItem("selected_coach_name");
       const storedCoachIdent = sessionStorage.getItem("selected_coach_identificacion");
-      if (storedCoachId && storedCoachName) {
+      if (storedCoachId && storedCoachName && storedCoachName !== "undefined" && storedCoachName !== "null") {
         setSelectedCoachId(storedCoachId);
         setSelectedCoachName(storedCoachName);
         setSelectedCoachIdentificacion(storedCoachIdent || null);
@@ -212,14 +212,19 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setSelectedCoach = (id: string | null, name: string | null, identificacion: string | null = null) => {
-    setSelectedCoachId(id);
-    setSelectedCoachName(name);
-    setSelectedCoachIdentificacion(identificacion);
+    const validId = id || null;
+    const validName = name && name !== "undefined" && name !== "null" ? name : null;
+    const validIdent = identificacion && identificacion !== "undefined" && identificacion !== "null" ? identificacion : null;
+
+    setSelectedCoachId(validId);
+    setSelectedCoachName(validName);
+    setSelectedCoachIdentificacion(validIdent);
+
     if (typeof window !== "undefined") {
-      if (id && name) {
-        sessionStorage.setItem("selected_coach_id", id);
-        sessionStorage.setItem("selected_coach_name", name);
-        sessionStorage.setItem("selected_coach_identificacion", identificacion || "");
+      if (validId && validName) {
+        sessionStorage.setItem("selected_coach_id", validId);
+        sessionStorage.setItem("selected_coach_name", validName);
+        sessionStorage.setItem("selected_coach_identificacion", validIdent || "");
       } else {
         sessionStorage.removeItem("selected_coach_id");
         sessionStorage.removeItem("selected_coach_name");
