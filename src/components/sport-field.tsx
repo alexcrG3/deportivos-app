@@ -59,9 +59,9 @@ function FootballField() {
       {/* Penalty spots */}
       <circle cx={11} cy={32.5} r={0.4} fill={FIELD_COLORS.line} />
       <circle cx={89} cy={32.5} r={0.4} fill={FIELD_COLORS.line} />
-      {/* Penalty arcs */}
-      <path d={`M 18.5,24 A 9.15,9.15 0 0,0 18.5,41`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
-      <path d={`M 81.5,24 A 9.15,9.15 0 0,1 81.5,41`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
+      {/* Penalty arcs (Media Luna fuera del área) */}
+      <path d={`M 18.5,27.26 A 9.15,9.15 0 0,1 18.5,37.74`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
+      <path d={`M 81.5,27.26 A 9.15,9.15 0 0,0 81.5,37.74`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
       {/* Corner arcs */}
       <path d={`M 2,3.5 A 1.5,1.5 0 0,1 3.5,2`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
       <path d={`M 96.5,2 A 1.5,1.5 0 0,1 98,3.5`} fill="none" stroke={FIELD_COLORS.line} strokeWidth={0.3} />
