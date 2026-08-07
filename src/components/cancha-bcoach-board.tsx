@@ -389,8 +389,8 @@ function FootballHalfField() {
       <rect x={0} y={28.5} width={2} height={8} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth={0.5} />
       {/* Penalty spot */}
       <circle cx={11} cy={32.5} r={0.4} fill="rgba(255,255,255,0.85)" />
-      {/* Penalty arc (Media Luna fuera del área) */}
-      <path d="M 18.5,27.26 A 9.15,9.15 0 0,1 18.5,37.74" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
+      {/* Penalty arc (Media Luna amplia y redonda fuera del área) */}
+      <path d="M 18.5,23 A 11.5,11.5 0 0,1 18.5,42" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.35} />
       {/* Corner arcs */}
       <path d="M 2,3.5 A 1.5,1.5 0 0,1 3.5,2" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
       <path d="M 2,61.5 A 1.5,1.5 0 0,0 3.5,63" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth={0.3} />
