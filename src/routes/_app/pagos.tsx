@@ -61,6 +61,9 @@ function PagosPage() {
   // Modal revertir pago
   const [revertTarget, setRevertTarget] = useState<{ id: string; nombre: string; monto: number } | null>(null);
 
+  // Modal exportar reporte
+  const [openExport, setOpenExport] = useState(false);
+
   const refreshData = () => {
     const jugadores = RendimientoStore.getJugadores();
     setPagosList(RendimientoStore.getPagos());

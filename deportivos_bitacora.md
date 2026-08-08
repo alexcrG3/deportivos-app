@@ -1037,3 +1037,8 @@ Una academia deportiva maneja inventario físico constante: uniformes, balones, 
   - **Verificación de Build**: Verificación de compilación de producción limpia (`npm run build`) con 0 errores.
 * **Mantenimiento y Control de Versiones**:
   - Actualización del árbol de rutas generado (`src/routeTree.gen.ts`) y sincronización completa con el repositorio remoto de GitHub (`main`).
+
+## [07/08/2026]
+* **Corrección de Error en Módulo de Pagos (`/pagos`):**
+  - **Fix de `ReferenceError: openExport is not defined`**: Se declaró la variable de estado faltante `openExport` (`const [openExport, setOpenExport] = useState(false);`) en `src/routes/_app/pagos.tsx`. Esto corrige el fallo de renderizado al interactuar o abrir el modal de exportación de reportes de pagos en la plataforma.
+
